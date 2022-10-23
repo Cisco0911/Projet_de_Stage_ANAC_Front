@@ -1,0 +1,18 @@
+
+
+.row {
+    font-size: 14px;
+    cursor: default;
+    user-select: none;
+    align-items: center;
+    white-space: nowrap;
+    position: relative;
+    display: flex;
+  }
+  
+
+.isSelected .row-contents{
+    background: rgb(0, 49, 247);
+    color: white;
+  }
+  

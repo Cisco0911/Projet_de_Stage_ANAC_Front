@@ -1,0 +1,370 @@
+<div>
+    {/* <div className="preloader">
+        <div className="preloader-icon"></div>
+    </div> */}
+    
+    <div className="layout-wrapper">
+        
+        <div className="header d-print-none">
+            <div className="header-container">
+                <div className="header-body">
+                    <div className="header-body-left">
+                        <ul className="navbar-nav">
+                            <li className="nav-item navigation-toggler">
+                                <a href="#" className="nav-link">
+                                    <i className="ti-menu"></i>
+                                </a>
+                            </li>
+                            <li className="nav-item">
+                                <div className="header-search-form">
+                                    <form>
+                                        <div className="input-group">
+                                            <div className="input-group-prepend">
+                                                <button className="btn">
+                                                    <i className="ti-search"></i>
+                                                </button>
+                                            </div>
+                                            <input type="text" className="form-control" placeholder="Search something..."/>
+                                            <div className="input-group-append">
+                                                <button className="btn header-search-close-btn">
+                                                    <i data-feather="x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="header-body-right">
+                        <ul className="navbar-nav">
+                            <li className="nav-item">
+                                <a href="#" className="nav-link mobile-header-search-btn" title="Search">
+                                    <i className="ti-search"></i>
+                                </a>
+                            </li>
+                            <li className="nav-item">
+                                <a href="#" className="nav-link" title="Dark">
+                                    <i className="fa fa-moon-o"></i>
+                                </a>
+                            </li>
+
+                            <li className="nav-item dropdown">
+                                <a href="#" className="nav-link nav-link-notify" title="Notifications" data-toggle="dropdown">
+                                    <i className="ti-bell"></i>
+                                </a>
+                                <div className="dropdown-menu dropdown-menu-right dropdown-menu-big">
+                                    <div className="bg-primary px-3 py-3">
+                                        <h6 className="mb-0">Notifications</h6>
+                                    </div>
+                                    <div className="dropdown-scroll">
+                                        <ul className="list-group list-group-flush">
+                                            <li>
+                                                <a href="#"
+                                                className="list-group-item d-flex hide-show-toggler">
+                                                    <div>
+                                                        <figure className="avatar mr-3">
+                                                            <span
+                                                                className="avatar-title bg-secondary-bright text-secondary rounded-circle">
+                                                                <i className="ti-server"></i>
+                                                            </span>
+                                                        </figure>
+                                                    </div>
+                                                    <div className="flex-grow-1">
+                                                        <p className="mb-0">
+                                                            Your storage space is running low!
+                                                            <i title="Mark as unread" data-toggle="tooltip"
+                                                            className="hide-show-toggler-item fa fa-check font-size-11 position-absolute right-0 top-0 mr-3 mt-3"></i>
+                                                        </p>
+                                                        <span className="text-muted small">4 sec ago</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#"
+                                                className="list-group-item d-flex hide-show-toggler">
+                                                    <div>
+                                                        <figure className="avatar mr-3">
+                                                            <img src="./style/assets/media/image/user/man_avatar4.jpg"
+                                                                className="rounded-circle" alt="avatar"/>
+                                                        </figure>
+                                                    </div>
+                                                    <div>
+                                                        <p className="mb-0">
+                                                            <span className="text-primary">Jonny Richie</span> uploaded new
+                                                            files
+                                                            <i title="Mark as read" data-toggle="tooltip"
+                                                            className="hide-show-toggler-item fa fa-circle-o font-size-11 position-absolute right-0 top-0 mr-3 mt-3"></i>
+                                                        </p>
+                                                        <span className="text-muted small">20 min ago</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li className="text-divider text-center small pb-2 px-3">
+                                                <span>Old notifications</span>
+                                            </li>
+                                            <li>
+                                                <a href="#"
+                                                className="list-group-item d-flex hide-show-toggler">
+                                                    <div>
+                                                        <figure className="avatar mr-3">
+                                                            <span
+                                                                className="avatar-title bg-info-bright text-info rounded-circle">
+                                                                <i className="fa fa-cloud-upload"></i>
+                                                            </span>
+                                                        </figure>
+                                                    </div>
+                                                    <div className="flex-grow-1">
+                                                        <p className="mb-0">
+                                                            Upgrade plan
+                                                            <i title="Mark as unread" data-toggle="tooltip"
+                                                            className="hide-show-toggler-item fa fa-check font-size-11 position-absolute right-0 top-0 mr-3 mt-3"></i>
+                                                        </p>
+                                                        <span className="text-muted small">45 sec ago</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#"
+                                                className="list-group-item d-flex hide-show-toggler">
+                                                    <div>
+                                                        <figure className="avatar mr-3">
+                                                            <span
+                                                                className="avatar-title bg-success-bright text-success rounded-circle">
+                                                                <i className="ti-share"></i>
+                                                            </span>
+                                                        </figure>
+                                                    </div>
+                                                    <div className="flex-grow-1">
+                                                        <p className="mb-0">
+                                                            A file has been shared
+                                                            <i title="Mark as unread" data-toggle="tooltip"
+                                                            className="hide-show-toggler-item fa fa-check font-size-11 position-absolute right-0 top-0 mr-3 mt-3"></i>
+                                                        </p>
+                                                        <span className="text-muted small">58 sec ago</span>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div className="px-3 py-2 text-right border-top">
+                                        <ul className="list-inline small">
+                                            <li className="list-inline-item mb-0">
+                                                <a href="#">Mark All Read</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li className="nav-item dropdown">
+                                <a href="#" className="nav-link" title="Settings" data-sidebar-target="#settings">
+                                    <i className="ti-settings"></i>
+                                </a>
+                            </li>
+
+                            <li className="nav-item dropdown">
+                                <a href="#" className="nav-link profile-nav-link dropdown-toggle" title="User menu"
+                                data-toggle="dropdown">
+                                    <span className="mr-2 d-sm-inline d-none">Bony Gidden</span>
+                                    <figure className="avatar avatar-sm">
+                                        <img src="./style/assets/media/image/user/man_avatar3.jpg"
+                                            className="rounded-circle"
+                                            alt="avatar"/>
+                                    </figure>
+                                </a>
+                                <div className="dropdown-menu dropdown-menu-right dropdown-menu-big">
+                                    <div className="text-center py-4"
+                                        data-background-image="./style/assets/media/image/image1.jpg">
+                                        <figure className="avatar avatar-lg mb-3 border-0">
+                                            <img src="./style/assets/media/image/user/man_avatar3.jpg"
+                                                className="rounded-circle" alt="image"/>
+                                        </figure>
+                                        <h5 className="mb-0">Bony Gidden</h5>
+                                    </div>
+                                    <div className="list-group list-group-flush">
+                                        <a href="#" className="list-group-item" data-sidebar-target="#settings">Settings</a>
+                                        <a href="http://bifor.laborasyon.com/login" className="list-group-item text-danger"
+                                        data-sidebar-target="#settings">Sign Out!</a>
+                                    </div>
+                                    <div className="pb-0 p-4">
+                                        <div className="mb-4">
+                                            <h6 className="d-flex justify-content-between">
+                                                Completed Tasks
+                                                <span className="float-right">%68</span>
+                                            </h6>
+                                            {/* <div className="progress" style="height:5px;">
+                                                <div className="progress-bar bg-primary" role="progressbar"
+                                                    style="width: 68%;" aria-valuenow="68" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
+                                            </div> */}
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <ul className="navbar-nav ml-auto">
+                    <li className="nav-item header-toggler">
+                        <a href="#" className="nav-link">
+                            <i className="ti-arrow-down"></i>
+                        </a>
+                    </li>
+                    <li className="nav-item sidebar-toggler">
+                        <a href="#" className="nav-link">
+                            <i className="ti-cloud"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+
+        <div className="content-wrapper">
+            
+            <File_section/>
+            
+            <div className="content-body">
+                
+                <div className="content">
+                    <div className="page-header d-flex justify-content-between">
+                        <h2>Files</h2>
+                        <a href="#" className="files-toggler">
+                            <i className="ti-menu"></i>
+                        </a>
+                    </div>
+
+                    <div className="row">
+                        <div className="col-xl-4 files-sidebar">
+                            <div className="card border-0">
+                                <h6 className="card-title">My Folders</h6>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="card-scroll" >
+                                         {files.fileTree}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {files.fileTable}
+                    </div>
+
+
+                </div>
+            
+                <footer className="content-footer d-print-none">
+                    <div>© 2020 Filedash - <a href="http://laborasyon.com" target="_blank">Laborasyon</a></div>
+                    <div>
+                        <nav className="nav">
+                            <a href="https://themeforest.net/licenses/standard" className="nav-link">Licenses</a>
+                            <a href="#" className="nav-link">Change Log</a>
+                            <a href="#" className="nav-link">Get Help</a>
+                        </nav>
+                    </div>
+                </footer>
+                
+            </div>
+            
+
+            
+            <div className="sidebar-group d-print-none">
+                
+                {files.fileDetails}
+
+                <div className="sidebar" id="settings">
+                    <div className="sidebar-header">
+                        <h4>Settings</h4>
+                        <a href="#" className="btn btn-light btn-floating sidebar-close-btn">
+                            <i className="ti-angle-right"></i>
+                        </a>
+                    </div>
+                    <div className="sidebar-content">
+                        <ul className="list-group list-group-flush">
+                            <li className="list-group-item pl-0 pr-0">
+                                <div className="custom-control custom-switch">
+                                    <input type="checkbox" className="custom-control-input" id="customSwitch1" checked/>
+                                    <label className="custom-control-label" for="customSwitch1">Allow notifications.</label>
+                                </div>
+                            </li>
+                            <li className="list-group-item pl-0 pr-0">
+                                <div className="custom-control custom-switch">
+                                    <input type="checkbox" className="custom-control-input" id="customSwitch2"/>
+                                    <label className="custom-control-label" for="customSwitch2">Hide user requests</label>
+                                </div>
+                            </li>
+                            <li className="list-group-item pl-0 pr-0">
+                                <div className="custom-control custom-switch">
+                                    <input type="checkbox" className="custom-control-input" id="customSwitch3" checked/>
+                                    <label className="custom-control-label" for="customSwitch3">Speed up demands</label>
+                                </div>
+                            </li>
+                            <li className="list-group-item pl-0 pr-0">
+                                <div className="custom-control custom-switch">
+                                    <input type="checkbox" className="custom-control-input" id="customSwitch4" checked/>
+                                    <label className="custom-control-label" for="customSwitch4">Hide menus</label>
+                                </div>
+                            </li>
+                            <li className="list-group-item pl-0 pr-0">
+                                <div className="custom-control custom-switch">
+                                    <input type="checkbox" className="custom-control-input" id="customSwitch5"/>
+                                    <label className="custom-control-label" for="customSwitch5">Remember next visits</label>
+                                </div>
+                            </li>
+                            <li className="list-group-item pl-0 pr-0">
+                                <div className="custom-control custom-switch">
+                                    <input type="checkbox" className="custom-control-input" id="customSwitch6"/>
+                                    <label className="custom-control-label" for="customSwitch6">Enable report
+                                        generation.</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+    
+</div>
+
+{
+    "id": "fdp2",
+    "name": "rapport.docs",
+    "extension": "docs",
+    "path": "path",
+    "parent_id": 3,
+    "parent_type": "c",
+    "created_at": "2022-09-13T11:10:51.000000Z",
+    "updated_at": "2022-09-13T11:10:51.000000Z"
+}
+
+{
+    "id": "audit1",
+    "name": "au-12-03-22",
+    "user_id": 3,
+    "service_id": 2,
+    "created_at": "2022-09-13T10:18:20.000000Z",
+    "updated_at": "2022-09-13T10:18:20.000000Z",
+    "service": {
+        "id": 2,
+        "name": "ANS",
+        "description": "Aucune description",
+        "created_at": null,
+        "updated_at": null
+    },
+    "user": {
+        "id": 3,
+        "name": "RICHARD",
+        "second_name": "le pen",
+        "inspector_number": "sgsgs",
+        "email": "rich@gmail.com",
+        "created_at": "2022-09-11T11:42:44.000000Z",
+        "updated_at": "2022-09-11T11:42:44.000000Z"
+    }
+}
