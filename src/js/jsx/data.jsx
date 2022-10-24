@@ -1021,14 +1021,26 @@ export default function useGetData(TheDatas)
   //   }, [FetchedNodesData]
   // )
 
-  // Global_State['isEditorMode'] = isEditorMode
-  // Global_State['EventsManager'] = EventsManager
+  Global_State['isEditorMode'] = isEditorMode
+  Global_State['dataBaseData'] = FetchedNodesData
+  Global_State['EventsManager'] = EventsManager
 
-  const editor = useEditor(FetchedNodesData, isEditorMode)
+  const editor = useEditor([])
 
-  const dataToUse = useMemo(
-    () => isEditorMode ? editor.data : FetchedNodesData,
-    [FetchedNodesData, isEditorMode, editor.data]
+  // const dataTose = useMemo(
+  //   () => isEditorMode ? JSON.parse(JSON.stringify(editor.data)) : JSON.parse(JSON.stringify(FetchedNodesData)),
+  //   [FetchedNodesData, isEditorMode, editor.data]
+  // )
+
+  const [ dataToUse, setDataToUse ] = useState( FetchedNodesData )
+
+  useEffect(
+    () =>
+    {
+      console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
+      if(isEditorMode) setDataToUse(JSON.parse(JSON.stringify([makeNodeData('0', "folder", "all", true, "lol", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)])))
+      else setDataToUse(JSON.parse(JSON.stringify([makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)])))
+    }, [isEditorMode, FetchedNodesData, editor.data]
   )
 
 
@@ -1044,7 +1056,7 @@ export default function useGetData(TheDatas)
       return map
     }, [dataToUse]
   )
-  // console.log('structuredData',structuredData)
+  console.log('structuredData',structuredData)
   
 
   const [selectedSectionId, setSectionId] = useState(Data_Base.data.sections.length === 0 ? 0 : Data_Base.data.sections[0].id)
@@ -1054,7 +1066,7 @@ export default function useGetData(TheDatas)
   const displayingSection = useMemo( () => 
     { 
       return Data_Base.data.sections.length === 0 ?
-      [makeNodeData(0, "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)] :
+      [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)] :
       structuredData.get(selectedSectionId) 
     }, 
     [selectedSectionId, structuredData] 
@@ -1437,10 +1449,11 @@ export default function useGetData(TheDatas)
 
   return (
       {
-          EventsManager,
-          isEditorMode,
+          ...Global_State,
+          // EventsManager,
+          // isEditorMode,
           authUser: Data_Base.authUser,
-          dataBaseData: FetchedNodesData,
+          // dataBaseData: FetchedNodesData,
           hasSection: Data_Base.data.sections.length !== 0,
           value: displayingSection,
           jsonValue: dataParsedToJson,

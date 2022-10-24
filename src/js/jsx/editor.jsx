@@ -2,6 +2,8 @@
 
 import React, {useState, useEffect, useRef, useReducer} from 'react';
 
+import isEqual from "lodash.isequal";
+
 import { http } from "./data";
 import { Global_State } from "./main";
 
@@ -22,13 +24,52 @@ import { useMemo } from 'react';
 
 
 
-export default function useEditor(data, isEditorMode)
+export default function useEditor(data)
 {
   // const active = useMemo( () => (isEditorMode), [Global_State.isEditorMode] )
 
-  const initData = JSON.parse( JSON.stringify(data) )
+  const initData = useRef( JSON.parse( JSON.stringify(data) ) )
 
-  const id = useRef(1)
+  const initManager = 
+  {
+    data: initData,
+    isNew: id =>
+    {
+      let isNew = true
+  
+      initData.current.forEach(
+        initNode => 
+        {
+          if( id === initNode.id )
+          {
+            isNew = false
+            return 0
+          }
+        }
+      );
+      
+      return isNew
+    },
+    haveBeenModified: node => 
+    {
+      let isModified = false
+  
+      initData.current.forEach(
+        initNode => 
+        {
+          if( node.id === initNode.id )
+          {
+            if( !isEqual(node, initNode) ) { isModified = true; return 1 }
+          }
+        }
+      );
+      
+      return isModified
+    },
+  }
+
+  const id = useRef(-2)
+  const job_id = useRef(1)
 
   const form_to_json = (formData) => 
   {
@@ -53,6 +94,24 @@ export default function useEditor(data, isEditorMode)
     return object
   }
 
+  // const haveBeenModified = node => 
+  // {
+  //   let isModified = false
+
+  //   initData.current.forEach(
+  //     initNode => 
+  //     {
+  //       if( node.id === initNode.id )
+  //       {
+  //         if( !isEqual(node, initNode) ) { isModified = true; return 1 }
+  //       }
+  //     }
+  //   );
+    
+  //   return isModified
+  // }
+
+
   function data_reducer( state, action )
   {
     switch (action.type) {
@@ -63,27 +122,59 @@ export default function useEditor(data, isEditorMode)
         }
       case 'update_initData':
         {
+          let updated_state = []
+          let modified_nodes = []
+
+          const new_data = JSON.parse( JSON.stringify( Global_State.dataBaseData ) )
+
+          new_data.forEach(
+            node =>
+            {
+              if( initManager.isNew(node.id) ) updated_state.push(node)
+            }
+          )
+
+          for (const localNode of state) 
+          {
+            let added = false
+            for (const node of Global_State.dataBaseData) 
+            {
+              if(node.id === localNode.id) 
+              {
+                if( initManager.haveBeenModified(node) )
+                {
+                  updated_state.push(node)
+                }
+                else updated_state.push(localNode)
+                
+                added = true
+                break;
+              }
+            }
+            if(added) continue
+            if( localNode.id.split('-').length === 2 ) updated_state.push(localNode)
+          }
+
           
-          
-          return JSON.parse( JSON.stringify( state ) )
+          return JSON.parse( JSON.stringify( updated_state ) )
         }
       case 'add_folder':
         {
           
           console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
 
-          const data = action.job
+          const data = action.job.data
 
           const new_folder = 
           Global_State.createNodeData(
-            `edit_${id.current}`,
+            `ds${id.current}`,
             "folder",
             data.services,
             false,
             data.name,
             "ds",
             false,
-            data.parent_type === 'App\\Models\\Section' ? '0' : data.parent_type + data.parent_id,
+            data.front_parent_type === 'root' ? '0' : data.front_parent_type + data.parent_id,
             "",
             true,
             undefined,
@@ -95,10 +186,11 @@ export default function useEditor(data, isEditorMode)
             undefined,
             undefined,
           )
+          new_folder['onEdit'] = true
 
           state.push(new_folder)
 
-          id.current = id.current + 1
+          id.current = id.current - 1
 
           return JSON.parse(JSON.stringify(state))
         }
@@ -120,7 +212,7 @@ export default function useEditor(data, isEditorMode)
     }
   }
 
-  const [localDataState, setDatasState] = useReducer(data_reducer, initData ) //.map( node => ({...node, name: 'lol'}) )
+  const [localDataState, setDatasState] = useReducer(data_reducer, initData.current ) //.map( node => ({...node, name: 'lol'}) )
 
   function jobs_reducer( state, action ) 
   {
@@ -134,13 +226,31 @@ export default function useEditor(data, isEditorMode)
           }
         case 'add_folder':
           {
-              const job = form_to_json(request)
+            const node = form_to_json(request)
+            const job = 
+            {
+              id: job_id.current,
+              operation: 'add',
+              node_type: 'folder',
+              data: node,
+              etat: 'waiting',
+              dependencies: 
+              [
+                {
+                  type: node.parent_type,
+                  id: node.parent_id
+                }
+              ]
 
-              state.push(job)
+            }
 
-              setDatasState({type: 'add_folder', job})
-  
-              return JSON.parse(JSON.stringify(state))
+            state.push(job)
+
+            job_id.current = job_id.current + 1 
+
+            setDatasState({type: 'add_folder', job})
+
+            return JSON.parse(JSON.stringify(state))
           }
         case 'delete':
           {
@@ -167,13 +277,15 @@ export default function useEditor(data, isEditorMode)
     {
       // Global_State.EventsManager.on('update_initData', data => { setDatasState({ type: 'update_initData', new_nodes: data }) } )
 
+      console.log('update_initData')
+
       setDatasState({ type: 'update_initData' })
 
       return () => 
       {
         // Global_State.EventsManager.off('update_initData')
       }
-    }, [Global_State.dataBaseData ]
+    }, [ Global_State.dataBaseData ]
   )
 
   useEffect(
@@ -233,7 +345,7 @@ export default function useEditor(data, isEditorMode)
 
 
 
-  console.log('localDataState',localDataState,Global_State.dataBaseData)
+  console.log('localDataState',localDataState,Global_State.dataBaseData, jobs)
 
   return (
       {

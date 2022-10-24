@@ -195,6 +195,8 @@ export default function FileTable({set}) {
 
     let node = backend.selectedNode.model
 
+    console.log('contentNooooooooooooode', node)
+
     let tag = "le Nom"
 
     // const [previousSelected, setPreviousSelected] = useState([0])
@@ -627,6 +629,7 @@ export default function FileTable({set}) {
                     else
                     {
                         console.log('editorHandle')
+                        queryBody.set('front_parent_type', node.type)
                         Global_State.editor.add_folder(queryBody)
                         
                         Global_State.modalManager.close_modal()
