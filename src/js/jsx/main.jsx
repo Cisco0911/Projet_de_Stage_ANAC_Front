@@ -52,7 +52,7 @@ import EventEmitter from 'eventemitter3';
 export const test = "Success"
 
 
-export let Global_State;
+export let Global_State = {};
 
 
 

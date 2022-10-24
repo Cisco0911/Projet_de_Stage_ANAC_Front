@@ -12,6 +12,7 @@ import React, { useMemo, useState, useEffect, useRef, useCallback, useReducer } 
 
 import parseToJson from "./files_package/parse_to_json";
 import useEditor from './editor';
+import { Global_State } from "./main";
 
 import axios from "axios";
 import Echo from 'laravel-echo';
@@ -452,13 +453,14 @@ export default function useGetData(TheDatas) {
       echosHandler('updateAuthUserInfo');
     });
 
-    EventsManager.on('nodeUpdate', function (data) {
-      dispatch({ type: 'update', data: data });
-    });
+    // EventsManager.on('nodeUpdate', data => { dispatch({ type: 'update', data }) })
 
     // EventsManager.on('updateData', () => { console.log('emit working') })
 
-    return function () {};
+    return function () {
+      EventsManager.off('updateAuthUserInfo');
+      // EventsManager.off('nodeUpdate')
+    };
   }, []);
 
   // sections: [],
@@ -1068,6 +1070,9 @@ export default function useGetData(TheDatas) {
   //   }, [FetchedNodesData]
   // )
 
+  // Global_State['isEditorMode'] = isEditorMode
+  // Global_State['EventsManager'] = EventsManager
+
   var editor = useEditor(FetchedNodesData, isEditorMode);
 
   var dataToUse = useMemo(function () {
@@ -1616,11 +1621,14 @@ export default function useGetData(TheDatas) {
 
 
   return {
+    EventsManager: EventsManager,
+    isEditorMode: isEditorMode,
     authUser: Data_Base.authUser,
+    dataBaseData: FetchedNodesData,
     hasSection: Data_Base.data.sections.length !== 0,
     value: displayingSection,
     jsonValue: dataParsedToJson,
-    isEditorMode: isEditorMode, editor: editor,
+    editor: editor,
     changeMode: function changeMode() {
       setIsEditorMode(function (t) {
         return !t;
@@ -1644,7 +1652,6 @@ export default function useGetData(TheDatas) {
     identifyNode: identifyNode,
     toggleCleared: toggleCleared,
     clearSelected: clearSelected,
-    EventsManager: EventsManager,
     CustomDropDown: CustomDropDown
   };
 }

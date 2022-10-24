@@ -57,7 +57,7 @@ import EventEmitter from 'eventemitter3';
 
 export var test = "Success";
 
-export var Global_State = void 0;
+export var Global_State = {};
 
 function Lol(_ref) {
     var lal = _ref.lal;
