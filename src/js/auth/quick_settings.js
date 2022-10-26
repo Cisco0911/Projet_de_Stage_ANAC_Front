@@ -84,7 +84,7 @@ export default function QuickSettings() {
             React.createElement(
                 Stack,
                 { direction: "row", spacing: 1, alignItems: "center" },
-                React.createElement(AntSwitch, { id: 'switchRef', checked: Global_State.editorMode, onClick: handleChange }),
+                React.createElement(AntSwitch, { id: 'switchRef', checked: Global_State.isEditorMode, onClick: handleChange }),
                 React.createElement(
                     "span",
                     { style: { width: 'max-content', cursor: 'pointer' }, onClick: function onClick() {

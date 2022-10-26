@@ -744,7 +744,7 @@ export default function FileTable(_ref3) {
                                     icon: "info"
                                 });
                                 Global_State.modalManager.close_modal();
-                            }
+                            } else console.log(res);
                             // console.log(res)
                         })
 
@@ -2273,6 +2273,8 @@ export default function FileTable(_ref3) {
             console.log(e);
         } };
 
+    console.log('dataaaaaaas', datas);
+
     return React.createElement(
         'div',
         { className: 'col-xl-8' },
@@ -2288,12 +2290,7 @@ export default function FileTable(_ref3) {
         React.createElement(ActionsMenu, null),
         React.createElement(DataTable, {
             columns: columns,
-            data: datas.filter(function (data) {
-                // console.log(filteringWord)
-                if (filteringWord !== "") return data.value.toLowerCase().indexOf(filteringWord) !== -1 || data.value.toUpperCase().indexOf(filteringWord) !== -1 ? true : false;else return true;
-            }).map(function (data) {
-                return data;
-            }),
+            data: datas,
 
             selectableRows: true,
             selectableRowsVisibleOnly: true,

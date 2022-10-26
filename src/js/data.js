@@ -1074,22 +1074,34 @@ export default function useGetData(TheDatas) {
   Global_State['dataBaseData'] = FetchedNodesData;
   Global_State['EventsManager'] = EventsManager;
 
-  var editor = useEditor([]);
-
-  // const dataTose = useMemo(
-  //   () => isEditorMode ? JSON.parse(JSON.stringify(editor.data)) : JSON.parse(JSON.stringify(FetchedNodesData)),
-  //   [FetchedNodesData, isEditorMode, editor.data]
-  // )
-
-  var _useState5 = useState(FetchedNodesData),
-      _useState6 = _slicedToArray(_useState5, 2),
-      dataToUse = _useState6[0],
-      setDataToUse = _useState6[1];
+  var editor = useEditor(FetchedNodesData);
 
   useEffect(function () {
-    console.log('kkkkkkkkkkkkkkkkkkkkkkkkk');
-    if (isEditorMode) setDataToUse(JSON.parse(JSON.stringify([makeNodeData('0', "folder", "all", true, "lol", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)])));else setDataToUse(JSON.parse(JSON.stringify([makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)])));
-  }, [isEditorMode, FetchedNodesData, editor.data]);
+    if (!isEditorMode) editor.close();else editor.open();
+  }, [isEditorMode]);
+
+  useEffect(function () {
+    editor.update_initData(FetchedNodesData);
+  }, [FetchedNodesData]);
+
+  var dataToUse = useMemo(function () {
+    return isEditorMode ? editor.data : JSON.parse(JSON.stringify(FetchedNodesData));
+  }, [FetchedNodesData, isEditorMode, editor.data]);
+
+  // const [ dataToUse, setDataToUse ] = useState( FetchedNodesData )
+
+  // const t = useRef([makeNodeData('0', "folder", "all", true, "lol", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "mike", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "lal", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, -1)])
+  // const f = useRef([makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "delta", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 3), makeNodeData('1', "folder", "all", true, "code", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 3), makeNodeData('5', "folder", "all", true, "fifa", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 5) ])
+
+  // useEffect(
+  //   () =>
+  //   {
+  //     console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
+  //     if(isEditorMode) setDataToUse(JSON.parse(JSON.stringify(editor.data)))
+  //     else setDataToUse(JSON.parse(JSON.stringify(FetchedNodesData)))
+  //   }, [isEditorMode, FetchedNodesData, editor.data]
+  // )
+
 
   var structuredData = useMemo(function () {
     var map = new Map();
@@ -1131,10 +1143,10 @@ export default function useGetData(TheDatas) {
   }, [dataToUse]);
   console.log('structuredData', structuredData);
 
-  var _useState7 = useState(Data_Base.data.sections.length === 0 ? 0 : Data_Base.data.sections[0].id),
-      _useState8 = _slicedToArray(_useState7, 2),
-      selectedSectionId = _useState8[0],
-      setSectionId = _useState8[1];
+  var _useState5 = useState(Data_Base.data.sections.length === 0 ? 0 : Data_Base.data.sections[0].id),
+      _useState6 = _slicedToArray(_useState5, 2),
+      selectedSectionId = _useState6[0],
+      setSectionId = _useState6[1];
 
   // console.log('selectedSectionId',selectedSectionId)
 
@@ -1172,10 +1184,10 @@ export default function useGetData(TheDatas) {
     };
   }
 
-  var _useState9 = useState(false),
-      _useState10 = _slicedToArray(_useState9, 2),
-      toggleCleared = _useState10[0],
-      setToggleCleared = _useState10[1];
+  var _useState7 = useState(false),
+      _useState8 = _slicedToArray(_useState7, 2),
+      toggleCleared = _useState8[0],
+      setToggleCleared = _useState8[1];
 
   var clearSelected = function clearSelected(setSelectedRows) {
     setToggleCleared(!toggleCleared);EventsManager.emit('clearSelected');
@@ -1342,20 +1354,20 @@ export default function useGetData(TheDatas) {
   };
 
   function useModalManager() {
-    var _useState11 = useState(null),
+    var _useState9 = useState(null),
+        _useState10 = _slicedToArray(_useState9, 2),
+        content = _useState10[0],
+        setContent = _useState10[1];
+
+    var _useState11 = useState(false),
         _useState12 = _slicedToArray(_useState11, 2),
-        content = _useState12[0],
-        setContent = _useState12[1];
+        show = _useState12[0],
+        setShow = _useState12[1];
 
-    var _useState13 = useState(false),
+    var _useState13 = useState(""),
         _useState14 = _slicedToArray(_useState13, 2),
-        show = _useState14[0],
-        setShow = _useState14[1];
-
-    var _useState15 = useState(""),
-        _useState16 = _slicedToArray(_useState15, 2),
-        modal_title = _useState16[0],
-        setTitle = _useState16[1];
+        modal_title = _useState14[0],
+        setTitle = _useState14[1];
 
     var modal = React.createElement(
       Modal,
@@ -1387,10 +1399,10 @@ export default function useGetData(TheDatas) {
       )
     );
 
-    var _useState17 = useState(React.createElement("div", null)),
-        _useState18 = _slicedToArray(_useState17, 2),
-        container = _useState18[0],
-        setModalOpening = _useState18[1];
+    var _useState15 = useState(React.createElement("div", null)),
+        _useState16 = _slicedToArray(_useState15, 2),
+        container = _useState16[0],
+        setModalOpening = _useState16[1];
 
     return {
       modal: modal,
@@ -1407,10 +1419,10 @@ export default function useGetData(TheDatas) {
   var modalManager = useModalManager();
 
   function useShowSpinner() {
-    var _useState19 = useState(false),
-        _useState20 = _slicedToArray(_useState19, 2),
-        show = _useState20[0],
-        setShow = _useState20[1];
+    var _useState17 = useState(false),
+        _useState18 = _slicedToArray(_useState17, 2),
+        show = _useState18[0],
+        setShow = _useState18[1];
 
     var spinner = React.createElement(
       "div",
@@ -1445,10 +1457,10 @@ export default function useGetData(TheDatas) {
         icon = _ref2.icon,
         content = _ref2.content;
 
-    var _useState21 = useState(false),
-        _useState22 = _slicedToArray(_useState21, 2),
-        show = _useState22[0],
-        setShow = _useState22[1];
+    var _useState19 = useState(false),
+        _useState20 = _slicedToArray(_useState19, 2),
+        show = _useState20[0],
+        setShow = _useState20[1];
     // const setShow = (val) => {
     //   set(val)
     //   isLogged = val
@@ -1531,10 +1543,10 @@ export default function useGetData(TheDatas) {
     initSelectedNodes.set(sct.id, '0');
   });
 
-  var _useState23 = useState(initSelectedNodes),
-      _useState24 = _slicedToArray(_useState23, 2),
-      selectedNodeIdsInSections = _useState24[0],
-      updateSNIdIS = _useState24[1];
+  var _useState21 = useState(initSelectedNodes),
+      _useState22 = _slicedToArray(_useState21, 2),
+      selectedNodeIdsInSections = _useState22[0],
+      updateSNIdIS = _useState22[1];
 
   var sizeFormater = function sizeFormater(size) {
     var fix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;

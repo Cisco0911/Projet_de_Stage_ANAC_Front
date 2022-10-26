@@ -609,6 +609,7 @@ export default function FileTable({set}) {
                                     });
                                     Global_State.modalManager.close_modal()
                                 }
+                                else console.log(res)
                                 // console.log(res)
                             })
                         
@@ -1945,6 +1946,8 @@ export default function FileTable({set}) {
     const isIndeterminate = (indeterminate) => indeterminate;
     const selectableRowsComponentProps = {  onclick: e => {console.log(e)} };
 
+    console.log('dataaaaaaas', datas)
+
 
     return (
         <div className="col-xl-8">
@@ -1954,12 +1957,7 @@ export default function FileTable({set}) {
             <ActionsMenu />
             <DataTable
                 columns={columns}
-                data={datas.filter((data) => {
-                    // console.log(filteringWord)
-                    if(filteringWord !== "") return data.value.toLowerCase().indexOf(filteringWord) !== -1 || data.value.toUpperCase().indexOf(filteringWord) !== -1 ? true : false
-                    else return true
-                    }).map((data) => { return data })
-                }
+                data={datas}
 
                 selectableRows
                 selectableRowsVisibleOnly

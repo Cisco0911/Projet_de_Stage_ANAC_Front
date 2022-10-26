@@ -97,7 +97,7 @@ export default function QuickSettings()
         <List sx = {{ minWidth: 250, maxWidth: 390 }}>
             <ListItem key={'mode éditeur'} >
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <AntSwitch id={'switchRef'} checked={Global_State.editorMode} onClick={handleChange}  />
+                    <AntSwitch id={'switchRef'} checked={Global_State.isEditorMode} onClick={handleChange}  />
                     <span style={{ width: 'max-content', cursor: 'pointer' }} onClick = { () => { console.log('switchRef'); switchRef.click() } } > { `${ Global_State.editorMode ? 'désactiver' : 'activer' } le mode éditeur` } </span>
                 </Stack>
                 <Divider />

@@ -1025,23 +1025,41 @@ export default function useGetData(TheDatas)
   Global_State['dataBaseData'] = FetchedNodesData
   Global_State['EventsManager'] = EventsManager
 
-  const editor = useEditor([])
-
-  // const dataTose = useMemo(
-  //   () => isEditorMode ? JSON.parse(JSON.stringify(editor.data)) : JSON.parse(JSON.stringify(FetchedNodesData)),
-  //   [FetchedNodesData, isEditorMode, editor.data]
-  // )
-
-  const [ dataToUse, setDataToUse ] = useState( FetchedNodesData )
+  const editor = useEditor(FetchedNodesData)
 
   useEffect(
     () =>
     {
-      console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
-      if(isEditorMode) setDataToUse(JSON.parse(JSON.stringify([makeNodeData('0', "folder", "all", true, "lol", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)])))
-      else setDataToUse(JSON.parse(JSON.stringify([makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)])))
-    }, [isEditorMode, FetchedNodesData, editor.data]
+      if(!isEditorMode) editor.close()
+      else editor.open()
+    }, [isEditorMode]
   )
+
+  useEffect(
+    () =>
+    {
+      editor.update_initData(FetchedNodesData)
+    }, [FetchedNodesData]
+  )
+
+  const dataToUse = useMemo(
+    () => isEditorMode ? editor.data : JSON.parse(JSON.stringify(FetchedNodesData)),
+    [FetchedNodesData, isEditorMode, editor.data]
+  )
+
+  // const [ dataToUse, setDataToUse ] = useState( FetchedNodesData )
+
+  // const t = useRef([makeNodeData('0', "folder", "all", true, "lol", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "mike", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "lal", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, -1)])
+  // const f = useRef([makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "delta", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 3), makeNodeData('1', "folder", "all", true, "code", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 3), makeNodeData('5', "folder", "all", true, "fifa", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 5) ])
+
+  // useEffect(
+  //   () =>
+  //   {
+  //     console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
+  //     if(isEditorMode) setDataToUse(JSON.parse(JSON.stringify(editor.data)))
+  //     else setDataToUse(JSON.parse(JSON.stringify(FetchedNodesData)))
+  //   }, [isEditorMode, FetchedNodesData, editor.data]
+  // )
 
 
   const structuredData = useMemo(

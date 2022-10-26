@@ -26,7 +26,9 @@ import { useMemo } from 'react';
 
 export default function useEditor(data)
 {
-  // const active = useMemo( () => (isEditorMode), [Global_State.isEditorMode] )
+  // const active = useMemo( () => (isEditorMode), [active] )
+
+  const [active, setActive] = useState(false)
 
   const initData = useRef( JSON.parse( JSON.stringify(data) ) )
 
@@ -37,16 +39,16 @@ export default function useEditor(data)
     {
       let isNew = true
   
-      initData.current.forEach(
-        initNode => 
-        {
-          if( id === initNode.id )
+      // console.log('enter foooooooooooooooor', initData.current)
+      for (const initNode of initData.current) 
+      {
+        // console.log('idddddddddddddddddddddddddddddddddd', id, initNode.id)
+        if( id === initNode.id )
           {
             isNew = false
-            return 0
+            break
           }
-        }
-      );
+      }
       
       return isNew
     },
@@ -71,25 +73,27 @@ export default function useEditor(data)
   const id = useRef(-2)
   const job_id = useRef(1)
 
+  
+  const getService = services => 
+  { 
+    // console.log('fffffffffffffffff',Global_State.authUser.services);  
+    return Global_State.authUser.services.filter( 
+      service => 
+      { 
+        let belongsTo = false
+        services.forEach(
+          element => { if(element.value === service.id) belongsTo = true }
+        );
+        return belongsTo
+      } 
+    )
+  }
+
   const form_to_json = (formData) => 
   {
-    const getService = services => 
-    { 
-      // console.log('fffffffffffffffff',Global_State.authUser.services);  
-      return Global_State.authUser.services.filter( 
-        service => 
-        { 
-          let belongsTo = false
-          services.forEach(
-            element => { if(element.value === service.id) belongsTo = true }
-          );
-          return belongsTo
-        } 
-      )
-    }
 
     var object = {};
-    formData.forEach((value, key) => object[key] = key === 'services' ? getService(JSON.parse(value)) : value);
+    formData.forEach((value, key) => object[key] = key === 'services' ? JSON.parse(value) : value);
 
     return object
   }
@@ -117,15 +121,19 @@ export default function useEditor(data)
     switch (action.type) {
       case 'reset':
         {
-          console.log('Global_State.dataBaseData', Global_State.dataBaseData)
-          return JSON.parse( JSON.stringify( Global_State.dataBaseData ) )
+          console.log('initData.current', initData.current)
+
+          id.current = -2
+          job_id.current = 1
+
+          return JSON.parse( JSON.stringify( initData.current ) )
         }
       case 'update_initData':
         {
           let updated_state = []
           let modified_nodes = []
 
-          const new_data = JSON.parse( JSON.stringify( Global_State.dataBaseData ) )
+          const new_data = JSON.parse( JSON.stringify( action.new_data ) )
 
           new_data.forEach(
             node =>
@@ -137,7 +145,7 @@ export default function useEditor(data)
           for (const localNode of state) 
           {
             let added = false
-            for (const node of Global_State.dataBaseData) 
+            for (const node of new_data) 
             {
               if(node.id === localNode.id) 
               {
@@ -155,6 +163,8 @@ export default function useEditor(data)
             if( localNode.id.split('-').length === 2 ) updated_state.push(localNode)
           }
 
+          initData.current = JSON.parse( JSON.stringify( new_data ) )
+
           
           return JSON.parse( JSON.stringify( updated_state ) )
         }
@@ -169,7 +179,7 @@ export default function useEditor(data)
           Global_State.createNodeData(
             `ds${id.current}`,
             "folder",
-            data.services,
+            getService(data.services),
             false,
             data.name,
             "ds",
@@ -231,7 +241,7 @@ export default function useEditor(data)
             {
               id: job_id.current,
               operation: 'add',
-              node_type: 'folder',
+              node_model: 'App\\Models\\DossierSimple',
               data: node,
               etat: 'waiting',
               dependencies: 
@@ -272,26 +282,53 @@ export default function useEditor(data)
 
   const [jobs, dispatch_job] = useReducer(jobs_reducer, [])
 
-  useEffect(
-    () =>
-    {
-      // Global_State.EventsManager.on('update_initData', data => { setDatasState({ type: 'update_initData', new_nodes: data }) } )
+  // useEffect(
+  //   () =>
+  //   {
+  //     // Global_State.EventsManager.on('update_initData', data => { setDatasState({ type: 'update_initData', new_nodes: data }) } )
 
-      console.log('update_initData')
+  //     console.log('update_initData')
 
-      setDatasState({ type: 'update_initData' })
+  //     setDatasState({ type: 'update_initData' })
 
-      return () => 
-      {
-        // Global_State.EventsManager.off('update_initData')
-      }
-    }, [ Global_State.dataBaseData ]
-  )
+  //     return () => 
+  //     {
+  //       // Global_State.EventsManager.off('update_initData')
+  //     }
+  //   }, [ iniData.current ]
+  // )
+
+  const update_initData = 
+  new_data =>
+  {
+    console.log('update_initData')
+
+    setDatasState({ type: 'update_initData', new_data })
+  }
+
+  const save = async request =>
+  {
+    await http.post('handle_edit', request)
+      .then(
+        res =>
+        {
+          console.log(res)
+        }
+      )
+      .catch(
+        err =>
+        {
+          console.log(err)
+        }
+      )
+
+
+  }
 
   useEffect(
       () =>
       {
-          if ( Global_State.isEditorMode && jobs.length > 0 )
+          if (jobs.length > 0 )
           {
               
               toast((t) => (
@@ -308,6 +345,24 @@ export default function useEditor(data)
                           >
                           <Button variant="light" onClick={() => 
                               {
+                                const queryData = new FormData
+
+                                jobs.map(job => { queryData.append( "jobs[]", JSON.stringify(job) ) })
+
+                                // console.log('jooooooooobs', queryData.get('jobs[]'))
+                                
+                                Global_State.changeMode()
+
+                                toast.promise(
+                                  save(queryData),
+                                  {
+                                    loading: 'Saving...',
+                                    success: 'Processus achevé',
+                                    error: 'err'
+                                  }
+                                )
+
+
                               }
                           }>
                               SAVE
@@ -334,23 +389,33 @@ export default function useEditor(data)
               }
               );
           }
-          else if ( !Global_State.isEditorMode )
-          {
-              toast.dismiss('save')
-              dispatch_job({ type: 'reset' })
-          }
+          // else if ( !active )
+          // {
+          //     toast.dismiss('save')
+          //     dispatch_job({ type: 'reset' })
+          // }
 
-      }, [jobs, Global_State.isEditorMode]
+      }, [jobs]
   )
 
+  const close = () =>
+  {
+    setActive(false)
+    toast.dismiss('save')
+    dispatch_job({ type: 'reset' })
+  }
 
 
-  console.log('localDataState',localDataState,Global_State.dataBaseData, jobs)
+
+  console.log('localDataState', localDataState, initData.current, jobs)
 
   return (
       {
           data: localDataState,
-          add_folder: (request) => { dispatch_job({ type: 'add_folder', request }) }
+          update_initData,
+          open: () => { setActive(true) },
+          close,
+          add_folder: (request) => { dispatch_job({ type: 'add_folder', request }) },
       }
   )
 
