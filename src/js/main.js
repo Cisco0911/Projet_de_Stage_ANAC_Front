@@ -809,4 +809,4 @@ function Page() {
 }
 
 var root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(Page, null));
+root.render(React.createElement(Lol, null));
