@@ -631,7 +631,7 @@ export default function FileTable({set}) {
                     {
                         console.log('editorHandle')
                         queryBody.set('front_parent_type', node.type)
-                        Global_State.editor.add_folder(queryBody)
+                        Global_State.editor.folder.add(queryBody)
                         
                         Global_State.modalManager.close_modal()
                     }
@@ -1272,21 +1272,21 @@ export default function FileTable({set}) {
                                                         break;
                                                     case 'fnc':
 
-                                                        await http.delete('del_fnc?id=' + nodeIdentity[0])
-                                                        .then( res => { 
-                                                            console.log(res); 
-                                                            if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                            {
-                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                            }) 
+                                                            await http.delete('del_fnc?id=' + nodeIdentity[0])
+                                                            .then( res => { 
+                                                                console.log(res); 
+                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                {
+                                                                    icon: <FaInfoCircle color='#2196F3' size={28} />
+                                                                }) 
 
-                                                        } )
-                                                        .catch(err => 
-                                                            { 
-                                                                console.log(err); 
-                                                                if(err.response.data === 'en attente') toast.error(`Cette FNC est deja dans une file d'attente de suppression: ${row.value}`) 
-                                                                else toast.error("error on this one, FNC: " + row.value) 
-                                                            })
+                                                            } )
+                                                            .catch(err => 
+                                                                { 
+                                                                    console.log(err); 
+                                                                    if(err.response.data === 'en attente') toast.error(`Cette FNC est deja dans une file d'attente de suppression: ${row.value}`) 
+                                                                    else toast.error("error on this one, FNC: " + row.value) 
+                                                                })
 
                                                         break;
                                                     case 'ds':
@@ -1342,16 +1342,67 @@ export default function FileTable({set}) {
 
                                     }
 
-                                    // console.log(selectedRow[0].id.substring(2))
-                                    toast.promise(
-                                        remove(),
-                                        {
-                                            loading: 'Loading...',
-                                            success: 'Processus achevé',
-                                            error: 'err'
-                                        }
+                                    const localRemove = () => 
+                                    {
+                                        selectedRow.map( 
+                                             row =>
+                                            {
+                                                // console.log(Global_State.identifyNode(row))
+                                                const nodeIdentity = Global_State.identifyNode(row)
+                                                // const [ id, type ] = Global_State.identifyNode(row)
 
-                                    )
+                                                console.log(selectedRow)
+                                                switch (row.type) {
+                                                    case 'audit':
+
+                                                        console.log('audit dispatch del')
+
+                                                        break;
+                                                    case 'checkList':
+                                                        break;
+                                                    case 'dp':
+                                                        break;
+                                                    case 'nonC':
+                                                        break;
+                                                    case 'fnc':
+
+                                                        console.log('fnc dispatch del')
+
+                                                        break;
+                                                    case 'ds':
+
+                                                        Global_State.editor.folder.delete(nodeIdentity[0])
+
+                                                        break;
+                                                    case 'f':
+
+                                                        console.log('file dispatch del')
+
+                                                        break;
+                                                
+                                                    default:
+                                                        break;
+                                                }
+
+                                            }
+                                        )
+
+                                    }
+
+                                    // console.log(selectedRow[0].id.substring(2))
+                                    if( !Global_State.isEditorMode )
+                                    {
+                                        toast.promise(
+                                            remove(),
+                                            {
+                                                loading: 'Loading...',
+                                                success: 'Processus achevé',
+                                                error: 'err'
+                                            }
+    
+                                        )
+                                    }
+                                    else localRemove()
 
                                 } } >Supprimer</i>
                             </div>

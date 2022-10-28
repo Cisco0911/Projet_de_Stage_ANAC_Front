@@ -204,10 +204,17 @@ export default function useEditor(data)
 
           return JSON.parse(JSON.stringify(state))
         }
-      case 'delete':
+      case 'del_folder':
         {
 
-          const newState = state.filter( node => node.id !== data.node_type + data.node.id ).map( node => node )
+          const suppress_from = ( list_, id ) =>
+          {
+            const rest = list_.filter(
+              node => ( node.id === `ds${id}` )
+            )
+          }
+
+          const newState = state.filter( node => node.id !== `ds${action.id}` )
 
           return JSON.parse(JSON.stringify(newState))
         }
@@ -226,31 +233,87 @@ export default function useEditor(data)
 
   function jobs_reducer( state, action ) 
   {
-      const request = action.request
 
-      switch (action.type) {
-        case 'reset':
+    const getJob = id =>
+    {
+      for (const job of state) 
+      {
+        console.log('searching joooooooooob', job.id, id)
+        if( job.id === id ) return job
+      }
+
+      return {}
+    }
+
+
+    switch (action.type) {
+      case 'reset':
+        {
+          setDatasState({ type: 'reset' })
+          return state.length === 0 ? state : []
+        }
+      case 'add_folder':
+        {
+          const request = action.request
+
+          const getDependencies = parent_id =>
           {
-            setDatasState({ type: 'reset' })
-            return state.length === 0 ? state : []
+            if(parseInt(parent_id) < 0)
+            {
+              for (const job of state) 
+              {
+                if( job.node_id === parseInt(parent_id) ) return [job.id]
+              }
+            }
+            return []
           }
-        case 'add_folder':
+
+          const node = form_to_json(request)
+          const job = 
           {
-            const node = form_to_json(request)
+            id: job_id.current,
+            operation: 'add',
+            node_id: id.current,
+            node_model: 'App\\Models\\DossierSimple',
+            data: node,
+            etat: 'waiting',
+            dependencies: getDependencies(node.parent_id)
+
+          }
+
+          state.push(job)
+
+          job_id.current = job_id.current + 1 
+
+          setDatasState({type: 'add_folder', job})
+
+          return JSON.parse(JSON.stringify(state))
+        }
+      case 'del_folder':
+        {
+          const id = action.id
+
+          state = state.filter(
+            job => 
+            {
+              // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+              if( job.node_id === id ) return false
+              // console.log(job.id, job.dependencies[0], getJob(job.dependencies[0]), id)
+              if( getJob(job.dependencies[0]).node_id === id ) return false
+              
+              return true
+            }
+          )
+
+          if( ! (parseInt(id) < 0) )
+          {
             const job = 
             {
               id: job_id.current,
-              operation: 'add',
+              operation: 'del',
+              node_id: id,
               node_model: 'App\\Models\\DossierSimple',
-              data: node,
               etat: 'waiting',
-              dependencies: 
-              [
-                {
-                  type: node.parent_type,
-                  id: node.parent_id
-                }
-              ]
 
             }
 
@@ -258,29 +321,26 @@ export default function useEditor(data)
 
             job_id.current = job_id.current + 1 
 
-            setDatasState({type: 'add_folder', job})
+          }
 
-            return JSON.parse(JSON.stringify(state))
-          }
-        case 'delete':
-          {
-  
-            const newState = state.filter( node => node.id !== data.node_type + data.node.id ).map( node => node )
-  
-            return JSON.parse(JSON.stringify(newState))
-          }
-        case 'update':
-          {
-  
-            return JSON.parse(JSON.stringify(state))
-          }
-        
-        default:
-          break;
-      }
+          setDatasState({type: 'del_folder', id})
+
+          return JSON.parse(JSON.stringify(state))
+
+        }
+      case 'update':
+        {
+
+          return JSON.parse(JSON.stringify(state))
+        }
+      
+      default:
+        break;
+    }
   }
 
   const [jobs, dispatch_job] = useReducer(jobs_reducer, [])
+  
 
   // useEffect(
   //   () =>
@@ -313,6 +373,7 @@ export default function useEditor(data)
         res =>
         {
           console.log(res)
+          // toast.dismiss('Saving')
         }
       )
       .catch(
@@ -359,6 +420,10 @@ export default function useEditor(data)
                                     loading: 'Saving...',
                                     success: 'Processus achevé',
                                     error: 'err'
+                                  },
+                                  {
+                                    // id: 'Saving',
+                                    // duration: Infinity
                                   }
                                 )
 
@@ -389,6 +454,10 @@ export default function useEditor(data)
               }
               );
           }
+          else
+          {
+            toast.dismiss('save')
+          }
           // else if ( !active )
           // {
           //     toast.dismiss('save')
@@ -415,7 +484,12 @@ export default function useEditor(data)
           update_initData,
           open: () => { setActive(true) },
           close,
-          add_folder: (request) => { dispatch_job({ type: 'add_folder', request }) },
+          folder:
+          {
+            add: (request) => { dispatch_job({ type: 'add_folder', request }) },
+            delete: (id) => { dispatch_job({ type: 'del_folder', id }) }
+          },
+
       }
   )
 

@@ -763,7 +763,7 @@ export default function FileTable(_ref3) {
                     } else {
                         console.log('editorHandle');
                         queryBody.set('front_parent_type', node.type);
-                        Global_State.editor.add_folder(queryBody);
+                        Global_State.editor.folder.add(queryBody);
 
                         Global_State.modalManager.close_modal();
                     }
@@ -1601,12 +1601,55 @@ export default function FileTable(_ref3) {
                                         };
                                     }();
 
+                                    var localRemove = function localRemove() {
+                                        selectedRow.map(function (row) {
+                                            // console.log(Global_State.identifyNode(row))
+                                            var nodeIdentity = Global_State.identifyNode(row);
+                                            // const [ id, type ] = Global_State.identifyNode(row)
+
+                                            console.log(selectedRow);
+                                            switch (row.type) {
+                                                case 'audit':
+
+                                                    console.log('audit dispatch del');
+
+                                                    break;
+                                                case 'checkList':
+                                                    break;
+                                                case 'dp':
+                                                    break;
+                                                case 'nonC':
+                                                    break;
+                                                case 'fnc':
+
+                                                    console.log('fnc dispatch del');
+
+                                                    break;
+                                                case 'ds':
+
+                                                    Global_State.editor.folder.delete(nodeIdentity[0]);
+
+                                                    break;
+                                                case 'f':
+
+                                                    console.log('file dispatch del');
+
+                                                    break;
+
+                                                default:
+                                                    break;
+                                            }
+                                        });
+                                    };
+
                                     // console.log(selectedRow[0].id.substring(2))
-                                    toast.promise(remove(), {
-                                        loading: 'Loading...',
-                                        success: 'Processus achevé',
-                                        error: 'err'
-                                    });
+                                    if (!Global_State.isEditorMode) {
+                                        toast.promise(remove(), {
+                                            loading: 'Loading...',
+                                            success: 'Processus achevé',
+                                            error: 'err'
+                                        });
+                                    } else localRemove();
                                 } },
                             'Supprimer'
                         )

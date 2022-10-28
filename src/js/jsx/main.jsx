@@ -468,7 +468,7 @@ function Home()
                                     </div>
                                 
                                     <footer className="content-footer d-print-none">
-                                        <div>© 2020 Filedash - <a href="http://laborasyon.com" target="_blank">Laborasyon</a></div>
+                                        <div>© 2022 ESSOAZINA - <a href="https://www.anac-togo.tg" target="_blank">ANAC</a></div>
                                         <div>
                                             <nav className="nav">
                                                 <a href="https://themeforest.net/licenses/standard" className="nav-link">Licenses</a>

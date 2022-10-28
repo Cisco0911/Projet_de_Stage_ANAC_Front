@@ -227,13 +227,17 @@ export default function useEditor(data) {
 
           return JSON.parse(JSON.stringify(state));
         }
-      case 'delete':
+      case 'del_folder':
         {
 
+          var suppress_from = function suppress_from(list_, id) {
+            var rest = list_.filter(function (node) {
+              return node.id === "ds" + id;
+            });
+          };
+
           var newState = state.filter(function (node) {
-            return node.id !== data.node_type + data.node.id;
-          }).map(function (node) {
-            return node;
+            return node.id !== "ds" + action.id;
           });
 
           return JSON.parse(JSON.stringify(newState));
@@ -255,7 +259,36 @@ export default function useEditor(data) {
       setDatasState = _useReducer2[1]; //.map( node => ({...node, name: 'lol'}) )
 
   function jobs_reducer(state, action) {
-    var request = action.request;
+
+    var getJob = function getJob(id) {
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = state[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var job = _step4.value;
+
+          console.log('searching joooooooooob', job.id, id);
+          if (job.id === id) return job;
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4.return) {
+            _iterator4.return();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+
+      return {};
+    };
 
     switch (action.type) {
       case 'reset':
@@ -265,17 +298,47 @@ export default function useEditor(data) {
         }
       case 'add_folder':
         {
+          var request = action.request;
+
+          var getDependencies = function getDependencies(parent_id) {
+            if (parseInt(parent_id) < 0) {
+              var _iteratorNormalCompletion5 = true;
+              var _didIteratorError5 = false;
+              var _iteratorError5 = undefined;
+
+              try {
+                for (var _iterator5 = state[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                  var _job = _step5.value;
+
+                  if (_job.node_id === parseInt(parent_id)) return [_job.id];
+                }
+              } catch (err) {
+                _didIteratorError5 = true;
+                _iteratorError5 = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                    _iterator5.return();
+                  }
+                } finally {
+                  if (_didIteratorError5) {
+                    throw _iteratorError5;
+                  }
+                }
+              }
+            }
+            return [];
+          };
+
           var node = form_to_json(request);
           var job = {
             id: job_id.current,
             operation: 'add',
+            node_id: id.current,
             node_model: 'App\\Models\\DossierSimple',
             data: node,
             etat: 'waiting',
-            dependencies: [{
-              type: node.parent_type,
-              id: node.parent_id
-            }]
+            dependencies: getDependencies(node.parent_id)
 
           };
 
@@ -287,16 +350,37 @@ export default function useEditor(data) {
 
           return JSON.parse(JSON.stringify(state));
         }
-      case 'delete':
+      case 'del_folder':
         {
+          var _id = action.id;
 
-          var newState = state.filter(function (node) {
-            return node.id !== data.node_type + data.node.id;
-          }).map(function (node) {
-            return node;
+          state = state.filter(function (job) {
+            // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+            if (job.node_id === _id) return false;
+            // console.log(job.id, job.dependencies[0], getJob(job.dependencies[0]), id)
+            if (getJob(job.dependencies[0]).node_id === _id) return false;
+
+            return true;
           });
 
-          return JSON.parse(JSON.stringify(newState));
+          if (!(parseInt(_id) < 0)) {
+            var _job2 = {
+              id: job_id.current,
+              operation: 'del',
+              node_id: _id,
+              node_model: 'App\\Models\\DossierSimple',
+              etat: 'waiting'
+
+            };
+
+            state.push(_job2);
+
+            job_id.current = job_id.current + 1;
+          }
+
+          setDatasState({ type: 'del_folder', id: _id });
+
+          return JSON.parse(JSON.stringify(state));
         }
       case 'update':
         {
@@ -345,6 +429,7 @@ export default function useEditor(data) {
               _context.next = 2;
               return http.post('handle_edit', request).then(function (res) {
                 console.log(res);
+                // toast.dismiss('Saving')
               }).catch(function (err) {
                 console.log(err);
               });
@@ -396,6 +481,9 @@ export default function useEditor(data) {
                     loading: 'Saving...',
                     success: 'Processus achevé',
                     error: 'err'
+                  }, {
+                    // id: 'Saving',
+                    // duration: Infinity
                   });
                 } },
               "SAVE"
@@ -418,6 +506,8 @@ export default function useEditor(data) {
           color: '#0062ff'
         }
       });
+    } else {
+      toast.dismiss('save');
     }
     // else if ( !active )
     // {
@@ -441,8 +531,14 @@ export default function useEditor(data) {
       setActive(true);
     },
     close: close,
-    add_folder: function add_folder(request) {
-      dispatch_job({ type: 'add_folder', request: request });
+    folder: {
+      add: function add(request) {
+        dispatch_job({ type: 'add_folder', request: request });
+      },
+      delete: function _delete(id) {
+        dispatch_job({ type: 'del_folder', id: id });
+      }
     }
+
   };
 }

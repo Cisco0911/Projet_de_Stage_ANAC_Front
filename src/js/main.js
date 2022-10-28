@@ -567,11 +567,11 @@ function Home() {
                                         React.createElement(
                                             'div',
                                             null,
-                                            '\xA9 2020 Filedash - ',
+                                            '\xA9 2022 ESSOAZINA - ',
                                             React.createElement(
                                                 'a',
-                                                { href: 'http://laborasyon.com', target: '_blank' },
-                                                'Laborasyon'
+                                                { href: 'https://www.anac-togo.tg', target: '_blank' },
+                                                'ANAC'
                                             )
                                         ),
                                         React.createElement(
