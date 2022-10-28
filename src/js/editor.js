@@ -232,13 +232,43 @@ export default function useEditor(data) {
 
           var suppress_from = function suppress_from(list_, id) {
             var rest = list_.filter(function (node) {
-              return node.id === "ds" + id;
+              return node.id !== id;
             });
+
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+              for (var _iterator4 = list_[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                var _node = _step4.value;
+
+                // console.log(id, node.parentId)
+                if (id === _node.parentId) rest = suppress_from(rest, _node.id);
+              }
+
+              // console.log('resttttttttttttttttt', rest)
+            } catch (err) {
+              _didIteratorError4 = true;
+              _iteratorError4 = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                  _iterator4.return();
+                }
+              } finally {
+                if (_didIteratorError4) {
+                  throw _iteratorError4;
+                }
+              }
+            }
+
+            return rest;
           };
 
-          var newState = state.filter(function (node) {
-            return node.id !== "ds" + action.id;
-          });
+          var newState = suppress_from(state, "ds" + action.id);
+
+          // console.log('new_staaaaaaaaaaaaate', newState)
 
           return JSON.parse(JSON.stringify(newState));
         }
@@ -261,28 +291,28 @@ export default function useEditor(data) {
   function jobs_reducer(state, action) {
 
     var getJob = function getJob(id) {
-      var _iteratorNormalCompletion4 = true;
-      var _didIteratorError4 = false;
-      var _iteratorError4 = undefined;
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
 
       try {
-        for (var _iterator4 = state[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var job = _step4.value;
+        for (var _iterator5 = state[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var job = _step5.value;
 
           console.log('searching joooooooooob', job.id, id);
           if (job.id === id) return job;
         }
       } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion4 && _iterator4.return) {
-            _iterator4.return();
+          if (!_iteratorNormalCompletion5 && _iterator5.return) {
+            _iterator5.return();
           }
         } finally {
-          if (_didIteratorError4) {
-            throw _iteratorError4;
+          if (_didIteratorError5) {
+            throw _iteratorError5;
           }
         }
       }
@@ -302,27 +332,27 @@ export default function useEditor(data) {
 
           var getDependencies = function getDependencies(parent_id) {
             if (parseInt(parent_id) < 0) {
-              var _iteratorNormalCompletion5 = true;
-              var _didIteratorError5 = false;
-              var _iteratorError5 = undefined;
+              var _iteratorNormalCompletion6 = true;
+              var _didIteratorError6 = false;
+              var _iteratorError6 = undefined;
 
               try {
-                for (var _iterator5 = state[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                  var _job = _step5.value;
+                for (var _iterator6 = state[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                  var _job = _step6.value;
 
                   if (_job.node_id === parseInt(parent_id)) return [_job.id];
                 }
               } catch (err) {
-                _didIteratorError5 = true;
-                _iteratorError5 = err;
+                _didIteratorError6 = true;
+                _iteratorError6 = err;
               } finally {
                 try {
-                  if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                    _iterator5.return();
+                  if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                    _iterator6.return();
                   }
                 } finally {
-                  if (_didIteratorError5) {
-                    throw _iteratorError5;
+                  if (_didIteratorError6) {
+                    throw _iteratorError6;
                   }
                 }
               }

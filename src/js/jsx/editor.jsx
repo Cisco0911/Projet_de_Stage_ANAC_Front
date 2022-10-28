@@ -209,12 +209,23 @@ export default function useEditor(data)
 
           const suppress_from = ( list_, id ) =>
           {
-            const rest = list_.filter(
-              node => ( node.id === `ds${id}` )
+            let rest = list_.filter(
+              node => ( node.id !== id )
             )
+
+            for (const node of list_) 
+            {
+              // console.log(id, node.parentId)
+              if( id === node.parentId ) rest = suppress_from(rest, node.id)
+            }
+
+            // console.log('resttttttttttttttttt', rest)
+            return rest
           }
 
-          const newState = state.filter( node => node.id !== `ds${action.id}` )
+          const newState = suppress_from(state, `ds${action.id}`)
+
+          // console.log('new_staaaaaaaaaaaaate', newState)
 
           return JSON.parse(JSON.stringify(newState))
         }
