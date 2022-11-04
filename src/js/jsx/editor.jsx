@@ -68,6 +68,8 @@ export default function useEditor(data)
         const id = useRef(-2)
         const job_id = useRef(1)
 
+        const formData = useRef()
+
 
         const getService = services =>
         {
@@ -86,9 +88,27 @@ export default function useEditor(data)
 
         const form_to_json = (formData) =>
         {
+                // object[key] = key === 'services' ? JSON.parse(value) : value
 
                 var object = {};
-                formData.forEach((value, key) => object[key] = key === 'services' ? JSON.parse(value) : value);
+                formData.forEach(
+                        (value, key) =>
+                        {
+                                switch (key)
+                                {
+                                        case 'services':
+                                                object[key] = JSON.parse(value)
+                                                break;
+                                        case 'fichiers[]':
+                                                if(Array.isArray(object.files)) object.files.push(value)
+                                                else object.files = [value]
+                                                break;
+                                        default:
+                                                object[key] = value
+                                                break;
+                                }
+                        }
+                );
 
                 return object
         }
@@ -225,6 +245,120 @@ export default function useEditor(data)
 
                                 return JSON.parse(JSON.stringify(newState))
                         }
+                        case 'add_files':
+                        {
+
+                                console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_files')
+
+                                const data = action.job.data
+                                const files = action.job.data.files
+
+                                console.log('dataaaaaaaaaaaaaaaaaaas', files, action.job)
+
+                                for (const file of files)
+                                {
+
+                                        const part_name = file.name.split('.')
+
+                                        const ext = part_name[part_name.length-1]
+
+                                        let new_file =
+                                        Global_State.createNodeData
+                                        (
+                                        `f${id.current}`,
+                                        "file",
+                                        getService(data.services),
+                                        false,
+                                        file.name,
+                                        "f",
+                                        false,
+                                        data.front_parent_type === 'root' ? '0' : data.front_parent_type + data.parent_id,
+                                        "",
+                                        false,
+                                        ext,
+                                        undefined,
+                                        undefined,
+                                        'pas encore créé',
+                                        undefined,
+                                        parseInt(data.section_id),
+                                        file.size,
+                                        undefined,
+                                        )
+                                        new_file['onEdit'] = true
+
+                                        state.push(new_file)
+
+                                        id.current = id.current - 1
+                                }
+
+                                return JSON.parse(JSON.stringify(state))
+                        }
+                        case 'del_file':
+                        {
+
+                                const suppress_from = ( list_, id ) =>
+                                {
+                                        let rest = list_.filter(
+                                        node => ( node.id !== id )
+                                        )
+
+                                        for (const node of list_)
+                                        {
+                                                // console.log(id, node.parentId)
+                                                if( id === node.parentId ) rest = suppress_from(rest, node.id)
+                                        }
+
+                                        // console.log('resttttttttttttttttt', rest)
+                                        return rest
+                                }
+
+                                const newState = suppress_from(state, `f${action.id}`)
+
+                                // console.log('new_staaaaaaaaaaaaate', newState)
+
+                                return JSON.parse(JSON.stringify(newState))
+                        }
+                        case 'add_audit':
+                        {
+
+                                console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_audit')
+
+                                for (const job of action.jobs)
+                                {
+                                        const data = job.data
+
+                                        const type = data.sub_type !== undefined ? data.sub_type : 'audit';
+
+                                        const new_node =
+                                        Global_State.createNodeData
+                                        (
+                                        `${type}${job.node_id}`,
+                                        "folder",
+                                        getService(data.services),
+                                        false,
+                                        data.name,
+                                        type,
+                                        false,
+                                        type === 'audit' ? '0' : `audit${job.data.audit_id}`,
+                                        "",
+                                        true,
+                                        undefined,
+                                        type === 'audit' ? Global_State.authUser : undefined,
+                                        undefined,
+                                        'pas encore créé',
+                                        undefined,
+                                        parseInt(data.section_id),
+                                        undefined,
+                                        undefined
+                                        )
+                                        new_node['onEdit'] = true
+
+                                        state.push(new_node)
+                                }
+
+
+                                return JSON.parse(JSON.stringify(state))
+                        }
                         case 'update':
                         {
 
@@ -253,7 +387,8 @@ export default function useEditor(data)
                 }
 
 
-                switch (action.type) {
+                switch (action.type)
+                {
                         case 'reset':
                         {
                                 setDatasState({ type: 'reset' })
@@ -261,6 +396,8 @@ export default function useEditor(data)
                         }
                         case 'add_folder':
                         {
+                                let new_state = [...state];
+
                                 const request = action.request
 
                                 const getDependencies = parent_id =>
@@ -288,25 +425,31 @@ export default function useEditor(data)
 
                                         }
 
-                                state.push(job)
+                                new_state.push(job)
 
                                 job_id.current = job_id.current + 1
 
                                 setDatasState({type: 'add_folder', job})
 
-                                return JSON.parse(JSON.stringify(state))
+                                return new_state
                         }
                         case 'del_folder':
                         {
+                                let new_state = [...state];
+
                                 const id = action.id
 
-                                state = state.filter(
+                                new_state = new_state.filter(
                                         job =>
                                         {
                                                 // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
                                                 if( job.node_id === id ) return false
-                                                // console.log(job.id, job.dependencies[0], getJob(job.dependencies[0]), id)
-                                                if( getJob(job.dependencies[0]).node_id === id ) return false
+
+                                                if (Array.isArray(job.dependencies))
+                                                {
+                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                        return getJob(job.dependencies[0]).node_id !== id
+                                                }
 
                                                 return true
                                         }
@@ -315,16 +458,16 @@ export default function useEditor(data)
                                 if( ! (parseInt(id) < 0) )
                                 {
                                         const job =
-                                                {
-                                                        id: job_id.current,
-                                                        operation: 'del',
-                                                        node_id: id,
-                                                        node_model: 'App\\Models\\DossierSimple',
-                                                        etat: 'waiting',
+                                        {
+                                                id: job_id.current,
+                                                operation: 'del',
+                                                node_id: id,
+                                                node_model: 'App\\Models\\DossierSimple',
+                                                etat: 'waiting',
 
-                                                }
+                                        }
 
-                                        state.push(job)
+                                        new_state.push(job)
 
                                         job_id.current = job_id.current + 1
 
@@ -332,8 +475,173 @@ export default function useEditor(data)
 
                                 setDatasState({type: 'del_folder', id})
 
-                                return JSON.parse(JSON.stringify(state))
+                                return new_state
 
+                        }
+                        case 'add_files':
+                        {
+                                let new_state = [...state];
+
+                                const request = action.request
+
+                                const getDependencies = parent_id =>
+                                {
+                                        if(parseInt(parent_id) < 0)
+                                        {
+                                                for (const job of state)
+                                                {
+                                                        if( job.node_id === parseInt(parent_id) ) return [job.id]
+                                                }
+                                        }
+                                        return []
+                                }
+
+                                const node = form_to_json(request)
+                                // console.log('nooooooooooooooooooooooooooooode file', {node})
+                                const job =
+                                {
+                                        id: job_id.current,
+                                        operation: 'add',
+                                        node_id: id.current,
+                                        node_model: 'App\\Models\\Fichier',
+                                        data: node,
+                                        etat: 'waiting',
+                                        dependencies: getDependencies(node.parent_id)
+
+                                }
+
+
+                                console.log('nooooooooooooooooooooooooooooode file', {node})
+
+                                new_state.push(job)
+
+                                job_id.current = job_id.current + 1
+
+                                setDatasState({type: 'add_files', job})
+
+                                return new_state
+                        }
+                        case 'del_file':
+                        {
+                                let new_state = [...state];
+
+                                const id = action.id
+
+                                new_state = new_state.filter(
+                                        job =>
+                                        {
+                                                // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                return job.node_id !== id;
+                                        }
+                                )
+
+                                if( ! (parseInt(id) < 0) )
+                                {
+                                        const job =
+                                        {
+                                                id: job_id.current,
+                                                operation: 'del',
+                                                node_id: id,
+                                                node_model: 'App\\Models\\Fichier',
+                                                etat: 'waiting',
+
+                                        }
+
+                                        new_state.push(job)
+
+                                        job_id.current = job_id.current + 1
+
+                                }
+
+                                setDatasState({type: 'del_file', id})
+
+                                return new_state
+
+                        }
+                        case 'add_audit':
+                        {
+                                let new_state = [...state];
+
+                                const request = action.request
+
+                                const node = form_to_json(request)
+
+                                const job =
+                                {
+                                        id: job_id.current,
+                                        operation: 'add',
+                                        node_id: id.current,
+                                        node_model: 'App\\Models\\Audit',
+                                        data: node,
+                                        etat: 'waiting',
+
+                                }
+                                job_id.current = job_id.current + 1
+                                id.current = id.current - 1
+
+                                const  checkList_job =
+                                {
+                                        id: job_id.current,
+                                        node_id: id.current,
+                                        node_model: 'App\\Models\\checkList',
+                                        data:
+                                        {
+                                                name: 'checkList',
+                                                audit_id: job.node_id,
+                                                sub_type: 'checkList',
+                                                services: job.data.services,
+                                                section_id: job.data.section_id,
+                                        },
+                                        dependencies: [job.id],
+                                        etat: 'waiting',
+                                }
+                                job_id.current = job_id.current + 1
+                                id.current = id.current - 1
+
+                                const  dp_job =
+                                {
+                                        id: job_id.current,
+                                        node_id: id.current,
+                                        node_model: 'App\\Models\\DossierPreuve',
+                                        data:
+                                        {
+                                                name: 'Dossier Preuve',
+                                                audit_id: job.node_id,
+                                                sub_type: 'dp',
+                                                services: job.data.services,
+                                                section_id: job.data.section_id,
+                                        },
+                                        dependencies: [job.id],
+                                        etat: 'waiting',
+                                }
+                                job_id.current = job_id.current + 1
+                                id.current = id.current - 1
+
+                                const  NC_job =
+                                {
+                                        id: job_id.current,
+                                        node_id: id.current,
+                                        node_model: 'App\\Models\\Nc',
+                                        data:
+                                        {
+                                                name: 'NC',
+                                                audit_id: job.node_id,
+                                                sub_type: 'nonC',
+                                                services: job.data.services,
+                                                section_id: job.data.section_id,
+                                        },
+                                        dependencies: [job.id],
+                                        etat: 'waiting',
+                                }
+                                job_id.current = job_id.current + 1
+                                id.current = id.current - 1
+
+                                new_state.push(job, checkList_job, dp_job, NC_job)
+
+
+                                setDatasState({type: 'add_audit', jobs: [ job, checkList_job, dp_job, NC_job ] })
+
+                                return new_state
                         }
                         case 'update':
                         {
@@ -375,7 +683,11 @@ export default function useEditor(data)
 
         const save = async request =>
         {
-                await http.post('handle_edit', request)
+                await http.post('handle_edit', request, {
+                                headers:{
+                                        'Content-Type': 'multipart/form-data'
+                                }
+                        })
                         .then(
                                 res =>
                                 {
@@ -415,7 +727,20 @@ export default function useEditor(data)
                                                                 {
                                                                         const queryData = new FormData
 
-                                                                        jobs.map(job => { queryData.append( "jobs[]", JSON.stringify(job) ) })
+                                                                        jobs.map(
+                                                                        job =>
+                                                                        {
+                                                                                queryData.append( "jobs[]", JSON.stringify(job) )
+                                                                                if( job.node_model === 'App\\Models\\Fichier'  && job.operation === 'add' )
+                                                                                {
+                                                                                        job.data.files.map(
+                                                                                        file =>
+                                                                                        {
+                                                                                                queryData.append( `job${job.id}_files[]`, file )
+                                                                                        }
+                                                                                        )
+                                                                                }
+                                                                        })
 
                                                                         // console.log('jooooooooobs', queryData.get('jobs[]'))
 
@@ -492,10 +817,20 @@ export default function useEditor(data)
                         open: () => { setActive(true) },
                         close,
                         folder:
-                                {
-                                        add: (request) => { dispatch_job({ type: 'add_folder', request }) },
-                                        delete: (id) => { dispatch_job({ type: 'del_folder', id }) }
-                                },
+                        {
+                                add: (request) => { dispatch_job({ type: 'add_folder', request }) },
+                                delete: (id) => { dispatch_job({ type: 'del_folder', id }) }
+                        },
+                        files:
+                        {
+                                add: (request) => { dispatch_job({ type: 'add_files', request }) },
+                                delete: (id) => { dispatch_job({ type: 'del_file', id }) }
+                        },
+                        audit:
+                        {
+                                add: (request) => { dispatch_job({ type: 'add_audit', request }) },
+                                delete: (id) => { dispatch_job({ type: 'del_audit', id }) }
+                        }
 
                 }
         )

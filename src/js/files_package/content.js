@@ -199,9 +199,13 @@ function Files_Dropzone(props) {
         return React.createElement(
             'div',
             { key: name },
-            React.createElement('input', { key: fileObject.file.path, style: { border: 'none', width: '50%' }, placeholder: name, onChange: function onChange(e) {
-                    e.preventDefault();fileObject.customName = e.target.value + '.' + ext;set(filesObjects);
-                } }),
+            React.createElement('input', { key: fileObject.file.path, style: { border: 'none', width: '50%' }, placeholder: name,
+                onChange: function onChange(e) {
+                    e.preventDefault();
+                    fileObject.customName = (e.target.value === '' ? name : e.target.value) + '.' + ext;
+                    set(filesObjects);
+                }
+            }),
             React.createElement(
                 'li',
                 { style: { display: 'inline' } },
@@ -490,7 +494,11 @@ export default function FileTable(_ref3) {
                             Global_State.modalManager.setContent(React.createElement(Audit_form, null));
                         });
                     } else {
-                        console.log('editorHandle');
+                        console.log('editorHandle audit');
+
+                        Global_State.editor.audit.add(queryBody);
+
+                        Global_State.modalManager.close_modal();
                     }
 
                     // console.log(queryBody.get("name"))
@@ -761,7 +769,7 @@ export default function FileTable(_ref3) {
                             Global_State.modalManager.setContent(React.createElement(Folder_form, null));
                         });
                     } else {
-                        console.log('editorHandle');
+                        console.log('editorHandle folder');
                         queryBody.set('front_parent_type', node.type);
                         Global_State.editor.folder.add(queryBody);
 
@@ -1264,7 +1272,12 @@ export default function FileTable(_ref3) {
                             Global_State.modalManager.setContent(React.createElement(Fs_form, null));
                         });
                     } else {
-                        console.log('editorHandle');
+                        console.log('editorHandle for files');
+                        // queryBody.forEach((value, key) => console.log(key, value));
+                        queryBody.set('front_parent_type', node.type);
+                        Global_State.editor.files.add(queryBody);
+
+                        Global_State.modalManager.close_modal();
                     }
 
                     // console.log(queryBody.get("name"))
@@ -1612,6 +1625,7 @@ export default function FileTable(_ref3) {
                                                 case 'audit':
 
                                                     console.log('audit dispatch del');
+                                                    Global_State.editor.audit.delete(nodeIdentity[0]);
 
                                                     break;
                                                 case 'checkList':
@@ -1627,12 +1641,14 @@ export default function FileTable(_ref3) {
                                                     break;
                                                 case 'ds':
 
+                                                    console.log('folder del');
                                                     Global_State.editor.folder.delete(nodeIdentity[0]);
 
                                                     break;
                                                 case 'f':
 
                                                     console.log('file dispatch del');
+                                                    Global_State.editor.files.delete(nodeIdentity[0]);
 
                                                     break;
 
@@ -1822,6 +1838,7 @@ export default function FileTable(_ref3) {
                             } });
                     case "pdf":
                         return React.createElement(BsFillFileEarmarkPdfFill, { color: '#ad0b00', size: iconSize, onClick: function onClick(e) {
+                                console.log(data);
                                 Global_State.modalManager.setContent(React.createElement(
                                     'div',
                                     { style: {
@@ -1830,7 +1847,7 @@ export default function FileTable(_ref3) {
                                             position: 'relative',
                                             alignItems: 'center'
                                         } },
-                                    React.createElement('embed', { src: data.url + "#toolbar=0&navpanes=0&scrollbar=0", width: 900, height: 400, type: 'application/pdf' })
+                                    Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : React.createElement('embed', { src: data.url + "#toolbar=0&navpanes=0&scrollbar=0", width: 900, height: 400, type: 'application/pdf' })
                                 ));
                                 Global_State.modalManager.open_modal("Apercu du fichier");
                             } });

@@ -159,7 +159,17 @@ function Files_Dropzone(props) {
         const ext = part_name[0]
         return (
             <div key={name} >
-                <input key={fileObject.file.path} style = {{border: 'none', width: '50%'}} placeholder = { name } onChange = { e => { e.preventDefault(); fileObject.customName = e.target.value + '.' + ext; set(filesObjects) }} />
+                <input key={fileObject.file.path} style = {{border: 'none', width: '50%'}} placeholder = { name }
+                       onChange =
+                       {
+                                e =>
+                                {
+                                        e.preventDefault();
+                                        fileObject.customName = (e.target.value === '' ? name : e.target.value) + '.' + ext;
+                                        set(filesObjects)
+                                }
+                        }
+                />
                 <li style = {{display: 'inline' }} > { '.' + ext +  " - " + fileObject.file.size + " bytes"} </li>
             </div>
         )
@@ -388,7 +398,11 @@ export default function FileTable({set}) {
                     }
                     else
                     {
-                        console.log('editorHandle')
+                            console.log('editorHandle audit')
+
+                            Global_State.editor.audit.add(queryBody)
+
+                            Global_State.modalManager.close_modal()
                     }
                     
 
@@ -629,7 +643,7 @@ export default function FileTable({set}) {
                     }
                     else
                     {
-                        console.log('editorHandle')
+                        console.log('editorHandle folder')
                         queryBody.set('front_parent_type', node.type)
                         Global_State.editor.folder.add(queryBody)
                         
@@ -1101,7 +1115,12 @@ export default function FileTable({set}) {
                     }
                     else
                     {
-                        console.log('editorHandle')
+                            console.log('editorHandle for files')
+                            // queryBody.forEach((value, key) => console.log(key, value));
+                            queryBody.set('front_parent_type', node.type)
+                            Global_State.editor.files.add(queryBody)
+
+                            Global_State.modalManager.close_modal()
                     }
 
                     // console.log(queryBody.get("name"))
@@ -1355,9 +1374,10 @@ export default function FileTable({set}) {
                                                 switch (row.type) {
                                                     case 'audit':
 
-                                                        console.log('audit dispatch del')
+                                                            console.log('audit dispatch del')
+                                                            Global_State.editor.audit.delete(nodeIdentity[0])
 
-                                                        break;
+                                                            break;
                                                     case 'checkList':
                                                         break;
                                                     case 'dp':
@@ -1366,22 +1386,24 @@ export default function FileTable({set}) {
                                                         break;
                                                     case 'fnc':
 
-                                                        console.log('fnc dispatch del')
+                                                            console.log('fnc dispatch del')
 
-                                                        break;
+                                                            break;
                                                     case 'ds':
 
-                                                        Global_State.editor.folder.delete(nodeIdentity[0])
+                                                            console.log('folder del')
+                                                            Global_State.editor.folder.delete(nodeIdentity[0])
 
-                                                        break;
+                                                            break;
                                                     case 'f':
 
-                                                        console.log('file dispatch del')
+                                                            console.log('file dispatch del')
+                                                            Global_State.editor.files.delete(nodeIdentity[0])
 
-                                                        break;
+                                                            break;
                                                 
                                                     default:
-                                                        break;
+                                                            break;
                                                 }
 
                                             }
@@ -1399,7 +1421,7 @@ export default function FileTable({set}) {
                                                 success: 'Processus achevé',
                                                 error: 'err'
                                             }
-    
+
                                         )
                                     }
                                     else localRemove()
@@ -1523,8 +1545,9 @@ export default function FileTable({set}) {
                     }
                  } />
                 case "pdf":
-                  return <BsFillFileEarmarkPdfFill color='#ad0b00' size={iconSize} onClick = { e => 
+                  return <BsFillFileEarmarkPdfFill color='#ad0b00' size={iconSize} onClick = { e =>
                     {
+                        console.log(data)
                         Global_State.modalManager.setContent(
                         <div style= {
                             {
@@ -1534,7 +1557,7 @@ export default function FileTable({set}) {
                                 alignItems: 'center',
                             }
                         } >
-                            <embed src = {data.url + "#toolbar=0&navpanes=0&scrollbar=0"} width={900} height= {400} type="application/pdf"  ></embed>
+                                {Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : <embed src = {data.url + "#toolbar=0&navpanes=0&scrollbar=0"} width={900} height= {400} type="application/pdf"  ></embed>}
                         </div>)
                         Global_State.modalManager.open_modal("Apercu du fichier")
                     }

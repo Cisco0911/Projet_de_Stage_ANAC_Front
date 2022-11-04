@@ -4,6 +4,8 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 /* eslint-disable import/first */
 
 import React, { useState, useEffect, useRef, useReducer } from 'react';
@@ -87,6 +89,8 @@ export default function useEditor(data) {
         var id = useRef(-2);
         var job_id = useRef(1);
 
+        var formData = useRef();
+
         var getService = function getService(services) {
                 // console.log('fffffffffffffffff',Global_State.authUser.services);
                 return Global_State.authUser.services.filter(function (service) {
@@ -99,10 +103,21 @@ export default function useEditor(data) {
         };
 
         var form_to_json = function form_to_json(formData) {
+                // object[key] = key === 'services' ? JSON.parse(value) : value
 
                 var object = {};
                 formData.forEach(function (value, key) {
-                        return object[key] = key === 'services' ? JSON.parse(value) : value;
+                        switch (key) {
+                                case 'services':
+                                        object[key] = JSON.parse(value);
+                                        break;
+                                case 'fichiers[]':
+                                        if (Array.isArray(object.files)) object.files.push(value);else object.files = [value];
+                                        break;
+                                default:
+                                        object[key] = value;
+                                        break;
+                        }
                 });
 
                 return object;
@@ -272,6 +287,137 @@ export default function useEditor(data) {
 
                                         return JSON.parse(JSON.stringify(newState));
                                 }
+                        case 'add_files':
+                                {
+
+                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_files');
+
+                                        var _data2 = action.job.data;
+                                        var files = action.job.data.files;
+
+                                        console.log('dataaaaaaaaaaaaaaaaaaas', files, action.job);
+
+                                        var _iteratorNormalCompletion5 = true;
+                                        var _didIteratorError5 = false;
+                                        var _iteratorError5 = undefined;
+
+                                        try {
+                                                for (var _iterator5 = files[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                                                        var file = _step5.value;
+
+
+                                                        var part_name = file.name.split('.');
+
+                                                        var ext = part_name[part_name.length - 1];
+
+                                                        var new_file = Global_State.createNodeData("f" + id.current, "file", getService(_data2.services), false, file.name, "f", false, _data2.front_parent_type === 'root' ? '0' : _data2.front_parent_type + _data2.parent_id, "", false, ext, undefined, undefined, 'pas encore créé', undefined, parseInt(_data2.section_id), file.size, undefined);
+                                                        new_file['onEdit'] = true;
+
+                                                        state.push(new_file);
+
+                                                        id.current = id.current - 1;
+                                                }
+                                        } catch (err) {
+                                                _didIteratorError5 = true;
+                                                _iteratorError5 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                                                                _iterator5.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError5) {
+                                                                throw _iteratorError5;
+                                                        }
+                                                }
+                                        }
+
+                                        return JSON.parse(JSON.stringify(state));
+                                }
+                        case 'del_file':
+                                {
+
+                                        var _suppress_from = function _suppress_from(list_, id) {
+                                                var rest = list_.filter(function (node) {
+                                                        return node.id !== id;
+                                                });
+
+                                                var _iteratorNormalCompletion6 = true;
+                                                var _didIteratorError6 = false;
+                                                var _iteratorError6 = undefined;
+
+                                                try {
+                                                        for (var _iterator6 = list_[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                                                                var _node2 = _step6.value;
+
+                                                                // console.log(id, node.parentId)
+                                                                if (id === _node2.parentId) rest = _suppress_from(rest, _node2.id);
+                                                        }
+
+                                                        // console.log('resttttttttttttttttt', rest)
+                                                } catch (err) {
+                                                        _didIteratorError6 = true;
+                                                        _iteratorError6 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                                                                        _iterator6.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError6) {
+                                                                        throw _iteratorError6;
+                                                                }
+                                                        }
+                                                }
+
+                                                return rest;
+                                        };
+
+                                        var _newState = _suppress_from(state, "f" + action.id);
+
+                                        // console.log('new_staaaaaaaaaaaaate', newState)
+
+                                        return JSON.parse(JSON.stringify(_newState));
+                                }
+                        case 'add_audit':
+                                {
+
+                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_audit');
+
+                                        var _iteratorNormalCompletion7 = true;
+                                        var _didIteratorError7 = false;
+                                        var _iteratorError7 = undefined;
+
+                                        try {
+                                                for (var _iterator7 = action.jobs[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                                                        var job = _step7.value;
+
+                                                        var _data3 = job.data;
+
+                                                        var type = _data3.sub_type !== undefined ? _data3.sub_type : 'audit';
+
+                                                        var new_node = Global_State.createNodeData("" + type + job.node_id, "folder", getService(_data3.services), false, _data3.name, type, false, type === 'audit' ? '0' : "audit" + job.data.audit_id, "", true, undefined, type === 'audit' ? Global_State.authUser : undefined, undefined, 'pas encore créé', undefined, parseInt(_data3.section_id), undefined, undefined);
+                                                        new_node['onEdit'] = true;
+
+                                                        state.push(new_node);
+                                                }
+                                        } catch (err) {
+                                                _didIteratorError7 = true;
+                                                _iteratorError7 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                                                                _iterator7.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError7) {
+                                                                throw _iteratorError7;
+                                                        }
+                                                }
+                                        }
+
+                                        return JSON.parse(JSON.stringify(state));
+                                }
                         case 'update':
                                 {
 
@@ -291,28 +437,28 @@ export default function useEditor(data) {
         function jobs_reducer(state, action) {
 
                 var getJob = function getJob(id) {
-                        var _iteratorNormalCompletion5 = true;
-                        var _didIteratorError5 = false;
-                        var _iteratorError5 = undefined;
+                        var _iteratorNormalCompletion8 = true;
+                        var _didIteratorError8 = false;
+                        var _iteratorError8 = undefined;
 
                         try {
-                                for (var _iterator5 = state[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                                        var job = _step5.value;
+                                for (var _iterator8 = state[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                                        var job = _step8.value;
 
                                         console.log('searching joooooooooob', job.id, id);
                                         if (job.id === id) return job;
                                 }
                         } catch (err) {
-                                _didIteratorError5 = true;
-                                _iteratorError5 = err;
+                                _didIteratorError8 = true;
+                                _iteratorError8 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                                                _iterator5.return();
+                                        if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                                                _iterator8.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError5) {
-                                                throw _iteratorError5;
+                                        if (_didIteratorError8) {
+                                                throw _iteratorError8;
                                         }
                                 }
                         }
@@ -328,31 +474,33 @@ export default function useEditor(data) {
                                 }
                         case 'add_folder':
                                 {
+                                        var new_state = [].concat(_toConsumableArray(state));
+
                                         var request = action.request;
 
                                         var getDependencies = function getDependencies(parent_id) {
                                                 if (parseInt(parent_id) < 0) {
-                                                        var _iteratorNormalCompletion6 = true;
-                                                        var _didIteratorError6 = false;
-                                                        var _iteratorError6 = undefined;
+                                                        var _iteratorNormalCompletion9 = true;
+                                                        var _didIteratorError9 = false;
+                                                        var _iteratorError9 = undefined;
 
                                                         try {
-                                                                for (var _iterator6 = state[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                                                                        var _job = _step6.value;
+                                                                for (var _iterator9 = state[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                                                                        var _job = _step9.value;
 
                                                                         if (_job.node_id === parseInt(parent_id)) return [_job.id];
                                                                 }
                                                         } catch (err) {
-                                                                _didIteratorError6 = true;
-                                                                _iteratorError6 = err;
+                                                                _didIteratorError9 = true;
+                                                                _iteratorError9 = err;
                                                         } finally {
                                                                 try {
-                                                                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                                                                                _iterator6.return();
+                                                                        if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                                                                                _iterator9.return();
                                                                         }
                                                                 } finally {
-                                                                        if (_didIteratorError6) {
-                                                                                throw _iteratorError6;
+                                                                        if (_didIteratorError9) {
+                                                                                throw _iteratorError9;
                                                                         }
                                                                 }
                                                         }
@@ -372,23 +520,28 @@ export default function useEditor(data) {
 
                                         };
 
-                                        state.push(job);
+                                        new_state.push(job);
 
                                         job_id.current = job_id.current + 1;
 
                                         setDatasState({ type: 'add_folder', job: job });
 
-                                        return JSON.parse(JSON.stringify(state));
+                                        return new_state;
                                 }
                         case 'del_folder':
                                 {
+                                        var _new_state = [].concat(_toConsumableArray(state));
+
                                         var _id = action.id;
 
-                                        state = state.filter(function (job) {
+                                        _new_state = _new_state.filter(function (job) {
                                                 // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
                                                 if (job.node_id === _id) return false;
-                                                // console.log(job.id, job.dependencies[0], getJob(job.dependencies[0]), id)
-                                                if (getJob(job.dependencies[0]).node_id === _id) return false;
+
+                                                if (Array.isArray(job.dependencies)) {
+                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                        return getJob(job.dependencies[0]).node_id !== _id;
+                                                }
 
                                                 return true;
                                         });
@@ -403,14 +556,180 @@ export default function useEditor(data) {
 
                                                 };
 
-                                                state.push(_job2);
+                                                _new_state.push(_job2);
 
                                                 job_id.current = job_id.current + 1;
                                         }
 
                                         setDatasState({ type: 'del_folder', id: _id });
 
-                                        return JSON.parse(JSON.stringify(state));
+                                        return _new_state;
+                                }
+                        case 'add_files':
+                                {
+                                        var _new_state2 = [].concat(_toConsumableArray(state));
+
+                                        var _request = action.request;
+
+                                        var _getDependencies = function _getDependencies(parent_id) {
+                                                if (parseInt(parent_id) < 0) {
+                                                        var _iteratorNormalCompletion10 = true;
+                                                        var _didIteratorError10 = false;
+                                                        var _iteratorError10 = undefined;
+
+                                                        try {
+                                                                for (var _iterator10 = state[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                                                                        var _job4 = _step10.value;
+
+                                                                        if (_job4.node_id === parseInt(parent_id)) return [_job4.id];
+                                                                }
+                                                        } catch (err) {
+                                                                _didIteratorError10 = true;
+                                                                _iteratorError10 = err;
+                                                        } finally {
+                                                                try {
+                                                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                                                                                _iterator10.return();
+                                                                        }
+                                                                } finally {
+                                                                        if (_didIteratorError10) {
+                                                                                throw _iteratorError10;
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                                return [];
+                                        };
+
+                                        var _node3 = form_to_json(_request);
+                                        // console.log('nooooooooooooooooooooooooooooode file', {node})
+                                        var _job3 = {
+                                                id: job_id.current,
+                                                operation: 'add',
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\Fichier',
+                                                data: _node3,
+                                                etat: 'waiting',
+                                                dependencies: _getDependencies(_node3.parent_id)
+
+                                        };
+
+                                        console.log('nooooooooooooooooooooooooooooode file', { node: _node3 });
+
+                                        _new_state2.push(_job3);
+
+                                        job_id.current = job_id.current + 1;
+
+                                        setDatasState({ type: 'add_files', job: _job3 });
+
+                                        return _new_state2;
+                                }
+                        case 'del_file':
+                                {
+                                        var _new_state3 = [].concat(_toConsumableArray(state));
+
+                                        var _id2 = action.id;
+
+                                        _new_state3 = _new_state3.filter(function (job) {
+                                                // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                return job.node_id !== _id2;
+                                        });
+
+                                        if (!(parseInt(_id2) < 0)) {
+                                                var _job5 = {
+                                                        id: job_id.current,
+                                                        operation: 'del',
+                                                        node_id: _id2,
+                                                        node_model: 'App\\Models\\Fichier',
+                                                        etat: 'waiting'
+
+                                                };
+
+                                                _new_state3.push(_job5);
+
+                                                job_id.current = job_id.current + 1;
+                                        }
+
+                                        setDatasState({ type: 'del_file', id: _id2 });
+
+                                        return _new_state3;
+                                }
+                        case 'add_audit':
+                                {
+                                        var _new_state4 = [].concat(_toConsumableArray(state));
+
+                                        var _request2 = action.request;
+
+                                        var _node4 = form_to_json(_request2);
+
+                                        var _job6 = {
+                                                id: job_id.current,
+                                                operation: 'add',
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\Audit',
+                                                data: _node4,
+                                                etat: 'waiting'
+
+                                        };
+                                        job_id.current = job_id.current + 1;
+                                        id.current = id.current - 1;
+
+                                        var checkList_job = {
+                                                id: job_id.current,
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\checkList',
+                                                data: {
+                                                        name: 'checkList',
+                                                        audit_id: _job6.node_id,
+                                                        sub_type: 'checkList',
+                                                        services: _job6.data.services,
+                                                        section_id: _job6.data.section_id
+                                                },
+                                                dependencies: [_job6.id],
+                                                etat: 'waiting'
+                                        };
+                                        job_id.current = job_id.current + 1;
+                                        id.current = id.current - 1;
+
+                                        var dp_job = {
+                                                id: job_id.current,
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\DossierPreuve',
+                                                data: {
+                                                        name: 'Dossier Preuve',
+                                                        audit_id: _job6.node_id,
+                                                        sub_type: 'dp',
+                                                        services: _job6.data.services,
+                                                        section_id: _job6.data.section_id
+                                                },
+                                                dependencies: [_job6.id],
+                                                etat: 'waiting'
+                                        };
+                                        job_id.current = job_id.current + 1;
+                                        id.current = id.current - 1;
+
+                                        var NC_job = {
+                                                id: job_id.current,
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\Nc',
+                                                data: {
+                                                        name: 'NC',
+                                                        audit_id: _job6.node_id,
+                                                        sub_type: 'nonC',
+                                                        services: _job6.data.services,
+                                                        section_id: _job6.data.section_id
+                                                },
+                                                dependencies: [_job6.id],
+                                                etat: 'waiting'
+                                        };
+                                        job_id.current = job_id.current + 1;
+                                        id.current = id.current - 1;
+
+                                        _new_state4.push(_job6, checkList_job, dp_job, NC_job);
+
+                                        setDatasState({ type: 'add_audit', jobs: [_job6, checkList_job, dp_job, NC_job] });
+
+                                        return _new_state4;
                                 }
                         case 'update':
                                 {
@@ -457,7 +776,11 @@ export default function useEditor(data) {
                                         switch (_context.prev = _context.next) {
                                                 case 0:
                                                         _context.next = 2;
-                                                        return http.post('handle_edit', request).then(function (res) {
+                                                        return http.post('handle_edit', request, {
+                                                                headers: {
+                                                                        'Content-Type': 'multipart/form-data'
+                                                                }
+                                                        }).then(function (res) {
                                                                 console.log(res);
                                                                 // toast.dismiss('Saving')
                                                         }).catch(function (err) {
@@ -501,6 +824,11 @@ export default function useEditor(data) {
 
                                                                         jobs.map(function (job) {
                                                                                 queryData.append("jobs[]", JSON.stringify(job));
+                                                                                if (job.node_model === 'App\\Models\\Fichier' && job.operation === 'add') {
+                                                                                        job.data.files.map(function (file) {
+                                                                                                queryData.append("job" + job.id + "_files[]", file);
+                                                                                        });
+                                                                                }
                                                                         });
 
                                                                         // console.log('jooooooooobs', queryData.get('jobs[]'))
@@ -567,6 +895,22 @@ export default function useEditor(data) {
                         },
                         delete: function _delete(id) {
                                 dispatch_job({ type: 'del_folder', id: id });
+                        }
+                },
+                files: {
+                        add: function add(request) {
+                                dispatch_job({ type: 'add_files', request: request });
+                        },
+                        delete: function _delete(id) {
+                                dispatch_job({ type: 'del_file', id: id });
+                        }
+                },
+                audit: {
+                        add: function add(request) {
+                                dispatch_job({ type: 'add_audit', request: request });
+                        },
+                        delete: function _delete(id) {
+                                dispatch_job({ type: 'del_audit', id: id });
                         }
                 }
 
