@@ -359,6 +359,31 @@ export default function useEditor(data)
 
                                 return JSON.parse(JSON.stringify(state))
                         }
+                        case 'del_audit':
+                        {
+
+                                const suppress_from_data = ( list_, id ) =>
+                                {
+                                        let rest = list_.filter(
+                                        node => ( node.id !== id )
+                                        )
+
+                                        for (const node of list_)
+                                        {
+                                                // console.log(id, node.parentId)
+                                                if( id === node.parentId ) rest = suppress_from_data(rest, node.id)
+                                        }
+
+                                        // console.log('resttttttttttttttttt', rest)
+                                        return rest
+                                }
+
+                                const newState = suppress_from_data(state, `audit${action.id}`)
+
+                                // console.log('new_staaaaaaaaaaaaate', newState)
+
+                                return JSON.parse(JSON.stringify(newState))
+                        }
                         case 'update':
                         {
 
@@ -642,6 +667,60 @@ export default function useEditor(data)
                                 setDatasState({type: 'add_audit', jobs: [ job, checkList_job, dp_job, NC_job ] })
 
                                 return new_state
+                        }
+                        case 'del_audit':
+                        {
+
+                                const id = action.id
+
+                                const supress_from_jobs =
+                                ( job_list, id ) =>
+                                {
+                                        let new_job_list = job_list.filter(
+                                                job =>
+                                                {
+                                                        // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                        return job.node_id !== id;
+                                                }
+                                        )
+
+                                        for (const job of new_job_list)
+                                        {
+                                                console.log(job, job.dependencies[0], id)
+                                                if (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                {
+                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                        new_job_list = supress_from_jobs(new_job_list, job.node_id)
+                                                }
+                                        }
+
+                                        return new_job_list
+                                }
+
+                                let new_state = supress_from_jobs([...state], id)
+
+                                if( ! (parseInt(id) < 0) )
+                                {
+                                        const job =
+                                        {
+                                                id: job_id.current,
+                                                operation: 'del',
+                                                node_id: id,
+                                                node_model: 'App\\Models\\Audit',
+                                                etat: 'waiting',
+
+                                        }
+
+                                        new_state.push(job)
+
+                                        job_id.current = job_id.current + 1
+
+                                }
+
+                                setDatasState({type: 'del_audit', id})
+
+                                return new_state
+
                         }
                         case 'update':
                         {

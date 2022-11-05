@@ -418,6 +418,51 @@ export default function useEditor(data) {
 
                                         return JSON.parse(JSON.stringify(state));
                                 }
+                        case 'del_audit':
+                                {
+
+                                        var suppress_from_data = function suppress_from_data(list_, id) {
+                                                var rest = list_.filter(function (node) {
+                                                        return node.id !== id;
+                                                });
+
+                                                var _iteratorNormalCompletion8 = true;
+                                                var _didIteratorError8 = false;
+                                                var _iteratorError8 = undefined;
+
+                                                try {
+                                                        for (var _iterator8 = list_[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                                                                var _node3 = _step8.value;
+
+                                                                // console.log(id, node.parentId)
+                                                                if (id === _node3.parentId) rest = suppress_from_data(rest, _node3.id);
+                                                        }
+
+                                                        // console.log('resttttttttttttttttt', rest)
+                                                } catch (err) {
+                                                        _didIteratorError8 = true;
+                                                        _iteratorError8 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                                                                        _iterator8.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError8) {
+                                                                        throw _iteratorError8;
+                                                                }
+                                                        }
+                                                }
+
+                                                return rest;
+                                        };
+
+                                        var _newState2 = suppress_from_data(state, "audit" + action.id);
+
+                                        // console.log('new_staaaaaaaaaaaaate', newState)
+
+                                        return JSON.parse(JSON.stringify(_newState2));
+                                }
                         case 'update':
                                 {
 
@@ -437,28 +482,28 @@ export default function useEditor(data) {
         function jobs_reducer(state, action) {
 
                 var getJob = function getJob(id) {
-                        var _iteratorNormalCompletion8 = true;
-                        var _didIteratorError8 = false;
-                        var _iteratorError8 = undefined;
+                        var _iteratorNormalCompletion9 = true;
+                        var _didIteratorError9 = false;
+                        var _iteratorError9 = undefined;
 
                         try {
-                                for (var _iterator8 = state[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                                        var job = _step8.value;
+                                for (var _iterator9 = state[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                                        var job = _step9.value;
 
                                         console.log('searching joooooooooob', job.id, id);
                                         if (job.id === id) return job;
                                 }
                         } catch (err) {
-                                _didIteratorError8 = true;
-                                _iteratorError8 = err;
+                                _didIteratorError9 = true;
+                                _iteratorError9 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion8 && _iterator8.return) {
-                                                _iterator8.return();
+                                        if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                                                _iterator9.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError8) {
-                                                throw _iteratorError8;
+                                        if (_didIteratorError9) {
+                                                throw _iteratorError9;
                                         }
                                 }
                         }
@@ -480,27 +525,27 @@ export default function useEditor(data) {
 
                                         var getDependencies = function getDependencies(parent_id) {
                                                 if (parseInt(parent_id) < 0) {
-                                                        var _iteratorNormalCompletion9 = true;
-                                                        var _didIteratorError9 = false;
-                                                        var _iteratorError9 = undefined;
+                                                        var _iteratorNormalCompletion10 = true;
+                                                        var _didIteratorError10 = false;
+                                                        var _iteratorError10 = undefined;
 
                                                         try {
-                                                                for (var _iterator9 = state[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                                                                        var _job = _step9.value;
+                                                                for (var _iterator10 = state[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                                                                        var _job = _step10.value;
 
                                                                         if (_job.node_id === parseInt(parent_id)) return [_job.id];
                                                                 }
                                                         } catch (err) {
-                                                                _didIteratorError9 = true;
-                                                                _iteratorError9 = err;
+                                                                _didIteratorError10 = true;
+                                                                _iteratorError10 = err;
                                                         } finally {
                                                                 try {
-                                                                        if (!_iteratorNormalCompletion9 && _iterator9.return) {
-                                                                                _iterator9.return();
+                                                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                                                                                _iterator10.return();
                                                                         }
                                                                 } finally {
-                                                                        if (_didIteratorError9) {
-                                                                                throw _iteratorError9;
+                                                                        if (_didIteratorError10) {
+                                                                                throw _iteratorError10;
                                                                         }
                                                                 }
                                                         }
@@ -573,27 +618,27 @@ export default function useEditor(data) {
 
                                         var _getDependencies = function _getDependencies(parent_id) {
                                                 if (parseInt(parent_id) < 0) {
-                                                        var _iteratorNormalCompletion10 = true;
-                                                        var _didIteratorError10 = false;
-                                                        var _iteratorError10 = undefined;
+                                                        var _iteratorNormalCompletion11 = true;
+                                                        var _didIteratorError11 = false;
+                                                        var _iteratorError11 = undefined;
 
                                                         try {
-                                                                for (var _iterator10 = state[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-                                                                        var _job4 = _step10.value;
+                                                                for (var _iterator11 = state[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                                                                        var _job4 = _step11.value;
 
                                                                         if (_job4.node_id === parseInt(parent_id)) return [_job4.id];
                                                                 }
                                                         } catch (err) {
-                                                                _didIteratorError10 = true;
-                                                                _iteratorError10 = err;
+                                                                _didIteratorError11 = true;
+                                                                _iteratorError11 = err;
                                                         } finally {
                                                                 try {
-                                                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
-                                                                                _iterator10.return();
+                                                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                                                                                _iterator11.return();
                                                                         }
                                                                 } finally {
-                                                                        if (_didIteratorError10) {
-                                                                                throw _iteratorError10;
+                                                                        if (_didIteratorError11) {
+                                                                                throw _iteratorError11;
                                                                         }
                                                                 }
                                                         }
@@ -601,20 +646,20 @@ export default function useEditor(data) {
                                                 return [];
                                         };
 
-                                        var _node3 = form_to_json(_request);
+                                        var _node4 = form_to_json(_request);
                                         // console.log('nooooooooooooooooooooooooooooode file', {node})
                                         var _job3 = {
                                                 id: job_id.current,
                                                 operation: 'add',
                                                 node_id: id.current,
                                                 node_model: 'App\\Models\\Fichier',
-                                                data: _node3,
+                                                data: _node4,
                                                 etat: 'waiting',
-                                                dependencies: _getDependencies(_node3.parent_id)
+                                                dependencies: _getDependencies(_node4.parent_id)
 
                                         };
 
-                                        console.log('nooooooooooooooooooooooooooooode file', { node: _node3 });
+                                        console.log('nooooooooooooooooooooooooooooode file', { node: _node4 });
 
                                         _new_state2.push(_job3);
 
@@ -660,14 +705,14 @@ export default function useEditor(data) {
 
                                         var _request2 = action.request;
 
-                                        var _node4 = form_to_json(_request2);
+                                        var _node5 = form_to_json(_request2);
 
                                         var _job6 = {
                                                 id: job_id.current,
                                                 operation: 'add',
                                                 node_id: id.current,
                                                 node_model: 'App\\Models\\Audit',
-                                                data: _node4,
+                                                data: _node5,
                                                 etat: 'waiting'
 
                                         };
@@ -730,6 +775,70 @@ export default function useEditor(data) {
                                         setDatasState({ type: 'add_audit', jobs: [_job6, checkList_job, dp_job, NC_job] });
 
                                         return _new_state4;
+                                }
+                        case 'del_audit':
+                                {
+
+                                        var _id3 = action.id;
+
+                                        var supress_from_jobs = function supress_from_jobs(job_list, id) {
+                                                var new_job_list = job_list.filter(function (job) {
+                                                        // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                        return job.node_id !== id;
+                                                });
+
+                                                var _iteratorNormalCompletion12 = true;
+                                                var _didIteratorError12 = false;
+                                                var _iteratorError12 = undefined;
+
+                                                try {
+                                                        for (var _iterator12 = new_job_list[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+                                                                var _job7 = _step12.value;
+
+                                                                console.log(_job7, _job7.dependencies[0], id);
+                                                                if (Array.isArray(_job7.dependencies) && getJob(_job7.dependencies[0]).node_id === id) {
+                                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                                        new_job_list = supress_from_jobs(new_job_list, _job7.node_id);
+                                                                }
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError12 = true;
+                                                        _iteratorError12 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion12 && _iterator12.return) {
+                                                                        _iterator12.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError12) {
+                                                                        throw _iteratorError12;
+                                                                }
+                                                        }
+                                                }
+
+                                                return new_job_list;
+                                        };
+
+                                        var _new_state5 = supress_from_jobs([].concat(_toConsumableArray(state)), _id3);
+
+                                        if (!(parseInt(_id3) < 0)) {
+                                                var _job8 = {
+                                                        id: job_id.current,
+                                                        operation: 'del',
+                                                        node_id: _id3,
+                                                        node_model: 'App\\Models\\Audit',
+                                                        etat: 'waiting'
+
+                                                };
+
+                                                _new_state5.push(_job8);
+
+                                                job_id.current = job_id.current + 1;
+                                        }
+
+                                        setDatasState({ type: 'del_audit', id: _id3 });
+
+                                        return _new_state5;
                                 }
                         case 'update':
                                 {
