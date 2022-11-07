@@ -556,7 +556,7 @@ export default function useEditor(data)
 
                                         for (const job of new_job_list)
                                         {
-                                                console.log(job, job.dependencies[0], id)
+                                                // console.log(job, job.dependencies[0], id)
                                                 if (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
                                                 {
                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
@@ -764,7 +764,7 @@ export default function useEditor(data)
 
                                         for (const job of new_job_list)
                                         {
-                                                console.log(job, job.dependencies[0], id)
+                                                // console.log(job, job.dependencies[0], id)
                                                 if (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
                                                 {
                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)

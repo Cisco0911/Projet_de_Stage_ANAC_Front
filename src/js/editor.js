@@ -670,7 +670,7 @@ export default function useEditor(data) {
                                                         for (var _iterator12 = new_job_list[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
                                                                 var _job = _step12.value;
 
-                                                                console.log(_job, _job.dependencies[0], id);
+                                                                // console.log(job, job.dependencies[0], id)
                                                                 if (Array.isArray(_job.dependencies) && getJob(_job.dependencies[0]).node_id === id) {
                                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
                                                                         new_job_list = supress_from_jobs(new_job_list, _job.node_id);
@@ -871,7 +871,7 @@ export default function useEditor(data) {
                                                         for (var _iterator13 = new_job_list[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
                                                                 var _job6 = _step13.value;
 
-                                                                console.log(_job6, _job6.dependencies[0], id);
+                                                                // console.log(job, job.dependencies[0], id)
                                                                 if (Array.isArray(_job6.dependencies) && getJob(_job6.dependencies[0]).node_id === id) {
                                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
                                                                         new_job_list = _supress_from_jobs(new_job_list, _job6.node_id);
