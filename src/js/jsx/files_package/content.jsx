@@ -808,6 +808,7 @@ export default function FileTable({set}) {
                                     // console.log(res)
                                     Global_State.modalManager.setContent(<FNCs_form/>)
                                 }
+                                else console.log(res)
                             })
                         
                             // Catch errors if any
@@ -826,7 +827,12 @@ export default function FileTable({set}) {
                     }
                     else
                     {
-                        console.log('editorHandle')
+                            console.log('editorHandle fnc')
+
+                            queryBody.set('front_parent_type', node.type)
+                            Global_State.editor.fnc.add(queryBody)
+
+                            Global_State.modalManager.close_modal()
                     }
 
                     // console.log(queryBody.get("name"))
@@ -1213,9 +1219,9 @@ export default function FileTable({set}) {
         
         const [ id, type ] = Global_State.identifyNode(node)
 
-        if (node.global_type === "folder") buttons.push( [ <i key={"add_folder"} className="dropdown-item" onClick={() => {add("add_folder")}} >Nouveau Dossier</i>, <i key={"add_files"} className="dropdown-item" onClick={() => {add("add_files")}} >Ajouter des fichiers</i> ] )
-        if (node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(Global_State.getCurrentSection().name) ) buttons.push(<i key={"add_audit"} className="dropdown-item" onClick={() => {add("add_audit")}} >Nouvel Audit</i>)
-        if (node.type === "nonC") buttons.push(<i key={"add_fncs"} className="dropdown-item" onClick={() => {add("add_fncs")}} >Générer des Non-Conformités</i>)
+        if (node.global_type === "folder") buttons.push( [ <option key={"add_folder"} className="dropdown-item" onClick={() => {add("add_folder")}} >Nouveau Dossier</option>, <option key={"add_files"} className="dropdown-item" onClick={() => {add("add_files")}} >Ajouter des fichiers</option> ] )
+        if (node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(Global_State.getCurrentSection().name) ) buttons.push(<option key={"add_audit"} className="dropdown-item" onClick={() => {add("add_audit")}} >Nouvel Audit</option>)
+        if (node.type === "nonC") buttons.push(<option key={"add_fncs"} className="dropdown-item" disabled = { false }  onClick={() => {add("add_fncs")}} >Générer des Non-Conformités</option>)
        
         return(
             <div className="d-md-flex justify-content-between mb-4">
@@ -1387,6 +1393,7 @@ export default function FileTable({set}) {
                                                     case 'fnc':
 
                                                             console.log('fnc dispatch del')
+                                                            Global_State.editor.fnc.delete(nodeIdentity[0])
 
                                                             break;
                                                     case 'ds':
@@ -1633,7 +1640,7 @@ export default function FileTable({set}) {
         {
             // const [niv, setNiv] = useState(level)
 
-            const level = data.level
+            const level = parseInt(data.level)
 
             const nextNiv = currentNiv =>
             {
@@ -1647,7 +1654,6 @@ export default function FileTable({set}) {
                 
                     default:
                         return 0
-                        break;
                 }
             }
 

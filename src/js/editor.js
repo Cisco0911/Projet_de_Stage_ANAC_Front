@@ -463,6 +463,77 @@ export default function useEditor(data) {
 
                                         return JSON.parse(JSON.stringify(_newState2));
                                 }
+                        case 'add_fncs':
+                                {
+
+                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder');
+
+                                        var _data4 = action.job.data;
+
+                                        var _ref = [parseInt(_data4.debut), parseInt(_data4.fin)],
+                                            debut = _ref[0],
+                                            fin = _ref[1];
+
+
+                                        var audit = Global_State.getNodeDataById(Global_State.getNodeDataById("nonC" + _data4.nonC_id).parentId);
+
+                                        for (var i = debut; i < fin + 1; i++) {
+                                                var new_fnc = Global_State.createNodeData("fnc" + id.current, "folder", getService(_data4.services), false, "FNC-" + audit.name + "-" + i, "fnc", false, "nonC" + _data4.nonC_id, "", true, undefined, undefined, false, 'pas encore créé', _data4.level, parseInt(audit.section_id), undefined, undefined);
+                                                new_fnc['onEdit'] = true;
+                                                new_fnc['access_key'] = { job_id: action.job.id, num: i };
+
+                                                state.push(new_fnc);
+
+                                                id.current = id.current - 1;
+                                        }
+
+                                        return JSON.parse(JSON.stringify(state));
+                                }
+                        case 'del_fnc':
+                                {
+
+                                        var _suppress_from2 = function _suppress_from2(list_, id) {
+                                                var rest = list_.filter(function (node) {
+                                                        return node.id !== id;
+                                                });
+
+                                                var _iteratorNormalCompletion9 = true;
+                                                var _didIteratorError9 = false;
+                                                var _iteratorError9 = undefined;
+
+                                                try {
+                                                        for (var _iterator9 = list_[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                                                                var _node4 = _step9.value;
+
+                                                                // console.log(id, node.parentId)
+                                                                if (id === _node4.parentId) rest = _suppress_from2(rest, _node4.id);
+                                                        }
+
+                                                        // console.log('resttttttttttttttttt', rest)
+                                                } catch (err) {
+                                                        _didIteratorError9 = true;
+                                                        _iteratorError9 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                                                                        _iterator9.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError9) {
+                                                                        throw _iteratorError9;
+                                                                }
+                                                        }
+                                                }
+
+                                                return rest;
+                                        };
+
+                                        var _newState3 = _suppress_from2(state, "fnc" + action.id);
+
+                                        // console.log('new_staaaaaaaaaaaaate', newState)
+
+                                        return JSON.parse(JSON.stringify(_newState3));
+                                }
                         case 'update':
                                 {
 
@@ -482,33 +553,69 @@ export default function useEditor(data) {
         function jobs_reducer(state, action) {
 
                 var getJob = function getJob(id) {
-                        var _iteratorNormalCompletion9 = true;
-                        var _didIteratorError9 = false;
-                        var _iteratorError9 = undefined;
+                        var _iteratorNormalCompletion10 = true;
+                        var _didIteratorError10 = false;
+                        var _iteratorError10 = undefined;
 
                         try {
-                                for (var _iterator9 = state[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                                        var job = _step9.value;
+                                for (var _iterator10 = state[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                                        var job = _step10.value;
 
                                         console.log('searching joooooooooob', job.id, id);
                                         if (job.id === id) return job;
                                 }
                         } catch (err) {
-                                _didIteratorError9 = true;
-                                _iteratorError9 = err;
+                                _didIteratorError10 = true;
+                                _iteratorError10 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion9 && _iterator9.return) {
-                                                _iterator9.return();
+                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                                                _iterator10.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError9) {
-                                                throw _iteratorError9;
+                                        if (_didIteratorError10) {
+                                                throw _iteratorError10;
                                         }
                                 }
                         }
 
                         return {};
+                };
+
+                var getDependencies = function getDependencies(parent_id, parent_type) {
+                        if (parseInt(parent_id) < 0) {
+                                if (parent_type === 'App\\Models\\NonConformite') {
+                                        var fnc = Global_State.getNodeDataById("fnc" + parent_id);
+
+                                        return [fnc.access_key];
+                                } else {
+                                        var _iteratorNormalCompletion11 = true;
+                                        var _didIteratorError11 = false;
+                                        var _iteratorError11 = undefined;
+
+                                        try {
+                                                for (var _iterator11 = state[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                                                        var job = _step11.value;
+
+                                                        if (job.node_id === parseInt(parent_id)) return [job.id];
+                                                }
+                                        } catch (err) {
+                                                _didIteratorError11 = true;
+                                                _iteratorError11 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                                                                _iterator11.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError11) {
+                                                                throw _iteratorError11;
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                        return [];
                 };
 
                 switch (action.type) {
@@ -523,36 +630,6 @@ export default function useEditor(data) {
 
                                         var request = action.request;
 
-                                        var getDependencies = function getDependencies(parent_id) {
-                                                if (parseInt(parent_id) < 0) {
-                                                        var _iteratorNormalCompletion10 = true;
-                                                        var _didIteratorError10 = false;
-                                                        var _iteratorError10 = undefined;
-
-                                                        try {
-                                                                for (var _iterator10 = state[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-                                                                        var _job = _step10.value;
-
-                                                                        if (_job.node_id === parseInt(parent_id)) return [_job.id];
-                                                                }
-                                                        } catch (err) {
-                                                                _didIteratorError10 = true;
-                                                                _iteratorError10 = err;
-                                                        } finally {
-                                                                try {
-                                                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
-                                                                                _iterator10.return();
-                                                                        }
-                                                                } finally {
-                                                                        if (_didIteratorError10) {
-                                                                                throw _iteratorError10;
-                                                                        }
-                                                                }
-                                                        }
-                                                }
-                                                return [];
-                                        };
-
                                         var node = form_to_json(request);
                                         var job = {
                                                 id: job_id.current,
@@ -561,7 +638,7 @@ export default function useEditor(data) {
                                                 node_model: 'App\\Models\\DossierSimple',
                                                 data: node,
                                                 etat: 'waiting',
-                                                dependencies: getDependencies(node.parent_id)
+                                                dependencies: getDependencies(node.parent_id, node.parent_type)
 
                                         };
 
@@ -575,21 +652,49 @@ export default function useEditor(data) {
                                 }
                         case 'del_folder':
                                 {
-                                        var _new_state = [].concat(_toConsumableArray(state));
 
                                         var _id = action.id;
 
-                                        _new_state = _new_state.filter(function (job) {
-                                                // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
-                                                if (job.node_id === _id) return false;
+                                        var supress_from_jobs = function supress_from_jobs(job_list, id) {
+                                                var new_job_list = job_list.filter(function (job) {
+                                                        // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                        if ("" + job.data.front_parent_type + job.data.parent_id === "ds" + id) return false;
+                                                        return job.node_id !== id;
+                                                });
 
-                                                if (Array.isArray(job.dependencies)) {
-                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
-                                                        return getJob(job.dependencies[0]).node_id !== _id;
+                                                var _iteratorNormalCompletion12 = true;
+                                                var _didIteratorError12 = false;
+                                                var _iteratorError12 = undefined;
+
+                                                try {
+                                                        for (var _iterator12 = new_job_list[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+                                                                var _job = _step12.value;
+
+                                                                console.log(_job, _job.dependencies[0], id);
+                                                                if (Array.isArray(_job.dependencies) && getJob(_job.dependencies[0]).node_id === id) {
+                                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                                        new_job_list = supress_from_jobs(new_job_list, _job.node_id);
+                                                                }
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError12 = true;
+                                                        _iteratorError12 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion12 && _iterator12.return) {
+                                                                        _iterator12.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError12) {
+                                                                        throw _iteratorError12;
+                                                                }
+                                                        }
                                                 }
 
-                                                return true;
-                                        });
+                                                return new_job_list;
+                                        };
+
+                                        var _new_state = supress_from_jobs([].concat(_toConsumableArray(state)), _id);
 
                                         if (!(parseInt(_id) < 0)) {
                                                 var _job2 = {
@@ -616,50 +721,20 @@ export default function useEditor(data) {
 
                                         var _request = action.request;
 
-                                        var _getDependencies = function _getDependencies(parent_id) {
-                                                if (parseInt(parent_id) < 0) {
-                                                        var _iteratorNormalCompletion11 = true;
-                                                        var _didIteratorError11 = false;
-                                                        var _iteratorError11 = undefined;
-
-                                                        try {
-                                                                for (var _iterator11 = state[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-                                                                        var _job4 = _step11.value;
-
-                                                                        if (_job4.node_id === parseInt(parent_id)) return [_job4.id];
-                                                                }
-                                                        } catch (err) {
-                                                                _didIteratorError11 = true;
-                                                                _iteratorError11 = err;
-                                                        } finally {
-                                                                try {
-                                                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
-                                                                                _iterator11.return();
-                                                                        }
-                                                                } finally {
-                                                                        if (_didIteratorError11) {
-                                                                                throw _iteratorError11;
-                                                                        }
-                                                                }
-                                                        }
-                                                }
-                                                return [];
-                                        };
-
-                                        var _node4 = form_to_json(_request);
+                                        var _node5 = form_to_json(_request);
                                         // console.log('nooooooooooooooooooooooooooooode file', {node})
                                         var _job3 = {
                                                 id: job_id.current,
                                                 operation: 'add',
                                                 node_id: id.current,
                                                 node_model: 'App\\Models\\Fichier',
-                                                data: _node4,
+                                                data: _node5,
                                                 etat: 'waiting',
-                                                dependencies: _getDependencies(_node4.parent_id)
+                                                dependencies: getDependencies(_node5.parent_id, _node5.parent_type)
 
                                         };
 
-                                        console.log('nooooooooooooooooooooooooooooode file', { node: _node4 });
+                                        console.log('nooooooooooooooooooooooooooooode file', { node: _node5 });
 
                                         _new_state2.push(_job3);
 
@@ -681,7 +756,7 @@ export default function useEditor(data) {
                                         });
 
                                         if (!(parseInt(_id2) < 0)) {
-                                                var _job5 = {
+                                                var _job4 = {
                                                         id: job_id.current,
                                                         operation: 'del',
                                                         node_id: _id2,
@@ -690,7 +765,7 @@ export default function useEditor(data) {
 
                                                 };
 
-                                                _new_state3.push(_job5);
+                                                _new_state3.push(_job4);
 
                                                 job_id.current = job_id.current + 1;
                                         }
@@ -705,14 +780,14 @@ export default function useEditor(data) {
 
                                         var _request2 = action.request;
 
-                                        var _node5 = form_to_json(_request2);
+                                        var _node6 = form_to_json(_request2);
 
-                                        var _job6 = {
+                                        var _job5 = {
                                                 id: job_id.current,
                                                 operation: 'add',
                                                 node_id: id.current,
                                                 node_model: 'App\\Models\\Audit',
-                                                data: _node5,
+                                                data: _node6,
                                                 etat: 'waiting'
 
                                         };
@@ -725,12 +800,12 @@ export default function useEditor(data) {
                                                 node_model: 'App\\Models\\checkList',
                                                 data: {
                                                         name: 'checkList',
-                                                        audit_id: _job6.node_id,
+                                                        audit_id: _job5.node_id,
                                                         sub_type: 'checkList',
-                                                        services: _job6.data.services,
-                                                        section_id: _job6.data.section_id
+                                                        services: _job5.data.services,
+                                                        section_id: _job5.data.section_id
                                                 },
-                                                dependencies: [_job6.id],
+                                                dependencies: [_job5.id],
                                                 etat: 'waiting'
                                         };
                                         job_id.current = job_id.current + 1;
@@ -742,12 +817,12 @@ export default function useEditor(data) {
                                                 node_model: 'App\\Models\\DossierPreuve',
                                                 data: {
                                                         name: 'Dossier Preuve',
-                                                        audit_id: _job6.node_id,
+                                                        audit_id: _job5.node_id,
                                                         sub_type: 'dp',
-                                                        services: _job6.data.services,
-                                                        section_id: _job6.data.section_id
+                                                        services: _job5.data.services,
+                                                        section_id: _job5.data.section_id
                                                 },
-                                                dependencies: [_job6.id],
+                                                dependencies: [_job5.id],
                                                 etat: 'waiting'
                                         };
                                         job_id.current = job_id.current + 1;
@@ -759,20 +834,20 @@ export default function useEditor(data) {
                                                 node_model: 'App\\Models\\Nc',
                                                 data: {
                                                         name: 'NC',
-                                                        audit_id: _job6.node_id,
+                                                        audit_id: _job5.node_id,
                                                         sub_type: 'nonC',
-                                                        services: _job6.data.services,
-                                                        section_id: _job6.data.section_id
+                                                        services: _job5.data.services,
+                                                        section_id: _job5.data.section_id
                                                 },
-                                                dependencies: [_job6.id],
+                                                dependencies: [_job5.id],
                                                 etat: 'waiting'
                                         };
                                         job_id.current = job_id.current + 1;
                                         id.current = id.current - 1;
 
-                                        _new_state4.push(_job6, checkList_job, dp_job, NC_job);
+                                        _new_state4.push(_job5, checkList_job, dp_job, NC_job);
 
-                                        setDatasState({ type: 'add_audit', jobs: [_job6, checkList_job, dp_job, NC_job] });
+                                        setDatasState({ type: 'add_audit', jobs: [_job5, checkList_job, dp_job, NC_job] });
 
                                         return _new_state4;
                                 }
@@ -781,37 +856,38 @@ export default function useEditor(data) {
 
                                         var _id3 = action.id;
 
-                                        var supress_from_jobs = function supress_from_jobs(job_list, id) {
+                                        var _supress_from_jobs = function _supress_from_jobs(job_list, id) {
                                                 var new_job_list = job_list.filter(function (job) {
                                                         // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                        if ("" + job.data.front_parent_type + job.data.parent_id === "audit" + id) return false;
                                                         return job.node_id !== id;
                                                 });
 
-                                                var _iteratorNormalCompletion12 = true;
-                                                var _didIteratorError12 = false;
-                                                var _iteratorError12 = undefined;
+                                                var _iteratorNormalCompletion13 = true;
+                                                var _didIteratorError13 = false;
+                                                var _iteratorError13 = undefined;
 
                                                 try {
-                                                        for (var _iterator12 = new_job_list[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-                                                                var _job7 = _step12.value;
+                                                        for (var _iterator13 = new_job_list[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+                                                                var _job6 = _step13.value;
 
-                                                                console.log(_job7, _job7.dependencies[0], id);
-                                                                if (Array.isArray(_job7.dependencies) && getJob(_job7.dependencies[0]).node_id === id) {
+                                                                console.log(_job6, _job6.dependencies[0], id);
+                                                                if (Array.isArray(_job6.dependencies) && getJob(_job6.dependencies[0]).node_id === id) {
                                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
-                                                                        new_job_list = supress_from_jobs(new_job_list, _job7.node_id);
+                                                                        new_job_list = _supress_from_jobs(new_job_list, _job6.node_id);
                                                                 }
                                                         }
                                                 } catch (err) {
-                                                        _didIteratorError12 = true;
-                                                        _iteratorError12 = err;
+                                                        _didIteratorError13 = true;
+                                                        _iteratorError13 = err;
                                                 } finally {
                                                         try {
-                                                                if (!_iteratorNormalCompletion12 && _iterator12.return) {
-                                                                        _iterator12.return();
+                                                                if (!_iteratorNormalCompletion13 && _iterator13.return) {
+                                                                        _iterator13.return();
                                                                 }
                                                         } finally {
-                                                                if (_didIteratorError12) {
-                                                                        throw _iteratorError12;
+                                                                if (_didIteratorError13) {
+                                                                        throw _iteratorError13;
                                                                 }
                                                         }
                                                 }
@@ -819,10 +895,10 @@ export default function useEditor(data) {
                                                 return new_job_list;
                                         };
 
-                                        var _new_state5 = supress_from_jobs([].concat(_toConsumableArray(state)), _id3);
+                                        var _new_state5 = _supress_from_jobs([].concat(_toConsumableArray(state)), _id3);
 
                                         if (!(parseInt(_id3) < 0)) {
-                                                var _job8 = {
+                                                var _job7 = {
                                                         id: job_id.current,
                                                         operation: 'del',
                                                         node_id: _id3,
@@ -831,7 +907,7 @@ export default function useEditor(data) {
 
                                                 };
 
-                                                _new_state5.push(_job8);
+                                                _new_state5.push(_job7);
 
                                                 job_id.current = job_id.current + 1;
                                         }
@@ -839,6 +915,95 @@ export default function useEditor(data) {
                                         setDatasState({ type: 'del_audit', id: _id3 });
 
                                         return _new_state5;
+                                }
+                        case 'add_fncs':
+                                {
+                                        var _new_state6 = [].concat(_toConsumableArray(state));
+
+                                        var _request3 = action.request;
+
+                                        var _node7 = form_to_json(_request3);
+                                        var _job8 = {
+                                                id: job_id.current,
+                                                operation: 'add',
+                                                // node_id: id.current,
+                                                node_model: 'App\\Models\\NonConformite',
+                                                data: _node7,
+                                                etat: 'waiting',
+                                                dependencies: getDependencies(_node7.nonC_id, 'App\\Models\\Nc')
+
+                                        };
+
+                                        _new_state6.push(_job8);
+
+                                        job_id.current = job_id.current + 1;
+
+                                        setDatasState({ type: 'add_fncs', job: _job8 });
+
+                                        return _new_state6;
+                                }
+                        case 'del_fnc':
+                                {
+
+                                        var _id4 = action.id;
+
+                                        var _supress_from_jobs2 = function _supress_from_jobs2(job_list, id) {
+                                                var new_job_list = job_list.filter(function (job) {
+                                                        // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                        if (job.data !== undefined && "" + job.data.front_parent_type + job.data.parent_id === "fnc" + id) return false;
+                                                        return job.node_id !== id;
+                                                });
+
+                                                var _iteratorNormalCompletion14 = true;
+                                                var _didIteratorError14 = false;
+                                                var _iteratorError14 = undefined;
+
+                                                try {
+                                                        for (var _iterator14 = new_job_list[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+                                                                var _job10 = _step14.value;
+
+                                                                // console.log(job, job.dependencies[0], id)
+                                                                if (Array.isArray(_job10.dependencies) && getJob(_job10.dependencies[0]).node_id === id) {
+                                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                                        new_job_list = _supress_from_jobs2(new_job_list, _job10.node_id);
+                                                                }
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError14 = true;
+                                                        _iteratorError14 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion14 && _iterator14.return) {
+                                                                        _iterator14.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError14) {
+                                                                        throw _iteratorError14;
+                                                                }
+                                                        }
+                                                }
+
+                                                return new_job_list;
+                                        };
+
+                                        var _new_state7 = _supress_from_jobs2([].concat(_toConsumableArray(state)), _id4);
+
+                                        var _job9 = {
+                                                id: job_id.current,
+                                                operation: 'del',
+                                                node_id: _id4,
+                                                node_model: 'App\\Models\\NonConformite',
+                                                etat: 'waiting'
+
+                                        };
+
+                                        _new_state7.push(_job9);
+
+                                        job_id.current = job_id.current + 1;
+
+                                        setDatasState({ type: 'del_fnc', id: _id4 });
+
+                                        return _new_state7;
                                 }
                         case 'update':
                                 {
@@ -879,7 +1044,7 @@ export default function useEditor(data) {
         };
 
         var save = function () {
-                var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(request) {
+                var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(request) {
                         return _regeneratorRuntime.wrap(function _callee$(_context) {
                                 while (1) {
                                         switch (_context.prev = _context.next) {
@@ -905,7 +1070,7 @@ export default function useEditor(data) {
                 }));
 
                 return function save(_x) {
-                        return _ref.apply(this, arguments);
+                        return _ref2.apply(this, arguments);
                 };
         }();
 
@@ -949,7 +1114,7 @@ export default function useEditor(data) {
                                                                                 success: 'Processus achevé',
                                                                                 error: 'err'
                                                                         }, {
-                                                                                // id: 'Saving',
+                                                                                id: 'Saving'
                                                                                 // duration: Infinity
                                                                         });
                                                                 } },
@@ -1020,6 +1185,14 @@ export default function useEditor(data) {
                         },
                         delete: function _delete(id) {
                                 dispatch_job({ type: 'del_audit', id: id });
+                        }
+                },
+                fnc: {
+                        add: function add(request) {
+                                dispatch_job({ type: 'add_fncs', request: request });
+                        },
+                        delete: function _delete(id) {
+                                dispatch_job({ type: 'del_fnc', id: id });
                         }
                 }
 

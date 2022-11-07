@@ -935,7 +935,7 @@ export default function FileTable(_ref3) {
                                 });
                                 // console.log(res)
                                 Global_State.modalManager.setContent(React.createElement(FNCs_form, null));
-                            }
+                            } else console.log(res);
                         })
 
                         // Catch errors if any
@@ -951,7 +951,12 @@ export default function FileTable(_ref3) {
                             Global_State.modalManager.setContent(React.createElement(FNCs_form, null));
                         });
                     } else {
-                        console.log('editorHandle');
+                        console.log('editorHandle fnc');
+
+                        queryBody.set('front_parent_type', node.type);
+                        Global_State.editor.fnc.add(queryBody);
+
+                        Global_State.modalManager.close_modal();
                     }
 
                     // console.log(queryBody.get("name"))
@@ -1394,28 +1399,28 @@ export default function FileTable(_ref3) {
             type = _Global_State$identif6[1];
 
         if (node.global_type === "folder") buttons.push([React.createElement(
-            'i',
+            'option',
             { key: "add_folder", className: 'dropdown-item', onClick: function onClick() {
                     add("add_folder");
                 } },
             'Nouveau Dossier'
         ), React.createElement(
-            'i',
+            'option',
             { key: "add_files", className: 'dropdown-item', onClick: function onClick() {
                     add("add_files");
                 } },
             'Ajouter des fichiers'
         )]);
         if (node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(Global_State.getCurrentSection().name)) buttons.push(React.createElement(
-            'i',
+            'option',
             { key: "add_audit", className: 'dropdown-item', onClick: function onClick() {
                     add("add_audit");
                 } },
             'Nouvel Audit'
         ));
         if (node.type === "nonC") buttons.push(React.createElement(
-            'i',
-            { key: "add_fncs", className: 'dropdown-item', onClick: function onClick() {
+            'option',
+            { key: "add_fncs", className: 'dropdown-item', disabled: false, onClick: function onClick() {
                     add("add_fncs");
                 } },
             'G\xE9n\xE9rer des Non-Conformit\xE9s'
@@ -1637,6 +1642,7 @@ export default function FileTable(_ref3) {
                                                 case 'fnc':
 
                                                     console.log('fnc dispatch del');
+                                                    Global_State.editor.fnc.delete(nodeIdentity[0]);
 
                                                     break;
                                                 case 'ds':
@@ -1914,7 +1920,7 @@ export default function FileTable(_ref3) {
 
             // const [niv, setNiv] = useState(level)
 
-            var level = data.level;
+            var level = parseInt(data.level);
 
             var nextNiv = function nextNiv(currentNiv) {
                 switch (currentNiv) {
@@ -1927,7 +1933,6 @@ export default function FileTable(_ref3) {
 
                     default:
                         return 0;
-                        break;
                 }
             };
 

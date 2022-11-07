@@ -276,7 +276,7 @@ export default function useGetData(TheDatas)
                                         console.log('emitting echo')
                                         console.log(data)
                                         const ids = new FormData
-                                        data.node.forEach(element => {
+                                        data.node.map(element => {
                                                 console.log(element)
                                                 ids.append('ids[]', element)
                                         });
@@ -1016,7 +1016,7 @@ export default function useGetData(TheDatas)
         // useEffect(
         //   () =>
         //   {
-        //     console.log('emiiiiiiiiiiiiiiiiiiiiiiiiit')
+        //     console.log('emiiiiiiiiiiiiiiiiiiiiiiiiit' false
         //     EventsManager.emit('updateData')
         //   }, [FetchedNodesData]
         // )
