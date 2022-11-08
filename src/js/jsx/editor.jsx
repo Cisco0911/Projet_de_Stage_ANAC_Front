@@ -454,10 +454,35 @@ export default function useEditor(data)
 
                                 return JSON.parse(JSON.stringify(newState))
                         }
-                        case 'update':
+                        case 'update_fnc':
                         {
 
-                                return JSON.parse(JSON.stringify(state))
+                                console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
+
+                                const data = action.job.data
+
+                                // for (let node of state)
+                                // {
+                                //        if (node.id === `fnc${data.id}`)
+                                //        {
+                                //
+                                //        }
+                                // }
+
+                                return JSON.parse(JSON.stringify(
+                                        state.map(
+                                                node =>
+                                                {
+                                                        if (node.id === `fnc${data.id}`)
+                                                        {
+                                                                node[data.update_object] = data.new_value
+                                                        }
+
+                                                        return node
+                                                }
+
+                                        )
+                                ))
                         }
 
                         default:
@@ -470,15 +495,28 @@ export default function useEditor(data)
         function jobs_reducer( state, action )
         {
 
-                const getJob = id =>
+                const getJob = key =>
                 {
-                        for (const job of state)
+                        try
                         {
-                                console.log('searching joooooooooob', job.id, id)
-                                if( job.id === id ) return job
-                        }
+                                for (const job of state)
+                                {
+                                        console.log('searching joooooooooob key.job_id', job.id, key.job_id)
+                                        if( job.id === key.job_id ) return job
+                                }
 
-                        return {}
+                                return {}
+                        }
+                        catch (e)
+                        {
+                                for (const job of state)
+                                {
+                                        console.log('searching joooooooooob key', job.id, key)
+                                        if( job.id === key ) return job
+                                }
+
+                                return {}
+                        }
                 }
 
                 const getDependencies = (parent_id, parent_type) =>
@@ -549,7 +587,6 @@ export default function useEditor(data)
                                         job =>
                                         {
                                                 // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
-                                                if(`${job.data.front_parent_type}${job.data.parent_id}` === `ds${id}`) return false
                                                 return job.node_id !== id;
                                         }
                                         )
@@ -557,7 +594,11 @@ export default function useEditor(data)
                                         for (const job of new_job_list)
                                         {
                                                 // console.log(job, job.dependencies[0], id)
-                                                if (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                if (
+                                                (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                ||
+                                                (job.data !== undefined && `${job.data.front_parent_type}${job.data.parent_id}` === `ds${id}`)
+                                                )
                                                 {
                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
                                                         new_job_list = supress_from_jobs(new_job_list, job.node_id)
@@ -757,7 +798,6 @@ export default function useEditor(data)
                                                 job =>
                                                 {
                                                         // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
-                                                        if(`${job.data.front_parent_type}${job.data.parent_id}` === `audit${id}`) return false
                                                         return job.node_id !== id;
                                                 }
                                         )
@@ -765,7 +805,11 @@ export default function useEditor(data)
                                         for (const job of new_job_list)
                                         {
                                                 // console.log(job, job.dependencies[0], id)
-                                                if (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                if (
+                                                (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                ||
+                                                (job.data !== undefined && `${job.data.front_parent_type}${job.data.parent_id}` === `audit${id}`)
+                                                )
                                                 {
                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
                                                         new_job_list = supress_from_jobs(new_job_list, job.node_id)
@@ -815,7 +859,8 @@ export default function useEditor(data)
                                         node_model: 'App\\Models\\NonConformite',
                                         data: node,
                                         etat: 'waiting',
-                                        dependencies: getDependencies(node.nonC_id, 'App\\Models\\Nc')
+                                        dependencies: getDependencies(node.nonC_id, 'App\\Models\\Nc'),
+                                        exceptions: []
 
                                 }
 
@@ -839,7 +884,6 @@ export default function useEditor(data)
                                                 job =>
                                                 {
                                                         // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
-                                                        if( job.data !== undefined && `${job.data.front_parent_type}${job.data.parent_id}` === `fnc${id}`) return false
                                                         return job.node_id !== id;
                                                 }
                                         )
@@ -847,7 +891,11 @@ export default function useEditor(data)
                                         for (const job of new_job_list)
                                         {
                                                 // console.log(job, job.dependencies[0], id)
-                                                if (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                if (
+                                                        (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                        ||
+                                                        (job.data !== undefined && `${job.data.front_parent_type}${job.data.parent_id}` === `fnc${id}`)
+                                                )
                                                 {
                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
                                                         new_job_list = supress_from_jobs(new_job_list, job.node_id)
@@ -859,13 +907,81 @@ export default function useEditor(data)
 
                                 let new_state = supress_from_jobs([...state], id)
 
+                                if( ! (parseInt(id) < 0) )
+                                {
+                                        const job =
+                                        {
+                                                id: job_id.current,
+                                                operation: 'del',
+                                                node_id: id,
+                                                node_model: 'App\\Models\\NonConformite',
+                                                etat: 'waiting',
+                                        }
+
+                                        new_state.push(job)
+
+                                        job_id.current = job_id.current + 1
+
+                                }
+                                else
+                                {
+                                        const fnc = Global_State.getNodeDataById(`fnc${id}`)
+
+                                        new_state = new_state.map(
+                                                job =>
+                                                {
+                                                        if(parseInt(job.id) === parseInt(fnc.access_key.job_id))
+                                                        {
+                                                                job.exceptions.push(fnc.access_key.num)
+                                                        }
+                                                        return job
+                                                }
+                                        ).filter(
+                                                job =>
+                                                {
+                                                        if( ( parseInt(job.id) === parseInt(fnc.access_key.job_id) ) && ( job.exceptions.length === (parseInt(job.data.fin) - parseInt(job.data.debut) + 1) ) )
+                                                        {
+                                                                return false
+                                                        }
+                                                        return true
+                                                }
+                                        )
+                                }
+
+                                setDatasState({type: 'del_fnc', id})
+
+                                return new_state
+
+                        }
+                        case 'update_fnc':
+                        {
+                                let new_state = [...state];
+
+                                const request = action.request
+
+                                const node = form_to_json(request)
+
+                                for (const job of new_state)
+                                {
+                                        if( job.operation === 'update' && job.data.id === node.id && job.data.update_object === node.update_object )
+                                        {
+                                                job.data = node
+
+                                                setDatasState({type: 'update_fnc', job})
+
+                                                return new_state
+                                        }
+                                }
+
                                 const job =
                                 {
                                         id: job_id.current,
-                                        operation: 'del',
-                                        node_id: id,
+                                        operation: 'update',
+                                        node_id: parseInt(node.id),
                                         node_model: 'App\\Models\\NonConformite',
+                                        data: node,
                                         etat: 'waiting',
+                                        dependencies: getDependencies(node.id, 'App\\Models\\NonConformite')
 
                                 }
 
@@ -873,15 +989,9 @@ export default function useEditor(data)
 
                                 job_id.current = job_id.current + 1
 
-                                setDatasState({type: 'del_fnc', id})
+                                setDatasState({type: 'update_fnc', job})
 
                                 return new_state
-
-                        }
-                        case 'update':
-                        {
-
-                                return JSON.parse(JSON.stringify(state))
                         }
 
                         default:
@@ -1069,7 +1179,8 @@ export default function useEditor(data)
                         fnc:
                         {
                                 add: (request) => { dispatch_job({ type: 'add_fncs', request }) },
-                                delete: (id) => { dispatch_job({ type: 'del_fnc', id }) }
+                                delete: (id) => { dispatch_job({ type: 'del_fnc', id }) },
+                                update: (request) => { dispatch_job({ type: 'update_fnc', request }) },
                         }
 
                 }

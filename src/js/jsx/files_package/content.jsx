@@ -1515,7 +1515,7 @@ export default function FileTable({set}) {
                             }} alt="Avatar" src = {data.url}  />
                         </div>)
                         Global_State.modalManager.open_modal("Apercu de l' image")
-                    }}  style={{  width: iconSize, height: iconSize, boxShadow: "1px 2px #888888" }} src = {data.url}  />
+                    }}  style={{  width: iconSize, height: iconSize, boxShadow: "1px 2px #888888" }} src = {data.url}   alt={''}/>
                 case "vid":
                   return <FcVideoFile onClick={e => 
                     {
@@ -1675,37 +1675,44 @@ export default function FileTable({set}) {
 
             function handleClick(e)
             {
-                console.log(level)
-                const node = Global_State.getNodeDataById(data.id)
-                const [id, lol] = Global_State.identifyNode(node)
-                // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
+                    console.log(level)
+                    const node_data = Global_State.getNodeDataById(data.id)
+                    const [id, lol] = Global_State.identifyNode(node_data)
+                    // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
 
-
-                const update = async () => 
-                {
-                    
                     const query = new FormData;
                     query.append('id', id)
                     query.append('update_object', 'level')
                     query.append('new_value', nextNiv(level))
 
-                    await http.post('update_fnc', query)
-                    .then( res => { 
-                        console.log(res)
-                    } )
-                    .catch(err => { console.log(err); throw err }) 
-                }
-
-                // console.log(selectedRow[0].id.substring(2))
-                toast.promise(
-                    update(),
+                    if(!Global_State.isEditorMode)
                     {
-                        loading: 'Loading...',
-                        success: 'Processus achevé',
-                        error: 'err'
+                            const update = async () =>
+                            {
+
+                                    await http.post('update_fnc', query)
+                                    .then( res => {
+                                            console.log(res)
+                                    } )
+                                    .catch(err => { console.log(err); throw err })
+                            }
+
+                            // console.log(selectedRow[0].id.substring(2))
+                            toast.promise(
+                            update(),
+                            {
+                                    loading: 'Loading...',
+                                    success: 'Processus achevé',
+                                    error: 'err'
+                                }
+
+                            )
+                    }
+                    else
+                    {
+                            Global_State.editor.fnc.update(query)
                     }
 
-                )
 
             }
 

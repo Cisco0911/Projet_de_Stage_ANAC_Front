@@ -1813,7 +1813,7 @@ export default function FileTable(_ref3) {
                                         }, alt: 'Avatar', src: data.url })
                                 ));
                                 Global_State.modalManager.open_modal("Apercu de l' image");
-                            }, style: { width: iconSize, height: iconSize, boxShadow: "1px 2px #888888" }, src: data.url });
+                            }, style: { width: iconSize, height: iconSize, boxShadow: "1px 2px #888888" }, src: data.url, alt: '' });
                     case "vid":
                         return React.createElement(FcVideoFile, { onClick: function onClick(e) {
                                 Global_State.modalManager.setContent(React.createElement(
@@ -1956,54 +1956,55 @@ export default function FileTable(_ref3) {
                 var _this4 = this;
 
                 console.log(level);
-                var node = Global_State.getNodeDataById(data.id);
+                var node_data = Global_State.getNodeDataById(data.id);
 
-                var _Global_State$identif7 = Global_State.identifyNode(node),
+                var _Global_State$identif7 = Global_State.identifyNode(node_data),
                     _Global_State$identif8 = _slicedToArray(_Global_State$identif7, 2),
                     id = _Global_State$identif8[0],
                     lol = _Global_State$identif8[1];
                 // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
 
+                var query = new FormData();
+                query.append('id', id);
+                query.append('update_object', 'level');
+                query.append('new_value', nextNiv(level));
 
-                var update = function () {
-                    var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4() {
-                        var query;
-                        return _regeneratorRuntime.wrap(function _callee4$(_context4) {
-                            while (1) {
-                                switch (_context4.prev = _context4.next) {
-                                    case 0:
-                                        query = new FormData();
+                if (!Global_State.isEditorMode) {
+                    var update = function () {
+                        var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4() {
+                            return _regeneratorRuntime.wrap(function _callee4$(_context4) {
+                                while (1) {
+                                    switch (_context4.prev = _context4.next) {
+                                        case 0:
+                                            _context4.next = 2;
+                                            return http.post('update_fnc', query).then(function (res) {
+                                                console.log(res);
+                                            }).catch(function (err) {
+                                                console.log(err);throw err;
+                                            });
 
-                                        query.append('id', id);
-                                        query.append('update_object', 'level');
-                                        query.append('new_value', nextNiv(level));
-
-                                        _context4.next = 6;
-                                        return http.post('update_fnc', query).then(function (res) {
-                                            console.log(res);
-                                        }).catch(function (err) {
-                                            console.log(err);throw err;
-                                        });
-
-                                    case 6:
-                                    case 'end':
-                                        return _context4.stop();
+                                        case 2:
+                                        case 'end':
+                                            return _context4.stop();
+                                    }
                                 }
-                            }
-                        }, _callee4, _this4);
-                    }));
+                            }, _callee4, _this4);
+                        }));
 
-                    return function update() {
-                        return _ref10.apply(this, arguments);
-                    };
-                }();
+                        return function update() {
+                            return _ref10.apply(this, arguments);
+                        };
+                    }();
 
-                // console.log(selectedRow[0].id.substring(2))
-                toast.promise(update(), {
-                    loading: 'Loading...',
-                    success: 'Processus achevé',
-                    error: 'err'
-                });
+                    // console.log(selectedRow[0].id.substring(2))
+                    toast.promise(update(), {
+                        loading: 'Loading...',
+                        success: 'Processus achevé',
+                        error: 'err'
+                    });
+                } else {
+                    Global_State.editor.fnc.update(query);
+                }
             }
 
             return React.createElement(

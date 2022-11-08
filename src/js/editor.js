@@ -534,10 +534,28 @@ export default function useEditor(data) {
 
                                         return JSON.parse(JSON.stringify(_newState3));
                                 }
-                        case 'update':
+                        case 'update_fnc':
                                 {
 
-                                        return JSON.parse(JSON.stringify(state));
+                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder');
+
+                                        var _data5 = action.job.data;
+
+                                        // for (let node of state)
+                                        // {
+                                        //        if (node.id === `fnc${data.id}`)
+                                        //        {
+                                        //
+                                        //        }
+                                        // }
+
+                                        return JSON.parse(JSON.stringify(state.map(function (node) {
+                                                if (node.id === "fnc" + _data5.id) {
+                                                        node[_data5.update_object] = _data5.new_value;
+                                                }
+
+                                                return node;
+                                        })));
                                 }
 
                         default:
@@ -552,34 +570,64 @@ export default function useEditor(data) {
 
         function jobs_reducer(state, action) {
 
-                var getJob = function getJob(id) {
-                        var _iteratorNormalCompletion10 = true;
-                        var _didIteratorError10 = false;
-                        var _iteratorError10 = undefined;
-
+                var getJob = function getJob(key) {
                         try {
-                                for (var _iterator10 = state[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-                                        var job = _step10.value;
+                                var _iteratorNormalCompletion10 = true;
+                                var _didIteratorError10 = false;
+                                var _iteratorError10 = undefined;
 
-                                        console.log('searching joooooooooob', job.id, id);
-                                        if (job.id === id) return job;
-                                }
-                        } catch (err) {
-                                _didIteratorError10 = true;
-                                _iteratorError10 = err;
-                        } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
-                                                _iterator10.return();
+                                        for (var _iterator10 = state[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                                                var job = _step10.value;
+
+                                                console.log('searching joooooooooob key.job_id', job.id, key.job_id);
+                                                if (job.id === key.job_id) return job;
                                         }
+                                } catch (err) {
+                                        _didIteratorError10 = true;
+                                        _iteratorError10 = err;
                                 } finally {
-                                        if (_didIteratorError10) {
-                                                throw _iteratorError10;
+                                        try {
+                                                if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                                                        _iterator10.return();
+                                                }
+                                        } finally {
+                                                if (_didIteratorError10) {
+                                                        throw _iteratorError10;
+                                                }
                                         }
                                 }
-                        }
 
-                        return {};
+                                return {};
+                        } catch (e) {
+                                var _iteratorNormalCompletion11 = true;
+                                var _didIteratorError11 = false;
+                                var _iteratorError11 = undefined;
+
+                                try {
+                                        for (var _iterator11 = state[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                                                var _job = _step11.value;
+
+                                                console.log('searching joooooooooob key', _job.id, key);
+                                                if (_job.id === key) return _job;
+                                        }
+                                } catch (err) {
+                                        _didIteratorError11 = true;
+                                        _iteratorError11 = err;
+                                } finally {
+                                        try {
+                                                if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                                                        _iterator11.return();
+                                                }
+                                        } finally {
+                                                if (_didIteratorError11) {
+                                                        throw _iteratorError11;
+                                                }
+                                        }
+                                }
+
+                                return {};
+                        }
                 };
 
                 var getDependencies = function getDependencies(parent_id, parent_type) {
@@ -589,27 +637,27 @@ export default function useEditor(data) {
 
                                         return [fnc.access_key];
                                 } else {
-                                        var _iteratorNormalCompletion11 = true;
-                                        var _didIteratorError11 = false;
-                                        var _iteratorError11 = undefined;
+                                        var _iteratorNormalCompletion12 = true;
+                                        var _didIteratorError12 = false;
+                                        var _iteratorError12 = undefined;
 
                                         try {
-                                                for (var _iterator11 = state[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-                                                        var job = _step11.value;
+                                                for (var _iterator12 = state[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+                                                        var job = _step12.value;
 
                                                         if (job.node_id === parseInt(parent_id)) return [job.id];
                                                 }
                                         } catch (err) {
-                                                _didIteratorError11 = true;
-                                                _iteratorError11 = err;
+                                                _didIteratorError12 = true;
+                                                _iteratorError12 = err;
                                         } finally {
                                                 try {
-                                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
-                                                                _iterator11.return();
+                                                        if (!_iteratorNormalCompletion12 && _iterator12.return) {
+                                                                _iterator12.return();
                                                         }
                                                 } finally {
-                                                        if (_didIteratorError11) {
-                                                                throw _iteratorError11;
+                                                        if (_didIteratorError12) {
+                                                                throw _iteratorError12;
                                                         }
                                                 }
                                         }
@@ -658,208 +706,6 @@ export default function useEditor(data) {
                                         var supress_from_jobs = function supress_from_jobs(job_list, id) {
                                                 var new_job_list = job_list.filter(function (job) {
                                                         // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
-                                                        if ("" + job.data.front_parent_type + job.data.parent_id === "ds" + id) return false;
-                                                        return job.node_id !== id;
-                                                });
-
-                                                var _iteratorNormalCompletion12 = true;
-                                                var _didIteratorError12 = false;
-                                                var _iteratorError12 = undefined;
-
-                                                try {
-                                                        for (var _iterator12 = new_job_list[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-                                                                var _job = _step12.value;
-
-                                                                // console.log(job, job.dependencies[0], id)
-                                                                if (Array.isArray(_job.dependencies) && getJob(_job.dependencies[0]).node_id === id) {
-                                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
-                                                                        new_job_list = supress_from_jobs(new_job_list, _job.node_id);
-                                                                }
-                                                        }
-                                                } catch (err) {
-                                                        _didIteratorError12 = true;
-                                                        _iteratorError12 = err;
-                                                } finally {
-                                                        try {
-                                                                if (!_iteratorNormalCompletion12 && _iterator12.return) {
-                                                                        _iterator12.return();
-                                                                }
-                                                        } finally {
-                                                                if (_didIteratorError12) {
-                                                                        throw _iteratorError12;
-                                                                }
-                                                        }
-                                                }
-
-                                                return new_job_list;
-                                        };
-
-                                        var _new_state = supress_from_jobs([].concat(_toConsumableArray(state)), _id);
-
-                                        if (!(parseInt(_id) < 0)) {
-                                                var _job2 = {
-                                                        id: job_id.current,
-                                                        operation: 'del',
-                                                        node_id: _id,
-                                                        node_model: 'App\\Models\\DossierSimple',
-                                                        etat: 'waiting'
-
-                                                };
-
-                                                _new_state.push(_job2);
-
-                                                job_id.current = job_id.current + 1;
-                                        }
-
-                                        setDatasState({ type: 'del_folder', id: _id });
-
-                                        return _new_state;
-                                }
-                        case 'add_files':
-                                {
-                                        var _new_state2 = [].concat(_toConsumableArray(state));
-
-                                        var _request = action.request;
-
-                                        var _node5 = form_to_json(_request);
-                                        // console.log('nooooooooooooooooooooooooooooode file', {node})
-                                        var _job3 = {
-                                                id: job_id.current,
-                                                operation: 'add',
-                                                node_id: id.current,
-                                                node_model: 'App\\Models\\Fichier',
-                                                data: _node5,
-                                                etat: 'waiting',
-                                                dependencies: getDependencies(_node5.parent_id, _node5.parent_type)
-
-                                        };
-
-                                        console.log('nooooooooooooooooooooooooooooode file', { node: _node5 });
-
-                                        _new_state2.push(_job3);
-
-                                        job_id.current = job_id.current + 1;
-
-                                        setDatasState({ type: 'add_files', job: _job3 });
-
-                                        return _new_state2;
-                                }
-                        case 'del_file':
-                                {
-                                        var _new_state3 = [].concat(_toConsumableArray(state));
-
-                                        var _id2 = action.id;
-
-                                        _new_state3 = _new_state3.filter(function (job) {
-                                                // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
-                                                return job.node_id !== _id2;
-                                        });
-
-                                        if (!(parseInt(_id2) < 0)) {
-                                                var _job4 = {
-                                                        id: job_id.current,
-                                                        operation: 'del',
-                                                        node_id: _id2,
-                                                        node_model: 'App\\Models\\Fichier',
-                                                        etat: 'waiting'
-
-                                                };
-
-                                                _new_state3.push(_job4);
-
-                                                job_id.current = job_id.current + 1;
-                                        }
-
-                                        setDatasState({ type: 'del_file', id: _id2 });
-
-                                        return _new_state3;
-                                }
-                        case 'add_audit':
-                                {
-                                        var _new_state4 = [].concat(_toConsumableArray(state));
-
-                                        var _request2 = action.request;
-
-                                        var _node6 = form_to_json(_request2);
-
-                                        var _job5 = {
-                                                id: job_id.current,
-                                                operation: 'add',
-                                                node_id: id.current,
-                                                node_model: 'App\\Models\\Audit',
-                                                data: _node6,
-                                                etat: 'waiting'
-
-                                        };
-                                        job_id.current = job_id.current + 1;
-                                        id.current = id.current - 1;
-
-                                        var checkList_job = {
-                                                id: job_id.current,
-                                                node_id: id.current,
-                                                node_model: 'App\\Models\\checkList',
-                                                data: {
-                                                        name: 'checkList',
-                                                        audit_id: _job5.node_id,
-                                                        sub_type: 'checkList',
-                                                        services: _job5.data.services,
-                                                        section_id: _job5.data.section_id
-                                                },
-                                                dependencies: [_job5.id],
-                                                etat: 'waiting'
-                                        };
-                                        job_id.current = job_id.current + 1;
-                                        id.current = id.current - 1;
-
-                                        var dp_job = {
-                                                id: job_id.current,
-                                                node_id: id.current,
-                                                node_model: 'App\\Models\\DossierPreuve',
-                                                data: {
-                                                        name: 'Dossier Preuve',
-                                                        audit_id: _job5.node_id,
-                                                        sub_type: 'dp',
-                                                        services: _job5.data.services,
-                                                        section_id: _job5.data.section_id
-                                                },
-                                                dependencies: [_job5.id],
-                                                etat: 'waiting'
-                                        };
-                                        job_id.current = job_id.current + 1;
-                                        id.current = id.current - 1;
-
-                                        var NC_job = {
-                                                id: job_id.current,
-                                                node_id: id.current,
-                                                node_model: 'App\\Models\\Nc',
-                                                data: {
-                                                        name: 'NC',
-                                                        audit_id: _job5.node_id,
-                                                        sub_type: 'nonC',
-                                                        services: _job5.data.services,
-                                                        section_id: _job5.data.section_id
-                                                },
-                                                dependencies: [_job5.id],
-                                                etat: 'waiting'
-                                        };
-                                        job_id.current = job_id.current + 1;
-                                        id.current = id.current - 1;
-
-                                        _new_state4.push(_job5, checkList_job, dp_job, NC_job);
-
-                                        setDatasState({ type: 'add_audit', jobs: [_job5, checkList_job, dp_job, NC_job] });
-
-                                        return _new_state4;
-                                }
-                        case 'del_audit':
-                                {
-
-                                        var _id3 = action.id;
-
-                                        var _supress_from_jobs = function _supress_from_jobs(job_list, id) {
-                                                var new_job_list = job_list.filter(function (job) {
-                                                        // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
-                                                        if ("" + job.data.front_parent_type + job.data.parent_id === "audit" + id) return false;
                                                         return job.node_id !== id;
                                                 });
 
@@ -869,12 +715,12 @@ export default function useEditor(data) {
 
                                                 try {
                                                         for (var _iterator13 = new_job_list[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-                                                                var _job6 = _step13.value;
+                                                                var _job2 = _step13.value;
 
                                                                 // console.log(job, job.dependencies[0], id)
-                                                                if (Array.isArray(_job6.dependencies) && getJob(_job6.dependencies[0]).node_id === id) {
+                                                                if (Array.isArray(_job2.dependencies) && getJob(_job2.dependencies[0]).node_id === id || _job2.data !== undefined && "" + _job2.data.front_parent_type + _job2.data.parent_id === "ds" + id) {
                                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
-                                                                        new_job_list = _supress_from_jobs(new_job_list, _job6.node_id);
+                                                                        new_job_list = supress_from_jobs(new_job_list, _job2.node_id);
                                                                 }
                                                         }
                                                 } catch (err) {
@@ -895,62 +741,171 @@ export default function useEditor(data) {
                                                 return new_job_list;
                                         };
 
-                                        var _new_state5 = _supress_from_jobs([].concat(_toConsumableArray(state)), _id3);
+                                        var _new_state = supress_from_jobs([].concat(_toConsumableArray(state)), _id);
 
-                                        if (!(parseInt(_id3) < 0)) {
-                                                var _job7 = {
+                                        if (!(parseInt(_id) < 0)) {
+                                                var _job3 = {
                                                         id: job_id.current,
                                                         operation: 'del',
-                                                        node_id: _id3,
-                                                        node_model: 'App\\Models\\Audit',
+                                                        node_id: _id,
+                                                        node_model: 'App\\Models\\DossierSimple',
                                                         etat: 'waiting'
 
                                                 };
 
-                                                _new_state5.push(_job7);
+                                                _new_state.push(_job3);
 
                                                 job_id.current = job_id.current + 1;
                                         }
 
-                                        setDatasState({ type: 'del_audit', id: _id3 });
+                                        setDatasState({ type: 'del_folder', id: _id });
 
-                                        return _new_state5;
+                                        return _new_state;
                                 }
-                        case 'add_fncs':
+                        case 'add_files':
                                 {
-                                        var _new_state6 = [].concat(_toConsumableArray(state));
+                                        var _new_state2 = [].concat(_toConsumableArray(state));
 
-                                        var _request3 = action.request;
+                                        var _request = action.request;
 
-                                        var _node7 = form_to_json(_request3);
-                                        var _job8 = {
+                                        var _node5 = form_to_json(_request);
+                                        // console.log('nooooooooooooooooooooooooooooode file', {node})
+                                        var _job4 = {
                                                 id: job_id.current,
                                                 operation: 'add',
-                                                // node_id: id.current,
-                                                node_model: 'App\\Models\\NonConformite',
-                                                data: _node7,
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\Fichier',
+                                                data: _node5,
                                                 etat: 'waiting',
-                                                dependencies: getDependencies(_node7.nonC_id, 'App\\Models\\Nc')
+                                                dependencies: getDependencies(_node5.parent_id, _node5.parent_type)
 
                                         };
 
-                                        _new_state6.push(_job8);
+                                        console.log('nooooooooooooooooooooooooooooode file', { node: _node5 });
+
+                                        _new_state2.push(_job4);
 
                                         job_id.current = job_id.current + 1;
 
-                                        setDatasState({ type: 'add_fncs', job: _job8 });
+                                        setDatasState({ type: 'add_files', job: _job4 });
 
-                                        return _new_state6;
+                                        return _new_state2;
                                 }
-                        case 'del_fnc':
+                        case 'del_file':
+                                {
+                                        var _new_state3 = [].concat(_toConsumableArray(state));
+
+                                        var _id2 = action.id;
+
+                                        _new_state3 = _new_state3.filter(function (job) {
+                                                // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                return job.node_id !== _id2;
+                                        });
+
+                                        if (!(parseInt(_id2) < 0)) {
+                                                var _job5 = {
+                                                        id: job_id.current,
+                                                        operation: 'del',
+                                                        node_id: _id2,
+                                                        node_model: 'App\\Models\\Fichier',
+                                                        etat: 'waiting'
+
+                                                };
+
+                                                _new_state3.push(_job5);
+
+                                                job_id.current = job_id.current + 1;
+                                        }
+
+                                        setDatasState({ type: 'del_file', id: _id2 });
+
+                                        return _new_state3;
+                                }
+                        case 'add_audit':
+                                {
+                                        var _new_state4 = [].concat(_toConsumableArray(state));
+
+                                        var _request2 = action.request;
+
+                                        var _node6 = form_to_json(_request2);
+
+                                        var _job6 = {
+                                                id: job_id.current,
+                                                operation: 'add',
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\Audit',
+                                                data: _node6,
+                                                etat: 'waiting'
+
+                                        };
+                                        job_id.current = job_id.current + 1;
+                                        id.current = id.current - 1;
+
+                                        var checkList_job = {
+                                                id: job_id.current,
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\checkList',
+                                                data: {
+                                                        name: 'checkList',
+                                                        audit_id: _job6.node_id,
+                                                        sub_type: 'checkList',
+                                                        services: _job6.data.services,
+                                                        section_id: _job6.data.section_id
+                                                },
+                                                dependencies: [_job6.id],
+                                                etat: 'waiting'
+                                        };
+                                        job_id.current = job_id.current + 1;
+                                        id.current = id.current - 1;
+
+                                        var dp_job = {
+                                                id: job_id.current,
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\DossierPreuve',
+                                                data: {
+                                                        name: 'Dossier Preuve',
+                                                        audit_id: _job6.node_id,
+                                                        sub_type: 'dp',
+                                                        services: _job6.data.services,
+                                                        section_id: _job6.data.section_id
+                                                },
+                                                dependencies: [_job6.id],
+                                                etat: 'waiting'
+                                        };
+                                        job_id.current = job_id.current + 1;
+                                        id.current = id.current - 1;
+
+                                        var NC_job = {
+                                                id: job_id.current,
+                                                node_id: id.current,
+                                                node_model: 'App\\Models\\Nc',
+                                                data: {
+                                                        name: 'NC',
+                                                        audit_id: _job6.node_id,
+                                                        sub_type: 'nonC',
+                                                        services: _job6.data.services,
+                                                        section_id: _job6.data.section_id
+                                                },
+                                                dependencies: [_job6.id],
+                                                etat: 'waiting'
+                                        };
+                                        job_id.current = job_id.current + 1;
+                                        id.current = id.current - 1;
+
+                                        _new_state4.push(_job6, checkList_job, dp_job, NC_job);
+
+                                        setDatasState({ type: 'add_audit', jobs: [_job6, checkList_job, dp_job, NC_job] });
+
+                                        return _new_state4;
+                                }
+                        case 'del_audit':
                                 {
 
-                                        var _id4 = action.id;
+                                        var _id3 = action.id;
 
-                                        var _supress_from_jobs2 = function _supress_from_jobs2(job_list, id) {
+                                        var _supress_from_jobs = function _supress_from_jobs(job_list, id) {
                                                 var new_job_list = job_list.filter(function (job) {
                                                         // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
-                                                        if (job.data !== undefined && "" + job.data.front_parent_type + job.data.parent_id === "fnc" + id) return false;
                                                         return job.node_id !== id;
                                                 });
 
@@ -960,12 +915,12 @@ export default function useEditor(data) {
 
                                                 try {
                                                         for (var _iterator14 = new_job_list[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-                                                                var _job10 = _step14.value;
+                                                                var _job7 = _step14.value;
 
                                                                 // console.log(job, job.dependencies[0], id)
-                                                                if (Array.isArray(_job10.dependencies) && getJob(_job10.dependencies[0]).node_id === id) {
+                                                                if (Array.isArray(_job7.dependencies) && getJob(_job7.dependencies[0]).node_id === id || _job7.data !== undefined && "" + _job7.data.front_parent_type + _job7.data.parent_id === "audit" + id) {
                                                                         // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
-                                                                        new_job_list = _supress_from_jobs2(new_job_list, _job10.node_id);
+                                                                        new_job_list = _supress_from_jobs(new_job_list, _job7.node_id);
                                                                 }
                                                         }
                                                 } catch (err) {
@@ -986,29 +941,188 @@ export default function useEditor(data) {
                                                 return new_job_list;
                                         };
 
-                                        var _new_state7 = _supress_from_jobs2([].concat(_toConsumableArray(state)), _id4);
+                                        var _new_state5 = _supress_from_jobs([].concat(_toConsumableArray(state)), _id3);
 
+                                        if (!(parseInt(_id3) < 0)) {
+                                                var _job8 = {
+                                                        id: job_id.current,
+                                                        operation: 'del',
+                                                        node_id: _id3,
+                                                        node_model: 'App\\Models\\Audit',
+                                                        etat: 'waiting'
+
+                                                };
+
+                                                _new_state5.push(_job8);
+
+                                                job_id.current = job_id.current + 1;
+                                        }
+
+                                        setDatasState({ type: 'del_audit', id: _id3 });
+
+                                        return _new_state5;
+                                }
+                        case 'add_fncs':
+                                {
+                                        var _new_state6 = [].concat(_toConsumableArray(state));
+
+                                        var _request3 = action.request;
+
+                                        var _node7 = form_to_json(_request3);
                                         var _job9 = {
                                                 id: job_id.current,
-                                                operation: 'del',
-                                                node_id: _id4,
+                                                operation: 'add',
+                                                // node_id: id.current,
                                                 node_model: 'App\\Models\\NonConformite',
-                                                etat: 'waiting'
+                                                data: _node7,
+                                                etat: 'waiting',
+                                                dependencies: getDependencies(_node7.nonC_id, 'App\\Models\\Nc'),
+                                                exceptions: []
 
                                         };
 
-                                        _new_state7.push(_job9);
+                                        _new_state6.push(_job9);
 
                                         job_id.current = job_id.current + 1;
+
+                                        setDatasState({ type: 'add_fncs', job: _job9 });
+
+                                        return _new_state6;
+                                }
+                        case 'del_fnc':
+                                {
+
+                                        var _id4 = action.id;
+
+                                        var _supress_from_jobs2 = function _supress_from_jobs2(job_list, id) {
+                                                var new_job_list = job_list.filter(function (job) {
+                                                        // console.log('del filterrrrrrrrrrrrrrrrrrrrrrrrrrrrr', job.id)
+                                                        return job.node_id !== id;
+                                                });
+
+                                                var _iteratorNormalCompletion15 = true;
+                                                var _didIteratorError15 = false;
+                                                var _iteratorError15 = undefined;
+
+                                                try {
+                                                        for (var _iterator15 = new_job_list[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+                                                                var _job10 = _step15.value;
+
+                                                                // console.log(job, job.dependencies[0], id)
+                                                                if (Array.isArray(_job10.dependencies) && getJob(_job10.dependencies[0]).node_id === id || _job10.data !== undefined && "" + _job10.data.front_parent_type + _job10.data.parent_id === "fnc" + id) {
+                                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                                        new_job_list = _supress_from_jobs2(new_job_list, _job10.node_id);
+                                                                }
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError15 = true;
+                                                        _iteratorError15 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion15 && _iterator15.return) {
+                                                                        _iterator15.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError15) {
+                                                                        throw _iteratorError15;
+                                                                }
+                                                        }
+                                                }
+
+                                                return new_job_list;
+                                        };
+
+                                        var _new_state7 = _supress_from_jobs2([].concat(_toConsumableArray(state)), _id4);
+
+                                        if (!(parseInt(_id4) < 0)) {
+                                                var _job11 = {
+                                                        id: job_id.current,
+                                                        operation: 'del',
+                                                        node_id: _id4,
+                                                        node_model: 'App\\Models\\NonConformite',
+                                                        etat: 'waiting'
+                                                };
+
+                                                _new_state7.push(_job11);
+
+                                                job_id.current = job_id.current + 1;
+                                        } else {
+                                                var fnc = Global_State.getNodeDataById("fnc" + _id4);
+
+                                                _new_state7 = _new_state7.map(function (job) {
+                                                        if (parseInt(job.id) === parseInt(fnc.access_key.job_id)) {
+                                                                job.exceptions.push(fnc.access_key.num);
+                                                        }
+                                                        return job;
+                                                }).filter(function (job) {
+                                                        if (parseInt(job.id) === parseInt(fnc.access_key.job_id) && job.exceptions.length === parseInt(job.data.fin) - parseInt(job.data.debut) + 1) {
+                                                                return false;
+                                                        }
+                                                        return true;
+                                                });
+                                        }
 
                                         setDatasState({ type: 'del_fnc', id: _id4 });
 
                                         return _new_state7;
                                 }
-                        case 'update':
+                        case 'update_fnc':
                                 {
+                                        var _new_state8 = [].concat(_toConsumableArray(state));
 
-                                        return JSON.parse(JSON.stringify(state));
+                                        var _request4 = action.request;
+
+                                        var _node8 = form_to_json(_request4);
+
+                                        var _iteratorNormalCompletion16 = true;
+                                        var _didIteratorError16 = false;
+                                        var _iteratorError16 = undefined;
+
+                                        try {
+                                                for (var _iterator16 = _new_state8[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+                                                        var _job13 = _step16.value;
+
+                                                        if (_job13.operation === 'update' && _job13.data.id === _node8.id && _job13.data.update_object === _node8.update_object) {
+                                                                _job13.data = _node8;
+
+                                                                setDatasState({ type: 'update_fnc', job: _job13 });
+
+                                                                return _new_state8;
+                                                        }
+                                                }
+                                        } catch (err) {
+                                                _didIteratorError16 = true;
+                                                _iteratorError16 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion16 && _iterator16.return) {
+                                                                _iterator16.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError16) {
+                                                                throw _iteratorError16;
+                                                        }
+                                                }
+                                        }
+
+                                        var _job12 = {
+                                                id: job_id.current,
+                                                operation: 'update',
+                                                node_id: parseInt(_node8.id),
+                                                node_model: 'App\\Models\\NonConformite',
+                                                data: _node8,
+                                                etat: 'waiting',
+                                                dependencies: getDependencies(_node8.id, 'App\\Models\\NonConformite')
+
+                                        };
+
+                                        _new_state8.push(_job12);
+
+                                        job_id.current = job_id.current + 1;
+
+                                        setDatasState({ type: 'update_fnc', job: _job12 });
+
+                                        return _new_state8;
                                 }
 
                         default:
@@ -1193,6 +1307,9 @@ export default function useEditor(data) {
                         },
                         delete: function _delete(id) {
                                 dispatch_job({ type: 'del_fnc', id: id });
+                        },
+                        update: function update(request) {
+                                dispatch_job({ type: 'update_fnc', request: request });
                         }
                 }
 
