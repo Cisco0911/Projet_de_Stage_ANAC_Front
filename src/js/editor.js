@@ -552,6 +552,7 @@ export default function useEditor(data) {
                                         return JSON.parse(JSON.stringify(state.map(function (node) {
                                                 if (node.id === "fnc" + _data5.id) {
                                                         node[_data5.update_object] = _data5.new_value;
+                                                        node['onEdit'] = true;
                                                 }
 
                                                 return node;
@@ -1055,10 +1056,7 @@ export default function useEditor(data) {
                                                         }
                                                         return job;
                                                 }).filter(function (job) {
-                                                        if (parseInt(job.id) === parseInt(fnc.access_key.job_id) && job.exceptions.length === parseInt(job.data.fin) - parseInt(job.data.debut) + 1) {
-                                                                return false;
-                                                        }
-                                                        return true;
+                                                        return !(parseInt(job.id) === parseInt(fnc.access_key.job_id) && job.exceptions.length === parseInt(job.data.fin) - parseInt(job.data.debut) + 1);
                                                 });
                                         }
 

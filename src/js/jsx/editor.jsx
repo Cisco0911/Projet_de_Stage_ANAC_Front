@@ -476,6 +476,7 @@ export default function useEditor(data)
                                                         if (node.id === `fnc${data.id}`)
                                                         {
                                                                 node[data.update_object] = data.new_value
+                                                                node['onEdit'] = true
                                                         }
 
                                                         return node
@@ -939,11 +940,8 @@ export default function useEditor(data)
                                         ).filter(
                                                 job =>
                                                 {
-                                                        if( ( parseInt(job.id) === parseInt(fnc.access_key.job_id) ) && ( job.exceptions.length === (parseInt(job.data.fin) - parseInt(job.data.debut) + 1) ) )
-                                                        {
-                                                                return false
-                                                        }
-                                                        return true
+                                                        return !((parseInt(job.id) === parseInt(fnc.access_key.job_id)) && (job.exceptions.length === (parseInt(job.data.fin) - parseInt(job.data.debut) + 1)));
+
                                                 }
                                         )
                                 }

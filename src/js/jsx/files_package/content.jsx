@@ -1719,25 +1719,27 @@ export default function FileTable({set}) {
             return( <div className={class_name} onClick = {handleClick} >{level}</div> )
         }
 
-        for(let data of node.children )
+        for(let child_node of node.children )
         {
-            datas.push(
+                const data = Global_State.getNodeDataById(child_node.id)
+                datas.push(
                 {
-                    id: data.id,
-                    value: data.name,
-                    level_value: data.level,
-                    name: <NameFormater data = {data} onClick = { e => { console.log('nameClicked'); handleClick({id: data.id, name: data.name}, e) } } />,
-                    level: data.type === "fnc" ? <LevelComponent data={data} /> : undefined,
-                    created_at: data.created_at,
-                    isClosed: data.type === "fnc" ? data.isClosed ? <div className="badge bg-success-bright text-success">Clôturé</div> : <div class="badge bg-danger-bright text-danger">Non-Clôturé</div> : undefined ,
-                    RA:  node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " +  data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " +  node.ra.second_name : undefined,
-                    size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
-                    type: data.type,
-                    global_type: data.global_type,
-                    section_id: data.section_id,
+                        id: data.id,
+                        value: data.name,
+                        level_value: data.level,
+                        name: <NameFormater data = {data} onClick = { e => { console.log('nameClicked'); handleClick({id: data.id, name: data.name}, e) } } />,
+                        level: data.type === "fnc" ? <LevelComponent data={data} /> : undefined,
+                        created_at: data.created_at,
+                        isClosed: data.type === "fnc" ? data.isClosed ? <div className="badge bg-success-bright text-success">Clôturé</div> : <div class="badge bg-danger-bright text-danger">Non-Clôturé</div> : undefined ,
+                        RA:  node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " +  data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " +  node.ra.second_name : undefined,
+                        size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
+                        type: data.type,
+                        global_type: data.global_type,
+                        section_id: data.section_id,
+                        isBeingEdited: data.onEdit
 
                 }
-            )
+                )
         }
 
         return datas
@@ -2028,10 +2030,28 @@ export default function FileTable({set}) {
 
 
 
+    const rowsStyles =
+    [
+            {
+                    when: row => row.isBeingEdited,
+                    style:
+                    {
+                            borderLeft: 'solid',
+                            borderRight: 'solid',
+                            borderRightColor: 'blue',
+                            borderLeftColor: 'blue',
+                            borderLeftWidth: '2px',
+                            borderRightWidth: '2px',
+                            borderRadius: '4px',
+                            // borderTopWidth: '0px',
+                            // borderBottomWidth: '0px',
+                    },
+            },
+    ]
 
-    
-    const isIndeterminate = (indeterminate) => indeterminate;
-    const selectableRowsComponentProps = {  onclick: e => {console.log(e)} };
+
+
+    const filtered_datas = useMemo( () => ( datas.filter( row => (row.value.indexOf(filteringWord) !== -1) ) ), [datas, filteringWord] )
 
     console.log('dataaaaaaas', datas)
 
@@ -2044,7 +2064,7 @@ export default function FileTable({set}) {
             <ActionsMenu />
             <DataTable
                 columns={columns}
-                data={datas}
+                data={filtered_datas}
 
                 selectableRows
                 selectableRowsVisibleOnly
@@ -2052,7 +2072,7 @@ export default function FileTable({set}) {
                 // selectableRowsComponent={Checkbox}
                 // selectableRowsComponentProps={selectableRowsComponentProps}
                 selectableRowSelected={ (row) => { justChecking.current = true; /* console.log('selectableRowSelected'); */ return row.isSelected }}
-                onSelectedRowsChange={ ({selectedCount, selectedRows}) => { if(datas.length > 0)handleChange(selectedCount, selectedRows) } }
+                onSelectedRowsChange={ ({selectedCount, selectedRows}) => { if(filtered_datas.length > 0)handleChange(selectedCount, selectedRows) } }
                 clearSelectedRows={Global_State.toggleCleared}
                 onRowDoubleClicked = { onRowDoubleClicked }
                 onRowClicked = { handleClick }
@@ -2071,6 +2091,7 @@ export default function FileTable({set}) {
                     }
                 }
                 theme = "default"
+                conditionalRowStyles={rowsStyles}
                 fixedHeader = {true}
                 fixedHeaderScrollHeight = "100vh"
                 pointerOnHover = {true}

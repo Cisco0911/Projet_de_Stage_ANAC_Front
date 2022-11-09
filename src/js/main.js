@@ -148,7 +148,7 @@ function Header() {
                 Global_State.authUser.name + ' ' + Global_State.authUser.second_name
             )
         ),
-        React.createElement('div', { 'class': 'dropdown-divider' }),
+        React.createElement('div', { className: 'dropdown-divider' }),
         React.createElement(
             'a',
             { className: 'list-group-item text-danger' },
@@ -205,11 +205,11 @@ function Header() {
 
     return React.createElement(
         Navbar /* bg="light"  */,
-        { expand: 'md', style: { padding: 0 } },
+        { expand: 'sm', style: { padding: 0 } },
         React.createElement(
             Container,
             { fluid: true, style: { justifyContent: 'end', alignItems: 'start', paddingRight: '15px' } },
-            React.createElement(Navbar.Toggle, { className: 'p-0 d-flex justify-content-start align-items-start d-md-none', 'aria-controls': 'offcanvasNavbar-expand-' + 'md', children: React.createElement(GiOverhead, { size: 40 }),
+            React.createElement(Navbar.Toggle, { className: 'p-0  justify-content-start align-items-start d-flex d-sm-none', 'aria-controls': 'offcanvasNavbar-expand-' + 'sm', children: React.createElement(GiOverhead, { size: 40 }),
                 style: {
                     width: 60,
                     color: 'rgb(0 0 0)',
@@ -220,37 +220,15 @@ function Header() {
             React.createElement(
                 Navbar.Offcanvas,
                 {
-                    id: 'offcanvasNavbar-expand-' + 'md',
-                    'aria-labelledby': 'offcanvasNavbarLabel-expand-' + 'md',
+                    id: 'offcanvasNavbar-expand-' + 'sm',
+                    'aria-labelledby': 'offcanvasNavbarLabel-expand-' + 'sm',
                     placement: 'top',
-                    className: 'container-fluid d-md-flex flex-md-row',
+                    className: 'container-fluid d-flex flex-row justify-content-end',
                     style: { /* width: '100%' */padding: 0 }
                 },
                 React.createElement(
-                    Col,
-                    { md: 5 },
-                    React.createElement(
-                        Form,
-                        { className: 'd-flex' },
-                        React.createElement(Form.Control, {
-                            type: 'search',
-                            placeholder: 'Search',
-                            className: 'me-2',
-                            'aria-label': 'Search',
-                            value: pre.current
-                        }),
-                        React.createElement(
-                            Button,
-                            { onClick: function onClick() {
-                                    console.log('handleClick');Global_State.EventsManager.emit('increase');
-                                }, className: 'justify-content-center', variant: 'outline-primary' /* style={{ width: 60, height: 35, alignItems: 'center', justifyContent: 'center', padding: '0px 15px', borderWidth: 2, }} */ },
-                            'Search'
-                        )
-                    )
-                ),
-                React.createElement(
-                    Col,
-                    { md: { span: 6, offset: 1 } },
+                    'div',
+                    { className: 'd-flex justify-content-start' },
                     React.createElement(
                         Stack,
                         { className: 'justify-content-md-end justify-content-center', direction: 'row', spacing: 1, alignItems: 'center', justifyContent: 'flex-end' },
@@ -370,6 +348,11 @@ function File_section() {
 }
 
 function Home() {
+
+    document.onkeydown = function (e) {
+        if (e.ctrlKey && e.key === 'f') return false;
+    };
+
     var _useState7 = useState(null),
         _useState8 = _slicedToArray(_useState7, 2),
         Data_Base = _useState8[0],
@@ -474,7 +457,7 @@ function Home() {
                             React.createElement(
                                 Row,
                                 null,
-                                React.createElement('div', { style: { marginTop: 30, width: '100%', display: 'block' } })
+                                React.createElement('div', { style: { marginTop: 20, width: '100%', display: 'block' } })
                             ),
                             React.createElement(
                                 Row,

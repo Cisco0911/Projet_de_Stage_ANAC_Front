@@ -2014,17 +2014,18 @@ export default function FileTable(_ref3) {
             );
         };
 
-        var _loop = function _loop(_data) {
+        var _loop = function _loop(child_node) {
+            var data = Global_State.getNodeDataById(child_node.id);
             datas.push({
-                id: _data.id,
-                value: _data.name,
-                level_value: _data.level,
-                name: React.createElement(NameFormater, { data: _data, onClick: function onClick(e) {
-                        console.log('nameClicked');handleClick({ id: _data.id, name: _data.name }, e);
+                id: data.id,
+                value: data.name,
+                level_value: data.level,
+                name: React.createElement(NameFormater, { data: data, onClick: function onClick(e) {
+                        console.log('nameClicked');handleClick({ id: data.id, name: data.name }, e);
                     } }),
-                level: _data.type === "fnc" ? React.createElement(LevelComponent, { data: _data }) : undefined,
-                created_at: _data.created_at,
-                isClosed: _data.type === "fnc" ? _data.isClosed ? React.createElement(
+                level: data.type === "fnc" ? React.createElement(LevelComponent, { data: data }) : undefined,
+                created_at: data.created_at,
+                isClosed: data.type === "fnc" ? data.isClosed ? React.createElement(
                     'div',
                     { className: 'badge bg-success-bright text-success' },
                     'Cl\xF4tur\xE9'
@@ -2033,11 +2034,12 @@ export default function FileTable(_ref3) {
                     { 'class': 'badge bg-danger-bright text-danger' },
                     'Non-Cl\xF4tur\xE9'
                 ) : undefined,
-                RA: node.type === "root" && _data.type === 'audit' ? _data.ra.name.substring(0, 1) + ". " + _data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " + node.ra.second_name : undefined,
-                size: _data.global_type === 'file' ? Global_State.sizeFormater(_data.taille) : undefined,
-                type: _data.type,
-                global_type: _data.global_type,
-                section_id: _data.section_id
+                RA: node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " + data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " + node.ra.second_name : undefined,
+                size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
+                type: data.type,
+                global_type: data.global_type,
+                section_id: data.section_id,
+                isBeingEdited: data.onEdit
 
             });
         };
@@ -2048,9 +2050,9 @@ export default function FileTable(_ref3) {
 
         try {
             for (var _iterator4 = node.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                var _data = _step4.value;
+                var child_node = _step4.value;
 
-                _loop(_data);
+                _loop(child_node);
             }
         } catch (err) {
             _didIteratorError4 = true;
@@ -2332,12 +2334,28 @@ export default function FileTable(_ref3) {
         // selectedRowsByClick.current = [row]
     };
 
-    var isIndeterminate = function isIndeterminate(indeterminate) {
-        return indeterminate;
-    };
-    var selectableRowsComponentProps = { onclick: function onclick(e) {
-            console.log(e);
-        } };
+    var rowsStyles = [{
+        when: function when(row) {
+            return row.isBeingEdited;
+        },
+        style: {
+            borderLeft: 'solid',
+            borderRight: 'solid',
+            borderRightColor: 'blue',
+            borderLeftColor: 'blue',
+            borderLeftWidth: '2px',
+            borderRightWidth: '2px',
+            borderRadius: '4px'
+            // borderTopWidth: '0px',
+            // borderBottomWidth: '0px',
+        }
+    }];
+
+    var filtered_datas = useMemo(function () {
+        return datas.filter(function (row) {
+            return row.value.indexOf(filteringWord) !== -1;
+        });
+    }, [datas, filteringWord]);
 
     console.log('dataaaaaaas', datas);
 
@@ -2356,7 +2374,7 @@ export default function FileTable(_ref3) {
         React.createElement(ActionsMenu, null),
         React.createElement(DataTable, {
             columns: columns,
-            data: datas,
+            data: filtered_datas,
 
             selectableRows: true,
             selectableRowsVisibleOnly: true,
@@ -2369,7 +2387,7 @@ export default function FileTable(_ref3) {
             onSelectedRowsChange: function onSelectedRowsChange(_ref13) {
                 var selectedCount = _ref13.selectedCount,
                     selectedRows = _ref13.selectedRows;
-                if (datas.length > 0) handleChange(selectedCount, selectedRows);
+                if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
             },
             clearSelectedRows: Global_State.toggleCleared,
             onRowDoubleClicked: onRowDoubleClicked,
@@ -2386,6 +2404,7 @@ export default function FileTable(_ref3) {
                 selectAllRowsItemText: 'Tout'
             },
             theme: 'default',
+            conditionalRowStyles: rowsStyles,
             fixedHeader: true,
             fixedHeaderScrollHeight: '100vh',
             pointerOnHover: true,

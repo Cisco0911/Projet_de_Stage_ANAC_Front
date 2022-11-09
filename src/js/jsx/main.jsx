@@ -128,7 +128,7 @@ function Header()
             <Avatar alt={`${Global_State.authUser.name} ${Global_State.authUser.second_name}`} src="./style/assets/media/image/user/man_avatar3.jpg" />
             <h5 className="mb-0">{`${Global_State.authUser.name} ${Global_State.authUser.second_name}`}</h5>
             </div>
-            <div class="dropdown-divider"/>
+            <div className="dropdown-divider"/>
             <a className="list-group-item text-danger" >Sign Out!</a>
         </React.Fragment>
     )
@@ -171,25 +171,25 @@ function Header()
     )
 
     return (
-        <Navbar /* bg="light"  */ expand="md" style={{padding: 0}}>
-          <Container fluid style={{ justifyContent: 'end', alignItems: 'start', paddingRight: '15px', }} >
-            {/* <Navbar.Brand href="#">Navbar scroll</Navbar.Brand> */}
-            <Navbar.Toggle className='p-0 d-flex justify-content-start align-items-start d-md-none' aria-controls={`offcanvasNavbar-expand-${'md'}`} children = {<GiOverhead size={40} />} 
-            style={{ 
-                width: 60, 
-                color: 'rgb(0 0 0)', 
-                transform: 'rotateY(180deg)', 
-                paddingLeft: 17, 
-                border: 'none',
-            }} />
-            <Navbar.Offcanvas
-                id={`offcanvasNavbar-expand-${'md'}`}
-                aria-labelledby={`offcanvasNavbarLabel-expand-${'md'}`}
-                placement="top"
-                className = 'container-fluid d-md-flex flex-md-row'
-                style={{/* width: '100%' */ padding: 0}}
-            >
-            {/* <Nav
+        <Navbar /* bg="light"  */ expand="sm" style={{padding: 0}}>
+            <Container fluid style={{ justifyContent: 'end', alignItems: 'start', paddingRight: '15px', }} >
+                    {/* <Navbar.Brand href="#">Navbar scroll</Navbar.Brand> */}
+                    <Navbar.Toggle className='p-0  justify-content-start align-items-start d-flex d-sm-none' aria-controls={`offcanvasNavbar-expand-${'sm'}`} children = {<GiOverhead size={40} />}
+                           style={{
+                                   width: 60,
+                                   color: 'rgb(0 0 0)',
+                                   transform: 'rotateY(180deg)',
+                                   paddingLeft: 17,
+                                   border: 'none',
+                           }} />
+                    <Navbar.Offcanvas
+                    id={`offcanvasNavbar-expand-${'sm'}`}
+                    aria-labelledby={`offcanvasNavbarLabel-expand-${'sm'}`}
+                    placement="top"
+                    className = 'container-fluid d-flex flex-row justify-content-end'
+                    style={{/* width: '100%' */ padding: 0}}
+                    >
+                            {/* <Nav
                 className="me-auto my-2 my-lg-0"
                 style={{ maxHeight: '100px' }}
                 navbarScroll
@@ -219,37 +219,37 @@ function Header()
                 />
                 <Button variant="outline-success">Search</Button>
             </Form> */}
-                
-                <Col md = {5} >
-                    <Form className="d-flex">
-                        <Form.Control
-                        type="search"
-                        placeholder="Search"
-                        className="me-2"
-                        aria-label="Search"
-                        value={pre.current}
-                        />
-                        <Button onClick={() => { console.log('handleClick'); Global_State.EventsManager.emit('increase')}} className='justify-content-center' variant="outline-primary" /* style={{ width: 60, height: 35, alignItems: 'center', justifyContent: 'center', padding: '0px 15px', borderWidth: 2, }} */ >Search</Button>
-                    </Form>
-                </Col>
-                    
-                <Col md = {{ span: 6, offset: 1 }}  >
 
-                    <Stack className='justify-content-md-end justify-content-center' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
+                            {/*<Col md = {5} >*/}
+                            {/*    <Form className="d-flex">*/}
+                            {/*        <Form.Control*/}
+                            {/*        type="search"*/}
+                            {/*        placeholder="Search"*/}
+                            {/*        className="me-2"*/}
+                            {/*        aria-label="Search"*/}
+                            {/*        value={pre.current}*/}
+                            {/*        />*/}
+                            {/*        <Button onClick={() => { console.log('handleClick'); Global_State.EventsManager.emit('increase')}} className='justify-content-center' variant="outline-primary" >Search</Button>*/}
+                            {/*    </Form>*/}
+                            {/*</Col>*/}
 
-                        <Notifications/>
-                            
-                        <QuickSettings />
+                            <div className={ 'd-flex justify-content-start' } >
 
-                        <Global_State.CustomDropDown id = 'userPanel' icon={dropTogglerContentUser} content={dropMenuItemsUser} />
-                    
-                    </Stack>
+                                    <Stack className='justify-content-md-end justify-content-center' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
 
-                </Col>
-              
-            </Navbar.Offcanvas>
-          </Container>
-        </Navbar>
+                                            <Notifications/>
+
+                                            <QuickSettings />
+
+                                            <Global_State.CustomDropDown id = 'userPanel' icon={dropTogglerContentUser} content={dropMenuItemsUser} />
+
+                                    </Stack>
+
+                            </div>
+
+                    </Navbar.Offcanvas>
+            </Container>
+    </Navbar>
     );
 }
 
@@ -333,246 +333,251 @@ function File_section()
 
 function Home()
 {
-    const [Data_Base, setData_base] = useState(null)
 
-    // useEffect(()=>(
-    //     console.log("Daaa a change !!!", Data_Base)
-    // ), [Data_Base])
+        document.onkeydown = function (e) {
+                if(e.ctrlKey && e.key === 'f') return false
+        }
 
-    // console.log("da", Data_Base);
+        const [Data_Base, setData_base] = useState(null)
 
-    // console.log(Data_Base)
+        // useEffect(()=>(
+        //     console.log("Daaa a change !!!", Data_Base)
+        // ), [Data_Base])
 
-    const container  = Data_Base === null ? <div className="preloader"> <div className="preloader-icon"></div> </div> : <Load datas ={JSON.parse(JSON.stringify(Data_Base))} />
+        // console.log("da", Data_Base);
 
-    function Load({datas})
-    {
-        // const initData = d
-        // const [le, setLe] = useState(initData)
-        // console.log("Leeeee", le);
-        Global_State = useGetData(JSON.parse(JSON.stringify(datas)))
-        console.log(Global_State)
+        // console.log(Data_Base)
 
-        const files = useGetFiles()
+        const container  = Data_Base === null ? <div className="preloader"> <div className="preloader-icon"></div> </div> : <Load datas ={JSON.parse(JSON.stringify(Data_Base))} />
 
-        const leftSideBar = <File_section/>;
+        function Load({datas})
+        {
+                // const initData = d
+                // const [le, setLe] = useState(initData)
+                // console.log("Leeeee", le);
+                Global_State = useGetData(JSON.parse(JSON.stringify(datas)))
+                console.log(Global_State)
 
-        const [ hide, setHide ] = useState(false)
+                const files = useGetFiles()
 
-        const overlaySideBar = 
-        <div className='d-xl-none' hidden = {hide} style={{ width: '100%', height: '100%', backgroundColor: 'red', position: 'absolute', zIndex: 999,}} >
-            <div />
-            {leftSideBar}
-        </div>
+                const leftSideBar = <File_section/>;
+
+                const [ hide, setHide ] = useState(false)
+
+                const overlaySideBar =
+                <div className='d-xl-none' hidden = {hide} style={{ width: '100%', height: '100%', backgroundColor: 'red', position: 'absolute', zIndex: 999,}} >
+                        <div />
+                        {leftSideBar}
+                </div>
+
+                return(
+                <div>
+                        <div>
+                                <Toaster
+                                // containerStyle={{ maxWidth: Infinity, }}
+                                toastOptions={{
+                                        // Define default options
+                                        className: '',
+                                        duration: 3000,
+                                        position: 'top-right',
+                                        style:
+                                        {
+                                                maxWidth: 1920,
+                                                // background: 'yellow',
+                                        },
+
+                                        // Default options for specific types
+                                        // success: {
+                                        //     duration: 3000,
+                                        //     theme: {
+                                        //         primary: 'green',
+                                        //         secondary: 'black',
+                                        //     },
+                                        // }
+                                }}
+                                />
+                        </div>
+                        {/* {overlaySideBar} */}
+                        {Global_State.modalManager.modal}
+
+                        <div className="layout-wrapper">
+
+                                <Stack direction="row" spacing={0.5} alignItems = 'center' justifyContent='flex-end' >
+                                        <Col xl = {1} className = 'd-none d-xl-block' >
+                                                {leftSideBar}
+                                        </Col>
+
+                                        <Col xl = {11} >
+
+                                                <Row sm = {1} style = {
+                                                        {
+                                                                position: 'sticky',
+                                                                top: 0,
+                                                                // width: '100%',
+                                                                backgroundColor: 'white',
+                                                                whiteSpace: 'normal',
+                                                                zIndex: 999,
+                                                        }}
+                                                >
+                                                        <Row>
+                                                                <div style={{ marginTop: 20, width: '100%', display: 'block' }} />
+                                                        </Row>
+                                                        <Row sm = {12} >
+                                                                <div style={{width: '100%', display: 'block' }} >
+                                                                        <Row >
+
+                                                                                <Col className='d-xl-none' md = {2} xs = {4} >
+                                                                                        {leftSideBar}
+                                                                                </Col>
+                                                                                <Col className='d-flex' md = {10} xs = {8} xl = {12} style={{padding: 0, alignItems: 'center'}}>
+                                                                                        <div style={{ width: '100%' }}>
+                                                                                                <Header />
+                                                                                        </div>
+                                                                                </Col>
+
+                                                                        </Row>
+                                                                </div>
+                                                        </Row>
+                                                </Row>
+
+                                                <Row sm = {11} >
+                                                        <div className="content-wrapper" style={{ width: '100%' }}>
+
+                                                                <div className="content-body">
+
+                                                                        <div className="content" style={{ paddingLeft: 0, paddingTop: 30, }} >
+                                                                                <div className="page-header d-flex justify-content-between">
+                                                                                        <h2>Files</h2>
+                                                                                        <a href="#" className="files-toggler">
+                                                                                                <i className="ti-menu"></i>
+                                                                                        </a>
+                                                                                </div>
+
+                                                                                <div className="row">
+                                                                                        <div className="col-xl-4 files-sidebar">
+                                                                                                <div className="card border-0">
+                                                                                                        <h6 className="card-title">My Folders</h6>
+                                                                                                        <div class="card">
+                                                                                                                <div class="card-body">
+                                                                                                                        <div class="card-scroll" >
+                                                                                                                                { files.fileTree }
+                                                                                                                        </div>
+                                                                                                                </div>
+                                                                                                        </div>
+                                                                                                </div>
+                                                                                        </div>
+                                                                                        { files.fileTable }
+                                                                                </div>
+
+
+                                                                        </div>
+
+                                                                        <footer className="content-footer d-print-none">
+                                                                                <div>© 2022 ESSOAZINA - <a href="https://www.anac-togo.tg" target="_blank">ANAC</a></div>
+                                                                                <div>
+                                                                                        <nav className="nav">
+                                                                                                <a href="https://themeforest.net/licenses/standard" className="nav-link">Licenses</a>
+                                                                                                <a href="#" className="nav-link">Change Log</a>
+                                                                                                <a href="#" className="nav-link">Get Help</a>
+                                                                                        </nav>
+                                                                                </div>
+                                                                        </footer>
+
+                                                                </div>
+
+
+
+                                                                <div className="sidebar-group d-print-none">
+
+                                                                        { files.fileDetails }
+
+                                                                        <div className="sidebar" id="settings">
+                                                                                <div className="sidebar-header">
+                                                                                        <h4>Settings</h4>
+                                                                                        <a href="#" className="btn btn-light btn-floating sidebar-close-btn">
+                                                                                                <i className="ti-angle-right"></i>
+                                                                                        </a>
+                                                                                </div>
+                                                                                <div className="sidebar-content">
+                                                                                        <ul className="list-group list-group-flush">
+                                                                                                <li className="list-group-item pl-0 pr-0">
+                                                                                                        <div className="custom-control custom-switch">
+                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch1" checked/>
+                                                                                                                <label className="custom-control-label" for="customSwitch1">Allow notifications.</label>
+                                                                                                        </div>
+                                                                                                </li>
+                                                                                                <li className="list-group-item pl-0 pr-0">
+                                                                                                        <div className="custom-control custom-switch">
+                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch2"/>
+                                                                                                                <label className="custom-control-label" for="customSwitch2">Hide user requests</label>
+                                                                                                        </div>
+                                                                                                </li>
+                                                                                                <li className="list-group-item pl-0 pr-0">
+                                                                                                        <div className="custom-control custom-switch">
+                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch3" checked/>
+                                                                                                                <label className="custom-control-label" for="customSwitch3">Speed up demands</label>
+                                                                                                        </div>
+                                                                                                </li>
+                                                                                                <li className="list-group-item pl-0 pr-0">
+                                                                                                        <div className="custom-control custom-switch">
+                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch4" checked/>
+                                                                                                                <label className="custom-control-label" for="customSwitch4">Hide menus</label>
+                                                                                                        </div>
+                                                                                                </li>
+                                                                                                <li className="list-group-item pl-0 pr-0">
+                                                                                                        <div className="custom-control custom-switch">
+                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch5"/>
+                                                                                                                <label className="custom-control-label" for="customSwitch5">Remember next visits</label>
+                                                                                                        </div>
+                                                                                                </li>
+                                                                                                <li className="list-group-item pl-0 pr-0">
+                                                                                                        <div className="custom-control custom-switch">
+                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch6"/>
+                                                                                                                <label className="custom-control-label" for="customSwitch6">Enable report
+                                                                                                                        generation.</label>
+                                                                                                        </div>
+                                                                                                </li>
+                                                                                        </ul>
+                                                                                </div>
+                                                                        </div>
+
+                                                                </div>
+
+                                                        </div>
+                                                </Row>
+
+                                        </Col>
+
+                                </Stack>
+
+
+
+
+                        </div>
+
+                </div>
+                )
+        }
+
+
+        useEffect(() => {
+                async function FetchData()
+                {
+                        const Datas = await getFromDataBase()
+                        setData_base(Datas)
+
+                }
+                FetchData()
+        }, [])
+
+        console.log("render")
+
+
+
 
         return(
-            <div>
-            <div>
-                <Toaster
-                    // containerStyle={{ maxWidth: Infinity, }}
-                    toastOptions={{
-                        // Define default options
-                        className: '',
-                        duration: 3000,
-                        position: 'top-right',
-                        style: 
-                        {
-                            maxWidth: 1920,
-                            // background: 'yellow',
-                        },
-
-                        // Default options for specific types
-                        // success: {
-                        //     duration: 3000,
-                        //     theme: {
-                        //         primary: 'green',
-                        //         secondary: 'black',
-                        //     },
-                        // }
-                    }}
-                />
-            </div>
-            {/* {overlaySideBar} */}
-            {Global_State.modalManager.modal}
-            
-            <div className="layout-wrapper">
-
-                <Stack direction="row" spacing={0.5} alignItems = 'center' justifyContent='flex-end' >
-                    <Col xl = {1} className = 'd-none d-xl-block' >
-                        {leftSideBar}
-                    </Col>
-
-                    <Col xl = {11} >
-                        
-                        <Row sm = {1} style = {
-                            { 
-                                position: 'sticky', 
-                                top: 0, 
-                                // width: '100%',
-                                backgroundColor: 'white',
-                                whiteSpace: 'normal',
-                                zIndex: 999,
-                            }} 
-                            >
-                            <Row>
-                                <div style={{ marginTop: 30, width: '100%', display: 'block' }} />
-                            </Row>
-                            <Row sm = {12} >
-                                <div style={{width: '100%', display: 'block' }} >
-                                    <Row >
-
-                                        <Col className='d-xl-none' md = {2} xs = {4} >
-                                            {leftSideBar}
-                                        </Col>
-                                        <Col className='d-flex' md = {10} xs = {8} xl = {12} style={{padding: 0, alignItems: 'center'}}>
-                                            <div style={{ width: '100%' }}>
-                                                <Header />
-                                            </div>
-                                        </Col>
-
-                                    </Row>
-                                </div>
-                            </Row>
-                        </Row>
-
-                        <Row sm = {11} >
-                            <div className="content-wrapper" style={{ width: '100%' }}>
-                                
-                                <div className="content-body">
-                                    
-                                    <div className="content" style={{ paddingLeft: 0, paddingTop: 30, }} >
-                                        <div className="page-header d-flex justify-content-between">
-                                            <h2>Files</h2>
-                                            <a href="#" className="files-toggler">
-                                                <i className="ti-menu"></i>
-                                            </a>
-                                        </div>
-
-                                        <div className="row">
-                                            <div className="col-xl-4 files-sidebar">
-                                                <div className="card border-0">
-                                                    <h6 className="card-title">My Folders</h6>
-                                                    <div class="card">
-                                                        <div class="card-body">
-                                                            <div class="card-scroll" >
-                                                            { files.fileTree }
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            { files.fileTable }
-                                        </div>
-
-
-                                    </div>
-                                
-                                    <footer className="content-footer d-print-none">
-                                        <div>© 2022 ESSOAZINA - <a href="https://www.anac-togo.tg" target="_blank">ANAC</a></div>
-                                        <div>
-                                            <nav className="nav">
-                                                <a href="https://themeforest.net/licenses/standard" className="nav-link">Licenses</a>
-                                                <a href="#" className="nav-link">Change Log</a>
-                                                <a href="#" className="nav-link">Get Help</a>
-                                            </nav>
-                                        </div>
-                                    </footer>
-                                    
-                                </div>
-                                
-
-                                
-                                <div className="sidebar-group d-print-none">
-                                    
-                                    { files.fileDetails }
-
-                                    <div className="sidebar" id="settings">
-                                        <div className="sidebar-header">
-                                            <h4>Settings</h4>
-                                            <a href="#" className="btn btn-light btn-floating sidebar-close-btn">
-                                                <i className="ti-angle-right"></i>
-                                            </a>
-                                        </div>
-                                        <div className="sidebar-content">
-                                            <ul className="list-group list-group-flush">
-                                                <li className="list-group-item pl-0 pr-0">
-                                                    <div className="custom-control custom-switch">
-                                                        <input type="checkbox" className="custom-control-input" id="customSwitch1" checked/>
-                                                        <label className="custom-control-label" for="customSwitch1">Allow notifications.</label>
-                                                    </div>
-                                                </li>
-                                                <li className="list-group-item pl-0 pr-0">
-                                                    <div className="custom-control custom-switch">
-                                                        <input type="checkbox" className="custom-control-input" id="customSwitch2"/>
-                                                        <label className="custom-control-label" for="customSwitch2">Hide user requests</label>
-                                                    </div>
-                                                </li>
-                                                <li className="list-group-item pl-0 pr-0">
-                                                    <div className="custom-control custom-switch">
-                                                        <input type="checkbox" className="custom-control-input" id="customSwitch3" checked/>
-                                                        <label className="custom-control-label" for="customSwitch3">Speed up demands</label>
-                                                    </div>
-                                                </li>
-                                                <li className="list-group-item pl-0 pr-0">
-                                                    <div className="custom-control custom-switch">
-                                                        <input type="checkbox" className="custom-control-input" id="customSwitch4" checked/>
-                                                        <label className="custom-control-label" for="customSwitch4">Hide menus</label>
-                                                    </div>
-                                                </li>
-                                                <li className="list-group-item pl-0 pr-0">
-                                                    <div className="custom-control custom-switch">
-                                                        <input type="checkbox" className="custom-control-input" id="customSwitch5"/>
-                                                        <label className="custom-control-label" for="customSwitch5">Remember next visits</label>
-                                                    </div>
-                                                </li>
-                                                <li className="list-group-item pl-0 pr-0">
-                                                    <div className="custom-control custom-switch">
-                                                        <input type="checkbox" className="custom-control-input" id="customSwitch6"/>
-                                                        <label className="custom-control-label" for="customSwitch6">Enable report
-                                                            generation.</label>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
-                                
-                            </div>
-                        </Row>
-
-                    </Col>
-
-                </Stack>
-                
-                
-
-                
-            </div>
-            
-        </div>
-        )
-    }
-
-
-    useEffect(() => {
-        async function FetchData()
-    {
-        const Datas = await getFromDataBase()
-        setData_base(Datas)
-        
-    }
-        FetchData()
-    }, [])
-
-    console.log("render")
-
-            
-    
-
-    return(
         <React.Fragment>
-            {container}
+                {container}
         </React.Fragment>
         )
 }
