@@ -25,14 +25,30 @@ import { alpha, styled } from '@mui/material/styles';
 
 export let backend
 
-export default function useGetFiles() {
+export default function useGetFiles(Global_research) {
 
         useEffect(
                 () =>
                 {
                         const handleKeyDown = (e) =>
                         {
-                                if(e.ctrlKey && e.key === 'f') console.log('find node')
+                                if(e.ctrlKey && e.key === 'f')
+                                {
+                                        console.log('find node')
+                                        Global_State.setOverlay_props( t => (
+                                                {
+                                                        ...t,
+                                                        style:
+                                                        {
+                                                                ...t.style,
+                                                                display: 'flex',
+                                                                alignItems: 'start',
+                                                                justifyContent: 'center'
+                                                        },
+                                                        children: Global_research
+                                                }
+                                        ) )
+                                }
                         }
 
                         document.addEventListener('keyup', handleKeyDown);

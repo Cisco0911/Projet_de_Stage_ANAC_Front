@@ -28,11 +28,23 @@ import { alpha, styled } from '@mui/material/styles';
 
 export var backend = void 0;
 
-export default function useGetFiles() {
+export default function useGetFiles(Global_research) {
 
         useEffect(function () {
                 var handleKeyDown = function handleKeyDown(e) {
-                        if (e.ctrlKey && e.key === 'f') console.log('find node');
+                        if (e.ctrlKey && e.key === 'f') {
+                                console.log('find node');
+                                Global_State.setOverlay_props(function (t) {
+                                        return Object.assign({}, t, {
+                                                style: Object.assign({}, t.style, {
+                                                        display: 'flex',
+                                                        alignItems: 'start',
+                                                        justifyContent: 'center'
+                                                }),
+                                                children: Global_research
+                                        });
+                                });
+                        }
                 };
 
                 document.addEventListener('keyup', handleKeyDown);

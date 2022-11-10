@@ -1642,12 +1642,30 @@ export default function useGetData(TheDatas) {
         //   }, [ref]);
         // }
 
+        var _useState23 = useState({
+                style: {
+                        display: 'none',
+                        position: 'fixed',
+                        top: '0',
+                        left: '0',
+                        zIndex: '1040',
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: '#00000000'
+                        // opacity: 0.5,
+                } }),
+            _useState24 = _slicedToArray(_useState23, 2),
+            Overlay_props = _useState24[0],
+            setOverlay_props = _useState24[1];
+
+        var Overlay_component = React.createElement("div", Overlay_props);
 
         return Object.assign({}, Global_State, {
                 // EventsManager,
                 // isEditorMode,
                 authUser: Data_Base.authUser,
                 // dataBaseData: FetchedNodesData,
+                dataToUse: dataToUse,
                 hasSection: Data_Base.data.sections.length !== 0,
                 value: displayingSection,
                 jsonValue: dataParsedToJson,
@@ -1675,7 +1693,9 @@ export default function useGetData(TheDatas) {
                 identifyNode: identifyNode,
                 toggleCleared: toggleCleared,
                 clearSelected: clearSelected,
-                CustomDropDown: CustomDropDown
+                CustomDropDown: CustomDropDown,
+                Overlay_component: Overlay_component,
+                setOverlay_props: setOverlay_props
         });
 }
 

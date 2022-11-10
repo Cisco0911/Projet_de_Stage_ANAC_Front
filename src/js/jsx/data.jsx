@@ -1466,6 +1466,20 @@ export default function useGetData(TheDatas)
         //   }, [ref]);
         // }
 
+        const [Overlay_props, setOverlay_props] = useState({
+                style: {
+                        display: 'none',
+                        position: 'fixed',
+                        top: '0',
+                        left: '0',
+                        zIndex: '1040',
+                        width: '100vw',
+                        height: '100vh',
+                        backgroundColor: '#00000000',
+                        // opacity: 0.5,
+                } }
+        )
+        const Overlay_component = <div {...Overlay_props}  />
 
         return (
                 {
@@ -1474,6 +1488,7 @@ export default function useGetData(TheDatas)
                         // isEditorMode,
                         authUser: Data_Base.authUser,
                         // dataBaseData: FetchedNodesData,
+                        dataToUse,
                         hasSection: Data_Base.data.sections.length !== 0,
                         value: displayingSection,
                         jsonValue: dataParsedToJson,
@@ -1498,6 +1513,8 @@ export default function useGetData(TheDatas)
                         toggleCleared,
                         clearSelected,
                         CustomDropDown,
+                        Overlay_component,
+                        setOverlay_props,
                 }
         )
 

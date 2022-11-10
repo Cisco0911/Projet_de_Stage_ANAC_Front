@@ -1,5 +1,8 @@
 
-#tree div::-webkit-scrollbar, .dropdown-menu::-webkit-scrollbar, #muiTree::-webkit-scrollbar {
+#tree div::-webkit-scrollbar,
+.dropdown-menu::-webkit-scrollbar,
+#muiTree::-webkit-scrollbar,
+#global_research_result div::-webkit-scrollbar {
   display: none;
 }
 
@@ -43,7 +46,6 @@
     display: flex;
     align-items: center;
     margin: 0 12px;
-    display: flex;
     width: max-content !important;
     border: 2px solid transparent;
     border-radius: 10px;

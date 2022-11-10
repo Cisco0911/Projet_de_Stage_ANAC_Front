@@ -33,6 +33,13 @@ import { styled, Theme, createTheme, ThemeProvider } from '@mui/material/styles'
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import Card from '@mui/material/Card';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import List from '@mui/material/List';
@@ -119,77 +126,111 @@ function Lol({lal}) {
 </li>*/
 
 
+function Global_research({display})
+{
+
+        const [value, setValue] = useState('')
+        // const [result_display, setDiaplay] = useState('d-none')
+
+        const handleChange = (e) =>
+        {
+                e.stopPropagation()
+                setValue(e.target.value)
+                // if (e.target.value.length > 0) setDiaplay('d-flex')
+                // else setDiaplay('d-none')
+        }
+
+        return(
+                <div  >
+                        <Form id={'global_research'} className ={`${display} container-fluid`} >
+                                <Form.Control
+                                type="search"
+                                placeholder="Search"
+                                className="me-2"
+                                aria-label="Search"
+                                value={value}
+                                onChange={handleChange}
+                                />
+                        </Form>
+
+                        <Card id={'global_research_result'} className={`${value === '' ? 'd-none' : 'd-flex'} mt-1 p-1`} sx={{ maxHeight: 3*window.innerHeight/4,  }} >
+                                <TableContainer component={Paper}>
+                                        <Table aria-label="simple table">
+                                                <TableBody>
+                                                        {
+                                                                Global_State.dataToUse.filter(
+                                                                        node => ( value !== '' ? node.name.indexOf(value) !== -1 : false)
+                                                                ).map((node) => (
+                                                                                <TableRow
+                                                                                        key={node.id}
+                                                                                        className={'m-1'}
+                                                                                        sx={{ margin: 5 }}
+                                                                                >
+                                                                                        <TableCell component="th" scope="row">
+                                                                                                {node.name}
+                                                                                        </TableCell>
+                                                                                        <TableCell align="left">{node.path}</TableCell>
+                                                                                </TableRow>
+                                                                        )
+                                                                )
+                                                        }
+                                                </TableBody>
+                                        </Table>
+                                </TableContainer>
+                        </Card>
+
+                </div>
+        )
+}
+
+
 function Header() 
 {
 
-    const dropMenuItemsUser = (
+        const dropMenuItemsUser = (
         <React.Fragment>
-            <div className=" d-flex flex-column justify-content-center align-items-center py-4" data-background-image="./style/assets/media/image/user/man_avatar3.jpg" style={{background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100}} >
-            <Avatar alt={`${Global_State.authUser.name} ${Global_State.authUser.second_name}`} src="./style/assets/media/image/user/man_avatar3.jpg" />
-            <h5 className="mb-0">{`${Global_State.authUser.name} ${Global_State.authUser.second_name}`}</h5>
-            </div>
-            <div className="dropdown-divider"/>
-            <a className="list-group-item text-danger" >Sign Out!</a>
+                <div className=" d-flex flex-column justify-content-center align-items-center py-4" data-background-image="./style/assets/media/image/user/man_avatar3.jpg" style={{background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100}} >
+                        <Avatar alt={`${Global_State.authUser.name} ${Global_State.authUser.second_name}`} src="./style/assets/media/image/user/man_avatar3.jpg" />
+                        <h5 className="mb-0">{`${Global_State.authUser.name} ${Global_State.authUser.second_name}`}</h5>
+                </div>
+                <div className="dropdown-divider"/>
+                <a className="list-group-item text-danger" >Sign Out!</a>
         </React.Fragment>
-    )
-    const dropTogglerContentUser = (
+        )
+        const dropTogglerContentUser = (
         <React.Fragment>
-            <Typography variant='userDropButton' >
-                <Stack className=''  direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
-                    <span className='m-5' > {`${Global_State.authUser.name} ${Global_State.authUser.second_name}`} </span>
-                        
-                    <Avatar sx={{ bgcolor: 'green' }}>N</Avatar>
-                    <MdOutlineArrowDropDownCircle />
-                </Stack>
-            </Typography>
+                <Typography variant='userDropButton' >
+                        <Stack className=''  direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
+                                <span className='m-5' > {`${Global_State.authUser.name} ${Global_State.authUser.second_name}`} </span>
+
+                                <Avatar sx={{ bgcolor: 'green' }}>N</Avatar>
+                                <MdOutlineArrowDropDownCircle />
+                        </Stack>
+                </Typography>
         </React.Fragment>
-    )
+        )
 
-    const [value, setValue] = useState(0)
-    const pre = {'current': value}
 
-    
-    Global_State.EventsManager.once('increase', () => { console.log('increase' + value); setValue(value + 100) })
-
-    useEffect(
-        () =>
-        {
-            console.log('value', value)
-            pre.current = value
-        }, [value]
-    )
-
-    useEffect(
-        () =>
-        {
-            return () => 
-            {
-                Global_State.EventsManager.off('increase');
-            }
-        },
-        []
-    )
-
-    return (
+        return (
         <Navbar /* bg="light"  */ expand="sm" style={{padding: 0}}>
-            <Container fluid style={{ justifyContent: 'end', alignItems: 'start', paddingRight: '15px', }} >
-                    {/* <Navbar.Brand href="#">Navbar scroll</Navbar.Brand> */}
-                    <Navbar.Toggle className='p-0  justify-content-start align-items-start d-flex d-sm-none' aria-controls={`offcanvasNavbar-expand-${'sm'}`} children = {<GiOverhead size={40} />}
-                           style={{
-                                   width: 60,
-                                   color: 'rgb(0 0 0)',
-                                   transform: 'rotateY(180deg)',
-                                   paddingLeft: 17,
-                                   border: 'none',
-                           }} />
-                    <Navbar.Offcanvas
-                    id={`offcanvasNavbar-expand-${'sm'}`}
-                    aria-labelledby={`offcanvasNavbarLabel-expand-${'sm'}`}
-                    placement="top"
-                    className = 'container-fluid d-flex flex-row justify-content-end'
-                    style={{/* width: '100%' */ padding: 0}}
-                    >
-                            {/* <Nav
+                <Container fluid style={{ justifyContent: 'end', alignItems: 'start', paddingRight: '15px', }} >
+                        {/* <Navbar.Brand href="#">Navbar scroll</Navbar.Brand> */}
+                        <Navbar.Toggle className='p-0  justify-content-start align-items-start d-flex d-sm-none' aria-controls={`offcanvasNavbar-expand-${'sm'}`} children = {<GiOverhead size={40} />}
+                                       style={{
+                                               width: 60,
+                                               color: 'rgb(0 0 0)',
+                                               transform: 'rotateY(180deg)',
+                                               paddingLeft: 17,
+                                               border: 'none',
+                                       }} />
+                        <Navbar.Offcanvas
+                        id={`offcanvasNavbar-expand-${'sm'}`}
+                        aria-labelledby={`offcanvasNavbarLabel-expand-${'sm'}`}
+                        placement="top"
+                        className = 'container-fluid d-flex flex-row justify-content-end'
+                        style={{/* width: '100%' */ height: 105, padding: 0}}
+                        >
+                                {/* <Nav
                 className="me-auto my-2 my-lg-0"
                 style={{ maxHeight: '100px' }}
                 navbarScroll
@@ -220,37 +261,39 @@ function Header()
                 <Button variant="outline-success">Search</Button>
             </Form> */}
 
-                            {/*<Col md = {5} >*/}
-                            {/*    <Form className="d-flex">*/}
-                            {/*        <Form.Control*/}
-                            {/*        type="search"*/}
-                            {/*        placeholder="Search"*/}
-                            {/*        className="me-2"*/}
-                            {/*        aria-label="Search"*/}
-                            {/*        value={pre.current}*/}
-                            {/*        />*/}
-                            {/*        <Button onClick={() => { console.log('handleClick'); Global_State.EventsManager.emit('increase')}} className='justify-content-center' variant="outline-primary" >Search</Button>*/}
-                            {/*    </Form>*/}
-                            {/*</Col>*/}
+                                {/*<Col md = {5} >*/}
+                                {/*    <Form className="d-flex">*/}
+                                {/*        <Form.Control*/}
+                                {/*        type="search"*/}
+                                {/*        placeholder="Search"*/}
+                                {/*        className="me-2"*/}
+                                {/*        aria-label="Search"*/}
+                                {/*        value={pre.current}*/}
+                                {/*        />*/}
+                                {/*        <Button onClick={() => { console.log('handleClick'); Global_State.EventsManager.emit('increase')}} className='justify-content-center' variant="outline-primary" >Search</Button>*/}
+                                {/*    </Form>*/}
+                                {/*</Col>*/}
 
-                            <div className={ 'd-flex justify-content-start' } >
+                                <div className={ 'd-flex justify-content-start flex-column container-fluid' } >
 
-                                    <Stack className='justify-content-md-end justify-content-center' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
+                                        <Stack className='justify-content-md-end justify-content-center m-2' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
 
-                                            <Notifications/>
+                                                <Notifications/>
 
-                                            <QuickSettings />
+                                                <QuickSettings />
 
-                                            <Global_State.CustomDropDown id = 'userPanel' icon={dropTogglerContentUser} content={dropMenuItemsUser} />
+                                                <Global_State.CustomDropDown id = 'userPanel' icon={dropTogglerContentUser} content={dropMenuItemsUser} />
 
-                                    </Stack>
+                                        </Stack>
 
-                            </div>
+                                        <Global_research display={'d-flex d-sm-none'} />
 
-                    </Navbar.Offcanvas>
-            </Container>
-    </Navbar>
-    );
+                                </div>
+
+                        </Navbar.Offcanvas>
+                </Container>
+        </Navbar>
+        );
 }
 
 
@@ -358,7 +401,7 @@ function Home()
                 Global_State = useGetData(JSON.parse(JSON.stringify(datas)))
                 console.log(Global_State)
 
-                const files = useGetFiles()
+                const files = useGetFiles(<Global_research display={'d-none d-sm-flex'} />)
 
                 const leftSideBar = <File_section/>;
 
@@ -398,6 +441,7 @@ function Home()
                                 />
                         </div>
                         {/* {overlaySideBar} */}
+                        {Global_State.Overlay_component}
                         {Global_State.modalManager.modal}
 
                         <div className="layout-wrapper">
