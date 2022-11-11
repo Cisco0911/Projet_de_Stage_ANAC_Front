@@ -45,7 +45,10 @@ export default function useGetFiles(Global_research) {
                                                                 alignItems: 'start',
                                                                 justifyContent: 'center'
                                                         },
-                                                        children: Global_research
+                                                        children:
+                                                                <div style={{ width: "max-content", marginTop: 15 }} >
+                                                                        {Global_research}
+                                                                </div>
                                                 }
                                         ) )
                                 }

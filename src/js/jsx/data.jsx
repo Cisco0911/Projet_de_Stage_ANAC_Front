@@ -542,7 +542,7 @@ export default function useGetData(TheDatas)
                                         "audit",
                                         false,
                                         '0',
-                                        "",
+                                        " audit_paaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaath",
                                         true,
                                         undefined,
                                         audit.user,
@@ -1479,7 +1479,22 @@ export default function useGetData(TheDatas)
                         // opacity: 0.5,
                 } }
         )
-        const Overlay_component = <div {...Overlay_props}  />
+        const Overlay_component = <div {...Overlay_props} onClick={ (e) =>
+                {
+                        e.stopPropagation();
+                        setOverlay_props(t => (
+                                        {
+                                                ...t,
+                                                style:
+                                                {
+                                                        ...t.style,
+                                                        display: 'none',
+                                                },
+                                        }
+                                )
+                        )
+                }
+        }  />
 
         return (
                 {

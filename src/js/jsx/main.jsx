@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom/client';
 import toast from "react-hot-toast";
 
 import useGetFiles from './files_package/files';
+import Global_research from "./files_package/global_research";
 import Login from "./auth/login";
 import { http } from "./data";
 import { backend } from "./files_package/files";
@@ -55,6 +56,7 @@ import {Toaster} from "react-hot-toast";
 
 // import './files.js';
 import EventEmitter from 'eventemitter3';
+import zIndex from "@mui/material/styles/zIndex";
 
 export const test = "Success"
 
@@ -125,63 +127,6 @@ function Lol({lal}) {
     </a>
 </li>*/
 
-
-function Global_research({display})
-{
-
-        const [value, setValue] = useState('')
-        // const [result_display, setDiaplay] = useState('d-none')
-
-        const handleChange = (e) =>
-        {
-                e.stopPropagation()
-                setValue(e.target.value)
-                // if (e.target.value.length > 0) setDiaplay('d-flex')
-                // else setDiaplay('d-none')
-        }
-
-        return(
-                <div  >
-                        <Form id={'global_research'} className ={`${display} container-fluid`} >
-                                <Form.Control
-                                type="search"
-                                placeholder="Search"
-                                className="me-2"
-                                aria-label="Search"
-                                value={value}
-                                onChange={handleChange}
-                                />
-                        </Form>
-
-                        <Card id={'global_research_result'} className={`${value === '' ? 'd-none' : 'd-flex'} mt-1 p-1`} sx={{ maxHeight: 3*window.innerHeight/4,  }} >
-                                <TableContainer component={Paper}>
-                                        <Table aria-label="simple table">
-                                                <TableBody>
-                                                        {
-                                                                Global_State.dataToUse.filter(
-                                                                        node => ( value !== '' ? node.name.indexOf(value) !== -1 : false)
-                                                                ).map((node) => (
-                                                                                <TableRow
-                                                                                        key={node.id}
-                                                                                        className={'m-1'}
-                                                                                        sx={{ margin: 5 }}
-                                                                                >
-                                                                                        <TableCell component="th" scope="row">
-                                                                                                {node.name}
-                                                                                        </TableCell>
-                                                                                        <TableCell align="left">{node.path}</TableCell>
-                                                                                </TableRow>
-                                                                        )
-                                                                )
-                                                        }
-                                                </TableBody>
-                                        </Table>
-                                </TableContainer>
-                        </Card>
-
-                </div>
-        )
-}
 
 
 function Header() 

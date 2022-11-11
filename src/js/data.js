@@ -620,7 +620,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator3 = audits[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
                                 var audit = _step3.value;
 
-                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', "", true, undefined, audit.user, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', " audit_paaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaath", true, undefined, audit.user, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined));
                         }
 
                         // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
@@ -1658,7 +1658,16 @@ export default function useGetData(TheDatas) {
             Overlay_props = _useState24[0],
             setOverlay_props = _useState24[1];
 
-        var Overlay_component = React.createElement("div", Overlay_props);
+        var Overlay_component = React.createElement("div", Object.assign({}, Overlay_props, { onClick: function onClick(e) {
+                        e.stopPropagation();
+                        setOverlay_props(function (t) {
+                                return Object.assign({}, t, {
+                                        style: Object.assign({}, t.style, {
+                                                display: 'none'
+                                        })
+                                });
+                        });
+                } }));
 
         return Object.assign({}, Global_State, {
                 // EventsManager,

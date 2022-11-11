@@ -41,7 +41,11 @@ export default function useGetFiles(Global_research) {
                                                         alignItems: 'start',
                                                         justifyContent: 'center'
                                                 }),
-                                                children: Global_research
+                                                children: React.createElement(
+                                                        "div",
+                                                        { style: { width: "max-content", marginTop: 15 } },
+                                                        Global_research
+                                                )
                                         });
                                 });
                         }

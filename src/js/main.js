@@ -12,6 +12,7 @@ import ReactDOM from 'react-dom/client';
 import toast from "react-hot-toast";
 
 import useGetFiles from './files_package/files';
+import Global_research from "./files_package/global_research";
 import Login from "./auth/login";
 import { http } from "./data";
 import { backend } from "./files_package/files";
@@ -61,6 +62,7 @@ import { Toaster } from "react-hot-toast";
 
 // import './files.js';
 import EventEmitter from 'eventemitter3';
+import zIndex from "@mui/material/styles/zIndex";
 
 export var test = "Success";
 
@@ -139,78 +141,6 @@ function Lol(_ref) {
         <span className="badge badge-warning">New</span>
     </a>
 </li>*/
-
-function Global_research(_ref2) {
-        var display = _ref2.display;
-
-        var _useState5 = useState(''),
-            _useState6 = _slicedToArray(_useState5, 2),
-            value = _useState6[0],
-            setValue = _useState6[1];
-        // const [result_display, setDiaplay] = useState('d-none')
-
-        var handleChange = function handleChange(e) {
-                e.stopPropagation();
-                setValue(e.target.value);
-                // if (e.target.value.length > 0) setDiaplay('d-flex')
-                // else setDiaplay('d-none')
-        };
-
-        return React.createElement(
-                'div',
-                null,
-                React.createElement(
-                        Form,
-                        { id: 'global_research', className: display + ' container-fluid' },
-                        React.createElement(Form.Control, {
-                                type: 'search',
-                                placeholder: 'Search',
-                                className: 'me-2',
-                                'aria-label': 'Search',
-                                value: value,
-                                onChange: handleChange
-                        })
-                ),
-                React.createElement(
-                        Card,
-                        { id: 'global_research_result', className: (value === '' ? 'd-none' : 'd-flex') + ' mt-1 p-1', sx: { maxHeight: 3 * window.innerHeight / 4 } },
-                        React.createElement(
-                                TableContainer,
-                                { component: Paper },
-                                React.createElement(
-                                        Table,
-                                        { 'aria-label': 'simple table' },
-                                        React.createElement(
-                                                TableBody,
-                                                null,
-                                                Global_State.dataToUse.filter(function (node) {
-                                                        return value !== '' ? node.name.indexOf(value) !== -1 : false;
-                                                }).map(function (node) {
-                                                        return React.createElement(
-                                                                TableRow,
-                                                                {
-                                                                        key: node.id,
-                                                                        className: 'm-1',
-                                                                        sx: { margin: 5 }
-                                                                },
-                                                                React.createElement(
-                                                                        TableCell,
-                                                                        { component: 'th', scope: 'row' },
-                                                                        node.name
-                                                                ),
-                                                                React.createElement(
-                                                                        TableCell,
-                                                                        { align: 'left' },
-                                                                        node.path
-                                                                )
-                                                        );
-                                                })
-                                        )
-                                )
-                        )
-                )
-        );
-}
 
 function Header() {
 
@@ -411,10 +341,10 @@ function Home() {
                 if (e.ctrlKey && e.key === 'f') return false;
         };
 
-        var _useState7 = useState(null),
-            _useState8 = _slicedToArray(_useState7, 2),
-            Data_Base = _useState8[0],
-            setData_base = _useState8[1];
+        var _useState5 = useState(null),
+            _useState6 = _slicedToArray(_useState5, 2),
+            Data_Base = _useState6[0],
+            setData_base = _useState6[1];
 
         // useEffect(()=>(
         //     console.log("Daaa a change !!!", Data_Base)
@@ -432,8 +362,8 @@ function Home() {
                 ' '
         ) : React.createElement(Load, { datas: JSON.parse(JSON.stringify(Data_Base)) });
 
-        function Load(_ref4) {
-                var datas = _ref4.datas;
+        function Load(_ref3) {
+                var datas = _ref3.datas;
 
                 // const initData = d
                 // const [le, setLe] = useState(initData)
@@ -445,10 +375,10 @@ function Home() {
 
                 var leftSideBar = React.createElement(File_section, null);
 
-                var _useState9 = useState(false),
-                    _useState10 = _slicedToArray(_useState9, 2),
-                    hide = _useState10[0],
-                    setHide = _useState10[1];
+                var _useState7 = useState(false),
+                    _useState8 = _slicedToArray(_useState7, 2),
+                    hide = _useState8[0],
+                    setHide = _useState8[1];
 
                 var overlaySideBar = React.createElement(
                         'div',
@@ -766,7 +696,7 @@ function Home() {
 
         useEffect(function () {
                 var FetchData = function () {
-                        var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
+                        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
                                 var Datas;
                                 return _regeneratorRuntime.wrap(function _callee2$(_context2) {
                                         while (1) {
@@ -789,7 +719,7 @@ function Home() {
                         }));
 
                         return function FetchData() {
-                                return _ref5.apply(this, arguments);
+                                return _ref4.apply(this, arguments);
                         };
                 }();
 
@@ -806,14 +736,14 @@ function Home() {
 }
 
 function Page() {
-        var _useState11 = useState(React.createElement(
+        var _useState9 = useState(React.createElement(
                 'div',
                 null,
                 'ANAC'
         )),
-            _useState12 = _slicedToArray(_useState11, 2),
-            container = _useState12[0],
-            setContainer = _useState12[1];
+            _useState10 = _slicedToArray(_useState9, 2),
+            container = _useState10[0],
+            setContainer = _useState10[1];
 
         useEffect(function () {
                 function checkAuthState() {
