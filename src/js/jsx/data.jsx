@@ -235,7 +235,7 @@ export const getFromDataBase = async () =>
 export default function useGetData(TheDatas)
 {
 
-        console.log('checking')
+        console.log('checking', TheDatas)
 
 
         const [authUser, updateAuthUserInfo] = useState(TheDatas.authUser)
@@ -530,6 +530,104 @@ export default function useGetData(TheDatas)
                         }
                 )})
 
+                const getPath = (id, node_type) =>
+                {
+                        for (const node of allDataAsNodeData)
+                        {
+                              if (node.id === id + node_type)  return node.path
+                        }
+
+                        switch (node_type)
+                        {
+                                case 'audit':
+                                {
+                                        let audit
+
+                                        for (const auditElement of  Data_Base.data.audits)
+                                        {
+                                                // console.log('paath audit ', id, '  ', auditElement.id)
+                                                if(auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement))
+                                        }
+
+                                        return `${getPath(audit.section_id, '')}\\${audit.name}\\`
+                                }
+                                case 'checkList':
+                                {
+                                        let checkList
+
+                                        for (const checkListElement of  Data_Base.data.checkLists)
+                                        {
+                                                if(checkListElement.id === id) checkList = JSON.parse(JSON.stringify(checkListElement))
+                                        }
+
+                                        return `${getPath(checkList.audit_id, 'audit')}\\${checkList.name}\\`
+                                }
+                                case 'dp':
+                                {
+                                        let dp
+
+                                        for (const dpElement of  Data_Base.data.dps)
+                                        {
+                                                if(dpElement.id === id) dp = JSON.parse(JSON.stringify(dpElement))
+                                        }
+
+                                        return `${getPath(dp.audit_id, 'audit')}\\${dp.name}\\`
+                                }
+                                case 'nonC':
+                                {
+                                        let nc
+
+                                        for (const ncElement of  Data_Base.data.nonCs)
+                                        {
+                                                if(ncElement.id === id) nc = JSON.parse(JSON.stringify(ncElement))
+                                        }
+
+                                        return `${getPath(nc.audit_id, 'audit')}\\${nc.name}\\`
+                                }
+                                case 'fnc':
+                                {
+                                        let fnc
+
+                                        for (const fncElement of  Data_Base.data.fncs)
+                                        {
+                                                if(fncElement.id === id) fnc = JSON.parse(JSON.stringify(fncElement))
+                                        }
+
+                                        return `${getPath(fnc.nc_id, 'nonC')}\\${fnc.name}\\`
+                                }
+                                case 'ds':
+                                {
+                                        let folder
+
+                                        for (const ds of  Data_Base.data.ds)
+                                        {
+                                                if(ds.id === id) folder = JSON.parse(JSON.stringify(ds))
+                                        }
+
+                                        return `${getPath(folder.parent_id, folder.parent_type)}\\${folder.name}\\`
+                                }
+                                case 'f':
+                                {
+                                        let file
+
+                                        for (const f of  Data_Base.data.fs)
+                                        {
+                                                if(f.id === id) file = JSON.parse(JSON.stringify(f))
+                                        }
+
+                                        return `${getPath(file.parent_id, file.parent_type)}\\${file.name}`
+                                }
+                                default:
+                                {
+                                        for (const section of  Data_Base.data.sections)
+                                        {
+                                                if(section.id === id) return `${section.name}:\\`
+                                        }
+                                }
+                        }
+
+                }
+
                 // audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19)
                 for(let audit of audits) {
                         allDataAsNodeData.push(
@@ -542,7 +640,7 @@ export default function useGetData(TheDatas)
                                         "audit",
                                         false,
                                         '0',
-                                        " audit_paaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaath",
+                                        getPath(parseInt(audit.id.substring(5), 10), 'audit'),
                                         true,
                                         undefined,
                                         audit.user,
@@ -568,7 +666,7 @@ export default function useGetData(TheDatas)
                                         "checkList",
                                         false,
                                         "audit" + checkList.audit_id,
-                                        "",
+                                        getPath(parseInt(checkList.id.substring(9), 10), 'checkList'),
                                         true,
                                         undefined,
                                         undefined,
@@ -594,7 +692,7 @@ export default function useGetData(TheDatas)
                                         "dp",
                                         false,
                                         "audit" + dp.audit_id,
-                                        "",
+                                        getPath(parseInt(dp.id.substring(2), 10), 'dp'),
                                         true,
                                         undefined,
                                         undefined,
@@ -620,7 +718,7 @@ export default function useGetData(TheDatas)
                                         "nonC",
                                         false,
                                         "audit" + nonC.audit_id,
-                                        "",
+                                        getPath(parseInt(nonC.id.substring(4), 10), 'nonC'),
                                         true,
                                         undefined,
                                         undefined,
@@ -646,7 +744,7 @@ export default function useGetData(TheDatas)
                                         "fnc",
                                         false,
                                         "nonC" + fnc.nc_id,
-                                        "",
+                                        getPath(parseInt(fnc.id.substring(3), 10), 'fnc'),
                                         true,
                                         undefined,
                                         undefined,
@@ -672,7 +770,7 @@ export default function useGetData(TheDatas)
                                         "f",
                                         false,
                                         f.parent_type === '' ? '0' : f.parent_type + f.parent_id,
-                                        "",
+                                        getPath(parseInt(f.id.substring(1), 10), 'f'),
                                         false,
                                         f.extension,
                                         undefined,
@@ -698,7 +796,7 @@ export default function useGetData(TheDatas)
                                         "ds",
                                         false,
                                         d.parent_type === '' ? '0' : d.parent_type + d.parent_id,
-                                        "",
+                                        getPath(parseInt(d.id.substring(2), 10), 'ds'),
                                         true,
                                         undefined,
                                         undefined,

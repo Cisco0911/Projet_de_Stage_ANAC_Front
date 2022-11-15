@@ -7,8 +7,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Tree } from "react-arborist";
 import useBack from "./nodeBackend";
-import { Node } from "./node";
-import { makeNodeData } from "./parse_to_json";
 import FileTable from "./content";
 import FileDetails from "./files_details";
 import "./file_style.css";
@@ -25,8 +23,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
-
-export var backend = void 0;
 
 export default function useGetFiles(Global_research) {
 
@@ -46,10 +42,18 @@ export default function useGetFiles(Global_research) {
                                                         { style: { width: "max-content", marginTop: 15 } },
                                                         Global_research
                                                 )
+
                                         });
+                                });
+
+                                setImmediate(function () {
+                                        var gr_input = document.getElementById('global_research_input');
+                                        gr_input.focus();
                                 });
                         }
                 };
+
+                // console.log('Global_research', Global_research)
 
                 document.addEventListener('keyup', handleKeyDown);
 
@@ -58,10 +62,10 @@ export default function useGetFiles(Global_research) {
                 };
         }, []);
 
-        backend = useBack();
+        Global_State['backend'] = useBack();
 
         return {
-                fileTree: Global_State.hasSection ? React.createElement(FileTree, { data: backend.data }) : React.createElement("div", null),
+                fileTree: Global_State.hasSection ? React.createElement(FileTree, { data: Global_State.backend.data }) : React.createElement("div", null),
                 fileTable: Global_State.hasSection ? React.createElement(FileTable, null) : React.createElement("div", null),
                 fileDetails: Global_State.hasSection ? React.createElement(FileDetails, null) : React.createElement("div", null)
         };
@@ -147,7 +151,7 @@ function FileTree(_ref) {
 
                 var item = useRef();
 
-                var _useState3 = useState(expanded.indexOf(node.id) !== -1 ? true : false),
+                var _useState3 = useState(expanded.indexOf(node.id) !== -1),
                     _useState4 = _slicedToArray(_useState3, 2),
                     isOpen = _useState4[0],
                     setIsOpen = _useState4[1];
@@ -214,7 +218,7 @@ function FileTree(_ref) {
 
         var handleFocus = function handleFocus(event, nodeId) {
 
-                backend.setCurrentSelectedFolder(nodeId);
+                Global_State.backend.setCurrentSelectedFolder(nodeId);
 
                 // setExpanded( [nodeId] )
         };

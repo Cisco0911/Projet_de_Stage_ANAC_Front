@@ -1,22 +1,13 @@
 import _regeneratorRuntime from 'babel-runtime/regenerator';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 /* eslint-disable import/first */
 
-import React, { useMemo, useState, useReducer, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useReducer, useEffect, useRef, useCallback } from 'react';
 
-import { backend } from "./files";
 import { Global_State } from '../main';
 import { http } from "../data";
 
@@ -61,7 +52,7 @@ var SearchComponent = function SearchComponent(_ref) {
         'div',
         null,
         node.isRoot ? React.createElement(IoArrowUndoOutline, { size: 25, style: { marginRight: 20 } }) : React.createElement(IoArrowUndoSharp, { onClick: function onClick(e) {
-                e.preventDefault();backend.setCurrentSelectedFolder(previousSelected.pop());
+                e.preventDefault();Global_State.backend.setCurrentSelectedFolder(previousSelected.pop());
             }, size: 25, style: { marginRight: 20 } }),
         React.createElement(
             'label',
@@ -77,7 +68,6 @@ var SearchComponent = function SearchComponent(_ref) {
 };
 
 function Files_Dropzone(props) {
-    var _this2 = this;
 
     var baseStyle = {
         flex: 1,
@@ -120,71 +110,12 @@ function Files_Dropzone(props) {
         return Object.assign({}, baseStyle, isFocused ? focusedStyle : {}, isDragAccept ? acceptStyle : {}, isDragReject ? rejectStyle : {});
     }, [isFocused, isDragAccept, isDragReject]);
 
-    var CustomDiv = function CustomDiv(_ref2) {
-        var children = _ref2.children;
-
-        var _useState = useState(children[0]),
-            _useState2 = _slicedToArray(_useState, 2),
-            html = _useState2[0],
-            setHtml = _useState2[1];
-
-        var ContentEditable = function (_React$Component) {
-            _inherits(ContentEditable, _React$Component);
-
-            function ContentEditable() {
-                _classCallCheck(this, ContentEditable);
-
-                return _possibleConstructorReturn(this, (ContentEditable.__proto__ || Object.getPrototypeOf(ContentEditable)).apply(this, arguments));
-            }
-
-            _createClass(ContentEditable, [{
-                key: 'render',
-                value: function render() {
-                    return React.createElement('div', {
-                        onInput: this.emitChange,
-                        onBlur: this.emitChange,
-                        contentEditable: true,
-                        dangerouslySetInnerHTML: { __html: this.props.html } });
-                }
-            }, {
-                key: 'shouldComponentUpdate',
-                value: function shouldComponentUpdate(nextProps) {
-                    return nextProps.html !== this.getDOMNode().innerHTML;
-                }
-            }, {
-                key: 'emitChange',
-                value: function emitChange() {
-                    var html = this.getDOMNode().innerHTML;
-                    if (this.props.onChange && html !== this.lastHtml) {
-
-                        this.props.onChange({
-                            target: {
-                                value: html
-                            }
-                        });
-                    }
-                    this.lastHtml = html;
-                }
-            }]);
-
-            return ContentEditable;
-        }(React.Component);
-
-        ;
-
-        var handleChange = function (event) {
-            this.setHtml(event.target.value);
-        }.bind(_this2);
-
-        return React.createElement(ContentEditable, { html: html, onChange: handleChange });
-    };
-
-    var _useState3 = useState(acceptedFiles.map(function (file) {
+    var _useState = useState(acceptedFiles.map(function (file) {
         return { file: file, customName: file.name };
     })),
-        _useState4 = _slicedToArray(_useState3, 2),
-        filesObjects = _useState4[0],
-        set = _useState4[1];
+        _useState2 = _slicedToArray(_useState, 2),
+        filesObjects = _useState2[0],
+        set = _useState2[1];
 
     useEffect(function () {
         set(acceptedFiles.map(function (file) {
@@ -192,7 +123,7 @@ function Files_Dropzone(props) {
         }));
     }, [acceptedFiles]);
 
-    var files = filesObjects.map(function (fileObject) {
+    var files_name_list = filesObjects.map(function (fileObject) {
         var part_name = JSON.parse(JSON.stringify(fileObject.file.name.split('.')));
         var name = part_name.splice(0, part_name.length - 1).join('.');
         var ext = part_name[0];
@@ -248,7 +179,7 @@ function Files_Dropzone(props) {
             React.createElement(
                 'ul',
                 null,
-                files
+                files_name_list
             )
         )
     );
@@ -257,13 +188,13 @@ function Files_Dropzone(props) {
 // let handleChange
 
 
-export default function FileTable(_ref3) {
-    var _this3 = this;
+export default function FileTable(_ref2) {
+    var _this = this;
 
-    var set = _ref3.set;
+    var set = _ref2.set;
 
 
-    var node = backend.selectedNode.model;
+    var node = Global_State.backend.selectedNode.model;
 
     console.log('contentNooooooooooooode', node);
 
@@ -275,23 +206,24 @@ export default function FileTable(_ref3) {
         previousSelected.push(node.parentId);return previousSelected;
     }, [node]);
 
-    var _useState5 = useState(""),
+    var _useState3 = useState(""),
+        _useState4 = _slicedToArray(_useState3, 2),
+        filteringWord = _useState4[0],
+        setFilteringWord = _useState4[1];
+
+    var _useState5 = useState(0),
         _useState6 = _slicedToArray(_useState5, 2),
-        filteringWord = _useState6[0],
-        setFilteringWord = _useState6[1];
+        selectedRowNumber = _useState6[0],
+        setNumber = _useState6[1];
 
-    var _useState7 = useState(0),
+    var _useState7 = useState([]),
         _useState8 = _slicedToArray(_useState7, 2),
-        selectedRowNumber = _useState8[0],
-        setNumber = _useState8[1];
-
-    var _useState9 = useState([]),
-        _useState10 = _slicedToArray(_useState9, 2),
-        selectedRow = _useState10[0],
-        setSelectedRows = _useState10[1];
+        selectedRow = _useState8[0],
+        setSelectedRows = _useState8[1];
 
     var selectedRowsByClick = useRef([]);
     var justChecking = useRef(false);
+    var rowNumClick = useRef(0);
 
     // useEffect(
     //     () => 
@@ -317,7 +249,7 @@ export default function FileTable(_ref3) {
             console.log('clearSelected');setSelectedRows([]);setNumber(0);
         });
         Global_State.EventsManager.on('setSelectedNode', function () {
-            var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(data) {
+            var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(data) {
                 return _regeneratorRuntime.wrap(function _callee$(_context) {
                     while (1) {
                         switch (_context.prev = _context.next) {
@@ -326,17 +258,17 @@ export default function FileTable(_ref3) {
                                 return Global_State.setSectionId(data.section_id);
 
                             case 3:
-                                backend.setCurrentSelectedFolder(data.id);
+                                Global_State.backend.setCurrentSelectedFolder(data.id);
                             case 4:
                             case 'end':
                                 return _context.stop();
                         }
                     }
-                }, _callee, _this3);
+                }, _callee, _this);
             }));
 
             return function (_x) {
-                return _ref4.apply(this, arguments);
+                return _ref3.apply(this, arguments);
             };
         }());
         return function () {
@@ -389,8 +321,8 @@ export default function FileTable(_ref3) {
         });
 
         // composant de selection de service
-        var SelectServices = function SelectServices(_ref5) {
-            var updateMethod = _ref5.updateMethod;
+        var SelectServices = function SelectServices(_ref4) {
+            var updateMethod = _ref4.updateMethod;
 
             // console.log(servicesList)
             // console.log(options)
@@ -962,15 +894,15 @@ export default function FileTable(_ref3) {
                     // console.log(queryBody.get("name"))
                 };
 
-                var _useState11 = useState(1),
-                    _useState12 = _slicedToArray(_useState11, 2),
-                    min = _useState12[0],
-                    setMin = _useState12[1];
+                var _useState9 = useState(1),
+                    _useState10 = _slicedToArray(_useState9, 2),
+                    min = _useState10[0],
+                    setMin = _useState10[1];
 
-                var _useState13 = useState(false),
-                    _useState14 = _slicedToArray(_useState13, 2),
-                    enableEnd = _useState14[0],
-                    setEndState = _useState14[1];
+                var _useState11 = useState(false),
+                    _useState12 = _slicedToArray(_useState11, 2),
+                    enableEnd = _useState12[0],
+                    setEndState = _useState12[1];
 
                 var validationRules = yup.object().shape({
                     debut: yup.number().required("Le champs doit être rempli").positive("la valeur doit être positive").integer("Les décimaux sont invalide"),
@@ -1288,15 +1220,15 @@ export default function FileTable(_ref3) {
                     // console.log(queryBody.get("name"))
                 };
 
-                var _useState15 = useState(1),
-                    _useState16 = _slicedToArray(_useState15, 2),
-                    min = _useState16[0],
-                    setMin = _useState16[1];
+                var _useState13 = useState(1),
+                    _useState14 = _slicedToArray(_useState13, 2),
+                    min = _useState14[0],
+                    setMin = _useState14[1];
 
-                var _useState17 = useState(false),
-                    _useState18 = _slicedToArray(_useState17, 2),
-                    enableEnd = _useState18[0],
-                    setEndState = _useState18[1];
+                var _useState15 = useState(false),
+                    _useState16 = _slicedToArray(_useState15, 2),
+                    enableEnd = _useState16[0],
+                    setEndState = _useState16[1];
 
                 var validationRules = yup.object().shape({
                     files: yup.array().min(1).required("Au moins un fichier doit être sélectionné"),
@@ -1495,14 +1427,14 @@ export default function FileTable(_ref3) {
                                     // http.delete("")
 
                                     var remove = function () {
-                                        var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
+                                        var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
                                             return _regeneratorRuntime.wrap(function _callee3$(_context3) {
                                                 while (1) {
                                                     switch (_context3.prev = _context3.next) {
                                                         case 0:
                                                             _context3.next = 2;
                                                             return Promise.all(selectedRow.map(function () {
-                                                                var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(row) {
+                                                                var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(row) {
                                                                     var nodeIdentity;
                                                                     return _regeneratorRuntime.wrap(function _callee2$(_context2) {
                                                                         while (1) {
@@ -1594,11 +1526,11 @@ export default function FileTable(_ref3) {
                                                                                     return _context2.stop();
                                                                             }
                                                                         }
-                                                                    }, _callee2, _this3);
+                                                                    }, _callee2, _this);
                                                                 }));
 
                                                                 return function (_x2) {
-                                                                    return _ref7.apply(this, arguments);
+                                                                    return _ref6.apply(this, arguments);
                                                                 };
                                                             }()
 
@@ -1611,11 +1543,11 @@ export default function FileTable(_ref3) {
                                                             return _context3.stop();
                                                     }
                                                 }
-                                            }, _callee3, _this3);
+                                            }, _callee3, _this);
                                         }));
 
                                         return function remove() {
-                                            return _ref6.apply(this, arguments);
+                                            return _ref5.apply(this, arguments);
                                         };
                                     }();
 
@@ -1725,7 +1657,7 @@ export default function FileTable(_ref3) {
     //     )
     // }
 
-    var dataFormater = function dataFormater(node) {
+    var dataFormater = useCallback(function (node) {
 
         // console.log(node)
         var datas = [];
@@ -1788,9 +1720,9 @@ export default function FileTable(_ref3) {
         }
 
         function TypeIcon(props) {
-            var _ref8 = [props.data, props.iconSize],
-                data = _ref8[0],
-                iconSize = _ref8[1];
+            var _ref7 = [props.data, props.iconSize],
+                data = _ref7[0],
+                iconSize = _ref7[1];
 
             if (data.global_type === "folder") {
                 return React.createElement(FcFolder, { size: iconSize });
@@ -1880,7 +1812,7 @@ export default function FileTable(_ref3) {
 
             var nameComponent = React.createElement(
                 'div',
-                Object.assign({ id: props.data.id, ref: div, className: 'd-flex justify-content-center align-items-center', style: { height: '100%', width: '100%' } }, props),
+                Object.assign({ id: props.data.id, ref: div, className: 'd-flex justify-content-center align-items-center', style: { height: '100%', width: '100%', zIndex: -1000, pointerEvents: "none" } }, props),
                 React.createElement(TypeIcon, Object.assign({ iconSize: 30 }, props)),
                 React.createElement(
                     'span',
@@ -1915,8 +1847,8 @@ export default function FileTable(_ref3) {
             );
         };
 
-        var LevelComponent = function LevelComponent(_ref9) {
-            var data = _ref9.data;
+        var LevelComponent = function LevelComponent(_ref8) {
+            var data = _ref8.data;
 
             // const [niv, setNiv] = useState(level)
 
@@ -1953,7 +1885,7 @@ export default function FileTable(_ref3) {
             }
 
             function handleClick(e) {
-                var _this4 = this;
+                var _this2 = this;
 
                 console.log(level);
                 var node_data = Global_State.getNodeDataById(data.id);
@@ -1971,7 +1903,7 @@ export default function FileTable(_ref3) {
 
                 if (!Global_State.isEditorMode) {
                     var update = function () {
-                        var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4() {
+                        var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4() {
                             return _regeneratorRuntime.wrap(function _callee4$(_context4) {
                                 while (1) {
                                     switch (_context4.prev = _context4.next) {
@@ -1988,11 +1920,11 @@ export default function FileTable(_ref3) {
                                             return _context4.stop();
                                     }
                                 }
-                            }, _callee4, _this4);
+                            }, _callee4, _this2);
                         }));
 
                         return function update() {
-                            return _ref10.apply(this, arguments);
+                            return _ref9.apply(this, arguments);
                         };
                     }();
 
@@ -2014,36 +1946,6 @@ export default function FileTable(_ref3) {
             );
         };
 
-        var _loop = function _loop(child_node) {
-            var data = Global_State.getNodeDataById(child_node.id);
-            datas.push({
-                id: data.id,
-                value: data.name,
-                level_value: data.level,
-                name: React.createElement(NameFormater, { data: data, onClick: function onClick(e) {
-                        console.log('nameClicked');handleClick({ id: data.id, name: data.name }, e);
-                    } }),
-                level: data.type === "fnc" ? React.createElement(LevelComponent, { data: data }) : undefined,
-                created_at: data.created_at,
-                isClosed: data.type === "fnc" ? data.isClosed ? React.createElement(
-                    'div',
-                    { className: 'badge bg-success-bright text-success' },
-                    'Cl\xF4tur\xE9'
-                ) : React.createElement(
-                    'div',
-                    { 'class': 'badge bg-danger-bright text-danger' },
-                    'Non-Cl\xF4tur\xE9'
-                ) : undefined,
-                RA: node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " + data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " + node.ra.second_name : undefined,
-                size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
-                type: data.type,
-                global_type: data.global_type,
-                section_id: data.section_id,
-                isBeingEdited: data.onEdit
-
-            });
-        };
-
         var _iteratorNormalCompletion4 = true;
         var _didIteratorError4 = false;
         var _iteratorError4 = undefined;
@@ -2052,7 +1954,31 @@ export default function FileTable(_ref3) {
             for (var _iterator4 = node.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
                 var child_node = _step4.value;
 
-                _loop(child_node);
+                var _data = Global_State.getNodeDataById(child_node.id);
+                datas.push({
+                    id: _data.id,
+                    value: _data.name,
+                    level_value: _data.level,
+                    name: React.createElement(NameFormater, { data: _data }),
+                    level: _data.type === "fnc" ? React.createElement(LevelComponent, { data: _data }) : undefined,
+                    created_at: _data.created_at,
+                    isClosed: _data.type === "fnc" ? _data.isClosed ? React.createElement(
+                        'div',
+                        { className: 'badge bg-success-bright text-success' },
+                        'Cl\xF4tur\xE9'
+                    ) : React.createElement(
+                        'div',
+                        { 'class': 'badge bg-danger-bright text-danger' },
+                        'Non-Cl\xF4tur\xE9'
+                    ) : undefined,
+                    RA: node.type === "root" && _data.type === 'audit' ? _data.ra.name.substring(0, 1) + ". " + _data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " + node.ra.second_name : undefined,
+                    size: _data.global_type === 'file' ? Global_State.sizeFormater(_data.taille) : undefined,
+                    type: _data.type,
+                    global_type: _data.global_type,
+                    section_id: _data.section_id,
+                    isBeingEdited: _data.onEdit
+
+                });
             }
         } catch (err) {
             _didIteratorError4 = true;
@@ -2070,18 +1996,18 @@ export default function FileTable(_ref3) {
         }
 
         return datas;
-    };
+    }, []);
 
     // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
     var sortByName = function sortByName(rowA, rowB) {
         // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
         if (node.type === 'nonC') {
-            var _ref11 = [rowA.value.split('-'), rowB.value.split('-')],
-                listA = _ref11[0],
-                listB = _ref11[1];
-            var _ref12 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                a = _ref12[0],
-                b = _ref12[1];
+            var _ref10 = [rowA.value.split('-'), rowB.value.split('-')],
+                listA = _ref10[0],
+                listB = _ref10[1];
+            var _ref11 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                a = _ref11[0],
+                b = _ref11[1];
 
 
             if (a > b) {
@@ -2324,13 +2250,16 @@ export default function FileTable(_ref3) {
     }, [selectedRow]);
 
     var onRowDoubleClicked = function onRowDoubleClicked(row, event) {
-        backend.setCurrentSelectedFolder(row.id);
+        Global_State.backend.setCurrentSelectedFolder(row.id);
         // console.log('dbclick',row)
     };
 
     var handleClick = function handleClick(row, event) {
-        // console.log(row.id, event); 
+        // console.log(row.id, event);
+
+        event.preventDefault();event.stopPropagation();
         if (event.ctrlKey || event.altKey || event.shiftKey) handleChange(1, [row], true);else handleChange(1, [row]);
+
         // selectedRowsByClick.current = [row]
     };
 
@@ -2384,9 +2313,9 @@ export default function FileTable(_ref3) {
             , selectableRowSelected: function selectableRowSelected(row) {
                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
             },
-            onSelectedRowsChange: function onSelectedRowsChange(_ref13) {
-                var selectedCount = _ref13.selectedCount,
-                    selectedRows = _ref13.selectedRows;
+            onSelectedRowsChange: function onSelectedRowsChange(_ref12) {
+                var selectedCount = _ref12.selectedCount,
+                    selectedRows = _ref12.selectedRows;
                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
             },
             clearSelectedRows: Global_State.toggleCleared,

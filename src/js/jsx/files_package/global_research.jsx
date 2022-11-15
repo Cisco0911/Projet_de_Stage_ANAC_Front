@@ -40,7 +40,26 @@ export default function Global_research({display})
         const handleFilterTagClick = (e) =>
         {
                 e.stopPropagation()
-                setFilterTag('Audit')
+
+                switch (filterTag)
+                {
+                        case 'All':
+                                setFilterTag('Folder')
+                                break
+                        case 'Folder':
+                                setFilterTag('File')
+                                break
+                        case 'File':
+                                setFilterTag('Audit')
+                                break
+                        case 'Audit':
+                                setFilterTag('FNC')
+                                break
+                        default:
+                                setFilterTag('All')
+                                break
+
+                }
         }
 
         return(
@@ -50,51 +69,86 @@ export default function Global_research({display})
                                 Global_research
                         </Form.Label>
                         <InputGroup className="me-2">
-                                <InputGroup.Text> <div onClick={handleFilterTagClick} > {filterTag} </div> </InputGroup.Text>
+                                <InputGroup.Text> <div onClick={handleFilterTagClick} style={{ cursor: 'pointer' }} > {filterTag} </div> </InputGroup.Text>
                                 <Form.Control
+                                id={'global_research_input'}
+                                style={{ backgroundColor: 'whitesmoke' }}
                                 type="search"
                                 placeholder="Search"
                                 aria-label="Search"
                                 value={value}
                                 onChange={handleChange}
+                                // autoFocus
                                 />
                         </InputGroup>
                 </Form>
 
-                <Card id={'global_research_result'} className={`${value === '' ? 'd-none' : 'd-flex'} mt-1 p-1`} sx={{ maxHeight: 3*window.innerHeight/4, maxWidth: 9*window.innerWidth/10 }} >
-                        <TableContainer component={Paper}>
-                                <Table aria-label="simple table">
-                                        <TableBody>
+                <Card id={'global_research_result'} className={`${value === '' ? 'd-none' : 'd-flex flex-column'} mt-1 p-1`}
+                      sx =
+                      {{
+                              maxHeight: 3*window.innerHeight/4,
+                              maxWidth: 9*window.innerWidth/10,
+                              backgroundColor: '#0062ff7a',
+                              border: 'solid blue 1px',
+                              overflowY: 'scroll'
+                      }}
+                >
+                        {
+                                Global_State.dataToUse.filter(
+                                node =>
+                                {
+                                        if (value === '') return false
+                                        else if (node.type === 'checkList' || node.type === 'dp' || node.type === 'nc') return false
+                                        else if (filterTag === 'All') return node.name.indexOf(value) !== -1
+                                        else if (filterTag === 'Audit') return (node.type === 'audit' && node.name.indexOf(value) !== -1)
+                                        else if (filterTag === 'FNC') return (node.type === 'fnc' && node.name.indexOf(value) !== -1)
+                                        else if (filterTag === 'Folder') return (node.type === 'ds' && node.name.indexOf(value) !== -1)
+                                        else if (filterTag === 'File') return (node.type === 'f' && node.name.indexOf(value) !== -1)
+                                }
+                                ).map(
+                                node =>
+                                        {
+                                                const Research_name_component = ({name, researched_word}) =>
                                                 {
-                                                        Global_State.dataToUse.filter(
-                                                                node =>
-                                                                {
-                                                                        if (value === '') return false
-                                                                        else if (filterTag === 'All') return node.name.indexOf(value) !== -1
-                                                                        else if (filterTag === 'Audit') return (node.type === 'audit' && node.name.indexOf(value) !== -1)
-                                                                        else if (filterTag === 'FNC') return (node.type === 'fnc' && node.name.indexOf(value) !== -1)
-                                                                        else if (filterTag === 'Folder') return (node.type === 'ds' && node.name.indexOf(value) !== -1)
-                                                                        else if (filterTag === 'File') return (node.type === 'f' && node.name.indexOf(value) !== -1)
-                                                                }
-                                                        ).map((node) => (
-                                                        <TableRow
-                                                        key={node.id}
-                                                        className={'m-1'}
-                                                        sx={{ margin: 5 }}
-                                                        >
-                                                                <TableCell className={'d-none d-sm-block'} component="th" scope="row" sx={{ minWidth: 'max-content' }}>
-                                                                        {`${node.name}   ${node.path}`}
-                                                                </TableCell>
-                                                                <TableCell className={'d-block d-sm-none'} component="th" scope="row" sx={{ minWidth: 'max-content' }}>
-                                                                        {node.name}
-                                                                </TableCell>
-                                                        </TableRow>
-                                                        )
+                                                        const idx = name.indexOf(researched_word)
+
+                                                        const [prev, current, next] = [ name.substring(0, idx), name.substring(idx, idx + researched_word.length), name.substring(idx + researched_word.length, name.length)  ]
+
+                                                        return (
+                                                                <span className={'d-flex align-items-center'} >
+                                                                        {prev}
+                                                                        <span style={{ backgroundColor: 'blue', color: 'white', borderRadius: 2, padding: 2 }} >{current}</span>
+                                                                        {next}
+                                                                </span>
                                                         )
                                                 }
-                                        </TableBody>
-                                </Table>
-                        </TableContainer>
+
+                                                return (
+                                                        <Card
+                                                                key={node.id}
+                                                                className={'m-1 d-flex align-items-center'}
+                                                                sx =
+                                                                {{
+                                                                        minHeight: 35,
+                                                                        margin: 5,
+                                                                        padding: 2,
+                                                                        overflowX: 'scroll',
+                                                                        cursor: 'pointer'
+                                                                }}
+                                                        >
+                                                                <div className={'d-none d-sm-flex'}  style={{ minWidth: 'max-content' }}>
+                                                                        <Research_name_component name={node.name} researched_word={value}  />
+                                                                        &nbsp;&nbsp;
+                                                                        <span className={'d-flex align-items-center'} style={{ color: "#00000075", fontSize: 13 }} > {`${node.path}`} </span>
+                                                                </div>
+                                                                <div className={'d-block d-sm-none'}  style={{ minWidth: 'max-content' }}>
+                                                                        <Research_name_component name={node.name} researched_word={value}  />
+                                                                </div>
+                                                        </Card>
+                                                )
+                                        }
+                                )
+                        }
                 </Card>
 
         </div>

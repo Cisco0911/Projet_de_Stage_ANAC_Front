@@ -1167,7 +1167,7 @@ export default function useEditor(data) {
                                                                         'Content-Type': 'multipart/form-data'
                                                                 }
                                                         }).then(function (res) {
-                                                                console.log(res);
+                                                                console.log('editor handling ressssssssssssssssssssssssssssssssssss', res);
                                                                 // toast.dismiss('Saving')
                                                         }).catch(function (err) {
                                                                 console.log(err);

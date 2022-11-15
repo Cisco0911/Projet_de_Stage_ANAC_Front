@@ -1034,7 +1034,7 @@ export default function useEditor(data)
                         .then(
                                 res =>
                                 {
-                                        console.log(res)
+                                        console.log('editor handling ressssssssssssssssssssssssssssssssssss', res)
                                         // toast.dismiss('Saving')
                                 }
                         )

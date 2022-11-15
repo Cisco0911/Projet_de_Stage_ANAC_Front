@@ -3,8 +3,6 @@
 import React, {useRef, useState, useCallback, useEffect} from 'react';
 import { Tree } from "react-arborist";
 import useBack from "./nodeBackend";
-import { Node } from "./node";
-import { makeNodeData } from "./parse_to_json";
 import FileTable from "./content";
 import FileDetails from "./files_details";
 import "./file_style.css";
@@ -22,8 +20,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
-
-export let backend
 
 export default function useGetFiles(Global_research) {
 
@@ -45,14 +41,27 @@ export default function useGetFiles(Global_research) {
                                                                 alignItems: 'start',
                                                                 justifyContent: 'center'
                                                         },
-                                                        children:
-                                                                <div style={{ width: "max-content", marginTop: 15 }} >
-                                                                        {Global_research}
-                                                                </div>
+                                                        children: (
+                                                        <div style={{ width: "max-content", marginTop: 15 }} >
+                                                                {Global_research}
+                                                        </div>
+                                                        ),
+
                                                 }
                                         ) )
+
+
+                                        setImmediate(
+                                                () =>
+                                                {
+                                                        const gr_input = document.getElementById('global_research_input')
+                                                        gr_input.focus()
+                                                }
+                                        )
                                 }
                         }
+
+                        // console.log('Global_research', Global_research)
 
                         document.addEventListener('keyup', handleKeyDown);
 
@@ -66,11 +75,11 @@ export default function useGetFiles(Global_research) {
                 }, []
         )
 
-        backend = useBack()
+        Global_State['backend'] = useBack()
 
         return (
         {
-                fileTree: Global_State.hasSection ? <FileTree data = {backend.data} /> : <div/>,
+                fileTree: Global_State.hasSection ? <FileTree data = {Global_State.backend.data} /> : <div/>,
                 fileTable: Global_State.hasSection ? <FileTable  /> : <div/> ,
                 fileDetails: Global_State.hasSection ? <FileDetails/> : <div/>,
         }
@@ -152,7 +161,7 @@ function FileTree({data}) {
                 // const expended = useRef(['0'])
 
                 const item = useRef()
-                const [isOpen, setIsOpen] = useState((expanded.indexOf(node.id) !== -1)? true: false)
+                const [isOpen, setIsOpen] = useState((expanded.indexOf(node.id) !== -1))
 
                 const handleDbClick = e =>
                 {
@@ -222,7 +231,7 @@ function FileTree({data}) {
         const handleFocus = (event, nodeId) =>
         {
 
-                backend.setCurrentSelectedFolder(nodeId)
+                Global_State.backend.setCurrentSelectedFolder(nodeId)
 
                 // setExpanded( [nodeId] )
         }

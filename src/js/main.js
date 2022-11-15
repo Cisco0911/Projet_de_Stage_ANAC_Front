@@ -15,7 +15,6 @@ import useGetFiles from './files_package/files';
 import Global_research from "./files_package/global_research";
 import Login from "./auth/login";
 import { http } from "./data";
-import { backend } from "./files_package/files";
 import Notifications from "./auth/user_notification";
 import QuickSettings from "./auth/quick_settings";
 // import FileTable from "./files_package/content";
@@ -292,7 +291,7 @@ function File_section() {
                                                                                                                         return Global_State.setSectionId(section.id);
 
                                                                                                                 case 2:
-                                                                                                                        backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.get(section.id));
+                                                                                                                        Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.get(section.id));
 
                                                                                                                 case 3:
                                                                                                                 case 'end':

@@ -1,8 +1,7 @@
 /* eslint-disable import/first */
 
-import React, {useMemo, useState, useReducer, useEffect, useRef} from 'react';
+import React, {useMemo, useState, useReducer, useEffect, useRef, useCallback} from 'react';
 
-import { backend } from "./files";
 import {Global_State} from '../main';
 import { http } from "../data";
 
@@ -48,7 +47,7 @@ const SearchComponent = ({set, tag, node}) =>
     return (
         <div>
             {node.isRoot ? <IoArrowUndoOutline size={25} style = {{ marginRight: 20, }} /> :
-            <IoArrowUndoSharp onClick={ (e) => { e.preventDefault(); backend.setCurrentSelectedFolder(previousSelected.pop()) } }  size={25} style = {{ marginRight: 20, }}  />}
+            <IoArrowUndoSharp onClick={ (e) => { e.preventDefault(); Global_State.backend.setCurrentSelectedFolder(previousSelected.pop()) } }  size={25} style = {{ marginRight: 20, }}  />}
             <label>Chercher selon {tag} :
                 <input onChange={(e) => {set(e.target.value)}} type="search" className="form-control form-control-sm" placeholder="" aria-controls="table-files"/>
             </label>
@@ -109,51 +108,11 @@ function Files_Dropzone(props) {
     isDragReject
     ]);
 
-    const CustomDiv = ({children}) => 
-    {
-        const [html, setHtml] = useState(children[0])
-        class ContentEditable extends React.Component
-        {
-            render()
-            {
-                return <div
-                    onInput={this.emitChange}
-                    onBlur={this.emitChange}
-                    contentEditable
-                    dangerouslySetInnerHTML={{__html: this.props.html}}></div>;
-            }
-            shouldComponentUpdate(nextProps)
-            {
-                return nextProps.html !== this.getDOMNode().innerHTML;
-            }
-            emitChange()
-            {
-                var html = this.getDOMNode().innerHTML;
-                if (this.props.onChange && html !== this.lastHtml) {
-        
-                    this.props.onChange({
-                        target: {
-                            value: html
-                        }
-                    });
-                }
-                this.lastHtml = html;
-            }
-        };
-
-        var handleChange = function(event){
-            this.setHtml(event.target.value);
-        }.bind(this);
-        
-        return (<ContentEditable html={html} onChange={handleChange} />);
-
-    }
-
     const [filesObjects, set] = useState(acceptedFiles.map( file => { return {file, customName: file.name} } )) 
 
     useEffect( () => { set(acceptedFiles.map( file => { return {file, customName: file.name} } )) }, [acceptedFiles] )
     
-    const files = filesObjects.map(fileObject => {
+    const files_name_list = filesObjects.map(fileObject => {
         const part_name = JSON.parse(JSON.stringify(fileObject.file.name.split('.')))
         const name = part_name.splice(0, part_name.length - 1).join('.')
         const ext = part_name[0]
@@ -192,7 +151,7 @@ function Files_Dropzone(props) {
         </div>
         <aside>
           <h4>Files</h4>
-          <ul>{files}</ul>
+          <ul>{files_name_list}</ul>
         </aside>
       </div>
     );
@@ -203,22 +162,24 @@ function Files_Dropzone(props) {
 
 export default function FileTable({set}) {
 
-    let node = backend.selectedNode.model
+        let node = Global_State.backend.selectedNode.model
 
-    console.log('contentNooooooooooooode', node)
+        console.log('contentNooooooooooooode', node)
 
-    let tag = "le Nom"
+        let tag = "le Nom"
 
-    // const [previousSelected, setPreviousSelected] = useState([0])
+        // const [previousSelected, setPreviousSelected] = useState([0])
 
-    previousSelected = useMemo( () => { previousSelected.push(node.parentId); return previousSelected }, [node] )
+        previousSelected = useMemo( () => { previousSelected.push(node.parentId); return previousSelected }, [node] )
 
-    const [filteringWord, setFilteringWord] = useState("")
+        const [filteringWord, setFilteringWord] = useState("")
 
-    const [selectedRowNumber, setNumber] = useState(0)
-    const [selectedRow, setSelectedRows] = useState([])
-    const selectedRowsByClick = useRef([])
-    const justChecking = useRef(false)
+        const [selectedRowNumber, setNumber] = useState(0)
+        const [selectedRow, setSelectedRows] = useState([])
+        const selectedRowsByClick = useRef([])
+        const justChecking = useRef(false)
+        const rowNumClick = useRef(0)
+
 
     // useEffect(
     //     () => 
@@ -243,7 +204,7 @@ export default function FileTable({set}) {
         {
 
             Global_State.EventsManager.on('clearSelected', () => { console.log('clearSelected'); setSelectedRows([]); setNumber(0) })
-            Global_State.EventsManager.on('setSelectedNode', async (data) => { console.log(data); await Global_State.setSectionId(data.section_id); backend.setCurrentSelectedFolder(data.id) })
+            Global_State.EventsManager.on('setSelectedNode', async (data) => { console.log(data); await Global_State.setSectionId(data.section_id); Global_State.backend.setCurrentSelectedFolder(data.id) })
             return () => 
             {
                 Global_State.EventsManager.off('clearSelected');
@@ -1465,285 +1426,287 @@ export default function FileTable({set}) {
     //     )
     // }
 
-    const dataFormater = (node) => {
-        
-        // console.log(node)
-        let datas = []
+    const dataFormater = useCallback(
+    (node) => {
 
-        function getTypeExt(ext) {
-            const img = ["jpeg", "jpg", "png", "gif"]
-            const vid = ["mp4", "avi", "MOV", "mpeg"]
-        
-            for(let imgExt of img)
-            {
-              if(imgExt === ext) return "img";
-            }
-            for(let vidExt of vid)
-            {
-              if(vidExt === ext) return "vid";
-            }
-            return ext
-          }
+            // console.log(node)
+            let datas = []
 
-        function TypeIcon(props) {
-            const [data, iconSize] = [props.data, props.iconSize]
-            if (data.global_type === "folder") {
-             return (
-                <FcFolder size={iconSize}  />
-                )
-            }
-            else 
-            {
-                // <BsCardImage size={iconSize} />
-              switch(getTypeExt(data.ext)) {
-                case "img":
-                  return <img onClick={e => 
+            function getTypeExt(ext) {
+                    const img = ["jpeg", "jpg", "png", "gif"]
+                    const vid = ["mp4", "avi", "MOV", "mpeg"]
+
+                    for(let imgExt of img)
                     {
-                        Global_State.modalManager.setContent(
-                        <div style= {
-                            {
-                                display: 'flex',
-                                justifyContent: 'center',
-                                position: 'relative',
-                                alignItems: 'center',
-                            }
-                        } >
-                            <img style={
-                            {  
-                                width: 'auto', 
-                                height: 'auto',
-                            }} alt="Avatar" src = {data.url}  />
-                        </div>)
-                        Global_State.modalManager.open_modal("Apercu de l' image")
-                    }}  style={{  width: iconSize, height: iconSize, boxShadow: "1px 2px #888888" }} src = {data.url}   alt={''}/>
-                case "vid":
-                  return <FcVideoFile onClick={e => 
-                    {
-                        Global_State.modalManager.setContent(
-                        <div style= {
-                            {
-                                display: 'flex',
-                                justifyContent: 'center',
-                                position: 'relative',
-                                alignItems: 'center',
-                            }
-                        } >
-                            <video width="auto" height="auto" controls autoPlay preload=''>
-                                <source src={data.url} type={"video/" + data.ext} />
-                            </video>
-                        </div>)
-                        Global_State.modalManager.open_modal("Apercu de l' image")
-                    }}  size = {iconSize}   />
-                case "docx":
-                  return <RiFileWord2Fill color='#295394' size={iconSize} onClick = { e => 
-                    {
-                        Global_State.modalManager.setContent(
-                        <div style= {
-                            {
-                                display: 'flex',
-                                justifyContent: 'center',
-                                position: 'relative',
-                                alignItems: 'center',
-                            }
-                        } >
-                            {/* <iframe src = { "https://drive.google.com/viewer?url=https://sunumaths.com/wp-content/uploads/2020/08/Cours-Terminale-L.pdf"} width="auto" height="auto" type="application/docx" ></iframe> */}
-                        </div>)
-                        Global_State.modalManager.open_modal("Apercu du fichier")
+                            if(imgExt === ext) return "img";
                     }
-                 } />
-                case "pdf":
-                  return <BsFillFileEarmarkPdfFill color='#ad0b00' size={iconSize} onClick = { e =>
+                    for(let vidExt of vid)
                     {
-                        console.log(data)
-                        Global_State.modalManager.setContent(
-                        <div style= {
-                            {
-                                display: 'flex',
-                                justifyContent: 'center',
-                                position: 'relative',
-                                alignItems: 'center',
-                            }
-                        } >
-                                {Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : <embed src = {data.url + "#toolbar=0&navpanes=0&scrollbar=0"} width={900} height= {400} type="application/pdf"  ></embed>}
-                        </div>)
-                        Global_State.modalManager.open_modal("Apercu du fichier")
+                            if(vidExt === ext) return "vid";
                     }
-                 }  />
-                case "xlsx":
-                  return <SiMicrosoftexcel color='#1f6e43' size={iconSize} />
-                case "pptx":
-                  return <SiMicrosoftpowerpoint color='#ad0b00' size={iconSize} onClick = { e => 
-                    {
-                        Global_State.modalManager.setContent(
-                        <div style= {
-                            {
-                                display: 'flex',
-                                justifyContent: 'center',
-                                position: 'relative',
-                                alignItems: 'center',
-                            }
-                        } >
-                            {/* <iframe src = {data.url} width="auto" height="auto" type="application/pptx"></iframe> */}
-                        </div>)
-                        Global_State.modalManager.open_modal("Apercu du fichier")
-                    }
-                 } />
-                default:
-                  return <AiFillFileUnknown size={iconSize} />
-              }
-            }
-           }
-
-        const NameFormater = (props) => {
-            const div = useRef()
-
-            const nameComponent = (
-                <div id = {props.data.id} ref = {div} className='d-flex justify-content-center align-items-center' style={{ height: '100%', width: '100%' }} {...props} >
-                    <TypeIcon iconSize={30} {...props} />
-                    <span 
-                    style={
-                        {
-                            MozUserSelect: 'none',
-                            msUserSelect: 'none',
-                            WebkitUserSelect: 'none',
-                            userSelect: 'none',
-                            marginLeft: 10, 
-                            fontSize: 15, 
-                            fontWeight: 'bold'
-                        }}  >{props.data.name}</span>
-                </div>
-            )
-
-            useEffect(
-                () =>
-                {
-
-                    var pDoc = document.getElementById(`${props.data.id}`);
-
-                    var parent = pDoc.parentNode
-
-                    parent.classList.add("h-100")
-                    parent.style.height = '100%'
-
-                    
-                }
-            )
-
-            return(
-                <React.Fragment>
-                    {nameComponent}
-                </React.Fragment>
-            )
-        }
-
-        const LevelComponent = ({data}) =>
-        {
-            // const [niv, setNiv] = useState(level)
-
-            const level = parseInt(data.level)
-
-            const nextNiv = currentNiv =>
-            {
-                switch (currentNiv) {
-                    case 1:
-                        return 2
-                    case 2:
-                        return 3
-                    case 3:
-                        return 1
-                
-                    default:
-                        return 0
-                }
+                    return ext
             }
 
-            let class_name
-            switch (level) {
-                case 1:
-                    class_name = "badge bg-danger-bright text-dark"
-                    break
-                case 2:
-                    class_name = "badge bg-warning-bright text-dark"
-                    break
-                case 3:
-                    class_name = "badge bg-dark-bright text-dark"
-                    break
-            
-                default:
-                    break;
-            }
-
-            function handleClick(e)
-            {
-                    console.log(level)
-                    const node_data = Global_State.getNodeDataById(data.id)
-                    const [id, lol] = Global_State.identifyNode(node_data)
-                    // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
-
-                    const query = new FormData;
-                    query.append('id', id)
-                    query.append('update_object', 'level')
-                    query.append('new_value', nextNiv(level))
-
-                    if(!Global_State.isEditorMode)
-                    {
-                            const update = async () =>
-                            {
-
-                                    await http.post('update_fnc', query)
-                                    .then( res => {
-                                            console.log(res)
-                                    } )
-                                    .catch(err => { console.log(err); throw err })
-                            }
-
-                            // console.log(selectedRow[0].id.substring(2))
-                            toast.promise(
-                            update(),
-                            {
-                                    loading: 'Loading...',
-                                    success: 'Processus achevé',
-                                    error: 'err'
-                                }
-
+            function TypeIcon(props) {
+                    const [data, iconSize] = [props.data, props.iconSize]
+                    if (data.global_type === "folder") {
+                            return (
+                            <FcFolder size={iconSize}  />
                             )
                     }
                     else
                     {
-                            Global_State.editor.fnc.update(query)
+                            // <BsCardImage size={iconSize} />
+                            switch(getTypeExt(data.ext)) {
+                                    case "img":
+                                            return <img onClick={e =>
+                                            {
+                                                    Global_State.modalManager.setContent(
+                                                    <div style= {
+                                                            {
+                                                                    display: 'flex',
+                                                                    justifyContent: 'center',
+                                                                    position: 'relative',
+                                                                    alignItems: 'center',
+                                                            }
+                                                    } >
+                                                            <img style={
+                                                                    {
+                                                                            width: 'auto',
+                                                                            height: 'auto',
+                                                                    }} alt="Avatar" src = {data.url}  />
+                                                    </div>)
+                                                    Global_State.modalManager.open_modal("Apercu de l' image")
+                                            }}  style={{  width: iconSize, height: iconSize, boxShadow: "1px 2px #888888" }} src = {data.url}   alt={''}/>
+                                    case "vid":
+                                            return <FcVideoFile onClick={e =>
+                                            {
+                                                    Global_State.modalManager.setContent(
+                                                    <div style= {
+                                                            {
+                                                                    display: 'flex',
+                                                                    justifyContent: 'center',
+                                                                    position: 'relative',
+                                                                    alignItems: 'center',
+                                                            }
+                                                    } >
+                                                            <video width="auto" height="auto" controls autoPlay preload=''>
+                                                                    <source src={data.url} type={"video/" + data.ext} />
+                                                            </video>
+                                                    </div>)
+                                                    Global_State.modalManager.open_modal("Apercu de l' image")
+                                            }}  size = {iconSize}   />
+                                    case "docx":
+                                            return <RiFileWord2Fill color='#295394' size={iconSize} onClick = { e =>
+                                            {
+                                                    Global_State.modalManager.setContent(
+                                                    <div style= {
+                                                            {
+                                                                    display: 'flex',
+                                                                    justifyContent: 'center',
+                                                                    position: 'relative',
+                                                                    alignItems: 'center',
+                                                            }
+                                                    } >
+                                                            {/* <iframe src = { "https://drive.google.com/viewer?url=https://sunumaths.com/wp-content/uploads/2020/08/Cours-Terminale-L.pdf"} width="auto" height="auto" type="application/docx" ></iframe> */}
+                                                    </div>)
+                                                    Global_State.modalManager.open_modal("Apercu du fichier")
+                                            }
+                                            } />
+                                    case "pdf":
+                                            return <BsFillFileEarmarkPdfFill color='#ad0b00' size={iconSize} onClick = { e =>
+                                            {
+                                                    console.log(data)
+                                                    Global_State.modalManager.setContent(
+                                                    <div style= {
+                                                            {
+                                                                    display: 'flex',
+                                                                    justifyContent: 'center',
+                                                                    position: 'relative',
+                                                                    alignItems: 'center',
+                                                            }
+                                                    } >
+                                                            {Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : <embed src = {data.url + "#toolbar=0&navpanes=0&scrollbar=0"} width={900} height= {400} type="application/pdf"  ></embed>}
+                                                    </div>)
+                                                    Global_State.modalManager.open_modal("Apercu du fichier")
+                                            }
+                                            }  />
+                                    case "xlsx":
+                                            return <SiMicrosoftexcel color='#1f6e43' size={iconSize} />
+                                    case "pptx":
+                                            return <SiMicrosoftpowerpoint color='#ad0b00' size={iconSize} onClick = { e =>
+                                            {
+                                                    Global_State.modalManager.setContent(
+                                                    <div style= {
+                                                            {
+                                                                    display: 'flex',
+                                                                    justifyContent: 'center',
+                                                                    position: 'relative',
+                                                                    alignItems: 'center',
+                                                            }
+                                                    } >
+                                                            {/* <iframe src = {data.url} width="auto" height="auto" type="application/pptx"></iframe> */}
+                                                    </div>)
+                                                    Global_State.modalManager.open_modal("Apercu du fichier")
+                                            }
+                                            } />
+                                    default:
+                                            return <AiFillFileUnknown size={iconSize} />
+                            }
                     }
-
-
             }
 
-            return( <div className={class_name} onClick = {handleClick} >{level}</div> )
-        }
+            const NameFormater = (props) => {
+                    const div = useRef()
 
-        for(let child_node of node.children )
-        {
-                const data = Global_State.getNodeDataById(child_node.id)
-                datas.push(
-                {
-                        id: data.id,
-                        value: data.name,
-                        level_value: data.level,
-                        name: <NameFormater data = {data} onClick = { e => { console.log('nameClicked'); handleClick({id: data.id, name: data.name}, e) } } />,
-                        level: data.type === "fnc" ? <LevelComponent data={data} /> : undefined,
-                        created_at: data.created_at,
-                        isClosed: data.type === "fnc" ? data.isClosed ? <div className="badge bg-success-bright text-success">Clôturé</div> : <div class="badge bg-danger-bright text-danger">Non-Clôturé</div> : undefined ,
-                        RA:  node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " +  data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " +  node.ra.second_name : undefined,
-                        size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
-                        type: data.type,
-                        global_type: data.global_type,
-                        section_id: data.section_id,
-                        isBeingEdited: data.onEdit
+                    const nameComponent = (
+                    <div id = {props.data.id} ref = {div} className='d-flex justify-content-center align-items-center' style={{ height: '100%', width: '100%', zIndex: -1000, pointerEvents: "none" }} {...props} >
+                            <TypeIcon iconSize={30} {...props} />
+                            <span
+                            style={
+                                    {
+                                            MozUserSelect: 'none',
+                                            msUserSelect: 'none',
+                                            WebkitUserSelect: 'none',
+                                            userSelect: 'none',
+                                            marginLeft: 10,
+                                            fontSize: 15,
+                                            fontWeight: 'bold'
+                                    }}  >{props.data.name}</span>
+                    </div>
+                    )
 
-                }
-                )
-        }
+                    useEffect(
+                    () =>
+                    {
 
-        return datas
-    }
+                            var pDoc = document.getElementById(`${props.data.id}`);
+
+                            var parent = pDoc.parentNode
+
+                            parent.classList.add("h-100")
+                            parent.style.height = '100%'
+
+
+                    }
+                    )
+
+                    return(
+                    <React.Fragment>
+                            {nameComponent}
+                    </React.Fragment>
+                    )
+            }
+
+            const LevelComponent = ({data}) =>
+            {
+                    // const [niv, setNiv] = useState(level)
+
+                    const level = parseInt(data.level)
+
+                    const nextNiv = currentNiv =>
+                    {
+                            switch (currentNiv) {
+                                    case 1:
+                                            return 2
+                                    case 2:
+                                            return 3
+                                    case 3:
+                                            return 1
+
+                                    default:
+                                            return 0
+                            }
+                    }
+
+                    let class_name
+                    switch (level) {
+                            case 1:
+                                    class_name = "badge bg-danger-bright text-dark"
+                                    break
+                            case 2:
+                                    class_name = "badge bg-warning-bright text-dark"
+                                    break
+                            case 3:
+                                    class_name = "badge bg-dark-bright text-dark"
+                                    break
+
+                            default:
+                                    break;
+                    }
+
+                    function handleClick(e)
+                    {
+                            console.log(level)
+                            const node_data = Global_State.getNodeDataById(data.id)
+                            const [id, lol] = Global_State.identifyNode(node_data)
+                            // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
+
+                            const query = new FormData;
+                            query.append('id', id)
+                            query.append('update_object', 'level')
+                            query.append('new_value', nextNiv(level))
+
+                            if(!Global_State.isEditorMode)
+                            {
+                                    const update = async () =>
+                                    {
+
+                                            await http.post('update_fnc', query)
+                                            .then( res => {
+                                                    console.log(res)
+                                            } )
+                                            .catch(err => { console.log(err); throw err })
+                                    }
+
+                                    // console.log(selectedRow[0].id.substring(2))
+                                    toast.promise(
+                                    update(),
+                                    {
+                                            loading: 'Loading...',
+                                            success: 'Processus achevé',
+                                            error: 'err'
+                                    }
+
+                                    )
+                            }
+                            else
+                            {
+                                    Global_State.editor.fnc.update(query)
+                            }
+
+
+                    }
+
+                    return( <div className={class_name} onClick = {handleClick} >{level}</div> )
+            }
+
+            for(let child_node of node.children )
+            {
+                    const data = Global_State.getNodeDataById(child_node.id)
+                    datas.push(
+                    {
+                            id: data.id,
+                            value: data.name,
+                            level_value: data.level,
+                            name: <NameFormater data = {data} />,
+                            level: data.type === "fnc" ? <LevelComponent data={data} /> : undefined,
+                            created_at: data.created_at,
+                            isClosed: data.type === "fnc" ? data.isClosed ? <div className="badge bg-success-bright text-success">Clôturé</div> : <div class="badge bg-danger-bright text-danger">Non-Clôturé</div> : undefined ,
+                            RA:  node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " +  data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " +  node.ra.second_name : undefined,
+                            size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
+                            type: data.type,
+                            global_type: data.global_type,
+                            section_id: data.section_id,
+                            isBeingEdited: data.onEdit
+
+                    }
+                    )
+            }
+
+            return datas
+    }, []
+    )
 
 
     // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
@@ -2016,15 +1979,18 @@ export default function FileTable({set}) {
 
     const onRowDoubleClicked = (row, event) => 
     {
-        backend.setCurrentSelectedFolder(row.id)
+            Global_State.backend.setCurrentSelectedFolder(row.id)
         // console.log('dbclick',row)
     }
 
     const handleClick = (row, event) => 
-    { 
-        // console.log(row.id, event); 
-        if(event.ctrlKey || event.altKey || event.shiftKey) handleChange(1, [row], true)
-        else handleChange(1, [row])
+    {
+            // console.log(row.id, event);
+
+            event.preventDefault(); event.stopPropagation()
+            if(event.ctrlKey || event.altKey || event.shiftKey) handleChange(1, [row], true)
+            else handleChange(1, [row])
+
         // selectedRowsByClick.current = [row]
     }
 

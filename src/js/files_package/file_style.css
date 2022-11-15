@@ -2,6 +2,7 @@
 #tree div::-webkit-scrollbar,
 .dropdown-menu::-webkit-scrollbar,
 #muiTree::-webkit-scrollbar,
+#global_research_result::-webkit-scrollbar,
 #global_research_result div::-webkit-scrollbar {
   display: none;
 }

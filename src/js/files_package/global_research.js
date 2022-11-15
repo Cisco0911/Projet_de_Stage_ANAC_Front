@@ -40,7 +40,25 @@ export default function Global_research(_ref) {
 
         var handleFilterTagClick = function handleFilterTagClick(e) {
                 e.stopPropagation();
-                setFilterTag('Audit');
+
+                switch (filterTag) {
+                        case 'All':
+                                setFilterTag('Folder');
+                                break;
+                        case 'Folder':
+                                setFilterTag('File');
+                                break;
+                        case 'File':
+                                setFilterTag('Audit');
+                                break;
+                        case 'Audit':
+                                setFilterTag('FNC');
+                                break;
+                        default:
+                                setFilterTag('All');
+                                break;
+
+                }
         };
 
         return React.createElement(
@@ -65,7 +83,7 @@ export default function Global_research(_ref) {
                                         " ",
                                         React.createElement(
                                                 "div",
-                                                { onClick: handleFilterTagClick },
+                                                { onClick: handleFilterTagClick, style: { cursor: 'pointer' } },
                                                 " ",
                                                 filterTag,
                                                 " "
@@ -73,51 +91,89 @@ export default function Global_research(_ref) {
                                         " "
                                 ),
                                 React.createElement(Form.Control, {
+                                        id: 'global_research_input',
+                                        style: { backgroundColor: 'whitesmoke' },
                                         type: "search",
                                         placeholder: "Search",
                                         "aria-label": "Search",
                                         value: value,
                                         onChange: handleChange
+                                        // autoFocus
                                 })
                         )
                 ),
                 React.createElement(
                         Card,
-                        { id: 'global_research_result', className: (value === '' ? 'd-none' : 'd-flex') + " mt-1 p-1", sx: { maxHeight: 3 * window.innerHeight / 4, maxWidth: 9 * window.innerWidth / 10 } },
-                        React.createElement(
-                                TableContainer,
-                                { component: Paper },
-                                React.createElement(
-                                        Table,
-                                        { "aria-label": "simple table" },
+                        { id: 'global_research_result', className: (value === '' ? 'd-none' : 'd-flex flex-column') + " mt-1 p-1",
+                                sx: {
+                                        maxHeight: 3 * window.innerHeight / 4,
+                                        maxWidth: 9 * window.innerWidth / 10,
+                                        backgroundColor: '#0062ff7a',
+                                        border: 'solid blue 1px',
+                                        overflowY: 'scroll'
+                                }
+                        },
+                        Global_State.dataToUse.filter(function (node) {
+                                if (value === '') return false;else if (node.type === 'checkList' || node.type === 'dp' || node.type === 'nc') return false;else if (filterTag === 'All') return node.name.indexOf(value) !== -1;else if (filterTag === 'Audit') return node.type === 'audit' && node.name.indexOf(value) !== -1;else if (filterTag === 'FNC') return node.type === 'fnc' && node.name.indexOf(value) !== -1;else if (filterTag === 'Folder') return node.type === 'ds' && node.name.indexOf(value) !== -1;else if (filterTag === 'File') return node.type === 'f' && node.name.indexOf(value) !== -1;
+                        }).map(function (node) {
+                                var Research_name_component = function Research_name_component(_ref2) {
+                                        var name = _ref2.name,
+                                            researched_word = _ref2.researched_word;
+
+                                        var idx = name.indexOf(researched_word);
+
+                                        var _ref3 = [name.substring(0, idx), name.substring(idx, idx + researched_word.length), name.substring(idx + researched_word.length, name.length)],
+                                            prev = _ref3[0],
+                                            current = _ref3[1],
+                                            next = _ref3[2];
+
+
+                                        return React.createElement(
+                                                "span",
+                                                { className: 'd-flex align-items-center' },
+                                                prev,
+                                                React.createElement(
+                                                        "span",
+                                                        { style: { backgroundColor: 'blue', color: 'white', borderRadius: 2, padding: 2 } },
+                                                        current
+                                                ),
+                                                next
+                                        );
+                                };
+
+                                return React.createElement(
+                                        Card,
+                                        {
+                                                key: node.id,
+                                                className: 'm-1 d-flex align-items-center',
+                                                sx: {
+                                                        minHeight: 35,
+                                                        margin: 5,
+                                                        padding: 2,
+                                                        overflowX: 'scroll',
+                                                        cursor: 'pointer'
+                                                }
+                                        },
                                         React.createElement(
-                                                TableBody,
-                                                null,
-                                                Global_State.dataToUse.filter(function (node) {
-                                                        if (value === '') return false;else if (filterTag === 'All') return node.name.indexOf(value) !== -1;else if (filterTag === 'Audit') return node.type === 'audit' && node.name.indexOf(value) !== -1;else if (filterTag === 'FNC') return node.type === 'fnc' && node.name.indexOf(value) !== -1;else if (filterTag === 'Folder') return node.type === 'ds' && node.name.indexOf(value) !== -1;else if (filterTag === 'File') return node.type === 'f' && node.name.indexOf(value) !== -1;
-                                                }).map(function (node) {
-                                                        return React.createElement(
-                                                                TableRow,
-                                                                {
-                                                                        key: node.id,
-                                                                        className: 'm-1',
-                                                                        sx: { margin: 5 }
-                                                                },
-                                                                React.createElement(
-                                                                        TableCell,
-                                                                        { className: 'd-none d-sm-block', component: "th", scope: "row", sx: { minWidth: 'max-content' } },
-                                                                        node.name + "   " + node.path
-                                                                ),
-                                                                React.createElement(
-                                                                        TableCell,
-                                                                        { className: 'd-block d-sm-none', component: "th", scope: "row", sx: { minWidth: 'max-content' } },
-                                                                        node.name
-                                                                )
-                                                        );
-                                                })
+                                                "div",
+                                                { className: 'd-none d-sm-flex', style: { minWidth: 'max-content' } },
+                                                React.createElement(Research_name_component, { name: node.name, researched_word: value }),
+                                                "\xA0\xA0",
+                                                React.createElement(
+                                                        "span",
+                                                        { className: 'd-flex align-items-center', style: { color: "#00000075", fontSize: 13 } },
+                                                        " ",
+                                                        "" + node.path,
+                                                        " "
+                                                )
+                                        ),
+                                        React.createElement(
+                                                "div",
+                                                { className: 'd-block d-sm-none', style: { minWidth: 'max-content' } },
+                                                React.createElement(Research_name_component, { name: node.name, researched_word: value })
                                         )
-                                )
-                        )
+                                );
+                        })
                 )
         );
 }
