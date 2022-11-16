@@ -70,3 +70,7 @@
     outline: 0;
     box-shadow: none;
 }
+
+.react-datepicker-popper{
+    z-index: 100 !important;
+}

@@ -2,16 +2,15 @@
 // import Echo from 'laravel-echo';
 // import Pusher from 'pusher-js';
 
+import 'react-date-range/dist/styles.css'; // main css file
+import 'react-date-range/dist/theme/default.css'; // theme css file
+
+import "react-datepicker/dist/react-datepicker.css";
+
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 
 import './style/vendors/bundle.css';
-// import './style/vendors/quill/quill.snow.css';
-// import './style/vendors/jstree/themes/default/style.min.css';
-// import './style/vendors/clockpicker/bootstrap-clockpicker.min.css';
-// import './style/vendors/datepicker/daterangepicker.css';
-// import './style/vendors/dataTable/datatables.min.css';
-// import './style/vendors/select2/css/select2.min.css';
 
 import "./style/vendors/dropzone/dropzone.css";
 
