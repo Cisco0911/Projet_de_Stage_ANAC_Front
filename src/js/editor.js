@@ -233,7 +233,7 @@ export default function useEditor(data) {
 
                                         var _data = action.job.data;
 
-                                        var new_folder = Global_State.createNodeData("ds" + id.current, "folder", getService(_data.services), false, _data.name, "ds", false, _data.front_parent_type === 'root' ? '0' : _data.front_parent_type + _data.parent_id, "", true, undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data.section_id), undefined, undefined);
+                                        var new_folder = Global_State.createNodeData("ds" + id.current, "folder", getService(_data.services), false, _data.name, "ds", false, _data.front_parent_type === 'root' ? '0' : _data.front_parent_type + _data.parent_id, "", true, undefined, undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data.section_id), undefined, undefined);
                                         new_folder['onEdit'] = true;
 
                                         state.push(new_folder);
@@ -310,7 +310,7 @@ export default function useEditor(data) {
 
                                                         var ext = part_name[part_name.length - 1];
 
-                                                        var new_file = Global_State.createNodeData("f" + id.current, "file", getService(_data2.services), false, file.name, "f", false, _data2.front_parent_type === 'root' ? '0' : _data2.front_parent_type + _data2.parent_id, "", false, ext, undefined, undefined, 'pas encore créé', undefined, parseInt(_data2.section_id), file.size, undefined);
+                                                        var new_file = Global_State.createNodeData("f" + id.current, "file", getService(_data2.services), false, file.name, "f", false, _data2.front_parent_type === 'root' ? '0' : _data2.front_parent_type + _data2.parent_id, "", false, ext, undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data2.section_id), file.size, undefined);
                                                         new_file['onEdit'] = true;
 
                                                         state.push(new_file);
@@ -396,7 +396,7 @@ export default function useEditor(data) {
 
                                                         var type = _data3.sub_type !== undefined ? _data3.sub_type : 'audit';
 
-                                                        var new_node = Global_State.createNodeData("" + type + job.node_id, "folder", getService(_data3.services), false, _data3.name, type, false, type === 'audit' ? '0' : "audit" + job.data.audit_id, "", true, undefined, type === 'audit' ? Global_State.authUser : undefined, undefined, 'pas encore créé', undefined, parseInt(_data3.section_id), undefined, undefined);
+                                                        var new_node = Global_State.createNodeData("" + type + job.node_id, "folder", getService(_data3.services), false, _data3.name, type, false, type === 'audit' ? '0' : "audit" + job.data.audit_id, "", true, undefined, type === 'audit' ? Global_State.authUser : undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data3.section_id), undefined, undefined);
                                                         new_node['onEdit'] = true;
 
                                                         state.push(new_node);
@@ -478,7 +478,7 @@ export default function useEditor(data) {
                                         var audit = Global_State.getNodeDataById(Global_State.getNodeDataById("nonC" + _data4.nonC_id).parentId);
 
                                         for (var i = debut; i < fin + 1; i++) {
-                                                var new_fnc = Global_State.createNodeData("fnc" + id.current, "folder", getService(_data4.services), false, "FNC-" + audit.name + "-" + i, "fnc", false, "nonC" + _data4.nonC_id, "", true, undefined, undefined, false, 'pas encore créé', _data4.level, parseInt(audit.section_id), undefined, undefined);
+                                                var new_fnc = Global_State.createNodeData("fnc" + id.current, "folder", getService(_data4.services), false, "FNC-" + audit.name + "-" + i, "fnc", false, "nonC" + _data4.nonC_id, "", true, undefined, undefined, false, null, 'pas encore créé', _data4.level, parseInt(audit.section_id), undefined, undefined);
                                                 new_fnc['onEdit'] = true;
                                                 new_fnc['access_key'] = { job_id: action.job.id, num: i };
 

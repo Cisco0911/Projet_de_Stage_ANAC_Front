@@ -63,9 +63,7 @@ export default function Global_research(_ref) {
 
         return React.createElement(
                 "div",
-                { onClick: function onClick(e) {
-                                e.stopPropagation();
-                        } },
+                null,
                 React.createElement(
                         Form,
                         { id: 'global_research', className: display + " container-fluid", style: { width: window.innerWidth > 576 ? 500 : 'unset' } },

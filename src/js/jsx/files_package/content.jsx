@@ -1,6 +1,6 @@
 /* eslint-disable import/first */
 
-import React, {useMemo, useState, useReducer, useEffect, useRef, useCallback} from 'react';
+import React, {useMemo, useState, useReducer, useEffect, useRef, useCallback, forwardRef} from 'react';
 
 import {Global_State} from '../main';
 import { http } from "../data";
@@ -28,12 +28,14 @@ import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
-import Checkbox from "@mui/material/Checkbox";
+import {HiSaveAs} from 'react-icons/hi'
+import {VscSaveAs} from 'react-icons/vsc'
 
 import { Formik, useFormik } from 'formik';
 import * as yup from 'yup'
 
 import DatePicker from "react-datepicker";
+import Stack from "@mui/material/Stack";
 
 
 
@@ -149,16 +151,16 @@ function Files_Dropzone(props) {
 export default function FileTable({set})
 {
 
-        let node = Global_State.backend.selectedNode.model
+        let node = useMemo(() => (Global_State.backend.selectedNode.model), [Global_State.backend.selectedNode.model])
 
         const contain_audit = ( node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(Global_State.getCurrentSection().name) )
 
-        console.log('contentNooooooooooooode', node)
+        console.log('contentNooooooooooooode', node, Global_State.backend)
 
         const [filter, setFilter] = useState(
                 {
-                        tag: "la Date de creation",
-                        element: [null, null]
+                        tag: "le Nom",
+                        element: ''
                 }
         )
 
@@ -1177,7 +1179,7 @@ export default function FileTable({set})
                 if (node.type === "nonC") buttons.push(<option key={"add_fncs"} className="dropdown-item" disabled = { false }  onClick={() => {add("add_fncs")}} >Générer des Non-Conformités</option>)
 
                 return(
-                <div className="d-md-flex justify-content-between mb-4">
+                <div className="d-md-flex justify-content-between">
                         <ul className="list-inline mb-3">
                                 <li className="list-inline-item mb-0">
                                         <a className="btn btn-outline-light dropdown-toggle" data-toggle="dropdown">
@@ -1673,26 +1675,180 @@ export default function FileTable({set})
                         return( <div className={class_name} onClick = {handleClick} >{level}</div> )
                 }
 
+                const ReviewDateComponenr = ({data}) =>
+                {
+                        const value = data.review_date ? data.review_date : '____/__/__'
+
+                        const handleClick = e =>
+                        {
+                                e.stopPropagation()
+                                console.log("review date handle click")
+
+                                const Date_input = ({data }) =>
+                                {
+
+                                        const CustomInput = forwardRef(
+                                                ({ value, onClick }, ref) =>
+                                                (
+                                                        <Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: 'whitesmoke' }}>
+                                                                <input ref={ref}
+                                                                       className="form-control form-control-sm"
+                                                                       style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0 }}
+                                                                       value={`${value}`}
+                                                                       onChange={e => {e.preventDefault(); e.stopPropagation()}}
+                                                                       onClick={onClick}
+                                                                       readOnly
+                                                                />
+
+                                                                <div  style={{ width: 'fit-content', height: 'fit-content', padding: 5, backgroundColor: '#E9ECEFFF' }} onClick={ handleSubmit } >
+                                                                        <HiSaveAs size={25} color={'blue'} />
+                                                                </div>
+                                                        </Stack>
+                                                )
+                                        );
+
+                                        const [startDate, setStartDate] = useState(data.review_date !== null ? new Date(data.review_date) : new Date());
+
+                                        const new_review_date = `${startDate.getFullYear()}/${startDate.getMonth()+1}/${startDate.getDate()}`
+                                        console.log('new_review_date', new_review_date, e)
+
+                                        const handleSubmit = e =>
+                                        {
+                                                e.stopPropagation()
+
+                                                Global_State.setOverlay_props(t => (
+                                                                {
+                                                                        ...t,
+                                                                        style:
+                                                                        {
+                                                                                ...t.style,
+                                                                                display: 'none',
+                                                                        },
+                                                                }
+                                                        )
+                                                )
+
+                                                console.log(new_review_date)
+                                                const [id, model_type] = Global_State.identifyNode(data)
+
+                                                const query = new FormData;
+                                                query.append('id', id)
+                                                query.append('update_object', 'review_date')
+                                                query.append('new_value', new_review_date)
+
+                                                if(!Global_State.isEditorMode)
+                                                {
+                                                        const update = async () =>
+                                                        {
+
+                                                                await http.post('update_fnc', query)
+                                                                .then( res => {
+                                                                        console.log(res)
+                                                                } )
+                                                                .catch(err => { console.log(err); throw err })
+                                                        }
+
+                                                        // console.log(selectedRow[0].id.substring(2))
+                                                        toast.promise(
+                                                        update(),
+                                                        {
+                                                                loading: 'Loading...',
+                                                                success: 'Processus achevé',
+                                                                error: 'err'
+                                                        }
+
+                                                        )
+                                                }
+                                                else
+                                                {
+                                                        Global_State.editor.fnc.update(query)
+                                                }
+                                        }
+
+                                        return (
+                                                <div className={`d-flex justify-content-center align-items-center`}
+                                                     style={{
+                                                             backgroundColor: 'rgba(255,255,255,0)',
+                                                             borderRadius: 10,
+                                                             border: '1px solid blue',
+                                                             overflow: "hidden"
+                                                        }}
+                                                >
+                                                        <div style={{ width: "fit-content" }} >
+                                                                <DatePicker
+                                                                        selected={startDate}
+                                                                        onChange={(date) => setStartDate(date)}
+                                                                        showYearDropdown
+                                                                        scrollableYearDropdown
+                                                                        yearDropdownItemNumber={20}
+                                                                        minDate={new Date()}
+                                                                        customInput ={ <CustomInput /> }
+                                                                />
+                                                        </div>
+                                                </div>
+                                        )
+                                }
+
+
+                                Global_State.setOverlay_props( t => (
+                                {
+                                        ...t,
+                                        style:
+                                        {
+                                                ...t.style,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                        },
+                                        children: (
+                                        <div
+                                                style=
+                                                {{
+                                                        width: "max-content",
+                                                        marginTop: 15,
+                                                        backgroundColor: 'rgba(255,255,255,0)' ,
+                                                        translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+                                                }}
+                                                onClick={ e => { e.stopPropagation() } }
+                                        >
+                                                <Date_input data={data} />
+                                        </div>
+                                        ),
+
+                                }
+                                ) )
+                        }
+
+                        return(
+                                <span className={`${data.review_date ? 'text-primary' : ''}`} onClick={handleClick} >
+                                        {value}
+                                </span>
+                        )
+                }
+
                 for(let child_node of node.children )
                 {
-                        const data = Global_State.getNodeDataById(child_node.id)
+                        // console.log('child_node.id', child_node)
+                        const data = child_node // Global_State.getNodeDataById(child_node.id)
+                        // if (data === null) continue
                         datas.push(
-                        {
-                                id: data.id,
-                                value: data.name,
-                                level_value: data.level,
-                                name: <NameFormater data = {data} />,
-                                level: data.type === "fnc" ? <LevelComponent data={data} /> : undefined,
-                                created_at: data.created_at,
-                                isClosed: data.type === "fnc" ? data.isClosed ? <div className="badge bg-success-bright text-success">Clôturé</div> : <div class="badge bg-danger-bright text-danger">Non-Clôturé</div> : undefined ,
-                                RA:  node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " +  data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " +  node.ra.second_name : undefined,
-                                size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
-                                type: data.type,
-                                global_type: data.global_type,
-                                section_id: data.section_id,
-                                isBeingEdited: data.onEdit
+                                {
+                                        id: data.id,
+                                        value: data.name,
+                                        level_value: data.level,
+                                        name: <NameFormater data = {data} />,
+                                        level: data.type === "fnc" ? <LevelComponent data={data} /> : undefined,
+                                        created_at: data.created_at,
+                                        isClosed: data.type === "fnc" ? data.isClosed ? <div className="badge bg-success-bright text-success">Clôturé</div> : <div className="badge bg-danger-bright text-danger">Non-Clôturé</div> : undefined ,
+                                        RA:  node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " +  data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " +  node.ra.second_name : undefined,
+                                        size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
+                                        type: data.type,
+                                        global_type: data.global_type,
+                                        section_id: data.section_id,
+                                        isBeingEdited: data.onEdit,
+                                        review_date: data.review_date === undefined ? '' : <ReviewDateComponenr data={data} />,
 
-                        }
+                                }
                         )
                 }
 
@@ -1758,7 +1914,7 @@ export default function FileTable({set})
         {
                 let columns_of_the_type
 
-                if (node.type === "root" && Global_State.getCurrentSection().name === 'Audit') {
+                if (node.type === "root" && contain_audit) {
                         columns_of_the_type =
                         [
                                 {
@@ -1816,8 +1972,8 @@ export default function FileTable({set})
                                         width: "11%"
                                 },
                                 {
-                                        name: 'CREE LE',
-                                        selector: row => row.created_at,
+                                        name: 'DATE DE REVISION',
+                                        selector: row => row.review_date,
                                         sortable: true,
                                         width: "22%"
                                 },
@@ -2026,11 +2182,14 @@ export default function FileTable({set})
                                                                                 selectsRange={true}
                                                                                 startDate={startDate}
                                                                                 endDate={endDate}
-                                                                                onChange={(update) => {
-                                                                                        // const now = new Date()
-                                                                                        // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
-                                                                                        set( t => ({...t, element: update}) );
-                                                                                }}
+                                                                                onChange={
+                                                                                        (update) =>
+                                                                                        {
+                                                                                                // const now = new Date()
+                                                                                                // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
+                                                                                                set( t => ({...t, element: update}) );
+                                                                                        }
+                                                                                }
                                                                                 isClearable={true}
                                                                                 showYearDropdown
                                                                                 scrollableYearDropdown
@@ -2043,12 +2202,43 @@ export default function FileTable({set})
 
                                                         );
                                                 }
+                                                case 'la Date de revision':
+                                                {
+                                                        const [startDate, endDate] = filter.element;
+                                                        return (
+                                                        <div style={{ maxWidth: 243 }} >
+                                                                <label>Chercher selon {filter.tag} :</label>
+                                                                <DatePicker
+                                                                selectsRange={true}
+                                                                startDate={startDate}
+                                                                endDate={endDate}
+                                                                onChange={
+                                                                        (update) =>
+                                                                        {
+                                                                                // const now = new Date()
+                                                                                // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
+                                                                                set( t => ({...t, element: update}) );
+                                                                        }
+                                                                }
+                                                                isClearable={true}
+                                                                showYearDropdown
+                                                                scrollableYearDropdown
+                                                                yearDropdownItemNumber={1000}
+                                                                minDate={new Date("2021/12/31")}
+                                                                customInput ={ <input className="form-control form-control-sm mr-15" value={`${startDate} - ${endDate}`}/> }
+
+                                                                />
+                                                        </div>
+
+                                                        );
+                                                }
 
                                                 default:
                                                         return (
-                                                                <label>Chercher selon {filter.tag} :
+                                                                <div>
+                                                                        <label>Chercher selon {filter.tag} :</label>
                                                                         <input onChange={(e) => {set( t => ({...t, element: e.target.value}) )}} value={filter.element} type="search" className="form-control form-control-sm" placeholder="" aria-controls="table-files"/>
-                                                                </label>
+                                                                </div>
                                                         )
                                         }
                                 }, []
@@ -2065,7 +2255,88 @@ export default function FileTable({set})
         )
 
 
-        const filtered_datas = useMemo( () => ( datas.filter( row => (row.value.indexOf(filter.element) !== -1) ) ), [datas, filter] )
+        const filtered_datas = useMemo( () =>
+                {
+                        return datas.filter(
+                                row =>
+                                {
+                                        switch (filter.tag)
+                                        {
+                                                case 'le Nom':
+                                                        return row.value.indexOf(filter.element) !== -1
+                                                case 'la Date de creation':
+                                                {
+                                                        // console.log(new Date(row.created_at.substring(0, 10).split('-').join('/')).valueOf())
+
+                                                        const creation_string_date = row.created_at.substring(0, 10)
+                                                        const formated_creation_string_date = creation_string_date.split('-').join('/')
+
+                                                        const creation_date = new Date(formated_creation_string_date)
+
+                                                        const [debut, fin] = filter.element
+
+                                                        if (debut === null && fin === null) return true
+                                                        else
+                                                        {
+                                                                if (debut === null)
+                                                                {
+                                                                        return ( creation_date.valueOf() <= fin.valueOf() )
+                                                                }
+                                                                else if (fin === null)
+                                                                {
+                                                                        return ( creation_date.valueOf() >= debut.valueOf() )
+                                                                }
+                                                                else
+                                                                {
+                                                                        // console.log(debut.valueOf(), fin.valueOf(), creation_date.valueOf(), (creation_date.valueOf() >= debut.valueOf() && creation_date.valueOf() <= fin.valueOf()) )
+                                                                        return ( creation_date.valueOf() >= debut.valueOf() && creation_date.valueOf() <= fin.valueOf() )
+                                                                }
+                                                        }
+                                                }
+                                                case 'le RA':
+                                                        if (row.RA) return row.RA.indexOf(filter.element) !== -1
+                                                        else return false
+                                                case 'la Date de revision':
+                                                {
+                                                        // console.log(new Date(row.created_at.substring(0, 10).split('-').join('/')).valueOf())
+
+                                                        const data = Global_State.getNodeDataById(row.id)
+
+                                                        const [debut, fin] = filter.element
+
+                                                        if (debut === null && fin === null) return true
+                                                        else if (data.review_date !== undefined )
+                                                        {
+
+                                                                const revision_string_date = data.review_date.substring(0, 10)
+                                                                const formatted_revision_string_date = revision_string_date.split('-').join('/')
+
+                                                                const revision_date = new Date(formatted_revision_string_date)
+
+                                                                console.log('review_daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaate', revision_date.toString() )
+                                                                if (debut === null)
+                                                                {
+                                                                        return ( revision_date.valueOf() <= fin.valueOf() )
+                                                                }
+                                                                else if (fin === null)
+                                                                {
+                                                                        return ( revision_date.valueOf() >= debut.valueOf() )
+                                                                }
+                                                                else
+                                                                {
+                                                                        // console.log(debut.valueOf(), fin.valueOf(), creation_date.valueOf(), (creation_date.valueOf() >= debut.valueOf() && creation_date.valueOf() <= fin.valueOf()) )
+                                                                        return ( revision_date.valueOf() >= debut.valueOf() && revision_date.valueOf() <= fin.valueOf() )
+                                                                }
+                                                        }
+                                                        else return false
+                                                }
+
+
+                                        }
+                                }
+                        )
+                }, [datas, filter]
+        )
 
         console.log('dataaaaaaas', datas)
 

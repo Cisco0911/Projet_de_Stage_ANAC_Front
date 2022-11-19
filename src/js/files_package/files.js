@@ -4,7 +4,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /* eslint-disable import/first */
 
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { Tree } from "react-arborist";
 import useBack from "./nodeBackend";
 import FileTable from "./content";
@@ -39,7 +39,9 @@ export default function useGetFiles(Global_research) {
                                                 }),
                                                 children: React.createElement(
                                                         "div",
-                                                        { style: { width: "max-content", marginTop: 15 } },
+                                                        { style: { width: "max-content", marginTop: 15 }, onClick: function onClick(e) {
+                                                                        e.stopPropagation();
+                                                                } },
                                                         Global_research
                                                 )
 
@@ -64,9 +66,13 @@ export default function useGetFiles(Global_research) {
 
         Global_State['backend'] = useBack();
 
+        var dataTable = useMemo(function () {
+                return React.createElement(FileTable, null);
+        }, [Global_State.backend.selectedNode.model]);
+
         return {
                 fileTree: Global_State.hasSection ? React.createElement(FileTree, { data: Global_State.backend.data }) : React.createElement("div", null),
-                fileTable: Global_State.hasSection ? React.createElement(FileTable, null) : React.createElement("div", null),
+                fileTable: Global_State.hasSection ? dataTable : React.createElement("div", null),
                 fileDetails: Global_State.hasSection ? React.createElement(FileDetails, null) : React.createElement("div", null)
         };
 }

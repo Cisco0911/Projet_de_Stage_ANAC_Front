@@ -74,3 +74,8 @@
 .react-datepicker-popper{
     z-index: 100 !important;
 }
+
+.all_transparent div
+{
+    background-color: rgba(255, 255, 255, 0);
+}

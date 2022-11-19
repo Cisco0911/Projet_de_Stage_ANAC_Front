@@ -425,6 +425,36 @@ export default function useGetData(TheDatas)
 
                                         }
                                 }
+                                else if (data.type === 'FncReviewNotification')
+                                {
+                                        console.log(data)
+
+                                        const ids = new FormData
+
+                                        ids.append('ids[]', `${data.fncId}-fnc`)
+
+                                        http.post('getDatasByIds', ids)
+                                        .then( res =>
+                                        {
+                                                console.log(res)
+
+                                                const fnc = res.data[0]
+
+                                                toast(`Revision de la Fnc ${fnc.name}`,
+                                                {
+                                                        id: 'FncReviewNotification',
+                                                        icon: '🙌',
+                                                        duration: Infinity,
+                                                }
+                                                )
+                                        }
+                                        )
+                                        .catch( err =>
+                                        {
+                                                console.log(err)
+                                        }
+                                        )
+                                }
 
                         });
 
@@ -477,6 +507,33 @@ export default function useGetData(TheDatas)
         Data_Base.data.ds = Data_Base.data.ds.filter((element) => { return haveRightToSee(element.services, Data_Base.authUser.services) }).map((visibleElement) => {return visibleElement})
         Data_Base.data.fs = Data_Base.data.fs.filter((element) => { return haveRightToSee(element.services, Data_Base.authUser.services) }).map((visibleElement) => {return visibleElement})
 
+        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, isClosed, review_date, created_at, level, section_id, taille, url)
+        {
+
+
+                return {
+                        id,
+                        global_type,
+                        services,
+                        isOpen,
+                        section_id,
+                        name,
+                        type,
+                        taille,
+                        level,
+                        created_at,
+                        ra,
+                        hasChildren,
+                        isRoot,
+                        parentId,
+                        path,
+                        isClosed,
+                        review_date,
+                        ext,
+                        url,
+                }
+
+        }
 
         const dataFormater = () =>
         {
@@ -485,7 +542,7 @@ export default function useGetData(TheDatas)
 
                 // makeNodeData(0, "Racine", "root", true, -1, "", true)
 
-                let allDataAsNodeData = [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)]
+                let allDataAsNodeData = [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, undefined, -1)]
 
                 const audits = Data_Base.data.audits.map((audit) => { return(
                         {
@@ -645,6 +702,7 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         audit.user,
                                         undefined,
+                                        undefined,
                                         audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19),
                                         undefined,
                                         audit.section_id,
@@ -668,6 +726,7 @@ export default function useGetData(TheDatas)
                                         "audit" + checkList.audit_id,
                                         getPath(parseInt(checkList.id.substring(9), 10), 'checkList'),
                                         true,
+                                        undefined,
                                         undefined,
                                         undefined,
                                         undefined,
@@ -697,6 +756,7 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         undefined,
                                         undefined,
+                                        undefined,
                                         dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19),
                                         undefined,
                                         dp.section_id,
@@ -720,6 +780,7 @@ export default function useGetData(TheDatas)
                                         "audit" + nonC.audit_id,
                                         getPath(parseInt(nonC.id.substring(4), 10), 'nonC'),
                                         true,
+                                        undefined,
                                         undefined,
                                         undefined,
                                         undefined,
@@ -749,6 +810,7 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         undefined,
                                         fnc.isClosed,
+                                        fnc.review_date,
                                         fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19),
                                         fnc.level,
                                         fnc.section_id,
@@ -775,6 +837,7 @@ export default function useGetData(TheDatas)
                                         f.extension,
                                         undefined,
                                         undefined,
+                                        undefined,
                                         f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19),
                                         undefined,
                                         f.section_id,
@@ -798,6 +861,7 @@ export default function useGetData(TheDatas)
                                         d.parent_type === '' ? '0' : d.parent_type + d.parent_id,
                                         getPath(parseInt(d.id.substring(2), 10), 'ds'),
                                         true,
+                                        undefined,
                                         undefined,
                                         undefined,
                                         undefined,
@@ -896,6 +960,7 @@ export default function useGetData(TheDatas)
                                                                         data.node_type === 'f' ? node.extension : undefined,
                                                                         node.user,
                                                                         data.node_type === 'fnc' ? node.isClosed : undefined,
+                                                                        data.node_type === 'fnc' ? node.review_date : undefined,
                                                                         node.created_at,//
                                                                         data.node_type === 'fnc' ? node.level : undefined,
                                                                         section_id,
@@ -925,6 +990,7 @@ export default function useGetData(TheDatas)
                                                         data.node_type === 'f' ? data.node.extension : undefined,
                                                         data.node_type === 'audit' ? data.node.user.name : undefined,
                                                         data.node_type === 'fnc' ? data.node.isClosed : undefined,
+                                                        data.node_type === 'fnc' ? data.node.review_date : undefined,
                                                         data.node.created_at,//
                                                         data.node_type === 'fnc' ? data.node.level : undefined,
                                                         section_id,
@@ -1085,6 +1151,7 @@ export default function useGetData(TheDatas)
                                         data.node_type === 'f' ? node.extension : undefined,
                                         data.node_type === 'audit' ? node.user.name : undefined,
                                         data.node_type === 'fnc' ? node.isClosed : undefined,
+                                        data.node_type === 'fnc' ? node.review_date : undefined,
                                         node.created_at,//
                                         data.node_type === 'fnc' ? node.level : undefined,
                                         parseInt(node.section_id),
@@ -1167,7 +1234,7 @@ export default function useGetData(TheDatas)
 
                         for(let section of Data_Base.data.sections)
                         {
-                                map.set(section.id, dataToUse.filter((nodeData) => { /*console.log(nodeData.section_id, section.id)*/; return nodeData.section_id === section.id || nodeData.section_id === -1 }).map((nodeData) => { return nodeData } ) )
+                                map.set(section.id, dataToUse.filter((nodeData) => { /*console.log(nodeData.section_id, section.id);*/ return nodeData.section_id === section.id || nodeData.section_id === -1 }).map((nodeData) => { return nodeData } ) )
                         }
                         return map
                 }, [dataToUse]
@@ -1191,33 +1258,6 @@ export default function useGetData(TheDatas)
         const dataParsedToJson = useMemo( () => parseToJson(displayingSection), [displayingSection] )
 
         // console.log(displayingSection)
-
-        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, isClosed, created_at, level, section_id, taille, url)
-        {
-
-
-                return {
-                        id,
-                        global_type,
-                        services,
-                        isOpen,
-                        section_id,
-                        name,
-                        type,
-                        taille,
-                        level,
-                        created_at,
-                        ra,
-                        hasChildren,
-                        isRoot,
-                        parentId,
-                        path,
-                        isClosed,
-                        ext,
-                        url,
-                }
-
-        }
 
 
         const [toggleCleared, setToggleCleared] = useState(false);
@@ -1573,7 +1613,9 @@ export default function useGetData(TheDatas)
                         zIndex: '1040',
                         width: '100vw',
                         height: '100vh',
+                        overflow: 'auto',
                         backgroundColor: '#00000000',
+                        // pointerEvents: 'none',
                         // opacity: 0.5,
                 } }
         )
@@ -1611,7 +1653,7 @@ export default function useGetData(TheDatas)
                         getNodeDataById: getNodeData,
                         getChildrenById: getChildren,
                         getType: getType,
-                        modalManager: modalManager,
+                        modalManager,
                         spinnerManager,
                         selectedSectionId,
                         setSectionId,

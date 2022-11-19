@@ -1,6 +1,6 @@
 /* eslint-disable import/first */
 
-import React, {useRef, useState, useCallback, useEffect} from 'react';
+import React, {useRef, useState, useCallback, useEffect, useMemo} from 'react';
 import { Tree } from "react-arborist";
 import useBack from "./nodeBackend";
 import FileTable from "./content";
@@ -42,7 +42,7 @@ export default function useGetFiles(Global_research) {
                                                                 justifyContent: 'center'
                                                         },
                                                         children: (
-                                                        <div style={{ width: "max-content", marginTop: 15 }} >
+                                                        <div style={{ width: "max-content", marginTop: 15 }} onClick={ e => { e.stopPropagation() } } >
                                                                 {Global_research}
                                                         </div>
                                                         ),
@@ -77,10 +77,12 @@ export default function useGetFiles(Global_research) {
 
         Global_State['backend'] = useBack()
 
+        const dataTable = useMemo(() => (<FileTable  />), [Global_State.backend.selectedNode.model])
+
         return (
         {
                 fileTree: Global_State.hasSection ? <FileTree data = {Global_State.backend.data} /> : <div/>,
-                fileTable: Global_State.hasSection ? <FileTable  /> : <div/> ,
+                fileTable: Global_State.hasSection ? dataTable : <div/> ,
                 fileDetails: Global_State.hasSection ? <FileDetails/> : <div/>,
         }
         )

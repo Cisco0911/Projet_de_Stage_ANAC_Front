@@ -6,7 +6,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 /* eslint-disable import/first */
 
-import React, { useMemo, useState, useReducer, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useState, useReducer, useEffect, useRef, useCallback, forwardRef } from 'react';
 
 import { Global_State } from '../main';
 import { http } from "../data";
@@ -34,12 +34,14 @@ import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
-import Checkbox from "@mui/material/Checkbox";
+import { HiSaveAs } from 'react-icons/hi';
+import { VscSaveAs } from 'react-icons/vsc';
 
 import { Formik, useFormik } from 'formik';
 import * as yup from 'yup';
 
 import DatePicker from "react-datepicker";
+import Stack from "@mui/material/Stack";
 
 var previousSelected = [];
 
@@ -170,15 +172,17 @@ export default function FileTable(_ref) {
         var set = _ref.set;
 
 
-        var node = Global_State.backend.selectedNode.model;
+        var node = useMemo(function () {
+                return Global_State.backend.selectedNode.model;
+        }, [Global_State.backend.selectedNode.model]);
 
         var contain_audit = node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(Global_State.getCurrentSection().name);
 
-        console.log('contentNooooooooooooode', node);
+        console.log('contentNooooooooooooode', node, Global_State.backend);
 
         var _useState3 = useState({
-                tag: "la Date de creation",
-                element: [null, null]
+                tag: "le Nom",
+                element: ''
         }),
             _useState4 = _slicedToArray(_useState3, 2),
             filter = _useState4[0],
@@ -1339,7 +1343,7 @@ export default function FileTable(_ref) {
 
                 return React.createElement(
                         'div',
-                        { className: 'd-md-flex justify-content-between mb-4' },
+                        { className: 'd-md-flex justify-content-between' },
                         React.createElement(
                                 'ul',
                                 { className: 'list-inline mb-3' },
@@ -1933,6 +1937,174 @@ export default function FileTable(_ref) {
                         );
                 };
 
+                var ReviewDateComponenr = function ReviewDateComponenr(_ref9) {
+                        var data = _ref9.data;
+
+                        var value = data.review_date ? data.review_date : '____/__/__';
+
+                        var handleClick = function handleClick(e) {
+                                e.stopPropagation();
+                                console.log("review date handle click");
+
+                                var Date_input = function Date_input(_ref10) {
+                                        var data = _ref10.data;
+
+
+                                        var CustomInput = forwardRef(function (_ref11, ref) {
+                                                var value = _ref11.value,
+                                                    onClick = _ref11.onClick;
+                                                return React.createElement(
+                                                        Stack,
+                                                        { direction: 'row', sx: { width: 'fit-content', backgroundColor: 'whitesmoke' } },
+                                                        React.createElement('input', { ref: ref,
+                                                                className: 'form-control form-control-sm',
+                                                                style: { height: 35, textAlign: 'center', border: 'none', borderRadius: 0 },
+                                                                value: '' + value,
+                                                                onChange: function onChange(e) {
+                                                                        e.preventDefault();e.stopPropagation();
+                                                                },
+                                                                onClick: onClick,
+                                                                readOnly: true
+                                                        }),
+                                                        React.createElement(
+                                                                'div',
+                                                                { style: { width: 'fit-content', height: 'fit-content', padding: 5, backgroundColor: '#E9ECEFFF' }, onClick: handleSubmit },
+                                                                React.createElement(HiSaveAs, { size: 25, color: 'blue' })
+                                                        )
+                                                );
+                                        });
+
+                                        var _useState17 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
+                                            _useState18 = _slicedToArray(_useState17, 2),
+                                            startDate = _useState18[0],
+                                            setStartDate = _useState18[1];
+
+                                        var new_review_date = startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate();
+                                        console.log('new_review_date', new_review_date, e);
+
+                                        var handleSubmit = function handleSubmit(e) {
+                                                e.stopPropagation();
+
+                                                Global_State.setOverlay_props(function (t) {
+                                                        return Object.assign({}, t, {
+                                                                style: Object.assign({}, t.style, {
+                                                                        display: 'none'
+                                                                })
+                                                        });
+                                                });
+
+                                                console.log(new_review_date);
+
+                                                var _Global_State$identif9 = Global_State.identifyNode(data),
+                                                    _Global_State$identif10 = _slicedToArray(_Global_State$identif9, 2),
+                                                    id = _Global_State$identif10[0],
+                                                    model_type = _Global_State$identif10[1];
+
+                                                var query = new FormData();
+                                                query.append('id', id);
+                                                query.append('update_object', 'review_date');
+                                                query.append('new_value', new_review_date);
+
+                                                if (!Global_State.isEditorMode) {
+                                                        var update = function () {
+                                                                var _ref12 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
+                                                                        return _regeneratorRuntime.wrap(function _callee5$(_context5) {
+                                                                                while (1) {
+                                                                                        switch (_context5.prev = _context5.next) {
+                                                                                                case 0:
+                                                                                                        _context5.next = 2;
+                                                                                                        return http.post('update_fnc', query).then(function (res) {
+                                                                                                                console.log(res);
+                                                                                                        }).catch(function (err) {
+                                                                                                                console.log(err);throw err;
+                                                                                                        });
+
+                                                                                                case 2:
+                                                                                                case 'end':
+                                                                                                        return _context5.stop();
+                                                                                        }
+                                                                                }
+                                                                        }, _callee5, _this);
+                                                                }));
+
+                                                                return function update() {
+                                                                        return _ref12.apply(this, arguments);
+                                                                };
+                                                        }();
+
+                                                        // console.log(selectedRow[0].id.substring(2))
+                                                        toast.promise(update(), {
+                                                                loading: 'Loading...',
+                                                                success: 'Processus achevé',
+                                                                error: 'err'
+                                                        });
+                                                } else {
+                                                        Global_State.editor.fnc.update(query);
+                                                }
+                                        };
+
+                                        return React.createElement(
+                                                'div',
+                                                { className: 'd-flex justify-content-center align-items-center',
+                                                        style: {
+                                                                backgroundColor: 'rgba(255,255,255,0)',
+                                                                borderRadius: 10,
+                                                                border: '1px solid blue',
+                                                                overflow: "hidden"
+                                                        }
+                                                },
+                                                React.createElement(
+                                                        'div',
+                                                        { style: { width: "fit-content" } },
+                                                        React.createElement(DatePicker, {
+                                                                selected: startDate,
+                                                                onChange: function onChange(date) {
+                                                                        return setStartDate(date);
+                                                                },
+                                                                showYearDropdown: true,
+                                                                scrollableYearDropdown: true,
+                                                                yearDropdownItemNumber: 20,
+                                                                minDate: new Date(),
+                                                                customInput: React.createElement(CustomInput, null)
+                                                        })
+                                                )
+                                        );
+                                };
+
+                                Global_State.setOverlay_props(function (t) {
+                                        return Object.assign({}, t, {
+                                                style: Object.assign({}, t.style, {
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center'
+                                                }),
+                                                children: React.createElement(
+                                                        'div',
+                                                        {
+                                                                style: {
+                                                                        width: "max-content",
+                                                                        marginTop: 15,
+                                                                        backgroundColor: 'rgba(255,255,255,0)',
+                                                                        translate: Math.abs(e.clientX - window.innerWidth / 2) + 'px ' + Math.abs(e.clientY - window.innerHeight / 2) + 'px'
+                                                                },
+                                                                onClick: function onClick(e) {
+                                                                        e.stopPropagation();
+                                                                }
+                                                        },
+                                                        React.createElement(Date_input, { data: data })
+                                                )
+
+                                        });
+                                });
+                        };
+
+                        return React.createElement(
+                                'span',
+                                { className: '' + (data.review_date ? 'text-primary' : ''), onClick: handleClick },
+                                value
+                        );
+                };
+
                 var _iteratorNormalCompletion4 = true;
                 var _didIteratorError4 = false;
                 var _iteratorError4 = undefined;
@@ -1941,7 +2113,9 @@ export default function FileTable(_ref) {
                         for (var _iterator4 = node.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
                                 var child_node = _step4.value;
 
-                                var data = Global_State.getNodeDataById(child_node.id);
+                                // console.log('child_node.id', child_node)
+                                var data = child_node; // Global_State.getNodeDataById(child_node.id)
+                                // if (data === null) continue
                                 datas.push({
                                         id: data.id,
                                         value: data.name,
@@ -1955,7 +2129,7 @@ export default function FileTable(_ref) {
                                                 'Cl\xF4tur\xE9'
                                         ) : React.createElement(
                                                 'div',
-                                                { 'class': 'badge bg-danger-bright text-danger' },
+                                                { className: 'badge bg-danger-bright text-danger' },
                                                 'Non-Cl\xF4tur\xE9'
                                         ) : undefined,
                                         RA: node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " + data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " + node.ra.second_name : undefined,
@@ -1963,7 +2137,8 @@ export default function FileTable(_ref) {
                                         type: data.type,
                                         global_type: data.global_type,
                                         section_id: data.section_id,
-                                        isBeingEdited: data.onEdit
+                                        isBeingEdited: data.onEdit,
+                                        review_date: data.review_date === undefined ? '' : React.createElement(ReviewDateComponenr, { data: data })
 
                                 });
                         }
@@ -1989,12 +2164,12 @@ export default function FileTable(_ref) {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref9 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref9[0],
-                            listB = _ref9[1];
-                        var _ref10 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref10[0],
-                            b = _ref10[1];
+                        var _ref13 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref13[0],
+                            listB = _ref13[1];
+                        var _ref14 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref14[0],
+                            b = _ref14[1];
 
 
                         if (a > b) {
@@ -2043,7 +2218,7 @@ export default function FileTable(_ref) {
         var columns = useMemo(function () {
                 var columns_of_the_type = void 0;
 
-                if (node.type === "root" && Global_State.getCurrentSection().name === 'Audit') {
+                if (node.type === "root" && contain_audit) {
                         columns_of_the_type = [{
                                 name: 'NOM',
                                 selector: function selector(row) {
@@ -2098,9 +2273,9 @@ export default function FileTable(_ref) {
                                 sortFunction: sortByLevel,
                                 width: "11%"
                         }, {
-                                name: 'CREE LE',
+                                name: 'DATE DE REVISION',
                                 selector: function selector(row) {
-                                        return row.created_at;
+                                        return row.review_date;
                                 },
                                 sortable: true,
                                 width: "22%"
@@ -2267,15 +2442,15 @@ export default function FileTable(_ref) {
                 }
         }];
 
-        var SearchComponent = useCallback(function SearchComponent(_ref11) {
-                var set = _ref11.set,
-                    filter = _ref11.filter,
-                    node = _ref11.node;
+        var SearchComponent = useCallback(function SearchComponent(_ref15) {
+                var set = _ref15.set,
+                    filter = _ref15.filter,
+                    node = _ref15.node;
 
 
-                var FilterComponent = useCallback(function FilterComponent(_ref12) {
-                        var set = _ref12.set,
-                            filter = _ref12.filter;
+                var FilterComponent = useCallback(function FilterComponent(_ref16) {
+                        var set = _ref16.set,
+                            filter = _ref16.filter;
 
                         switch (filter.tag) {
                                 case 'la Date de creation':
@@ -2315,14 +2490,55 @@ export default function FileTable(_ref) {
                                                         })
                                                 );
                                         }
+                                case 'la Date de revision':
+                                        {
+                                                var _filter$element2 = _slicedToArray(filter.element, 2),
+                                                    _startDate = _filter$element2[0],
+                                                    _endDate = _filter$element2[1];
+
+                                                return React.createElement(
+                                                        'div',
+                                                        { style: { maxWidth: 243 } },
+                                                        React.createElement(
+                                                                'label',
+                                                                null,
+                                                                'Chercher selon ',
+                                                                filter.tag,
+                                                                ' :'
+                                                        ),
+                                                        React.createElement(DatePicker, {
+                                                                selectsRange: true,
+                                                                startDate: _startDate,
+                                                                endDate: _endDate,
+                                                                onChange: function onChange(update) {
+                                                                        // const now = new Date()
+                                                                        // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
+                                                                        set(function (t) {
+                                                                                return Object.assign({}, t, { element: update });
+                                                                        });
+                                                                },
+                                                                isClearable: true,
+                                                                showYearDropdown: true,
+                                                                scrollableYearDropdown: true,
+                                                                yearDropdownItemNumber: 1000,
+                                                                minDate: new Date("2021/12/31"),
+                                                                customInput: React.createElement('input', { className: 'form-control form-control-sm mr-15', value: _startDate + ' - ' + _endDate })
+
+                                                        })
+                                                );
+                                        }
 
                                 default:
                                         return React.createElement(
-                                                'label',
+                                                'div',
                                                 null,
-                                                'Chercher selon ',
-                                                filter.tag,
-                                                ' :',
+                                                React.createElement(
+                                                        'label',
+                                                        null,
+                                                        'Chercher selon ',
+                                                        filter.tag,
+                                                        ' :'
+                                                ),
                                                 React.createElement('input', { onChange: function onChange(e) {
                                                                 set(function (t) {
                                                                         return Object.assign({}, t, { element: e.target.value });
@@ -2344,7 +2560,65 @@ export default function FileTable(_ref) {
 
         var filtered_datas = useMemo(function () {
                 return datas.filter(function (row) {
-                        return row.value.indexOf(filter.element) !== -1;
+                        switch (filter.tag) {
+                                case 'le Nom':
+                                        return row.value.indexOf(filter.element) !== -1;
+                                case 'la Date de creation':
+                                        {
+                                                // console.log(new Date(row.created_at.substring(0, 10).split('-').join('/')).valueOf())
+
+                                                var creation_string_date = row.created_at.substring(0, 10);
+                                                var formated_creation_string_date = creation_string_date.split('-').join('/');
+
+                                                var creation_date = new Date(formated_creation_string_date);
+
+                                                var _filter$element3 = _slicedToArray(filter.element, 2),
+                                                    debut = _filter$element3[0],
+                                                    fin = _filter$element3[1];
+
+                                                if (debut === null && fin === null) return true;else {
+                                                        if (debut === null) {
+                                                                return creation_date.valueOf() <= fin.valueOf();
+                                                        } else if (fin === null) {
+                                                                return creation_date.valueOf() >= debut.valueOf();
+                                                        } else {
+                                                                // console.log(debut.valueOf(), fin.valueOf(), creation_date.valueOf(), (creation_date.valueOf() >= debut.valueOf() && creation_date.valueOf() <= fin.valueOf()) )
+                                                                return creation_date.valueOf() >= debut.valueOf() && creation_date.valueOf() <= fin.valueOf();
+                                                        }
+                                                }
+                                        }
+                                case 'le RA':
+                                        if (row.RA) return row.RA.indexOf(filter.element) !== -1;else return false;
+                                case 'la Date de revision':
+                                        {
+                                                // console.log(new Date(row.created_at.substring(0, 10).split('-').join('/')).valueOf())
+
+                                                var data = Global_State.getNodeDataById(row.id);
+
+                                                var _filter$element4 = _slicedToArray(filter.element, 2),
+                                                    _debut = _filter$element4[0],
+                                                    _fin = _filter$element4[1];
+
+                                                if (_debut === null && _fin === null) return true;else if (data.review_date !== undefined) {
+
+                                                        var revision_string_date = data.review_date.substring(0, 10);
+                                                        var formatted_revision_string_date = revision_string_date.split('-').join('/');
+
+                                                        var revision_date = new Date(formatted_revision_string_date);
+
+                                                        console.log('review_daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaate', revision_date.toString());
+                                                        if (_debut === null) {
+                                                                return revision_date.valueOf() <= _fin.valueOf();
+                                                        } else if (_fin === null) {
+                                                                return revision_date.valueOf() >= _debut.valueOf();
+                                                        } else {
+                                                                // console.log(debut.valueOf(), fin.valueOf(), creation_date.valueOf(), (creation_date.valueOf() >= debut.valueOf() && creation_date.valueOf() <= fin.valueOf()) )
+                                                                return revision_date.valueOf() >= _debut.valueOf() && revision_date.valueOf() <= _fin.valueOf();
+                                                        }
+                                                } else return false;
+                                        }
+
+                        }
                 });
         }, [datas, filter]);
 
@@ -2375,9 +2649,9 @@ export default function FileTable(_ref) {
                         , selectableRowSelected: function selectableRowSelected(row) {
                                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                         },
-                        onSelectedRowsChange: function onSelectedRowsChange(_ref13) {
-                                var selectedCount = _ref13.selectedCount,
-                                    selectedRows = _ref13.selectedRows;
+                        onSelectedRowsChange: function onSelectedRowsChange(_ref17) {
+                                var selectedCount = _ref17.selectedCount,
+                                    selectedRows = _ref17.selectedRows;
                                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                         },
                         clearSelectedRows: Global_State.toggleCleared,

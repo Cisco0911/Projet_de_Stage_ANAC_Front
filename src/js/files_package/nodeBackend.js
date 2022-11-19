@@ -115,6 +115,7 @@ export default function useBack() {
 
     useEffect(function () {
 
+        console.log('root', root);
         Global_State.clearSelected();
         _setCurrentSelectedFolder(find(selectedNode.model.id));
         console.log('nodeBackend_selectedNode', selectedNode);
@@ -127,6 +128,7 @@ export default function useBack() {
 
     return {
         data: jsonData.data,
+        root: root,
         onToggle: updateOpenState,
         selectedNode: selectedNode,
         setCurrentSelectedFolder: function setCurrentSelectedFolder(id) {

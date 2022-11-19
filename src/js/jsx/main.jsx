@@ -218,9 +218,9 @@ function Header()
                                 {/*    </Form>*/}
                                 {/*</Col>*/}
 
-                                <div className={ 'd-flex justify-content-start flex-column container-fluid' } >
+                                <div className={ 'd-flex justify-content-start flex-column container-fluid p-0' } >
 
-                                        <Stack className='justify-content-md-end justify-content-center m-2' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
+                                        <Stack className='justify-content-sm-end justify-content-center m-2' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
 
                                                 <Notifications/>
 
@@ -445,9 +445,9 @@ function Home()
                                                                                         <div className="col-xl-4 files-sidebar">
                                                                                                 <div className="card border-0">
                                                                                                         <h6 className="card-title">My Folders</h6>
-                                                                                                        <div class="card">
-                                                                                                                <div class="card-body">
-                                                                                                                        <div class="card-scroll" >
+                                                                                                        <div className="card">
+                                                                                                                <div className="card-body">
+                                                                                                                        <div className="card-scroll" >
                                                                                                                                 { files.fileTree }
                                                                                                                         </div>
                                                                                                                 </div>
@@ -478,56 +478,6 @@ function Home()
                                                                 <div className="sidebar-group d-print-none">
 
                                                                         { files.fileDetails }
-
-                                                                        <div className="sidebar" id="settings">
-                                                                                <div className="sidebar-header">
-                                                                                        <h4>Settings</h4>
-                                                                                        <a href="#" className="btn btn-light btn-floating sidebar-close-btn">
-                                                                                                <i className="ti-angle-right"></i>
-                                                                                        </a>
-                                                                                </div>
-                                                                                <div className="sidebar-content">
-                                                                                        <ul className="list-group list-group-flush">
-                                                                                                <li className="list-group-item pl-0 pr-0">
-                                                                                                        <div className="custom-control custom-switch">
-                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch1" checked/>
-                                                                                                                <label className="custom-control-label" for="customSwitch1">Allow notifications.</label>
-                                                                                                        </div>
-                                                                                                </li>
-                                                                                                <li className="list-group-item pl-0 pr-0">
-                                                                                                        <div className="custom-control custom-switch">
-                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch2"/>
-                                                                                                                <label className="custom-control-label" for="customSwitch2">Hide user requests</label>
-                                                                                                        </div>
-                                                                                                </li>
-                                                                                                <li className="list-group-item pl-0 pr-0">
-                                                                                                        <div className="custom-control custom-switch">
-                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch3" checked/>
-                                                                                                                <label className="custom-control-label" for="customSwitch3">Speed up demands</label>
-                                                                                                        </div>
-                                                                                                </li>
-                                                                                                <li className="list-group-item pl-0 pr-0">
-                                                                                                        <div className="custom-control custom-switch">
-                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch4" checked/>
-                                                                                                                <label className="custom-control-label" for="customSwitch4">Hide menus</label>
-                                                                                                        </div>
-                                                                                                </li>
-                                                                                                <li className="list-group-item pl-0 pr-0">
-                                                                                                        <div className="custom-control custom-switch">
-                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch5"/>
-                                                                                                                <label className="custom-control-label" for="customSwitch5">Remember next visits</label>
-                                                                                                        </div>
-                                                                                                </li>
-                                                                                                <li className="list-group-item pl-0 pr-0">
-                                                                                                        <div className="custom-control custom-switch">
-                                                                                                                <input type="checkbox" className="custom-control-input" id="customSwitch6"/>
-                                                                                                                <label className="custom-control-label" for="customSwitch6">Enable report
-                                                                                                                        generation.</label>
-                                                                                                        </div>
-                                                                                                </li>
-                                                                                        </ul>
-                                                                                </div>
-                                                                        </div>
 
                                                                 </div>
 

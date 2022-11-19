@@ -214,10 +214,10 @@ function Header() {
                                 },
                                 React.createElement(
                                         'div',
-                                        { className: 'd-flex justify-content-start flex-column container-fluid' },
+                                        { className: 'd-flex justify-content-start flex-column container-fluid p-0' },
                                         React.createElement(
                                                 Stack,
-                                                { className: 'justify-content-md-end justify-content-center m-2', direction: 'row', spacing: 1, alignItems: 'center', justifyContent: 'flex-end' },
+                                                { className: 'justify-content-sm-end justify-content-center m-2', direction: 'row', spacing: 1, alignItems: 'center', justifyContent: 'flex-end' },
                                                 React.createElement(Notifications, null),
                                                 React.createElement(QuickSettings, null),
                                                 React.createElement(Global_State.CustomDropDown, { id: 'userPanel', icon: dropTogglerContentUser, content: dropMenuItemsUser })
@@ -516,13 +516,13 @@ function Home() {
                                                                                                         ),
                                                                                                         React.createElement(
                                                                                                                 'div',
-                                                                                                                { 'class': 'card' },
+                                                                                                                { className: 'card' },
                                                                                                                 React.createElement(
                                                                                                                         'div',
-                                                                                                                        { 'class': 'card-body' },
+                                                                                                                        { className: 'card-body' },
                                                                                                                         React.createElement(
                                                                                                                                 'div',
-                                                                                                                                { 'class': 'card-scroll' },
+                                                                                                                                { className: 'card-scroll' },
                                                                                                                                 files.fileTree
                                                                                                                         )
                                                                                                                 )
@@ -573,117 +573,7 @@ function Home() {
                                                                 React.createElement(
                                                                         'div',
                                                                         { className: 'sidebar-group d-print-none' },
-                                                                        files.fileDetails,
-                                                                        React.createElement(
-                                                                                'div',
-                                                                                { className: 'sidebar', id: 'settings' },
-                                                                                React.createElement(
-                                                                                        'div',
-                                                                                        { className: 'sidebar-header' },
-                                                                                        React.createElement(
-                                                                                                'h4',
-                                                                                                null,
-                                                                                                'Settings'
-                                                                                        ),
-                                                                                        React.createElement(
-                                                                                                'a',
-                                                                                                { href: '#', className: 'btn btn-light btn-floating sidebar-close-btn' },
-                                                                                                React.createElement('i', { className: 'ti-angle-right' })
-                                                                                        )
-                                                                                ),
-                                                                                React.createElement(
-                                                                                        'div',
-                                                                                        { className: 'sidebar-content' },
-                                                                                        React.createElement(
-                                                                                                'ul',
-                                                                                                { className: 'list-group list-group-flush' },
-                                                                                                React.createElement(
-                                                                                                        'li',
-                                                                                                        { className: 'list-group-item pl-0 pr-0' },
-                                                                                                        React.createElement(
-                                                                                                                'div',
-                                                                                                                { className: 'custom-control custom-switch' },
-                                                                                                                React.createElement('input', { type: 'checkbox', className: 'custom-control-input', id: 'customSwitch1', checked: true }),
-                                                                                                                React.createElement(
-                                                                                                                        'label',
-                                                                                                                        { className: 'custom-control-label', 'for': 'customSwitch1' },
-                                                                                                                        'Allow notifications.'
-                                                                                                                )
-                                                                                                        )
-                                                                                                ),
-                                                                                                React.createElement(
-                                                                                                        'li',
-                                                                                                        { className: 'list-group-item pl-0 pr-0' },
-                                                                                                        React.createElement(
-                                                                                                                'div',
-                                                                                                                { className: 'custom-control custom-switch' },
-                                                                                                                React.createElement('input', { type: 'checkbox', className: 'custom-control-input', id: 'customSwitch2' }),
-                                                                                                                React.createElement(
-                                                                                                                        'label',
-                                                                                                                        { className: 'custom-control-label', 'for': 'customSwitch2' },
-                                                                                                                        'Hide user requests'
-                                                                                                                )
-                                                                                                        )
-                                                                                                ),
-                                                                                                React.createElement(
-                                                                                                        'li',
-                                                                                                        { className: 'list-group-item pl-0 pr-0' },
-                                                                                                        React.createElement(
-                                                                                                                'div',
-                                                                                                                { className: 'custom-control custom-switch' },
-                                                                                                                React.createElement('input', { type: 'checkbox', className: 'custom-control-input', id: 'customSwitch3', checked: true }),
-                                                                                                                React.createElement(
-                                                                                                                        'label',
-                                                                                                                        { className: 'custom-control-label', 'for': 'customSwitch3' },
-                                                                                                                        'Speed up demands'
-                                                                                                                )
-                                                                                                        )
-                                                                                                ),
-                                                                                                React.createElement(
-                                                                                                        'li',
-                                                                                                        { className: 'list-group-item pl-0 pr-0' },
-                                                                                                        React.createElement(
-                                                                                                                'div',
-                                                                                                                { className: 'custom-control custom-switch' },
-                                                                                                                React.createElement('input', { type: 'checkbox', className: 'custom-control-input', id: 'customSwitch4', checked: true }),
-                                                                                                                React.createElement(
-                                                                                                                        'label',
-                                                                                                                        { className: 'custom-control-label', 'for': 'customSwitch4' },
-                                                                                                                        'Hide menus'
-                                                                                                                )
-                                                                                                        )
-                                                                                                ),
-                                                                                                React.createElement(
-                                                                                                        'li',
-                                                                                                        { className: 'list-group-item pl-0 pr-0' },
-                                                                                                        React.createElement(
-                                                                                                                'div',
-                                                                                                                { className: 'custom-control custom-switch' },
-                                                                                                                React.createElement('input', { type: 'checkbox', className: 'custom-control-input', id: 'customSwitch5' }),
-                                                                                                                React.createElement(
-                                                                                                                        'label',
-                                                                                                                        { className: 'custom-control-label', 'for': 'customSwitch5' },
-                                                                                                                        'Remember next visits'
-                                                                                                                )
-                                                                                                        )
-                                                                                                ),
-                                                                                                React.createElement(
-                                                                                                        'li',
-                                                                                                        { className: 'list-group-item pl-0 pr-0' },
-                                                                                                        React.createElement(
-                                                                                                                'div',
-                                                                                                                { className: 'custom-control custom-switch' },
-                                                                                                                React.createElement('input', { type: 'checkbox', className: 'custom-control-input', id: 'customSwitch6' }),
-                                                                                                                React.createElement(
-                                                                                                                        'label',
-                                                                                                                        { className: 'custom-control-label', 'for': 'customSwitch6' },
-                                                                                                                        'Enable report generation.'
-                                                                                                                )
-                                                                                                        )
-                                                                                                )
-                                                                                        )
-                                                                                )
-                                                                        )
+                                                                        files.fileDetails
                                                                 )
                                                         )
                                                 )

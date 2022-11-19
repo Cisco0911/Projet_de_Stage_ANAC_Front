@@ -63,7 +63,7 @@ export default function Global_research({display})
         }
 
         return(
-        <div onClick={ e => { e.stopPropagation() } }  >
+        <div>
                 <Form id={'global_research'} className ={`${display} container-fluid`} style={{ width: (window.innerWidth > 576 ? 500 : 'unset') }} >
                         <Form.Label htmlFor="inlineFormInputGroup" visuallyHidden>
                                 Global_research

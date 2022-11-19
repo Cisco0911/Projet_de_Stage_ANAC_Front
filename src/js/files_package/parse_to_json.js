@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { useMemo } from 'react';
 import { useEffect } from 'react';
 import { Global_State } from "../main";
+import { forEach } from "react-bootstrap/ElementChildren";
 // import { Tree } from "react-arborist";
 // import TreeModel from "tree-model";
 
@@ -51,6 +52,7 @@ var listeners = function listeners() {
 
 export default function parseToJson(value) {
 
+  // console.log('valllllllllllllluuuuuuuuuuuuuuuuuuuuuuuuuuuuuue', value)
   var nodesData = { data: value };
 
   echosHandler = function echosHandler(tag) {
@@ -93,8 +95,6 @@ export default function parseToJson(value) {
   // useEffect( () => { startUpdate(); nodesData.setData(FetchedNodesData) }, [FetchedNodesData] )
 
   // console.log(nodesData)
-
-  var jsonData = makeJsonTree();
 
   var nodesDataCopy = nodesData.data.slice();
 
@@ -163,29 +163,30 @@ export default function parseToJson(value) {
     return children;
   }
 
-  function makeJsonNode(id, global_type, services, name, type, isOpen, children, isRoot, parentId, path, hasChildren, ext, ra, isClosed, created_at, level, taille, url) {
+  // function makeJsonNode(id, global_type, services, name, type, isOpen, children, isRoot, parentId, path, hasChildren, ext, ra, isClosed, created_at, level, taille, url) {
+  //
+  //   return ({
+  //     id: id,
+  //     global_type: global_type,
+  //     services,
+  //     name: name,
+  //     type: type,
+  //     taille,
+  //     level: level,
+  //     created_at: created_at,
+  //     ra: ra,
+  //     hasChildren: hasChildren,
+  //     isOpen: isOpen,
+  //     children: children,
+  //     isRoot: isRoot,
+  //     parentId: parentId,
+  //     path: path,
+  //     isClosed: isClosed,
+  //     ext: ext,
+  //     url,
+  // })
+  // }
 
-    return {
-      id: id,
-      global_type: global_type,
-      services: services,
-      name: name,
-      type: type,
-      taille: taille,
-      level: level,
-      created_at: created_at,
-      ra: ra,
-      hasChildren: hasChildren,
-      isOpen: isOpen,
-      children: children,
-      isRoot: isRoot,
-      parentId: parentId,
-      path: path,
-      isClosed: isClosed,
-      ext: ext,
-      url: url
-    };
-  }
 
   function makeChildren(node) {
 
@@ -202,7 +203,31 @@ export default function parseToJson(value) {
 
           var children1 = makeChildren(childData);
 
-          var child = makeJsonNode(childData.id, childData.global_type, childData.services, childData.name, childData.type, childData.isOpen, children1, childData.isRoot, childData.parentId, childData.path, childData.hasChildren, childData.ext, childData.ra, childData.isClosed, childData.created_at, childData.level, childData.taille, childData.url);
+          // let child = makeJsonNode(
+          //   childData.id,
+          //   childData.global_type,
+          //   childData.services,
+          //   childData.name,
+          //   childData.type,
+          //   childData.isOpen,
+          //   children1,
+          //   childData.isRoot,
+          //   childData.parentId,
+          //   childData.path,
+          //   childData.hasChildren,
+          //   childData.ext,
+          //   childData.ra,
+          //   childData.isClosed,
+          //   childData.created_at,
+          //   childData.level,
+          //   childData.taille,
+          //   childData.url,
+          //
+          //   );
+
+          var child = Object.assign({}, JSON.parse(JSON.stringify(childData)), {
+            children: children1
+          });
 
           children.push(child);
         }
@@ -222,7 +247,7 @@ export default function parseToJson(value) {
       }
 
       return children;
-    } else return null;
+    } else return undefined;
   }
 
   function makeJsonTree() {
@@ -236,7 +261,42 @@ export default function parseToJson(value) {
 
         if (node.isRoot) {
           var children = makeChildren(node);
-          return makeJsonNode(node.id, node.global_type, node.services, node.name, node.type, node.isOpen, children, node.isRoot, node.parentId, node.path, node.hasChildren, node.ext, node.ra, node.isClosed, node.created_at, node.level, node.taille, node.url);
+          var racine = {};
+
+          // node.forEach(
+          //         (value, key) =>
+          //         {
+          //                 racine[key] = JSON.parse(JSON.stringify(value))
+          //         }
+          // );
+          // racine['children'] = children
+
+          return Object.assign({}, JSON.parse(JSON.stringify(node)), {
+            children: children
+
+            // makeJsonNode(
+            //   node.id,
+            //   node.global_type,
+            //   node.services,
+            //   node.name,
+            //   node.type,
+            //   node.isOpen,
+            //   children,
+            //   node.isRoot,
+            //   node.parentId,
+            //   node.path,
+            //   node.hasChildren,
+            //   node.ext,
+            //   node.ra,
+            //   node.isClosed,
+            //   node.created_at,
+            //   node.level,
+            //   node.taille,
+            //   node.url,
+            //
+            //   )
+
+          });
         }
       }
     } catch (err) {
@@ -254,6 +314,8 @@ export default function parseToJson(value) {
       }
     }
   }
+
+  var jsonData = makeJsonTree();
 
   console.log('jsonData', jsonData);
 
