@@ -343,6 +343,11 @@ export default function useGetData(TheDatas) {
                         }
                 });
 
+                echo.private("user." + authUser.id).listen('AuthUserUpdate', function () {
+                        console.log('AuthUserUpdate');
+                        echosHandler('updateAuthUserInfo');
+                });
+
                 echo.private("user." + authUser.id).notification(function (data) {
                         if (data.type === 'NodeRemovalNotification') {
                                 console.log(data);
@@ -449,22 +454,36 @@ export default function useGetData(TheDatas) {
                         } else if (data.type === 'FncReviewNotification') {
                                 console.log(data);
 
-                                var ids = new FormData();
+                                // const ids = new FormData
+                                //
+                                // ids.append('ids[]', `${data.fncId}-fnc`)
+                                //
+                                // http.post('getDatasByIds', ids)
+                                // .then( res =>
+                                // {
+                                //         console.log(res)
+                                //
+                                //         const fnc = res.data[0]
+                                //
+                                //         toast(`Revision de la Fnc ${fnc.name}`,
+                                //         {
+                                //                 id: 'FncReviewNotification',
+                                //                 icon: '🙌',
+                                //                 duration: Infinity,
+                                //         }
+                                //         )
+                                // }
+                                // )
+                                // .catch( err =>
+                                // {
+                                //         console.log(err)
+                                // }
+                                // )
 
-                                ids.append('ids[]', data.fncId + "-fnc");
-
-                                http.post('getDatasByIds', ids).then(function (res) {
-                                        console.log(res);
-
-                                        var fnc = res.data[0];
-
-                                        toast("Revision de la Fnc " + fnc.name, {
-                                                id: 'FncReviewNotification',
-                                                icon: '🙌',
-                                                duration: Infinity
-                                        });
-                                }).catch(function (err) {
-                                        console.log(err);
+                                toast("" + data.msg, {
+                                        id: 'FncReviewNotification',
+                                        icon: '🙌',
+                                        duration: Infinity
                                 });
                         }
                 });

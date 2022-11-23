@@ -1203,16 +1203,6 @@ export default function FileTable(_ref) {
                                         // console.log(queryBody.get("name"))
                                 };
 
-                                var _useState13 = useState(1),
-                                    _useState14 = _slicedToArray(_useState13, 2),
-                                    min = _useState14[0],
-                                    setMin = _useState14[1];
-
-                                var _useState15 = useState(false),
-                                    _useState16 = _slicedToArray(_useState15, 2),
-                                    enableEnd = _useState16[0],
-                                    setEndState = _useState16[1];
-
                                 var validationRules = yup.object().shape({
                                         files: yup.array().min(1).required("Au moins un fichier doit être sélectionné"),
                                         services: yup.array().min(1).required('Au moins un service doit être sélectionné')
@@ -1891,6 +1881,7 @@ export default function FileTable(_ref) {
                                 query.append('id', id);
                                 query.append('update_object', 'level');
                                 query.append('new_value', nextNiv(level));
+                                query.append('additional_info', JSON.stringify({}));
 
                                 if (!Global_State.isEditorMode) {
                                         var update = function () {
@@ -1974,13 +1965,103 @@ export default function FileTable(_ref) {
                                                 );
                                         });
 
-                                        var _useState17 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
-                                            _useState18 = _slicedToArray(_useState17, 2),
-                                            startDate = _useState18[0],
-                                            setStartDate = _useState18[1];
+                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref12) {
+                                                var date = _ref12.date,
+                                                    value = _ref12.value,
+                                                    onChange = _ref12.onChange;
 
-                                        var new_review_date = startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate();
+
+                                                var validationRules = yup.object().shape({
+                                                        hour: yup.number().integer().positive("L'heure est positive").min(new Date().getHours()).max(24, 'maximum 24h'),
+                                                        minutes: yup.number().integer().positive("L'heure est positive").min(0).max(60, 'maximum 60mins')
+
+                                                });
+
+                                                var formik = useFormik({
+                                                        validationSchema: validationRules,
+                                                        onSubmit: handleSubmit,
+                                                        initialValues: {
+                                                                hour: new Date().getHours(),
+                                                                minutes: 0
+                                                        }
+                                                });
+
+                                                var handleBlur = function handleBlur(e) {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        if (!formik.errors.hour && !formik.errors.minutes) {
+                                                                onChange((formik.values.hour === '' ? 0 : formik.values.hour) + ':' + (formik.values.minutes === '' ? 0 : formik.values.minutes));
+                                                        }
+                                                };
+
+                                                return React.createElement(
+                                                        Form,
+                                                        { className: 'd-flex flex-row', value: undefined, onSubmit: formik.handleSubmit },
+                                                        React.createElement(
+                                                                Form.Group,
+                                                                { className: 'mr-3 d-flex' },
+                                                                React.createElement(
+                                                                        Form.Label,
+                                                                        { style: { margin: 0, marginRight: 5 } },
+                                                                        'hh'
+                                                                ),
+                                                                React.createElement(Form.Control, {
+                                                                        style: {
+                                                                                maxWidth: '35px',
+                                                                                maxHeight: '20px',
+                                                                                fontSize: '10px',
+                                                                                padding: '2px'
+                                                                        },
+                                                                        maxLength: '2',
+                                                                        name: 'hour',
+                                                                        value: formik.values.hour,
+                                                                        onChange: formik.handleChange,
+                                                                        onBlur: handleBlur
+                                                                        // type="number"
+                                                                        , placeholder: '00',
+                                                                        isInvalid: !!formik.errors.hour
+                                                                })
+                                                        ),
+                                                        React.createElement(
+                                                                Form.Group,
+                                                                { className: 'd-flex' },
+                                                                React.createElement(
+                                                                        Form.Label,
+                                                                        { style: { margin: 0, marginRight: 5 } },
+                                                                        'mm'
+                                                                ),
+                                                                React.createElement(Form.Control, {
+                                                                        style: {
+                                                                                maxWidth: '35px',
+                                                                                maxHeight: '20px',
+                                                                                fontSize: '10px',
+                                                                                padding: '2px'
+                                                                        },
+                                                                        maxLength: '2',
+                                                                        name: 'minutes',
+                                                                        value: formik.values.minutes,
+                                                                        onChange: formik.handleChange,
+                                                                        onBlur: handleBlur
+                                                                        // type="number"
+                                                                        , placeholder: '00',
+                                                                        isInvalid: !!formik.errors.minutes
+                                                                })
+                                                        )
+                                                );
+                                        }, []);
+
+                                        var _useState13 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
+                                            _useState14 = _slicedToArray(_useState13, 2),
+                                            startDate = _useState14[0],
+                                            setStartDate = _useState14[1];
+
+                                        var new_review_date = startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate() + ' ' + startDate.getHours() + ':' + startDate.getMinutes();
                                         console.log('new_review_date', new_review_date, e);
+
+                                        // let today = new Date()
+                                        // today.setHours(0, 0, 0, 0)
+
+                                        console.log('millesec dif', new Date(new_review_date).valueOf() - new Date().valueOf());
 
                                         var handleSubmit = function handleSubmit(e) {
                                                 e.stopPropagation();
@@ -2004,10 +2085,13 @@ export default function FileTable(_ref) {
                                                 query.append('id', id);
                                                 query.append('update_object', 'review_date');
                                                 query.append('new_value', new_review_date);
+                                                query.append('additional_info', JSON.stringify({
+                                                        remain_ms: '' + (new Date(new_review_date).valueOf() - new Date().valueOf())
+                                                }));
 
                                                 if (!Global_State.isEditorMode) {
                                                         var update = function () {
-                                                                var _ref12 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
+                                                                var _ref13 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
                                                                         return _regeneratorRuntime.wrap(function _callee5$(_context5) {
                                                                                 while (1) {
                                                                                         switch (_context5.prev = _context5.next) {
@@ -2028,7 +2112,7 @@ export default function FileTable(_ref) {
                                                                 }));
 
                                                                 return function update() {
-                                                                        return _ref12.apply(this, arguments);
+                                                                        return _ref13.apply(this, arguments);
                                                                 };
                                                         }();
 
@@ -2055,14 +2139,18 @@ export default function FileTable(_ref) {
                                                 },
                                                 React.createElement(
                                                         'div',
-                                                        { style: { width: "fit-content" } },
+                                                        { className: 'd-flex', style: { width: "fit-content" } },
                                                         React.createElement(DatePicker, {
                                                                 selected: startDate,
+                                                                popperClassName: 'reactDatePickerPopper',
+                                                                dateFormat: 'yyyy/MM/dd h:mm aa',
                                                                 onChange: function onChange(date) {
                                                                         return setStartDate(date);
                                                                 },
                                                                 showYearDropdown: true,
                                                                 scrollableYearDropdown: true,
+                                                                showTimeInput: true,
+                                                                customTimeInput: React.createElement(CustomTimeInput, null),
                                                                 yearDropdownItemNumber: 20,
                                                                 minDate: new Date(),
                                                                 customInput: React.createElement(CustomInput, null)
@@ -2164,12 +2252,12 @@ export default function FileTable(_ref) {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref13 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref13[0],
-                            listB = _ref13[1];
-                        var _ref14 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref14[0],
-                            b = _ref14[1];
+                        var _ref14 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref14[0],
+                            listB = _ref14[1];
+                        var _ref15 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref15[0],
+                            b = _ref15[1];
 
 
                         if (a > b) {
@@ -2442,15 +2530,15 @@ export default function FileTable(_ref) {
                 }
         }];
 
-        var SearchComponent = useCallback(function SearchComponent(_ref15) {
-                var set = _ref15.set,
-                    filter = _ref15.filter,
-                    node = _ref15.node;
+        var SearchComponent = useCallback(function SearchComponent(_ref16) {
+                var set = _ref16.set,
+                    filter = _ref16.filter,
+                    node = _ref16.node;
 
 
-                var FilterComponent = useCallback(function FilterComponent(_ref16) {
-                        var set = _ref16.set,
-                            filter = _ref16.filter;
+                var FilterComponent = useCallback(function FilterComponent(_ref17) {
+                        var set = _ref17.set,
+                            filter = _ref17.filter;
 
                         switch (filter.tag) {
                                 case 'la Date de creation':
@@ -2473,6 +2561,7 @@ export default function FileTable(_ref) {
                                                                 selectsRange: true,
                                                                 startDate: startDate,
                                                                 endDate: endDate,
+                                                                popperClassName: 'reactDatePickerPopper',
                                                                 onChange: function onChange(update) {
                                                                         // const now = new Date()
                                                                         // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
@@ -2510,6 +2599,7 @@ export default function FileTable(_ref) {
                                                                 selectsRange: true,
                                                                 startDate: _startDate,
                                                                 endDate: _endDate,
+                                                                popperClassName: 'reactDatePickerPopper',
                                                                 onChange: function onChange(update) {
                                                                         // const now = new Date()
                                                                         // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
@@ -2649,9 +2739,9 @@ export default function FileTable(_ref) {
                         , selectableRowSelected: function selectableRowSelected(row) {
                                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                         },
-                        onSelectedRowsChange: function onSelectedRowsChange(_ref17) {
-                                var selectedCount = _ref17.selectedCount,
-                                    selectedRows = _ref17.selectedRows;
+                        onSelectedRowsChange: function onSelectedRowsChange(_ref18) {
+                                var selectedCount = _ref18.selectedCount,
+                                    selectedRows = _ref18.selectedRows;
                                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                         },
                         clearSelectedRows: Global_State.toggleCleared,

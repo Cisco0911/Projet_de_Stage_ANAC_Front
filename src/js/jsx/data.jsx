@@ -323,6 +323,14 @@ export default function useGetData(TheDatas)
                                 }
                         });
 
+                        echo.private(`user.${authUser.id}`).listen('AuthUserUpdate',
+                                () =>
+                                {
+                                        console.log('AuthUserUpdate')
+                                        echosHandler('updateAuthUserInfo')
+                                }
+                        )
+
                         echo.private(`user.${authUser.id}`).notification((data) => {
                                 if(data.type === 'NodeRemovalNotification')
                                 {
@@ -429,30 +437,38 @@ export default function useGetData(TheDatas)
                                 {
                                         console.log(data)
 
-                                        const ids = new FormData
+                                        // const ids = new FormData
+                                        //
+                                        // ids.append('ids[]', `${data.fncId}-fnc`)
+                                        //
+                                        // http.post('getDatasByIds', ids)
+                                        // .then( res =>
+                                        // {
+                                        //         console.log(res)
+                                        //
+                                        //         const fnc = res.data[0]
+                                        //
+                                        //         toast(`Revision de la Fnc ${fnc.name}`,
+                                        //         {
+                                        //                 id: 'FncReviewNotification',
+                                        //                 icon: '🙌',
+                                        //                 duration: Infinity,
+                                        //         }
+                                        //         )
+                                        // }
+                                        // )
+                                        // .catch( err =>
+                                        // {
+                                        //         console.log(err)
+                                        // }
+                                        // )
 
-                                        ids.append('ids[]', `${data.fncId}-fnc`)
-
-                                        http.post('getDatasByIds', ids)
-                                        .then( res =>
-                                        {
-                                                console.log(res)
-
-                                                const fnc = res.data[0]
-
-                                                toast(`Revision de la Fnc ${fnc.name}`,
+                                        toast(`${data.msg}`,
                                                 {
                                                         id: 'FncReviewNotification',
                                                         icon: '🙌',
                                                         duration: Infinity,
                                                 }
-                                                )
-                                        }
-                                        )
-                                        .catch( err =>
-                                        {
-                                                console.log(err)
-                                        }
                                         )
                                 }
 

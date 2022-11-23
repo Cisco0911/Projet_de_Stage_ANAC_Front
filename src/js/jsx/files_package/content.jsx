@@ -1087,9 +1087,6 @@ export default function FileTable({set})
                                         // console.log(queryBody.get("name"))
                                 };
 
-                                const [min, setMin] = useState(1)
-                                const [enableEnd, setEndState] = useState(false)
-
                                 const validationRules = yup.object().shape({
                                         files: yup.array().min(1).required("Au moins un fichier doit être sélectionné"),
                                         services: yup.array().min(1).required('Au moins un service doit être sélectionné'),
@@ -1640,6 +1637,7 @@ export default function FileTable({set})
                                 query.append('id', id)
                                 query.append('update_object', 'level')
                                 query.append('new_value', nextNiv(level))
+                                query.append('additional_info', JSON.stringify( {} ))
 
                                 if(!Global_State.isEditorMode)
                                 {
@@ -1707,10 +1705,119 @@ export default function FileTable({set})
                                                 )
                                         );
 
+                                        const CustomTimeInput = useCallback(
+                                                function CustomTimeInput({ date, value, onChange })
+                                                {
+
+                                                        const validationRules = yup.object().shape({
+                                                                hour: yup.number().integer().positive("L'heure est positive").min(new Date().getHours()).max(24, 'maximum 24h'),
+                                                                minutes: yup.number().integer().positive("L'heure est positive").min(0).max(60, 'maximum 60mins'),
+
+                                                        });
+
+                                                        const formik = useFormik(
+                                                        {
+                                                                validationSchema: validationRules,
+                                                                onSubmit: handleSubmit,
+                                                                initialValues:
+                                                                {
+                                                                        hour: new Date().getHours(),
+                                                                        minutes: 0
+                                                                }
+                                                        }
+                                                        )
+
+                                                        const handleBlur = e =>
+                                                        {
+                                                                e.preventDefault()
+                                                                e.stopPropagation()
+                                                                if (!formik.errors.hour && !formik.errors.minutes)
+                                                                {
+                                                                        onChange(`${formik.values.hour === '' ? 0 : formik.values.hour}:${formik.values.minutes === '' ? 0 : formik.values.minutes}`)
+                                                                }
+                                                        }
+
+                                                        return(
+                                                        <Form className={`d-flex flex-row`} value = {undefined} onSubmit={formik.handleSubmit} >
+
+
+                                                                <Form.Group className="mr-3 d-flex" >
+                                                                        <Form.Label style={{ margin: 0, marginRight: 5 }} >hh</Form.Label>
+                                                                        <Form.Control
+                                                                        style=
+                                                                        {{
+                                                                                maxWidth: '35px',
+                                                                                maxHeight: '20px',
+                                                                                fontSize: '10px',
+                                                                                padding: '2px'
+                                                                        }}
+                                                                        maxLength = '2'
+                                                                        name="hour"
+                                                                        value={formik.values.hour}
+                                                                        onChange={formik.handleChange}
+                                                                        onBlur={ handleBlur }
+                                                                        // type="number"
+                                                                        placeholder="00"
+                                                                        isInvalid={!!formik.errors.hour}
+                                                                        />
+                                                                        {/*<Form.Control.Feedback  type="invalid">*/}
+                                                                        {/*        {formik.errors.hour}*/}
+                                                                        {/*</Form.Control.Feedback>*/}
+                                                                </Form.Group>
+
+
+                                                                <Form.Group className="d-flex" >
+                                                                        <Form.Label style={{ margin: 0, marginRight: 5 }} >mm</Form.Label>
+                                                                        <Form.Control
+                                                                        style=
+                                                                        {{
+                                                                                maxWidth: '35px',
+                                                                                maxHeight: '20px',
+                                                                                fontSize: '10px',
+                                                                                padding: '2px'
+                                                                        }}
+                                                                        maxLength = '2'
+                                                                        name="minutes"
+                                                                        value={formik.values.minutes}
+                                                                        onChange={formik.handleChange}
+                                                                        onBlur={ handleBlur }
+                                                                        // type="number"
+                                                                        placeholder="00"
+                                                                        isInvalid={!!formik.errors.minutes}
+                                                                        />
+                                                                        {/*<Form.Control.Feedback type="invalid">*/}
+                                                                        {/*        {formik.errors.minutes}*/}
+                                                                        {/*</Form.Control.Feedback>*/}
+                                                                </Form.Group>
+
+                                                                {/*<div*/}
+                                                                {/*style = {*/}
+                                                                {/*        {*/}
+                                                                {/*                display: 'flex',*/}
+                                                                {/*                justifyContent: 'center',*/}
+                                                                {/*                position: 'relative',*/}
+                                                                {/*                alignItems: 'center',*/}
+                                                                {/*        }*/}
+                                                                {/*}*/}
+                                                                {/*>*/}
+                                                                {/*        <Button variant="primary" type="submit">*/}
+                                                                {/*                Submit*/}
+                                                                {/*        </Button>*/}
+                                                                {/*</div>*/}
+                                                        </Form>
+                                                        )
+                                                }, []
+                                        )
+
                                         const [startDate, setStartDate] = useState(data.review_date !== null ? new Date(data.review_date) : new Date());
 
-                                        const new_review_date = `${startDate.getFullYear()}/${startDate.getMonth()+1}/${startDate.getDate()}`
+                                        const new_review_date = `${startDate.getFullYear()}/${startDate.getMonth()+1}/${startDate.getDate()} ${startDate.getHours()}:${startDate.getMinutes()}`
                                         console.log('new_review_date', new_review_date, e)
+
+                                        // let today = new Date()
+                                        // today.setHours(0, 0, 0, 0)
+
+                                        console.log('millesec dif', new Date(new_review_date).valueOf() - new Date().valueOf())
 
                                         const handleSubmit = e =>
                                         {
@@ -1735,6 +1842,11 @@ export default function FileTable({set})
                                                 query.append('id', id)
                                                 query.append('update_object', 'review_date')
                                                 query.append('new_value', new_review_date)
+                                                query.append('additional_info', JSON.stringify(
+                                                        {
+                                                                remain_ms: `${new Date(new_review_date).valueOf() - new Date().valueOf()}`
+                                                        }
+                                                ))
 
                                                 if(!Global_State.isEditorMode)
                                                 {
@@ -1774,12 +1886,16 @@ export default function FileTable({set})
                                                              overflow: "hidden"
                                                         }}
                                                 >
-                                                        <div style={{ width: "fit-content" }} >
+                                                        <div className={`d-flex`} style={{ width: "fit-content" }} >
                                                                 <DatePicker
                                                                         selected={startDate}
+                                                                        popperClassName = 'reactDatePickerPopper'
+                                                                        dateFormat="yyyy/MM/dd h:mm aa"
                                                                         onChange={(date) => setStartDate(date)}
                                                                         showYearDropdown
                                                                         scrollableYearDropdown
+                                                                        showTimeInput
+                                                                        customTimeInput={<CustomTimeInput />}
                                                                         yearDropdownItemNumber={20}
                                                                         minDate={new Date()}
                                                                         customInput ={ <CustomInput /> }
@@ -2182,6 +2298,7 @@ export default function FileTable({set})
                                                                                 selectsRange={true}
                                                                                 startDate={startDate}
                                                                                 endDate={endDate}
+                                                                                popperClassName = 'reactDatePickerPopper'
                                                                                 onChange={
                                                                                         (update) =>
                                                                                         {
@@ -2212,6 +2329,7 @@ export default function FileTable({set})
                                                                 selectsRange={true}
                                                                 startDate={startDate}
                                                                 endDate={endDate}
+                                                                popperClassName = 'reactDatePickerPopper'
                                                                 onChange={
                                                                         (update) =>
                                                                         {
