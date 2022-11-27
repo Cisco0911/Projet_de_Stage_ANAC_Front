@@ -321,6 +321,30 @@ export default function useGetData(TheDatas)
                                                         }
                                                 )
                                 }
+                                else if (data.operation === 'move')
+                                {
+                                        console.log('emitting move echo', data)
+                                        const ids = new FormData
+                                        data.node.map(element => {
+                                                console.log(element)
+                                                ids.append('ids[]', element)
+                                        });
+                                        console.log(ids.get('ids[]'))
+
+                                        http.post('getDatasByIds', ids)
+                                        .then( res =>
+                                        {
+                                                console.log(res)
+
+                                                dispatch({type: 'move', data: {...data, 'node': res.data}})
+                                        }
+                                        )
+                                        .catch( err =>
+                                        {
+                                                console.log(err)
+                                        }
+                                        )
+                                }
                         });
 
                         echo.private(`user.${authUser.id}`).listen('AuthUserUpdate',
@@ -551,6 +575,83 @@ export default function useGetData(TheDatas)
 
         }
 
+
+        let sections = new Map()
+        Data_Base.data.sections.map((section) =>
+        {
+                const sct = JSON.parse(JSON.stringify(section))
+                // console.log(sct)
+                sections.set(sct.id, {...sct, selectedNodeIdInSection: 0 })
+        }
+        )
+
+
+        const getNewPath = (new_node, all_nodes, to_update = false) =>
+        {
+                if (!to_update)
+                {
+                        for (const node of all_nodes)
+                        {
+                                if (node.id === new_node.id )  return node.path
+                        }
+                }
+
+                switch (new_node.type)
+                {
+                        case 'audit':
+                        {
+                                // let audit
+                                //
+                                // for (const auditElement of  Data_Base.data.audits)
+                                // {
+                                //         // console.log('paath audit ', id, '  ', auditElement.id)
+                                //         if(auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement))
+                                // }
+
+                                return `${getNewPath(sections.get(new_node.section_id), all_nodes, true)}\\${new_node.name}`
+                        }
+                        case 'checkList':
+                        {
+                                let audit
+
+                                for (const node of  all_nodes)
+                                {
+                                        if(node.id === new_node.parentId) audit = JSON.parse(JSON.stringify(node))
+                                }
+
+                                return `${getNewPath(audit, all_nodes)}\\${new_node.name}`
+                        }
+                        case 'ds':
+                        {
+                                let parent
+
+                                for (const node of  all_nodes)
+                                {
+                                        if(node.id === new_node.parentId) parent = JSON.parse(JSON.stringify(node))
+                                }
+                                // console.log('paaaaaaaaaaaaaath', new_node)
+
+                                return `${getNewPath(parent, all_nodes)}\\${new_node.name}`
+                        }
+                        case 'f':
+                        {
+                                let parent
+
+                                for (const node of  all_nodes)
+                                {
+                                        if(node.id === new_node.parentId) parent = JSON.parse(JSON.stringify(node))
+                                }
+
+                                return `${getNewPath(parent, all_nodes)}\\${new_node.name}`
+                        }
+                        default:
+                        {
+                                 return `${new_node.name}:`
+                        }
+                }
+
+        }
+
         const dataFormater = () =>
         {
 
@@ -622,7 +723,7 @@ export default function useGetData(TheDatas)
                                                 if(auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement))
                                         }
 
-                                        return `${getPath(audit.section_id, '')}\\${audit.name}\\`
+                                        return `${getPath(audit.section_id, '')}\\${audit.name}`
                                 }
                                 case 'checkList':
                                 {
@@ -633,7 +734,7 @@ export default function useGetData(TheDatas)
                                                 if(checkListElement.id === id) checkList = JSON.parse(JSON.stringify(checkListElement))
                                         }
 
-                                        return `${getPath(checkList.audit_id, 'audit')}\\${checkList.name}\\`
+                                        return `${getPath(checkList.audit_id, 'audit')}\\${checkList.name}`
                                 }
                                 case 'dp':
                                 {
@@ -644,7 +745,7 @@ export default function useGetData(TheDatas)
                                                 if(dpElement.id === id) dp = JSON.parse(JSON.stringify(dpElement))
                                         }
 
-                                        return `${getPath(dp.audit_id, 'audit')}\\${dp.name}\\`
+                                        return `${getPath(dp.audit_id, 'audit')}\\${dp.name}`
                                 }
                                 case 'nonC':
                                 {
@@ -655,7 +756,7 @@ export default function useGetData(TheDatas)
                                                 if(ncElement.id === id) nc = JSON.parse(JSON.stringify(ncElement))
                                         }
 
-                                        return `${getPath(nc.audit_id, 'audit')}\\${nc.name}\\`
+                                        return `${getPath(nc.audit_id, 'audit')}\\${nc.name}`
                                 }
                                 case 'fnc':
                                 {
@@ -666,7 +767,7 @@ export default function useGetData(TheDatas)
                                                 if(fncElement.id === id) fnc = JSON.parse(JSON.stringify(fncElement))
                                         }
 
-                                        return `${getPath(fnc.nc_id, 'nonC')}\\${fnc.name}\\`
+                                        return `${getPath(fnc.nc_id, 'nonC')}\\${fnc.name}`
                                 }
                                 case 'ds':
                                 {
@@ -677,7 +778,7 @@ export default function useGetData(TheDatas)
                                                 if(ds.id === id) folder = JSON.parse(JSON.stringify(ds))
                                         }
 
-                                        return `${getPath(folder.parent_id, folder.parent_type)}\\${folder.name}\\`
+                                        return `${getPath(folder.parent_id, folder.parent_type)}\\${folder.name}`
                                 }
                                 case 'f':
                                 {
@@ -694,7 +795,7 @@ export default function useGetData(TheDatas)
                                 {
                                         for (const section of  Data_Base.data.sections)
                                         {
-                                                if(section.id === id) return `${section.name}:\\`
+                                                if(section.id === id) return `${section.name}:`
                                         }
                                 }
                         }
@@ -1178,9 +1279,54 @@ export default function useGetData(TheDatas)
 
                                 console.log('updatedNode', updatedNode)
 
-                                const newState = state.map( node => node.id === updatedNode.id ? updatedNode : node )
+                                let newState = state.map(
+                                        node =>
+                                        {
+                                                if (node.id === updatedNode.id)
+                                                {
+                                                        updatedNode.path = getNewPath(updatedNode, state, true)
+
+                                                        return updatedNode
+                                                }
+                                                else if ( (node.parentId === updatedNode.id) )
+                                                {
+                                                        node.path = getNewPath(node, state, true)
+
+                                                        return node
+                                                }
+                                                else return node
+                                        }
+                                )
 
                                 // EventsManager.emit('updateData')
+
+                                console.log('newState', newState)
+
+                                return JSON.parse(JSON.stringify(newState))
+                        }
+                        case 'move':
+                        {
+                                const data = action.data
+
+                                dispatch({type: 'update', data})
+
+                                const moved_node = data.node[0];
+
+                                const newState = state.map(
+                                        node =>
+                                        {
+                                                if (node.id === data.node_type + moved_node.id)
+                                                {
+                                                        node.path = getNewPath(node, state)
+
+                                                        return node
+                                                }
+                                                else if ( (node.parentId === data.node_type + moved_node.id) )
+                                                {
+                                                        node.path = getNewPath(node, state)
+                                                }
+                                        }
+                                )
 
                                 console.log('newState', newState)
 
@@ -1501,17 +1647,6 @@ export default function useGetData(TheDatas)
 
                 },
                 []
-        )
-
-
-
-        let sections = new Map()
-        Data_Base.data.sections.map((section) =>
-                {
-                        const sct = JSON.parse(JSON.stringify(section))
-                        // console.log(sct)
-                        sections.set(sct.id, {...sct, selectedNodeIdInSection: 0 })
-                }
         )
         // console.log(sections)
 

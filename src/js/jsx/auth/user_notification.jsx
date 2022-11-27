@@ -1,12 +1,12 @@
 /* eslint-disable import/first */
 
-import React, {useState, useEffect, useRef, useMemo, useReducer} from 'react';
+import React, {useEffect, useMemo, useReducer, useRef, useState} from 'react';
 
-import { Global_State } from "../main";
-import { http } from "../data";
+import {Global_State} from "../main";
+import {http} from "../data";
 
 import Badge from '@mui/material/Badge';
-import { styled } from '@mui/material/styles';
+import {styled} from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Card from '@mui/material/Card';
@@ -15,20 +15,15 @@ import CardContent from '@mui/material/CardContent';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import Typography from '@mui/material/Typography';
 
 import toast from "react-hot-toast";
 
-import { IoMdNotifications } from "react-icons/io";
-import { MdNotificationsActive } from "react-icons/md";
+import {IoMdNotifications} from "react-icons/io";
+import {MdNotificationsActive} from "react-icons/md";
 
 import Button from 'react-bootstrap/Button';
-
-
-
-
-
-
+import Divider from "@mui/material/Divider";
+import {Chip} from "@mui/material";
 
 
 let readNotifs = []
@@ -379,7 +374,7 @@ function useOnScreen(target, root) {
         return isIntersecting
 }
 
-function useReviewNotif()
+function useUnreadReviewNotif()
 {
         const StyledBadge = styled(Badge)(({ theme }) => ({
                 '& .MuiBadge-badge': {
@@ -393,9 +388,117 @@ function useReviewNotif()
 
         const unreadReviewNotif = useMemo( () => JSON.parse(JSON.stringify(Global_State.authUser.unread_notifications)),  [Global_State.authUser])
 
-        let unreadReviewNotifComponents = []
+        // let unreadReviewNotifComponents = []
 
-        const UnreadReviewNotifComponent = ({notif}) =>
+        // const UnreadReviewNotifComponent = ({notif}) =>
+        // {
+        //         // useEffect(
+        //         //         () =>
+        //         //         {
+        //         //                 return (
+        //         //                         () =>
+        //         //                         {
+        //         //                                 console.log("unmount " + notif.data.msg)
+        //         //                         }
+        //         //                 )
+        //         //         }, []
+        //         // )
+        //
+        //         // const ref = useRef()
+        //         // const isVisible = useOnScreen(ref, document.querySelector('#root'))
+        //         //
+        //         // useEffect(
+        //         //         () =>
+        //         //         {
+        //         //                 console.log(isVisible, notif.data.msg)
+        //         //                 if ( !isRead(notif.id) && isVisible)
+        //         //                 {
+        //         //                         readNotifs.push(notif.id)
+        //         //                 }
+        //         //
+        //         //         }, [isVisible]
+        //         // )
+        //
+        //         return(
+        //         <ListItem
+        //         onMouseEnter=
+        //         {
+        //                 () =>
+        //                 {
+        //                         if ( !isRead(notif.id) )
+        //                         {
+        //                                 readNotifs.push(notif.id)
+        //                         }
+        //                 }
+        //         }
+        //         >
+        //                 <StyledBadge color="warning" badgeContent={"new"} >
+        //                         <Card sx = {{ minWidth: 150, maxWidth: 390 }} variant="outlined" >
+        //                                 <CardContent className={`d-flex p-2`} >
+        //                                         <div style={{ width: "max-content", fontSize: 12 }} onClick={e => {}} >
+        //                                                 <span style={{ fontWeight: "bold" }} >{`${notif.data.object}:`}</span>
+        //                                                 <br/>
+        //                                                 {notif.data.msg}
+        //                                         </div>
+        //                                 </CardContent>
+        //                         </Card>
+        //                 </StyledBadge>
+        //         </ListItem>
+        //         )
+        // }
+
+        return (
+                unreadReviewNotif.map(
+                        rv_notif =>
+                        (
+                        <ListItem key={rv_notif.id}
+                                  onMouseEnter=
+                                  {
+                                          () =>
+                                          {
+                                                  if ( !isRead(rv_notif.id) )
+                                                  {
+                                                          readNotifs.push(rv_notif.id)
+                                                  }
+                                          }
+                                  }
+                        >
+                                <StyledBadge color="warning" badgeContent={"new"} >
+                                        <Card sx = {{ minWidth: 150, maxWidth: 390 }} variant="outlined" >
+                                                <CardContent className={`d-flex p-2`} >
+                                                        <div style={{ width: "max-content", fontSize: 12 }} onClick={e => {}} >
+                                                                <span style={{ fontWeight: "bold" }} >{`${rv_notif.data.object}:`}</span>
+                                                                <br/>
+                                                                {rv_notif.data.msg}
+                                                        </div>
+                                                </CardContent>
+                                        </Card>
+                                </StyledBadge>
+                        </ListItem>
+                        )
+                )
+        )
+
+        // return unreadReviewNotifComponents
+}
+
+function useReadReviewNotif()
+{
+        const StyledBadge = styled(Badge)(({ theme }) => ({
+                '& .MuiBadge-badge': {
+                        right: 10,
+                        top: 13,
+                        border: `2px solid ${theme.palette.background.paper}`,
+                        padding: '0 4px',
+                        fontSize: 10,
+                },
+        }));
+
+        const readReviewNotifs = useMemo( () => JSON.parse(JSON.stringify(Global_State.authUser.read_notifications)),  [Global_State.authUser])
+
+        // let readReviewNotifComponents = []
+
+        const ReadReviewNotifComponent = ({notif}) =>
         {
                 // useEffect(
                 //         () =>
@@ -409,50 +512,68 @@ function useReviewNotif()
                 //         }, []
                 // )
 
-                const ref = useRef()
-                const isVisible = useOnScreen(ref, document.querySelector('#root'))
-
-                useEffect(
-                () =>
-                {
-                        console.log(isVisible, notif.data.msg)
-                        if ( !isRead(notif.id) && isVisible)
-                        {
-                                readNotifs.push(notif.id)
-                        }
-
-                }, [isVisible]
-                )
+                // const ref = useRef()
+                // const isVisible = useOnScreen(ref, document.querySelector('#root'))
+                //
+                // useEffect(
+                //         () =>
+                //         {
+                //                 console.log(isVisible, notif.data.msg)
+                //                 if ( !isRead(notif.id) && isVisible)
+                //                 {
+                //                         readNotifs.push(notif.id)
+                //                 }
+                //
+                //         }, [isVisible]
+                // )
 
                 return(
-                        <ListItem ref={ref} >
-                                <StyledBadge color="warning" badgeContent={"new"} >
-                                        <Card sx = {{ minWidth: 150, maxWidth: 390 }} variant="outlined" >
-                                                <CardContent className={`d-flex p-2`} >
-                                                        <div style={{ width: "max-content", fontSize: 12 }} onClick={e => {}} >
-                                                                <span style={{ fontWeight: "bold" }} >{`${notif.data.object}:`}</span>
-                                                                <br/>
-                                                                {notif.data.msg}
-                                                        </div>
-                                                </CardContent>
-                                        </Card>
-                                </StyledBadge>
-                        </ListItem>
+                <ListItem
+                onMouseEnter=
+                {
+                        () =>
+                        {
+                                if ( !isRead(notif.id) )
+                                {
+                                        readNotifs.push(notif.id)
+                                }
+                        }
+                }
+                >
+                        <StyledBadge color="warning" badgeContent={"new"} >
+                                <Card sx = {{ minWidth: 150, maxWidth: 390 }} variant="outlined" >
+                                        <CardContent className={`d-flex p-2`} >
+                                                <div style={{ width: "max-content", fontSize: 12 }} onClick={e => {}} >
+                                                        <span style={{ fontWeight: "bold" }} >{`${notif.data.object}:`}</span>
+                                                        <br/>
+                                                        {notif.data.msg}
+                                                </div>
+                                        </CardContent>
+                                </Card>
+                        </StyledBadge>
+                </ListItem>
                 )
         }
 
-        unreadReviewNotif.map(
-                rv_notif =>
-                {
-                        // console.log(rv_notif)
-
-                        unreadReviewNotifComponents.push(
-                                <UnreadReviewNotifComponent key={rv_notif.id} notif={rv_notif} />
+        return readReviewNotifs.map(
+                rv_notif => {
+                        return (
+                                <ListItem key={rv_notif.id} >
+                                        <Card sx={{minWidth: 150, maxWidth: 390}} variant="outlined">
+                                                <CardContent className={`d-flex p-2`}>
+                                                        <div style={{width: "max-content", fontSize: 12}} onClick={e => {
+                                                        }}>
+                                                                        <span
+                                                                        style={{fontWeight: "bold"}}>{`${rv_notif.data.object}:`}</span>
+                                                                <br/>
+                                                                {rv_notif.data.msg}
+                                                        </div>
+                                                </CardContent>
+                                        </Card>
+                                </ListItem>
                         )
                 }
         )
-
-        return unreadReviewNotifComponents
 }
 
 export default function Notifications()
@@ -462,24 +583,24 @@ export default function Notifications()
         const isVisible = useOnScreen(ref, document.querySelector('#root'))
 
         useEffect(
-        () =>
-        {
-                console.log(isVisible, "notifPanel")
-                if ( (readNotifs.length !== 0) && !isVisible)
+                () =>
                 {
+                        console.log(isVisible, "notifPanel")
+                        if ( (readNotifs.length !== 0) && !isVisible)
+                        {
 
-                        const notif_ids = new FormData
-                        readNotifs.map(notif_id => {
-                                // console.log(notif_id)
-                                notif_ids.append('notif_ids[]', notif_id)
-                        });
+                                const notif_ids = new FormData
+                                readNotifs.map(notif_id => {
+                                        // console.log(notif_id)
+                                        notif_ids.append('notif_ids[]', notif_id)
+                                });
 
-                        http.post(`markAsRead`, notif_ids)
-                        .then( res => { console.log(res) } )
-                        .catch(err => { console.log(err) })
-                }
+                                http.post(`markAsRead`, notif_ids)
+                                .then( res => { console.log(res) } )
+                                .catch(err => { console.log(err) })
+                        }
 
-        }, [isVisible]
+                }, [isVisible]
         )
 
         const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -494,23 +615,24 @@ export default function Notifications()
         const count = isThereUpdate()
 
         const notifButton = (
-        count ?
-        <IconButton aria-label="notification" style={{ width: 36, height: 36, }} >
-                <StyledBadge badgeContent={count} color="primary">
-                        <MdNotificationsActive color='#cd0606' size={30} />
-                </StyledBadge>
-        </IconButton>
-        :
-        <IconButton aria-label="notification" style={{ width: 36, height: 36, }} >
-                <StyledBadge badgeContent={count} color="primary">
-                        <IoMdNotifications color='#10088b' size={30} />
-                </StyledBadge>
-        </IconButton>
+                count ?
+                <IconButton aria-label="notification" style={{ width: 36, height: 36, }} >
+                        <StyledBadge badgeContent={count} color="primary">
+                                <MdNotificationsActive color='#cd0606' size={30} />
+                        </StyledBadge>
+                </IconButton>
+                :
+                <IconButton aria-label="notification" style={{ width: 36, height: 36, }} >
+                        <StyledBadge badgeContent={count} color="primary">
+                                <IoMdNotifications color='#10088b' size={30} />
+                        </StyledBadge>
+                </IconButton>
         )
 
 
         const operationNotifs = useOperationNotif()
-        const unreadReviewNotifs = useReviewNotif()
+        const unreadReviewNotifs = useUnreadReviewNotif()
+        const readReviewNotifs = useReadReviewNotif()
 
 
 
@@ -518,6 +640,8 @@ export default function Notifications()
         <List ref={ref} id={'notifRenderingComponent'} >
                 {operationNotifs}
                 {unreadReviewNotifs}
+                <Divider textAlign="left"> LU </Divider>
+                {readReviewNotifs}
         </List>
         ):
         (<div ref={ref} className='d-flex justify-content-center align-items-center' >

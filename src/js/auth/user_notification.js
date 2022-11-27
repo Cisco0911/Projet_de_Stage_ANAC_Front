@@ -6,7 +6,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 /* eslint-disable import/first */
 
-import React, { useState, useEffect, useRef, useMemo, useReducer } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
 import { Global_State } from "../main";
 import { http } from "../data";
@@ -21,7 +21,6 @@ import CardContent from '@mui/material/CardContent';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import Typography from '@mui/material/Typography';
 
 import toast from "react-hot-toast";
 
@@ -29,6 +28,8 @@ import { IoMdNotifications } from "react-icons/io";
 import { MdNotificationsActive } from "react-icons/md";
 
 import Button from 'react-bootstrap/Button';
+import Divider from "@mui/material/Divider";
+import { Chip } from "@mui/material";
 
 var readNotifs = [];
 
@@ -463,7 +464,7 @@ function useOnScreen(target, root) {
         return isIntersecting;
 }
 
-function useReviewNotif() {
+function useUnreadReviewNotif() {
         var StyledBadge = styled(Badge)(function (_ref5) {
                 var theme = _ref5.theme;
                 return {
@@ -481,10 +482,126 @@ function useReviewNotif() {
                 return JSON.parse(JSON.stringify(Global_State.authUser.unread_notifications));
         }, [Global_State.authUser]);
 
-        var unreadReviewNotifComponents = [];
+        // let unreadReviewNotifComponents = []
 
-        var UnreadReviewNotifComponent = function UnreadReviewNotifComponent(_ref6) {
-                var notif = _ref6.notif;
+        // const UnreadReviewNotifComponent = ({notif}) =>
+        // {
+        //         // useEffect(
+        //         //         () =>
+        //         //         {
+        //         //                 return (
+        //         //                         () =>
+        //         //                         {
+        //         //                                 console.log("unmount " + notif.data.msg)
+        //         //                         }
+        //         //                 )
+        //         //         }, []
+        //         // )
+        //
+        //         // const ref = useRef()
+        //         // const isVisible = useOnScreen(ref, document.querySelector('#root'))
+        //         //
+        //         // useEffect(
+        //         //         () =>
+        //         //         {
+        //         //                 console.log(isVisible, notif.data.msg)
+        //         //                 if ( !isRead(notif.id) && isVisible)
+        //         //                 {
+        //         //                         readNotifs.push(notif.id)
+        //         //                 }
+        //         //
+        //         //         }, [isVisible]
+        //         // )
+        //
+        //         return(
+        //         <ListItem
+        //         onMouseEnter=
+        //         {
+        //                 () =>
+        //                 {
+        //                         if ( !isRead(notif.id) )
+        //                         {
+        //                                 readNotifs.push(notif.id)
+        //                         }
+        //                 }
+        //         }
+        //         >
+        //                 <StyledBadge color="warning" badgeContent={"new"} >
+        //                         <Card sx = {{ minWidth: 150, maxWidth: 390 }} variant="outlined" >
+        //                                 <CardContent className={`d-flex p-2`} >
+        //                                         <div style={{ width: "max-content", fontSize: 12 }} onClick={e => {}} >
+        //                                                 <span style={{ fontWeight: "bold" }} >{`${notif.data.object}:`}</span>
+        //                                                 <br/>
+        //                                                 {notif.data.msg}
+        //                                         </div>
+        //                                 </CardContent>
+        //                         </Card>
+        //                 </StyledBadge>
+        //         </ListItem>
+        //         )
+        // }
+
+        return unreadReviewNotif.map(function (rv_notif) {
+                return React.createElement(
+                        ListItem,
+                        { key: rv_notif.id,
+                                onMouseEnter: function onMouseEnter() {
+                                        if (!isRead(rv_notif.id)) {
+                                                readNotifs.push(rv_notif.id);
+                                        }
+                                }
+                        },
+                        React.createElement(
+                                StyledBadge,
+                                { color: "warning", badgeContent: "new" },
+                                React.createElement(
+                                        Card,
+                                        { sx: { minWidth: 150, maxWidth: 390 }, variant: "outlined" },
+                                        React.createElement(
+                                                CardContent,
+                                                { className: "d-flex p-2" },
+                                                React.createElement(
+                                                        "div",
+                                                        { style: { width: "max-content", fontSize: 12 }, onClick: function onClick(e) {} },
+                                                        React.createElement(
+                                                                "span",
+                                                                { style: { fontWeight: "bold" } },
+                                                                rv_notif.data.object + ":"
+                                                        ),
+                                                        React.createElement("br", null),
+                                                        rv_notif.data.msg
+                                                )
+                                        )
+                                )
+                        )
+                );
+        });
+
+        // return unreadReviewNotifComponents
+}
+
+function useReadReviewNotif() {
+        var StyledBadge = styled(Badge)(function (_ref6) {
+                var theme = _ref6.theme;
+                return {
+                        '& .MuiBadge-badge': {
+                                right: 10,
+                                top: 13,
+                                border: "2px solid " + theme.palette.background.paper,
+                                padding: '0 4px',
+                                fontSize: 10
+                        }
+                };
+        });
+
+        var readReviewNotifs = useMemo(function () {
+                return JSON.parse(JSON.stringify(Global_State.authUser.read_notifications));
+        }, [Global_State.authUser]);
+
+        // let readReviewNotifComponents = []
+
+        var ReadReviewNotifComponent = function ReadReviewNotifComponent(_ref7) {
+                var notif = _ref7.notif;
 
                 // useEffect(
                 //         () =>
@@ -498,19 +615,30 @@ function useReviewNotif() {
                 //         }, []
                 // )
 
-                var ref = useRef();
-                var isVisible = useOnScreen(ref, document.querySelector('#root'));
-
-                useEffect(function () {
-                        console.log(isVisible, notif.data.msg);
-                        if (!isRead(notif.id) && isVisible) {
-                                readNotifs.push(notif.id);
-                        }
-                }, [isVisible]);
+                // const ref = useRef()
+                // const isVisible = useOnScreen(ref, document.querySelector('#root'))
+                //
+                // useEffect(
+                //         () =>
+                //         {
+                //                 console.log(isVisible, notif.data.msg)
+                //                 if ( !isRead(notif.id) && isVisible)
+                //                 {
+                //                         readNotifs.push(notif.id)
+                //                 }
+                //
+                //         }, [isVisible]
+                // )
 
                 return React.createElement(
                         ListItem,
-                        { ref: ref },
+                        {
+                                onMouseEnter: function onMouseEnter() {
+                                        if (!isRead(notif.id)) {
+                                                readNotifs.push(notif.id);
+                                        }
+                                }
+                        },
                         React.createElement(
                                 StyledBadge,
                                 { color: "warning", badgeContent: "new" },
@@ -537,13 +665,32 @@ function useReviewNotif() {
                 );
         };
 
-        unreadReviewNotif.map(function (rv_notif) {
-                // console.log(rv_notif)
-
-                unreadReviewNotifComponents.push(React.createElement(UnreadReviewNotifComponent, { key: rv_notif.id, notif: rv_notif }));
+        return readReviewNotifs.map(function (rv_notif) {
+                return React.createElement(
+                        ListItem,
+                        { key: rv_notif.id },
+                        React.createElement(
+                                Card,
+                                { sx: { minWidth: 150, maxWidth: 390 }, variant: "outlined" },
+                                React.createElement(
+                                        CardContent,
+                                        { className: "d-flex p-2" },
+                                        React.createElement(
+                                                "div",
+                                                { style: { width: "max-content", fontSize: 12 }, onClick: function onClick(e) {} },
+                                                React.createElement(
+                                                        "span",
+                                                        {
+                                                                style: { fontWeight: "bold" } },
+                                                        rv_notif.data.object + ":"
+                                                ),
+                                                React.createElement("br", null),
+                                                rv_notif.data.msg
+                                        )
+                                )
+                        )
+                );
         });
-
-        return unreadReviewNotifComponents;
 }
 
 export default function Notifications() {
@@ -569,8 +716,8 @@ export default function Notifications() {
                 }
         }, [isVisible]);
 
-        var StyledBadge = styled(Badge)(function (_ref7) {
-                var theme = _ref7.theme;
+        var StyledBadge = styled(Badge)(function (_ref8) {
+                var theme = _ref8.theme;
                 return {
                         '& .MuiBadge-badge': {
                                 right: 7,
@@ -602,13 +749,20 @@ export default function Notifications() {
         );
 
         var operationNotifs = useOperationNotif();
-        var unreadReviewNotifs = useReviewNotif();
+        var unreadReviewNotifs = useUnreadReviewNotif();
+        var readReviewNotifs = useReadReviewNotif();
 
         var renderingComponent = count ? React.createElement(
                 List,
                 { ref: ref, id: 'notifRenderingComponent' },
                 operationNotifs,
-                unreadReviewNotifs
+                unreadReviewNotifs,
+                React.createElement(
+                        Divider,
+                        { textAlign: "left" },
+                        " LU "
+                ),
+                readReviewNotifs
         ) : React.createElement(
                 "div",
                 { ref: ref, className: "d-flex justify-content-center align-items-center" },

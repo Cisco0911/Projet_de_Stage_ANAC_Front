@@ -340,6 +340,22 @@ export default function useGetData(TheDatas) {
                                 }).catch(function (err) {
                                         console.log(err);
                                 });
+                        } else if (data.operation === 'move') {
+                                console.log('emitting move echo', data);
+                                var _ids2 = new FormData();
+                                data.node.map(function (element) {
+                                        console.log(element);
+                                        _ids2.append('ids[]', element);
+                                });
+                                console.log(_ids2.get('ids[]'));
+
+                                http.post('getDatasByIds', _ids2).then(function (res) {
+                                        console.log(res);
+
+                                        dispatch({ type: 'move', data: Object.assign({}, data, { 'node': res.data }) });
+                                }).catch(function (err) {
+                                        console.log(err);
+                                });
                         }
                 });
 
@@ -631,6 +647,157 @@ export default function useGetData(TheDatas) {
                 };
         }
 
+        var sections = new Map();
+        Data_Base.data.sections.map(function (section) {
+                var sct = JSON.parse(JSON.stringify(section));
+                // console.log(sct)
+                sections.set(sct.id, Object.assign({}, sct, { selectedNodeIdInSection: 0 }));
+        });
+
+        var getNewPath = function getNewPath(new_node, all_nodes) {
+                var to_update = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+                if (!to_update) {
+                        var _iteratorNormalCompletion3 = true;
+                        var _didIteratorError3 = false;
+                        var _iteratorError3 = undefined;
+
+                        try {
+                                for (var _iterator3 = all_nodes[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                                        var node = _step3.value;
+
+                                        if (node.id === new_node.id) return node.path;
+                                }
+                        } catch (err) {
+                                _didIteratorError3 = true;
+                                _iteratorError3 = err;
+                        } finally {
+                                try {
+                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                                _iterator3.return();
+                                        }
+                                } finally {
+                                        if (_didIteratorError3) {
+                                                throw _iteratorError3;
+                                        }
+                                }
+                        }
+                }
+
+                switch (new_node.type) {
+                        case 'audit':
+                                {
+                                        // let audit
+                                        //
+                                        // for (const auditElement of  Data_Base.data.audits)
+                                        // {
+                                        //         // console.log('paath audit ', id, '  ', auditElement.id)
+                                        //         if(auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement))
+                                        // }
+
+                                        return getNewPath(sections.get(new_node.section_id), all_nodes, true) + "\\" + new_node.name;
+                                }
+                        case 'checkList':
+                                {
+                                        var audit = void 0;
+
+                                        var _iteratorNormalCompletion4 = true;
+                                        var _didIteratorError4 = false;
+                                        var _iteratorError4 = undefined;
+
+                                        try {
+                                                for (var _iterator4 = all_nodes[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                                                        var _node = _step4.value;
+
+                                                        if (_node.id === new_node.parentId) audit = JSON.parse(JSON.stringify(_node));
+                                                }
+                                        } catch (err) {
+                                                _didIteratorError4 = true;
+                                                _iteratorError4 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                                                                _iterator4.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError4) {
+                                                                throw _iteratorError4;
+                                                        }
+                                                }
+                                        }
+
+                                        return getNewPath(audit, all_nodes) + "\\" + new_node.name;
+                                }
+                        case 'ds':
+                                {
+                                        var parent = void 0;
+
+                                        var _iteratorNormalCompletion5 = true;
+                                        var _didIteratorError5 = false;
+                                        var _iteratorError5 = undefined;
+
+                                        try {
+                                                for (var _iterator5 = all_nodes[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                                                        var _node2 = _step5.value;
+
+                                                        if (_node2.id === new_node.parentId) parent = JSON.parse(JSON.stringify(_node2));
+                                                }
+                                                // console.log('paaaaaaaaaaaaaath', new_node)
+                                        } catch (err) {
+                                                _didIteratorError5 = true;
+                                                _iteratorError5 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                                                                _iterator5.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError5) {
+                                                                throw _iteratorError5;
+                                                        }
+                                                }
+                                        }
+
+                                        return getNewPath(parent, all_nodes) + "\\" + new_node.name;
+                                }
+                        case 'f':
+                                {
+                                        var _parent = void 0;
+
+                                        var _iteratorNormalCompletion6 = true;
+                                        var _didIteratorError6 = false;
+                                        var _iteratorError6 = undefined;
+
+                                        try {
+                                                for (var _iterator6 = all_nodes[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                                                        var _node3 = _step6.value;
+
+                                                        if (_node3.id === new_node.parentId) _parent = JSON.parse(JSON.stringify(_node3));
+                                                }
+                                        } catch (err) {
+                                                _didIteratorError6 = true;
+                                                _iteratorError6 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                                                                _iterator6.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError6) {
+                                                                throw _iteratorError6;
+                                                        }
+                                                }
+                                        }
+
+                                        return getNewPath(_parent, all_nodes) + "\\" + new_node.name;
+                                }
+                        default:
+                                {
+                                        return new_node.name + ":";
+                                }
+                }
+        };
+
         var dataFormater = function dataFormater() {
 
                 // Data_Base.data.audits[0].name = "dddd"
@@ -676,27 +843,27 @@ export default function useGetData(TheDatas) {
                 });
 
                 var getPath = function getPath(id, node_type) {
-                        var _iteratorNormalCompletion3 = true;
-                        var _didIteratorError3 = false;
-                        var _iteratorError3 = undefined;
+                        var _iteratorNormalCompletion7 = true;
+                        var _didIteratorError7 = false;
+                        var _iteratorError7 = undefined;
 
                         try {
-                                for (var _iterator3 = allDataAsNodeData[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                                        var node = _step3.value;
+                                for (var _iterator7 = allDataAsNodeData[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                                        var node = _step7.value;
 
                                         if (node.id === id + node_type) return node.path;
                                 }
                         } catch (err) {
-                                _didIteratorError3 = true;
-                                _iteratorError3 = err;
+                                _didIteratorError7 = true;
+                                _iteratorError7 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                                                _iterator3.return();
+                                        if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                                                _iterator7.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError3) {
-                                                throw _iteratorError3;
+                                        if (_didIteratorError7) {
+                                                throw _iteratorError7;
                                         }
                                 }
                         }
@@ -706,140 +873,16 @@ export default function useGetData(TheDatas) {
                                         {
                                                 var audit = void 0;
 
-                                                var _iteratorNormalCompletion4 = true;
-                                                var _didIteratorError4 = false;
-                                                var _iteratorError4 = undefined;
-
-                                                try {
-                                                        for (var _iterator4 = Data_Base.data.audits[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                                                                var auditElement = _step4.value;
-
-                                                                // console.log('paath audit ', id, '  ', auditElement.id)
-                                                                if (auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement));
-                                                        }
-                                                } catch (err) {
-                                                        _didIteratorError4 = true;
-                                                        _iteratorError4 = err;
-                                                } finally {
-                                                        try {
-                                                                if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                                                                        _iterator4.return();
-                                                                }
-                                                        } finally {
-                                                                if (_didIteratorError4) {
-                                                                        throw _iteratorError4;
-                                                                }
-                                                        }
-                                                }
-
-                                                return getPath(audit.section_id, '') + "\\" + audit.name + "\\";
-                                        }
-                                case 'checkList':
-                                        {
-                                                var checkList = void 0;
-
-                                                var _iteratorNormalCompletion5 = true;
-                                                var _didIteratorError5 = false;
-                                                var _iteratorError5 = undefined;
-
-                                                try {
-                                                        for (var _iterator5 = Data_Base.data.checkLists[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                                                                var checkListElement = _step5.value;
-
-                                                                if (checkListElement.id === id) checkList = JSON.parse(JSON.stringify(checkListElement));
-                                                        }
-                                                } catch (err) {
-                                                        _didIteratorError5 = true;
-                                                        _iteratorError5 = err;
-                                                } finally {
-                                                        try {
-                                                                if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                                                                        _iterator5.return();
-                                                                }
-                                                        } finally {
-                                                                if (_didIteratorError5) {
-                                                                        throw _iteratorError5;
-                                                                }
-                                                        }
-                                                }
-
-                                                return getPath(checkList.audit_id, 'audit') + "\\" + checkList.name + "\\";
-                                        }
-                                case 'dp':
-                                        {
-                                                var dp = void 0;
-
-                                                var _iteratorNormalCompletion6 = true;
-                                                var _didIteratorError6 = false;
-                                                var _iteratorError6 = undefined;
-
-                                                try {
-                                                        for (var _iterator6 = Data_Base.data.dps[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                                                                var dpElement = _step6.value;
-
-                                                                if (dpElement.id === id) dp = JSON.parse(JSON.stringify(dpElement));
-                                                        }
-                                                } catch (err) {
-                                                        _didIteratorError6 = true;
-                                                        _iteratorError6 = err;
-                                                } finally {
-                                                        try {
-                                                                if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                                                                        _iterator6.return();
-                                                                }
-                                                        } finally {
-                                                                if (_didIteratorError6) {
-                                                                        throw _iteratorError6;
-                                                                }
-                                                        }
-                                                }
-
-                                                return getPath(dp.audit_id, 'audit') + "\\" + dp.name + "\\";
-                                        }
-                                case 'nonC':
-                                        {
-                                                var nc = void 0;
-
-                                                var _iteratorNormalCompletion7 = true;
-                                                var _didIteratorError7 = false;
-                                                var _iteratorError7 = undefined;
-
-                                                try {
-                                                        for (var _iterator7 = Data_Base.data.nonCs[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-                                                                var ncElement = _step7.value;
-
-                                                                if (ncElement.id === id) nc = JSON.parse(JSON.stringify(ncElement));
-                                                        }
-                                                } catch (err) {
-                                                        _didIteratorError7 = true;
-                                                        _iteratorError7 = err;
-                                                } finally {
-                                                        try {
-                                                                if (!_iteratorNormalCompletion7 && _iterator7.return) {
-                                                                        _iterator7.return();
-                                                                }
-                                                        } finally {
-                                                                if (_didIteratorError7) {
-                                                                        throw _iteratorError7;
-                                                                }
-                                                        }
-                                                }
-
-                                                return getPath(nc.audit_id, 'audit') + "\\" + nc.name + "\\";
-                                        }
-                                case 'fnc':
-                                        {
-                                                var fnc = void 0;
-
                                                 var _iteratorNormalCompletion8 = true;
                                                 var _didIteratorError8 = false;
                                                 var _iteratorError8 = undefined;
 
                                                 try {
-                                                        for (var _iterator8 = Data_Base.data.fncs[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                                                                var fncElement = _step8.value;
+                                                        for (var _iterator8 = Data_Base.data.audits[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                                                                var auditElement = _step8.value;
 
-                                                                if (fncElement.id === id) fnc = JSON.parse(JSON.stringify(fncElement));
+                                                                // console.log('paath audit ', id, '  ', auditElement.id)
+                                                                if (auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError8 = true;
@@ -856,21 +899,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(fnc.nc_id, 'nonC') + "\\" + fnc.name + "\\";
+                                                return getPath(audit.section_id, '') + "\\" + audit.name;
                                         }
-                                case 'ds':
+                                case 'checkList':
                                         {
-                                                var folder = void 0;
+                                                var checkList = void 0;
 
                                                 var _iteratorNormalCompletion9 = true;
                                                 var _didIteratorError9 = false;
                                                 var _iteratorError9 = undefined;
 
                                                 try {
-                                                        for (var _iterator9 = Data_Base.data.ds[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                                                                var _ds = _step9.value;
+                                                        for (var _iterator9 = Data_Base.data.checkLists[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                                                                var checkListElement = _step9.value;
 
-                                                                if (_ds.id === id) folder = JSON.parse(JSON.stringify(_ds));
+                                                                if (checkListElement.id === id) checkList = JSON.parse(JSON.stringify(checkListElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError9 = true;
@@ -887,21 +930,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(folder.parent_id, folder.parent_type) + "\\" + folder.name + "\\";
+                                                return getPath(checkList.audit_id, 'audit') + "\\" + checkList.name;
                                         }
-                                case 'f':
+                                case 'dp':
                                         {
-                                                var file = void 0;
+                                                var dp = void 0;
 
                                                 var _iteratorNormalCompletion10 = true;
                                                 var _didIteratorError10 = false;
                                                 var _iteratorError10 = undefined;
 
                                                 try {
-                                                        for (var _iterator10 = Data_Base.data.fs[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-                                                                var f = _step10.value;
+                                                        for (var _iterator10 = Data_Base.data.dps[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                                                                var dpElement = _step10.value;
 
-                                                                if (f.id === id) file = JSON.parse(JSON.stringify(f));
+                                                                if (dpElement.id === id) dp = JSON.parse(JSON.stringify(dpElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError10 = true;
@@ -918,19 +961,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(file.parent_id, file.parent_type) + "\\" + file.name;
+                                                return getPath(dp.audit_id, 'audit') + "\\" + dp.name;
                                         }
-                                default:
+                                case 'nonC':
                                         {
+                                                var nc = void 0;
+
                                                 var _iteratorNormalCompletion11 = true;
                                                 var _didIteratorError11 = false;
                                                 var _iteratorError11 = undefined;
 
                                                 try {
-                                                        for (var _iterator11 = Data_Base.data.sections[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-                                                                var section = _step11.value;
+                                                        for (var _iterator11 = Data_Base.data.nonCs[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                                                                var ncElement = _step11.value;
 
-                                                                if (section.id === id) return section.name + ":\\";
+                                                                if (ncElement.id === id) nc = JSON.parse(JSON.stringify(ncElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError11 = true;
@@ -946,131 +991,145 @@ export default function useGetData(TheDatas) {
                                                                 }
                                                         }
                                                 }
+
+                                                return getPath(nc.audit_id, 'audit') + "\\" + nc.name;
+                                        }
+                                case 'fnc':
+                                        {
+                                                var fnc = void 0;
+
+                                                var _iteratorNormalCompletion12 = true;
+                                                var _didIteratorError12 = false;
+                                                var _iteratorError12 = undefined;
+
+                                                try {
+                                                        for (var _iterator12 = Data_Base.data.fncs[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+                                                                var fncElement = _step12.value;
+
+                                                                if (fncElement.id === id) fnc = JSON.parse(JSON.stringify(fncElement));
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError12 = true;
+                                                        _iteratorError12 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion12 && _iterator12.return) {
+                                                                        _iterator12.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError12) {
+                                                                        throw _iteratorError12;
+                                                                }
+                                                        }
+                                                }
+
+                                                return getPath(fnc.nc_id, 'nonC') + "\\" + fnc.name;
+                                        }
+                                case 'ds':
+                                        {
+                                                var folder = void 0;
+
+                                                var _iteratorNormalCompletion13 = true;
+                                                var _didIteratorError13 = false;
+                                                var _iteratorError13 = undefined;
+
+                                                try {
+                                                        for (var _iterator13 = Data_Base.data.ds[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+                                                                var _ds = _step13.value;
+
+                                                                if (_ds.id === id) folder = JSON.parse(JSON.stringify(_ds));
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError13 = true;
+                                                        _iteratorError13 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion13 && _iterator13.return) {
+                                                                        _iterator13.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError13) {
+                                                                        throw _iteratorError13;
+                                                                }
+                                                        }
+                                                }
+
+                                                return getPath(folder.parent_id, folder.parent_type) + "\\" + folder.name;
+                                        }
+                                case 'f':
+                                        {
+                                                var file = void 0;
+
+                                                var _iteratorNormalCompletion14 = true;
+                                                var _didIteratorError14 = false;
+                                                var _iteratorError14 = undefined;
+
+                                                try {
+                                                        for (var _iterator14 = Data_Base.data.fs[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+                                                                var f = _step14.value;
+
+                                                                if (f.id === id) file = JSON.parse(JSON.stringify(f));
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError14 = true;
+                                                        _iteratorError14 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion14 && _iterator14.return) {
+                                                                        _iterator14.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError14) {
+                                                                        throw _iteratorError14;
+                                                                }
+                                                        }
+                                                }
+
+                                                return getPath(file.parent_id, file.parent_type) + "\\" + file.name;
+                                        }
+                                default:
+                                        {
+                                                var _iteratorNormalCompletion15 = true;
+                                                var _didIteratorError15 = false;
+                                                var _iteratorError15 = undefined;
+
+                                                try {
+                                                        for (var _iterator15 = Data_Base.data.sections[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+                                                                var section = _step15.value;
+
+                                                                if (section.id === id) return section.name + ":";
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError15 = true;
+                                                        _iteratorError15 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion15 && _iterator15.return) {
+                                                                        _iterator15.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError15) {
+                                                                        throw _iteratorError15;
+                                                                }
+                                                        }
+                                                }
                                         }
                         }
                 };
 
                 // audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19)
-                var _iteratorNormalCompletion12 = true;
-                var _didIteratorError12 = false;
-                var _iteratorError12 = undefined;
-
-                try {
-                        for (var _iterator12 = audits[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-                                var audit = _step12.value;
-
-                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined));
-                        }
-
-                        // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
-                } catch (err) {
-                        _didIteratorError12 = true;
-                        _iteratorError12 = err;
-                } finally {
-                        try {
-                                if (!_iteratorNormalCompletion12 && _iterator12.return) {
-                                        _iterator12.return();
-                                }
-                        } finally {
-                                if (_didIteratorError12) {
-                                        throw _iteratorError12;
-                                }
-                        }
-                }
-
-                var _iteratorNormalCompletion13 = true;
-                var _didIteratorError13 = false;
-                var _iteratorError13 = undefined;
-
-                try {
-                        for (var _iterator13 = checkLists[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-                                var checkList = _step13.value;
-
-                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined));
-                        }
-
-                        // dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19)
-                } catch (err) {
-                        _didIteratorError13 = true;
-                        _iteratorError13 = err;
-                } finally {
-                        try {
-                                if (!_iteratorNormalCompletion13 && _iterator13.return) {
-                                        _iterator13.return();
-                                }
-                        } finally {
-                                if (_didIteratorError13) {
-                                        throw _iteratorError13;
-                                }
-                        }
-                }
-
-                var _iteratorNormalCompletion14 = true;
-                var _didIteratorError14 = false;
-                var _iteratorError14 = undefined;
-
-                try {
-                        for (var _iterator14 = dps[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-                                var dp = _step14.value;
-
-                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined));
-                        }
-
-                        // nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19)
-                } catch (err) {
-                        _didIteratorError14 = true;
-                        _iteratorError14 = err;
-                } finally {
-                        try {
-                                if (!_iteratorNormalCompletion14 && _iterator14.return) {
-                                        _iterator14.return();
-                                }
-                        } finally {
-                                if (_didIteratorError14) {
-                                        throw _iteratorError14;
-                                }
-                        }
-                }
-
-                var _iteratorNormalCompletion15 = true;
-                var _didIteratorError15 = false;
-                var _iteratorError15 = undefined;
-
-                try {
-                        for (var _iterator15 = nonCs[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-                                var nonC = _step15.value;
-
-                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined));
-                        }
-
-                        // fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19)
-                } catch (err) {
-                        _didIteratorError15 = true;
-                        _iteratorError15 = err;
-                } finally {
-                        try {
-                                if (!_iteratorNormalCompletion15 && _iterator15.return) {
-                                        _iterator15.return();
-                                }
-                        } finally {
-                                if (_didIteratorError15) {
-                                        throw _iteratorError15;
-                                }
-                        }
-                }
-
                 var _iteratorNormalCompletion16 = true;
                 var _didIteratorError16 = false;
                 var _iteratorError16 = undefined;
 
                 try {
-                        for (var _iterator16 = fncs[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-                                var fnc = _step16.value;
+                        for (var _iterator16 = audits[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+                                var audit = _step16.value;
 
-                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined));
                         }
 
-                        // f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19)
+                        // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError16 = true;
                         _iteratorError16 = err;
@@ -1091,13 +1150,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError17 = undefined;
 
                 try {
-                        for (var _iterator17 = fs[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-                                var f = _step17.value;
+                        for (var _iterator17 = checkLists[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+                                var checkList = _step17.value;
 
-                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url));
+                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined));
                         }
 
-                        // d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19)
+                        // dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError17 = true;
                         _iteratorError17 = err;
@@ -1118,13 +1177,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError18 = undefined;
 
                 try {
-                        for (var _iterator18 = ds[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-                                var d = _step18.value;
+                        for (var _iterator18 = dps[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+                                var dp = _step18.value;
 
-                                allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19), undefined, d.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined));
                         }
 
-                        // console.log("DataFormater", allDataAsNodeData)
+                        // nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError18 = true;
                         _iteratorError18 = err;
@@ -1140,29 +1199,18 @@ export default function useGetData(TheDatas) {
                         }
                 }
 
-                var structuredData = new Map();
-
-                var _loop = function _loop(section) {
-                        structuredData.set(section.id, allDataAsNodeData.filter(function (nodeData) {
-                                /*console.log(nodeData.section_id, section.id)*/;return nodeData.section_id === section.id || nodeData.section_id === -1;
-                        }).map(function (nodeData) {
-                                return nodeData;
-                        }));
-                };
-
                 var _iteratorNormalCompletion19 = true;
                 var _didIteratorError19 = false;
                 var _iteratorError19 = undefined;
 
                 try {
-                        for (var _iterator19 = Data_Base.data.sections[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-                                var section = _step19.value;
+                        for (var _iterator19 = nonCs[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+                                var nonC = _step19.value;
 
-                                _loop(section);
+                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined));
                         }
 
-                        // console.log(structuredData.get(1))
-
+                        // fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError19 = true;
                         _iteratorError19 = err;
@@ -1174,6 +1222,125 @@ export default function useGetData(TheDatas) {
                         } finally {
                                 if (_didIteratorError19) {
                                         throw _iteratorError19;
+                                }
+                        }
+                }
+
+                var _iteratorNormalCompletion20 = true;
+                var _didIteratorError20 = false;
+                var _iteratorError20 = undefined;
+
+                try {
+                        for (var _iterator20 = fncs[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+                                var fnc = _step20.value;
+
+                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined));
+                        }
+
+                        // f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19)
+                } catch (err) {
+                        _didIteratorError20 = true;
+                        _iteratorError20 = err;
+                } finally {
+                        try {
+                                if (!_iteratorNormalCompletion20 && _iterator20.return) {
+                                        _iterator20.return();
+                                }
+                        } finally {
+                                if (_didIteratorError20) {
+                                        throw _iteratorError20;
+                                }
+                        }
+                }
+
+                var _iteratorNormalCompletion21 = true;
+                var _didIteratorError21 = false;
+                var _iteratorError21 = undefined;
+
+                try {
+                        for (var _iterator21 = fs[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+                                var f = _step21.value;
+
+                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url));
+                        }
+
+                        // d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19)
+                } catch (err) {
+                        _didIteratorError21 = true;
+                        _iteratorError21 = err;
+                } finally {
+                        try {
+                                if (!_iteratorNormalCompletion21 && _iterator21.return) {
+                                        _iterator21.return();
+                                }
+                        } finally {
+                                if (_didIteratorError21) {
+                                        throw _iteratorError21;
+                                }
+                        }
+                }
+
+                var _iteratorNormalCompletion22 = true;
+                var _didIteratorError22 = false;
+                var _iteratorError22 = undefined;
+
+                try {
+                        for (var _iterator22 = ds[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
+                                var d = _step22.value;
+
+                                allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19), undefined, d.section_id, undefined, undefined));
+                        }
+
+                        // console.log("DataFormater", allDataAsNodeData)
+                } catch (err) {
+                        _didIteratorError22 = true;
+                        _iteratorError22 = err;
+                } finally {
+                        try {
+                                if (!_iteratorNormalCompletion22 && _iterator22.return) {
+                                        _iterator22.return();
+                                }
+                        } finally {
+                                if (_didIteratorError22) {
+                                        throw _iteratorError22;
+                                }
+                        }
+                }
+
+                var structuredData = new Map();
+
+                var _loop = function _loop(section) {
+                        structuredData.set(section.id, allDataAsNodeData.filter(function (nodeData) {
+                                /*console.log(nodeData.section_id, section.id)*/;return nodeData.section_id === section.id || nodeData.section_id === -1;
+                        }).map(function (nodeData) {
+                                return nodeData;
+                        }));
+                };
+
+                var _iteratorNormalCompletion23 = true;
+                var _didIteratorError23 = false;
+                var _iteratorError23 = undefined;
+
+                try {
+                        for (var _iterator23 = Data_Base.data.sections[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
+                                var section = _step23.value;
+
+                                _loop(section);
+                        }
+
+                        // console.log(structuredData.get(1))
+
+                } catch (err) {
+                        _didIteratorError23 = true;
+                        _iteratorError23 = err;
+                } finally {
+                        try {
+                                if (!_iteratorNormalCompletion23 && _iterator23.return) {
+                                        _iterator23.return();
+                                }
+                        } finally {
+                                if (_didIteratorError23) {
+                                        throw _iteratorError23;
                                 }
                         }
                 }
@@ -1381,7 +1548,15 @@ export default function useGetData(TheDatas) {
                                         console.log('updatedNode', updatedNode);
 
                                         var _newState = state.map(function (node) {
-                                                return node.id === updatedNode.id ? updatedNode : node;
+                                                if (node.id === updatedNode.id) {
+                                                        updatedNode.path = getNewPath(updatedNode, state, true);
+
+                                                        return updatedNode;
+                                                } else if (node.parentId === updatedNode.id) {
+                                                        node.path = getNewPath(node, state, true);
+
+                                                        return node;
+                                                } else return node;
                                         });
 
                                         // EventsManager.emit('updateData')
@@ -1389,6 +1564,28 @@ export default function useGetData(TheDatas) {
                                         console.log('newState', _newState);
 
                                         return JSON.parse(JSON.stringify(_newState));
+                                }
+                        case 'move':
+                                {
+                                        var _data3 = action.data;
+
+                                        dispatch({ type: 'update', data: _data3 });
+
+                                        var moved_node = _data3.node[0];
+
+                                        var _newState2 = state.map(function (node) {
+                                                if (node.id === _data3.node_type + moved_node.id) {
+                                                        node.path = getNewPath(node, state);
+
+                                                        return node;
+                                                } else if (node.parentId === _data3.node_type + moved_node.id) {
+                                                        node.path = getNewPath(node, state);
+                                                }
+                                        });
+
+                                        console.log('newState', _newState2);
+
+                                        return JSON.parse(JSON.stringify(_newState2));
                                 }
 
                         default:
@@ -1453,27 +1650,27 @@ export default function useGetData(TheDatas) {
                         }));
                 };
 
-                var _iteratorNormalCompletion20 = true;
-                var _didIteratorError20 = false;
-                var _iteratorError20 = undefined;
+                var _iteratorNormalCompletion24 = true;
+                var _didIteratorError24 = false;
+                var _iteratorError24 = undefined;
 
                 try {
-                        for (var _iterator20 = Data_Base.data.sections[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-                                var section = _step20.value;
+                        for (var _iterator24 = Data_Base.data.sections[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
+                                var section = _step24.value;
 
                                 _loop2(section);
                         }
                 } catch (err) {
-                        _didIteratorError20 = true;
-                        _iteratorError20 = err;
+                        _didIteratorError24 = true;
+                        _iteratorError24 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion20 && _iterator20.return) {
-                                        _iterator20.return();
+                                if (!_iteratorNormalCompletion24 && _iterator24.return) {
+                                        _iterator24.return();
                                 }
                         } finally {
-                                if (_didIteratorError20) {
-                                        throw _iteratorError20;
+                                if (_didIteratorError24) {
+                                        throw _iteratorError24;
                                 }
                         }
                 }
@@ -1513,52 +1710,52 @@ export default function useGetData(TheDatas) {
                 var img = ["jpeg", "jpg", "png", "gif"];
                 var vid = ["mp4", "avi", "MOV", "mpeg"];
 
-                var _iteratorNormalCompletion21 = true;
-                var _didIteratorError21 = false;
-                var _iteratorError21 = undefined;
+                var _iteratorNormalCompletion25 = true;
+                var _didIteratorError25 = false;
+                var _iteratorError25 = undefined;
 
                 try {
-                        for (var _iterator21 = img[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
-                                var imgExt = _step21.value;
+                        for (var _iterator25 = img[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
+                                var imgExt = _step25.value;
 
                                 if (imgExt === ext) return "img";
                         }
                 } catch (err) {
-                        _didIteratorError21 = true;
-                        _iteratorError21 = err;
+                        _didIteratorError25 = true;
+                        _iteratorError25 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion21 && _iterator21.return) {
-                                        _iterator21.return();
+                                if (!_iteratorNormalCompletion25 && _iterator25.return) {
+                                        _iterator25.return();
                                 }
                         } finally {
-                                if (_didIteratorError21) {
-                                        throw _iteratorError21;
+                                if (_didIteratorError25) {
+                                        throw _iteratorError25;
                                 }
                         }
                 }
 
-                var _iteratorNormalCompletion22 = true;
-                var _didIteratorError22 = false;
-                var _iteratorError22 = undefined;
+                var _iteratorNormalCompletion26 = true;
+                var _didIteratorError26 = false;
+                var _iteratorError26 = undefined;
 
                 try {
-                        for (var _iterator22 = vid[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
-                                var vidExt = _step22.value;
+                        for (var _iterator26 = vid[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
+                                var vidExt = _step26.value;
 
                                 if (vidExt === ext) return "vid";
                         }
                 } catch (err) {
-                        _didIteratorError22 = true;
-                        _iteratorError22 = err;
+                        _didIteratorError26 = true;
+                        _iteratorError26 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion22 && _iterator22.return) {
-                                        _iterator22.return();
+                                if (!_iteratorNormalCompletion26 && _iterator26.return) {
+                                        _iterator26.return();
                                 }
                         } finally {
-                                if (_didIteratorError22) {
-                                        throw _iteratorError22;
+                                if (_didIteratorError26) {
+                                        throw _iteratorError26;
                                 }
                         }
                 }
@@ -1567,13 +1764,13 @@ export default function useGetData(TheDatas) {
         }
 
         function getNodeData(id) {
-                var _iteratorNormalCompletion23 = true;
-                var _didIteratorError23 = false;
-                var _iteratorError23 = undefined;
+                var _iteratorNormalCompletion27 = true;
+                var _didIteratorError27 = false;
+                var _iteratorError27 = undefined;
 
                 try {
-                        for (var _iterator23 = displayingSection[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
-                                var node = _step23.value;
+                        for (var _iterator27 = displayingSection[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
+                                var node = _step27.value;
 
                                 // console.log(node.id)
                                 if (id === node.id) {
@@ -1581,16 +1778,16 @@ export default function useGetData(TheDatas) {
                                 }
                         }
                 } catch (err) {
-                        _didIteratorError23 = true;
-                        _iteratorError23 = err;
+                        _didIteratorError27 = true;
+                        _iteratorError27 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion23 && _iterator23.return) {
-                                        _iterator23.return();
+                                if (!_iteratorNormalCompletion27 && _iterator27.return) {
+                                        _iterator27.return();
                                 }
                         } finally {
-                                if (_didIteratorError23) {
-                                        throw _iteratorError23;
+                                if (_didIteratorError27) {
+                                        throw _iteratorError27;
                                 }
                         }
                 }
@@ -1612,29 +1809,29 @@ export default function useGetData(TheDatas) {
 
         function getChildren(nodeId) {
                 var children = [];
-                var _iteratorNormalCompletion24 = true;
-                var _didIteratorError24 = false;
-                var _iteratorError24 = undefined;
+                var _iteratorNormalCompletion28 = true;
+                var _didIteratorError28 = false;
+                var _iteratorError28 = undefined;
 
                 try {
-                        for (var _iterator24 = displayingSection[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
-                                var nodeData = _step24.value;
+                        for (var _iterator28 = displayingSection[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
+                                var nodeData = _step28.value;
 
                                 if (nodeData.parentId === nodeId) {
                                         children.push(nodeData);
                                 }
                         }
                 } catch (err) {
-                        _didIteratorError24 = true;
-                        _iteratorError24 = err;
+                        _didIteratorError28 = true;
+                        _iteratorError28 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion24 && _iterator24.return) {
-                                        _iterator24.return();
+                                if (!_iteratorNormalCompletion28 && _iterator28.return) {
+                                        _iterator28.return();
                                 }
                         } finally {
-                                if (_didIteratorError24) {
-                                        throw _iteratorError24;
+                                if (_didIteratorError28) {
+                                        throw _iteratorError28;
                                 }
                         }
                 }
@@ -1843,13 +2040,6 @@ export default function useGetData(TheDatas) {
                         )
                 );
         }, []);
-
-        var sections = new Map();
-        Data_Base.data.sections.map(function (section) {
-                var sct = JSON.parse(JSON.stringify(section));
-                // console.log(sct)
-                sections.set(sct.id, Object.assign({}, sct, { selectedNodeIdInSection: 0 }));
-        });
         // console.log(sections)
 
 

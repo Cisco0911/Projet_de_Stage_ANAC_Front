@@ -35,13 +35,14 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
 import { HiSaveAs } from 'react-icons/hi';
-import { VscSaveAs } from 'react-icons/vsc';
+import { FaPaste } from 'react-icons/fa';
 
 import { Formik, useFormik } from 'formik';
 import * as yup from 'yup';
 
 import DatePicker from "react-datepicker";
 import Stack from "@mui/material/Stack";
+import { IconButton } from "@mui/material";
 
 var previousSelected = [];
 
@@ -204,9 +205,16 @@ export default function FileTable(_ref) {
             selectedRow = _useState8[0],
             setSelectedRows = _useState8[1];
 
-        var selectedRowsByClick = useRef([]);
         var justChecking = useRef(false);
-        var rowNumClick = useRef(0);
+
+        var _useState9 = useState('none'),
+            _useState10 = _slicedToArray(_useState9, 2),
+            mc_state = _useState10[0],
+            setMc_state = _useState10[1];
+
+        var _ref2 = [useRef([]), useRef(0)],
+            to_move_or_copy = _ref2[0],
+            clear_clipboard_id = _ref2[1];
 
         // useEffect(
         //     () =>
@@ -232,7 +240,7 @@ export default function FileTable(_ref) {
                         console.log('clearSelected');setSelectedRows([]);setNumber(0);
                 });
                 Global_State.EventsManager.on('setSelectedNode', function () {
-                        var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(data) {
+                        var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(data) {
                                 return _regeneratorRuntime.wrap(function _callee$(_context) {
                                         while (1) {
                                                 switch (_context.prev = _context.next) {
@@ -251,7 +259,7 @@ export default function FileTable(_ref) {
                         }));
 
                         return function (_x) {
-                                return _ref2.apply(this, arguments);
+                                return _ref3.apply(this, arguments);
                         };
                 }());
                 return function () {
@@ -260,33 +268,329 @@ export default function FileTable(_ref) {
                 };
         }, []);
 
+        var Paste_component = useCallback(function Paste_component() {
+                var paste_here = function () {
+                        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(node) {
+                                var d, destination_id, destination_type, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, node_to_move, queryData;
+
+                                return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                                        while (1) {
+                                                switch (_context2.prev = _context2.next) {
+                                                        case 0:
+                                                                d = Global_State.identifyNode(JSON.parse(JSON.stringify(node)));
+                                                                destination_id = d[0];
+                                                                destination_type = d[1];
+
+                                                                // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy.current)
+
+                                                                _iteratorNormalCompletion = true;
+                                                                _didIteratorError = false;
+                                                                _iteratorError = undefined;
+                                                                _context2.prev = 6;
+                                                                _iterator = to_move_or_copy.current[Symbol.iterator]();
+
+                                                        case 8:
+                                                                if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+                                                                        _context2.next = 25;
+                                                                        break;
+                                                                }
+
+                                                                node_to_move = _step.value;
+
+                                                                if (!(node_to_move.type === 'ds')) {
+                                                                        _context2.next = 22;
+                                                                        break;
+                                                                }
+
+                                                                queryData = new FormData();
+
+
+                                                                queryData.append('destination_id', destination_id);
+                                                                queryData.append('destination_type', destination_type);
+                                                                queryData.append('id', node_to_move.id);
+
+                                                                // console.log('arriiiiiiiiiiiiiveeee')
+
+                                                                _context2.next = 17;
+                                                                return http.post('move_folder', queryData).then(function (res) {
+                                                                        console.log(res);
+                                                                }).catch(function (err) {
+                                                                        console.log(err);throw err;
+                                                                });
+
+                                                        case 17:
+
+                                                                clearTimeout(clear_clipboard_id.current);
+
+                                                                to_move_or_copy.current = [];
+                                                                setMc_state('none');
+                                                                _context2.next = 22;
+                                                                break;
+
+                                                        case 22:
+                                                                _iteratorNormalCompletion = true;
+                                                                _context2.next = 8;
+                                                                break;
+
+                                                        case 25:
+                                                                _context2.next = 31;
+                                                                break;
+
+                                                        case 27:
+                                                                _context2.prev = 27;
+                                                                _context2.t0 = _context2['catch'](6);
+                                                                _didIteratorError = true;
+                                                                _iteratorError = _context2.t0;
+
+                                                        case 31:
+                                                                _context2.prev = 31;
+                                                                _context2.prev = 32;
+
+                                                                if (!_iteratorNormalCompletion && _iterator.return) {
+                                                                        _iterator.return();
+                                                                }
+
+                                                        case 34:
+                                                                _context2.prev = 34;
+
+                                                                if (!_didIteratorError) {
+                                                                        _context2.next = 37;
+                                                                        break;
+                                                                }
+
+                                                                throw _iteratorError;
+
+                                                        case 37:
+                                                                return _context2.finish(34);
+
+                                                        case 38:
+                                                                return _context2.finish(31);
+
+                                                        case 39:
+                                                        case 'end':
+                                                                return _context2.stop();
+                                                }
+                                        }
+                                }, _callee2, this, [[6, 27, 31, 39], [32,, 34, 38]]);
+                        }));
+
+                        return function paste_here(_x2) {
+                                return _ref4.apply(this, arguments);
+                        };
+                }();
+
+                return React.createElement(
+                        IconButton,
+                        {
+                                disabled: mc_state === 'none',
+                                style: { marginRight: 20 },
+                                onClick: function onClick(e) {
+                                        console.log(to_move_or_copy.current, node.id);
+
+                                        toast.promise(paste_here(node), {
+                                                loading: 'Pasting...',
+                                                success: 'Processus achevé',
+                                                error: 'err'
+                                        }, {
+                                                id: 'Pasting'
+                                                // duration: Infinity
+                                        });
+                                }
+                        },
+                        React.createElement(FaPaste, { size: 25, color: '' + (mc_state === 'none' ? '' : 'blue') })
+                );
+        }, [node, mc_state]);
+
+        function handle_to_move_or_copy(operation_type, nodes) {
+                var move_to = function () {
+                        var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3(node) {
+                                var d, destination_id, destination_type, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, node_to_move, id, queryData;
+
+                                return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+                                        while (1) {
+                                                switch (_context3.prev = _context3.next) {
+                                                        case 0:
+                                                                d = Global_State.identifyNode(JSON.parse(JSON.stringify(node)));
+                                                                destination_id = d[0];
+                                                                destination_type = d[1];
+
+                                                                // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy)
+
+                                                                _iteratorNormalCompletion2 = true;
+                                                                _didIteratorError2 = false;
+                                                                _iteratorError2 = undefined;
+                                                                _context3.prev = 6;
+                                                                _iterator2 = to_move_or_copy[Symbol.iterator]();
+
+                                                        case 8:
+                                                                if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
+                                                                        _context3.next = 23;
+                                                                        break;
+                                                                }
+
+                                                                node_to_move = _step2.value;
+
+                                                                if (!(node_to_move.type === 'ds')) {
+                                                                        _context3.next = 20;
+                                                                        break;
+                                                                }
+
+                                                                id = Global_State.identifyNode(node_to_move)[0];
+                                                                queryData = new FormData();
+
+
+                                                                queryData.append('destination_id', destination_id);
+                                                                queryData.append('destination_type', destination_type);
+                                                                queryData.append('id', id);
+
+                                                                // console.log('arriiiiiiiiiiiiiveeee')
+
+                                                                _context3.next = 18;
+                                                                return http.post('move_folder', queryData).then(function (res) {
+                                                                        console.log(res);
+                                                                }).catch(function (err) {
+                                                                        console.log(err);throw err;
+                                                                });
+
+                                                        case 18:
+                                                                _context3.next = 20;
+                                                                break;
+
+                                                        case 20:
+                                                                _iteratorNormalCompletion2 = true;
+                                                                _context3.next = 8;
+                                                                break;
+
+                                                        case 23:
+                                                                _context3.next = 29;
+                                                                break;
+
+                                                        case 25:
+                                                                _context3.prev = 25;
+                                                                _context3.t0 = _context3['catch'](6);
+                                                                _didIteratorError2 = true;
+                                                                _iteratorError2 = _context3.t0;
+
+                                                        case 29:
+                                                                _context3.prev = 29;
+                                                                _context3.prev = 30;
+
+                                                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                                                        _iterator2.return();
+                                                                }
+
+                                                        case 32:
+                                                                _context3.prev = 32;
+
+                                                                if (!_didIteratorError2) {
+                                                                        _context3.next = 35;
+                                                                        break;
+                                                                }
+
+                                                                throw _iteratorError2;
+
+                                                        case 35:
+                                                                return _context3.finish(32);
+
+                                                        case 36:
+                                                                return _context3.finish(29);
+
+                                                        case 37:
+                                                        case 'end':
+                                                                return _context3.stop();
+                                                }
+                                        }
+                                }, _callee3, this, [[6, 25, 29, 37], [30,, 32, 36]]);
+                        }));
+
+                        return function move_to(_x3) {
+                                return _ref5.apply(this, arguments);
+                        };
+                }();
+
+                var to_move_or_copy = nodes.map(function (row) {
+                        return JSON.parse(JSON.stringify(Global_State.getNodeDataById(row.id)));
+                });
+
+                toast(function (t) {
+                        return React.createElement(
+                                'div',
+                                { style: { width: 'max-content' } },
+                                React.createElement(
+                                        Stack,
+                                        { spacing: 2, direction: 'row',
+                                                sx: {
+                                                        display: 'flex',
+                                                        justifyContent: 'center',
+                                                        position: 'relative',
+                                                        alignItems: 'center'
+                                                }
+                                        },
+                                        React.createElement(
+                                                Button,
+                                                { variant: 'light', onClick: function onClick() {
+                                                                console.log(operation_type, to_move_or_copy[0].id);
+
+                                                                toast.promise(move_to(node), {
+                                                                        loading: 'Moving...',
+                                                                        success: 'Processus achevé',
+                                                                        error: 'err'
+                                                                }, {
+                                                                        id: 'Moving'
+                                                                        // duration: Infinity
+                                                                });
+                                                        } },
+                                                operation_type.toUpperCase()
+                                        ),
+                                        React.createElement(
+                                                Button,
+                                                { variant: 'danger', onClick: function onClick() {
+                                                                toast.dismiss(operation_type);
+                                                        } },
+                                                'DISCARD'
+                                        )
+                                )
+                        );
+                }, {
+                        id: operation_type,
+                        position: "bottom-right",
+                        duration: Infinity,
+                        style: {
+                                // width: '1700px',
+                                border: '1px solid #0062ff',
+                                padding: '16px',
+                                color: '#0062ff'
+                        }
+                });
+        }
+
         function add(thing_to_add) {
                 // filtre de service
                 var canAddToService = function canAddToService(authService) {
                         var services = node.isRoot ? Global_State.getCurrentSection().services : node.services;
 
-                        var _iteratorNormalCompletion = true;
-                        var _didIteratorError = false;
-                        var _iteratorError = undefined;
+                        var _iteratorNormalCompletion3 = true;
+                        var _didIteratorError3 = false;
+                        var _iteratorError3 = undefined;
 
                         try {
-                                for (var _iterator = services[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                                        var elementService = _step.value;
+                                for (var _iterator3 = services[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                                        var elementService = _step3.value;
 
                                         // console.log(authService.id, elementService.id)
                                         if (authService.id === parseInt(elementService.id)) return true;
                                 }
                         } catch (err) {
-                                _didIteratorError = true;
-                                _iteratorError = err;
+                                _didIteratorError3 = true;
+                                _iteratorError3 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion && _iterator.return) {
-                                                _iterator.return();
+                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                                _iterator3.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError) {
-                                                throw _iteratorError;
+                                        if (_didIteratorError3) {
+                                                throw _iteratorError3;
                                         }
                                 }
                         }
@@ -304,8 +608,8 @@ export default function FileTable(_ref) {
                 });
 
                 // composant de selection de service
-                var SelectServices = function SelectServices(_ref3) {
-                        var updateMethod = _ref3.updateMethod;
+                var SelectServices = function SelectServices(_ref6) {
+                        var updateMethod = _ref6.updateMethod;
 
                         // console.log(servicesList)
                         // console.log(options)
@@ -877,15 +1181,15 @@ export default function FileTable(_ref) {
                                         // console.log(queryBody.get("name"))
                                 };
 
-                                var _useState9 = useState(1),
-                                    _useState10 = _slicedToArray(_useState9, 2),
-                                    min = _useState10[0],
-                                    setMin = _useState10[1];
-
-                                var _useState11 = useState(false),
+                                var _useState11 = useState(1),
                                     _useState12 = _slicedToArray(_useState11, 2),
-                                    enableEnd = _useState12[0],
-                                    setEndState = _useState12[1];
+                                    min = _useState12[0],
+                                    setMin = _useState12[1];
+
+                                var _useState13 = useState(false),
+                                    _useState14 = _slicedToArray(_useState13, 2),
+                                    enableEnd = _useState14[0],
+                                    setEndState = _useState14[1];
 
                                 var validationRules = yup.object().shape({
                                         debut: yup.number().required("Le champs doit être rempli").positive("la valeur doit être positive").integer("Les décimaux sont invalide"),
@@ -1370,60 +1674,77 @@ export default function FileTable(_ref) {
                                                         'Voir les Details'
                                                 ) : null,
                                                 React.createElement(
-                                                        'i',
+                                                        'option',
                                                         { className: 'dropdown-item' },
                                                         'Partager'
                                                 ),
                                                 React.createElement(
-                                                        'i',
+                                                        'option',
                                                         { className: 'dropdown-item' },
                                                         'T\xE9l\xE9charger'
                                                 ),
                                                 React.createElement(
-                                                        'i',
+                                                        'option',
                                                         { className: 'dropdown-item' },
                                                         'Copier vers'
                                                 ),
                                                 React.createElement(
-                                                        'i',
-                                                        { className: 'dropdown-item' },
+                                                        'option',
+                                                        { className: 'dropdown-item',
+                                                                onClick: function onClick(e) {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+
+                                                                        clearTimeout(clear_clipboard_id.current);
+
+                                                                        clear_clipboard_id.current = setTimeout(function () {
+                                                                                setMc_state('none');to_move_or_copy.current = [];
+                                                                        }, 2 * 60000);
+
+                                                                        to_move_or_copy.current = selectedRow.map(function (row) {
+                                                                                return { id: Global_State.identifyNode(row)[0], type: row.type };
+                                                                        });
+
+                                                                        setMc_state('move');
+                                                                }
+                                                        },
                                                         'D\xE9placer vers'
                                                 ),
                                                 selectedRowNumber === 1 ? React.createElement(
-                                                        'i',
+                                                        'option',
                                                         { className: 'dropdown-item' },
                                                         'Renommer'
                                                 ) : null,
                                                 React.createElement(
-                                                        'i',
+                                                        'option',
                                                         { className: 'dropdown-item', onClick: function onClick(e) {
                                                                         // http.delete("")
 
                                                                         var remove = function () {
-                                                                                var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
-                                                                                        return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+                                                                                var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
+                                                                                        return _regeneratorRuntime.wrap(function _callee5$(_context5) {
                                                                                                 while (1) {
-                                                                                                        switch (_context3.prev = _context3.next) {
+                                                                                                        switch (_context5.prev = _context5.next) {
                                                                                                                 case 0:
-                                                                                                                        _context3.next = 2;
+                                                                                                                        _context5.next = 2;
                                                                                                                         return Promise.all(selectedRow.map(function () {
-                                                                                                                                var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(row) {
+                                                                                                                                var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(row) {
                                                                                                                                         var nodeIdentity;
-                                                                                                                                        return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                                                                                                                                        return _regeneratorRuntime.wrap(function _callee4$(_context4) {
                                                                                                                                                 while (1) {
-                                                                                                                                                        switch (_context2.prev = _context2.next) {
+                                                                                                                                                        switch (_context4.prev = _context4.next) {
                                                                                                                                                                 case 0:
                                                                                                                                                                         // console.log(Global_State.identifyNode(row))
                                                                                                                                                                         nodeIdentity = Global_State.identifyNode(row);
                                                                                                                                                                         // const [ id, type ] = Global_State.identifyNode(row)
 
                                                                                                                                                                         console.log(selectedRow);
-                                                                                                                                                                        _context2.t0 = row.type;
-                                                                                                                                                                        _context2.next = _context2.t0 === 'audit' ? 5 : _context2.t0 === 'checkList' ? 8 : _context2.t0 === 'dp' ? 9 : _context2.t0 === 'nonC' ? 10 : _context2.t0 === 'fnc' ? 11 : _context2.t0 === 'ds' ? 14 : _context2.t0 === 'f' ? 17 : 20;
+                                                                                                                                                                        _context4.t0 = row.type;
+                                                                                                                                                                        _context4.next = _context4.t0 === 'audit' ? 5 : _context4.t0 === 'checkList' ? 8 : _context4.t0 === 'dp' ? 9 : _context4.t0 === 'nonC' ? 10 : _context4.t0 === 'fnc' ? 11 : _context4.t0 === 'ds' ? 14 : _context4.t0 === 'f' ? 17 : 20;
                                                                                                                                                                         break;
 
                                                                                                                                                                 case 5:
-                                                                                                                                                                        _context2.next = 7;
+                                                                                                                                                                        _context4.next = 7;
                                                                                                                                                                         return http.delete('del_audit?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -1435,19 +1756,19 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 7:
-                                                                                                                                                                        return _context2.abrupt('break', 21);
+                                                                                                                                                                        return _context4.abrupt('break', 21);
 
                                                                                                                                                                 case 8:
-                                                                                                                                                                        return _context2.abrupt('break', 21);
+                                                                                                                                                                        return _context4.abrupt('break', 21);
 
                                                                                                                                                                 case 9:
-                                                                                                                                                                        return _context2.abrupt('break', 21);
+                                                                                                                                                                        return _context4.abrupt('break', 21);
 
                                                                                                                                                                 case 10:
-                                                                                                                                                                        return _context2.abrupt('break', 21);
+                                                                                                                                                                        return _context4.abrupt('break', 21);
 
                                                                                                                                                                 case 11:
-                                                                                                                                                                        _context2.next = 13;
+                                                                                                                                                                        _context4.next = 13;
                                                                                                                                                                         return http.delete('del_fnc?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -1459,10 +1780,10 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 13:
-                                                                                                                                                                        return _context2.abrupt('break', 21);
+                                                                                                                                                                        return _context4.abrupt('break', 21);
 
                                                                                                                                                                 case 14:
-                                                                                                                                                                        _context2.next = 16;
+                                                                                                                                                                        _context4.next = 16;
                                                                                                                                                                         return http.delete('del_folder?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -1474,10 +1795,10 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 16:
-                                                                                                                                                                        return _context2.abrupt('break', 21);
+                                                                                                                                                                        return _context4.abrupt('break', 21);
 
                                                                                                                                                                 case 17:
-                                                                                                                                                                        _context2.next = 19;
+                                                                                                                                                                        _context4.next = 19;
                                                                                                                                                                         return http.delete('del_file?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -1489,21 +1810,21 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 19:
-                                                                                                                                                                        return _context2.abrupt('break', 21);
+                                                                                                                                                                        return _context4.abrupt('break', 21);
 
                                                                                                                                                                 case 20:
-                                                                                                                                                                        return _context2.abrupt('break', 21);
+                                                                                                                                                                        return _context4.abrupt('break', 21);
 
                                                                                                                                                                 case 21:
                                                                                                                                                                 case 'end':
-                                                                                                                                                                        return _context2.stop();
+                                                                                                                                                                        return _context4.stop();
                                                                                                                                                         }
                                                                                                                                                 }
-                                                                                                                                        }, _callee2, _this);
+                                                                                                                                        }, _callee4, _this);
                                                                                                                                 }));
 
-                                                                                                                                return function (_x2) {
-                                                                                                                                        return _ref5.apply(this, arguments);
+                                                                                                                                return function (_x4) {
+                                                                                                                                        return _ref8.apply(this, arguments);
                                                                                                                                 };
                                                                                                                         }()
 
@@ -1513,14 +1834,14 @@ export default function FileTable(_ref) {
 
                                                                                                                 case 2:
                                                                                                                 case 'end':
-                                                                                                                        return _context3.stop();
+                                                                                                                        return _context5.stop();
                                                                                                         }
                                                                                                 }
-                                                                                        }, _callee3, _this);
+                                                                                        }, _callee5, _this);
                                                                                 }));
 
                                                                                 return function remove() {
-                                                                                        return _ref4.apply(this, arguments);
+                                                                                        return _ref7.apply(this, arguments);
                                                                                 };
                                                                         }();
 
@@ -1647,52 +1968,52 @@ export default function FileTable(_ref) {
                         var img = ["jpeg", "jpg", "png", "gif"];
                         var vid = ["mp4", "avi", "MOV", "mpeg"];
 
-                        var _iteratorNormalCompletion2 = true;
-                        var _didIteratorError2 = false;
-                        var _iteratorError2 = undefined;
+                        var _iteratorNormalCompletion4 = true;
+                        var _didIteratorError4 = false;
+                        var _iteratorError4 = undefined;
 
                         try {
-                                for (var _iterator2 = img[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                                        var imgExt = _step2.value;
+                                for (var _iterator4 = img[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                                        var imgExt = _step4.value;
 
                                         if (imgExt === ext) return "img";
                                 }
                         } catch (err) {
-                                _didIteratorError2 = true;
-                                _iteratorError2 = err;
+                                _didIteratorError4 = true;
+                                _iteratorError4 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                                                _iterator2.return();
+                                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                                                _iterator4.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError2) {
-                                                throw _iteratorError2;
+                                        if (_didIteratorError4) {
+                                                throw _iteratorError4;
                                         }
                                 }
                         }
 
-                        var _iteratorNormalCompletion3 = true;
-                        var _didIteratorError3 = false;
-                        var _iteratorError3 = undefined;
+                        var _iteratorNormalCompletion5 = true;
+                        var _didIteratorError5 = false;
+                        var _iteratorError5 = undefined;
 
                         try {
-                                for (var _iterator3 = vid[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                                        var vidExt = _step3.value;
+                                for (var _iterator5 = vid[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                                        var vidExt = _step5.value;
 
                                         if (vidExt === ext) return "vid";
                                 }
                         } catch (err) {
-                                _didIteratorError3 = true;
-                                _iteratorError3 = err;
+                                _didIteratorError5 = true;
+                                _iteratorError5 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                                                _iterator3.return();
+                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                                                _iterator5.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError3) {
-                                                throw _iteratorError3;
+                                        if (_didIteratorError5) {
+                                                throw _iteratorError5;
                                         }
                                 }
                         }
@@ -1701,9 +2022,9 @@ export default function FileTable(_ref) {
                 }
 
                 function TypeIcon(props) {
-                        var _ref6 = [props.data, props.iconSize],
-                            data = _ref6[0],
-                            iconSize = _ref6[1];
+                        var _ref9 = [props.data, props.iconSize],
+                            data = _ref9[0],
+                            iconSize = _ref9[1];
 
                         if (data.global_type === "folder") {
                                 return React.createElement(FcFolder, { size: iconSize });
@@ -1828,8 +2149,8 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var LevelComponent = function LevelComponent(_ref7) {
-                        var data = _ref7.data;
+                var LevelComponent = function LevelComponent(_ref10) {
+                        var data = _ref10.data;
 
                         // const [niv, setNiv] = useState(level)
 
@@ -1885,12 +2206,12 @@ export default function FileTable(_ref) {
 
                                 if (!Global_State.isEditorMode) {
                                         var update = function () {
-                                                var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4() {
-                                                        return _regeneratorRuntime.wrap(function _callee4$(_context4) {
+                                                var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee6() {
+                                                        return _regeneratorRuntime.wrap(function _callee6$(_context6) {
                                                                 while (1) {
-                                                                        switch (_context4.prev = _context4.next) {
+                                                                        switch (_context6.prev = _context6.next) {
                                                                                 case 0:
-                                                                                        _context4.next = 2;
+                                                                                        _context6.next = 2;
                                                                                         return http.post('update_fnc', query).then(function (res) {
                                                                                                 console.log(res);
                                                                                         }).catch(function (err) {
@@ -1899,14 +2220,14 @@ export default function FileTable(_ref) {
 
                                                                                 case 2:
                                                                                 case 'end':
-                                                                                        return _context4.stop();
+                                                                                        return _context6.stop();
                                                                         }
                                                                 }
-                                                        }, _callee4, _this2);
+                                                        }, _callee6, _this2);
                                                 }));
 
                                                 return function update() {
-                                                        return _ref8.apply(this, arguments);
+                                                        return _ref11.apply(this, arguments);
                                                 };
                                         }();
 
@@ -1928,8 +2249,8 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var ReviewDateComponenr = function ReviewDateComponenr(_ref9) {
-                        var data = _ref9.data;
+                var ReviewDateComponenr = function ReviewDateComponenr(_ref12) {
+                        var data = _ref12.data;
 
                         var value = data.review_date ? data.review_date : '____/__/__';
 
@@ -1937,13 +2258,13 @@ export default function FileTable(_ref) {
                                 e.stopPropagation();
                                 console.log("review date handle click");
 
-                                var Date_input = function Date_input(_ref10) {
-                                        var data = _ref10.data;
+                                var Date_input = function Date_input(_ref13) {
+                                        var data = _ref13.data;
 
 
-                                        var CustomInput = forwardRef(function (_ref11, ref) {
-                                                var value = _ref11.value,
-                                                    onClick = _ref11.onClick;
+                                        var CustomInput = forwardRef(function (_ref14, ref) {
+                                                var value = _ref14.value,
+                                                    onClick = _ref14.onClick;
                                                 return React.createElement(
                                                         Stack,
                                                         { direction: 'row', sx: { width: 'fit-content', backgroundColor: 'whitesmoke' } },
@@ -1965,10 +2286,10 @@ export default function FileTable(_ref) {
                                                 );
                                         });
 
-                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref12) {
-                                                var date = _ref12.date,
-                                                    value = _ref12.value,
-                                                    onChange = _ref12.onChange;
+                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref15) {
+                                                var date = _ref15.date,
+                                                    value = _ref15.value,
+                                                    onChange = _ref15.onChange;
 
 
                                                 var validationRules = yup.object().shape({
@@ -2050,10 +2371,10 @@ export default function FileTable(_ref) {
                                                 );
                                         }, []);
 
-                                        var _useState13 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
-                                            _useState14 = _slicedToArray(_useState13, 2),
-                                            startDate = _useState14[0],
-                                            setStartDate = _useState14[1];
+                                        var _useState15 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
+                                            _useState16 = _slicedToArray(_useState15, 2),
+                                            startDate = _useState16[0],
+                                            setStartDate = _useState16[1];
 
                                         var new_review_date = startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate() + ' ' + startDate.getHours() + ':' + startDate.getMinutes();
                                         console.log('new_review_date', new_review_date, e);
@@ -2091,12 +2412,12 @@ export default function FileTable(_ref) {
 
                                                 if (!Global_State.isEditorMode) {
                                                         var update = function () {
-                                                                var _ref13 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
-                                                                        return _regeneratorRuntime.wrap(function _callee5$(_context5) {
+                                                                var _ref16 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee7() {
+                                                                        return _regeneratorRuntime.wrap(function _callee7$(_context7) {
                                                                                 while (1) {
-                                                                                        switch (_context5.prev = _context5.next) {
+                                                                                        switch (_context7.prev = _context7.next) {
                                                                                                 case 0:
-                                                                                                        _context5.next = 2;
+                                                                                                        _context7.next = 2;
                                                                                                         return http.post('update_fnc', query).then(function (res) {
                                                                                                                 console.log(res);
                                                                                                         }).catch(function (err) {
@@ -2105,14 +2426,14 @@ export default function FileTable(_ref) {
 
                                                                                                 case 2:
                                                                                                 case 'end':
-                                                                                                        return _context5.stop();
+                                                                                                        return _context7.stop();
                                                                                         }
                                                                                 }
-                                                                        }, _callee5, _this);
+                                                                        }, _callee7, _this);
                                                                 }));
 
                                                                 return function update() {
-                                                                        return _ref13.apply(this, arguments);
+                                                                        return _ref16.apply(this, arguments);
                                                                 };
                                                         }();
 
@@ -2193,13 +2514,13 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var _iteratorNormalCompletion4 = true;
-                var _didIteratorError4 = false;
-                var _iteratorError4 = undefined;
+                var _iteratorNormalCompletion6 = true;
+                var _didIteratorError6 = false;
+                var _iteratorError6 = undefined;
 
                 try {
-                        for (var _iterator4 = node.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                                var child_node = _step4.value;
+                        for (var _iterator6 = node.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                                var child_node = _step6.value;
 
                                 // console.log('child_node.id', child_node)
                                 var data = child_node; // Global_State.getNodeDataById(child_node.id)
@@ -2231,16 +2552,16 @@ export default function FileTable(_ref) {
                                 });
                         }
                 } catch (err) {
-                        _didIteratorError4 = true;
-                        _iteratorError4 = err;
+                        _didIteratorError6 = true;
+                        _iteratorError6 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                                        _iterator4.return();
+                                if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                                        _iterator6.return();
                                 }
                         } finally {
-                                if (_didIteratorError4) {
-                                        throw _iteratorError4;
+                                if (_didIteratorError6) {
+                                        throw _iteratorError6;
                                 }
                         }
                 }
@@ -2252,12 +2573,12 @@ export default function FileTable(_ref) {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref14 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref14[0],
-                            listB = _ref14[1];
-                        var _ref15 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref15[0],
-                            b = _ref15[1];
+                        var _ref17 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref17[0],
+                            listB = _ref17[1];
+                        var _ref18 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref18[0],
+                            b = _ref18[1];
 
 
                         if (a > b) {
@@ -2530,15 +2851,15 @@ export default function FileTable(_ref) {
                 }
         }];
 
-        var SearchComponent = useCallback(function SearchComponent(_ref16) {
-                var set = _ref16.set,
-                    filter = _ref16.filter,
-                    node = _ref16.node;
+        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref19) {
+                var set = _ref19.set,
+                    filter = _ref19.filter,
+                    node = _ref19.node;
 
 
-                var FilterComponent = useCallback(function FilterComponent(_ref17) {
-                        var set = _ref17.set,
-                            filter = _ref17.filter;
+                var FilterComponent = useCallback(function FilterComponent(_ref20) {
+                        var set = _ref20.set,
+                            filter = _ref20.filter;
 
                         switch (filter.tag) {
                                 case 'la Date de creation':
@@ -2641,12 +2962,20 @@ export default function FileTable(_ref) {
                 return React.createElement(
                         'div',
                         { className: 'd-flex flex-row align-items-end' },
-                        node.isRoot ? React.createElement(IoArrowUndoOutline, { size: 25, style: { marginRight: 20 } }) : React.createElement(IoArrowUndoSharp, { onClick: function onClick(e) {
-                                        e.preventDefault();Global_State.backend.setCurrentSelectedFolder(previousSelected.pop());
-                                }, size: 25, style: { marginRight: 20 } }),
+                        React.createElement(Paste_component, null),
+                        React.createElement(
+                                IconButton,
+                                { style: { marginRight: 20 },
+                                        disabled: node.isRoot,
+                                        onClick: function onClick(e) {
+                                                e.preventDefault();Global_State.backend.setCurrentSelectedFolder(previousSelected.pop());
+                                        }
+                                },
+                                node.isRoot ? React.createElement(IoArrowUndoOutline, { size: 25 }) : React.createElement(IoArrowUndoSharp, { size: 25, color: "black" })
+                        ),
                         React.createElement(FilterComponent, { set: set, filter: filter, node: node })
                 );
-        }, []);
+        }, [node, mc_state]);
 
         var filtered_datas = useMemo(function () {
                 return datas.filter(function (row) {
@@ -2739,9 +3068,9 @@ export default function FileTable(_ref) {
                         , selectableRowSelected: function selectableRowSelected(row) {
                                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                         },
-                        onSelectedRowsChange: function onSelectedRowsChange(_ref18) {
-                                var selectedCount = _ref18.selectedCount,
-                                    selectedRows = _ref18.selectedRows;
+                        onSelectedRowsChange: function onSelectedRowsChange(_ref21) {
+                                var selectedCount = _ref21.selectedCount,
+                                    selectedRows = _ref21.selectedRows;
                                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                         },
                         clearSelectedRows: Global_State.toggleCleared,
@@ -2767,7 +3096,7 @@ export default function FileTable(_ref) {
                         persistTableHead: true,
                         noHeader: true,
                         subHeader: true,
-                        subHeaderComponent: React.createElement(SearchComponent, { set: setFilter, filter: filter, node: node }),
+                        subHeaderComponent: React.createElement(SubHeaderComponent, { set: setFilter, filter: filter, node: node }),
                         noDataComponent: React.createElement(
                                 'div',
                                 { style: { textAlign: "center", marginTop: 100 } },

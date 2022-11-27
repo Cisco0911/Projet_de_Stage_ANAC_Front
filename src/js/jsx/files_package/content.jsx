@@ -29,13 +29,14 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
 import {HiSaveAs} from 'react-icons/hi'
-import {VscSaveAs} from 'react-icons/vsc'
+import {FaPaste} from 'react-icons/fa'
 
 import { Formik, useFormik } from 'formik';
 import * as yup from 'yup'
 
 import DatePicker from "react-datepicker";
 import Stack from "@mui/material/Stack";
+import {IconButton} from "@mui/material";
 
 
 
@@ -170,9 +171,11 @@ export default function FileTable({set})
 
         const [selectedRowNumber, setNumber] = useState(0)
         const [selectedRow, setSelectedRows] = useState([])
-        const selectedRowsByClick = useRef([])
         const justChecking = useRef(false)
-        const rowNumClick = useRef(0)
+
+        const [mc_state, setMc_state] = useState('none')
+        const [to_move_or_copy, clear_clipboard_id] = [useRef([]), useRef(0)]
+
 
 
         // useEffect(
@@ -207,6 +210,184 @@ export default function FileTable({set})
         },
         []
         )
+
+        const Paste_component = useCallback(
+                function Paste_component()
+                {
+
+                        async function paste_here(node)
+                        {
+                                const d = Global_State.identifyNode( JSON.parse( JSON.stringify(node) ) )
+                                const destination_id = d[0]; const destination_type = d[1]
+
+                                // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy.current)
+
+                                for (const node_to_move of to_move_or_copy.current)
+                                {
+
+                                        // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
+                                        if (node_to_move.type === 'ds')
+                                        {
+
+                                                const queryData = new FormData
+
+                                                queryData.append('destination_id', destination_id)
+                                                queryData.append('destination_type', destination_type)
+                                                queryData.append('id', node_to_move.id)
+
+                                                // console.log('arriiiiiiiiiiiiiveeee')
+
+                                                await http.post('move_folder', queryData)
+                                                .then( res => { console.log(res) } )
+                                                .catch( err => { console.log(err); throw err} )
+
+                                                clearTimeout(clear_clipboard_id.current)
+
+                                                to_move_or_copy.current = []
+                                                setMc_state('none')
+                                        }
+                                        else
+                                        {
+
+                                        }
+                                }
+
+                        }
+
+                        return (
+                                <IconButton
+                                        disabled={mc_state === 'none'}
+                                        style = {{ marginRight: 20, }}
+                                        onClick={
+                                                e =>
+                                                {
+                                                        console.log(to_move_or_copy.current, node.id)
+
+                                                        toast.promise(
+                                                                paste_here(node),
+                                                                {
+                                                                        loading: 'Pasting...',
+                                                                        success: 'Processus achevé',
+                                                                        error: 'err'
+                                                                },
+                                                                {
+                                                                        id: 'Pasting',
+                                                                        // duration: Infinity
+                                                                }
+                                                        )
+                                                }
+                                        }
+                                >
+                                        <FaPaste size={25} color={`${mc_state === 'none'? '' : 'blue'}`} />
+                                </IconButton>
+                        )
+
+                }, [node, mc_state]
+        )
+
+        function handle_to_move_or_copy(operation_type, nodes)
+        {
+                const to_move_or_copy = nodes.map(
+                        row =>
+                        (
+                                JSON.parse(JSON.stringify( Global_State.getNodeDataById(row.id) ))
+                        )
+                )
+
+                async function move_to(node)
+                {
+                        const d = Global_State.identifyNode( JSON.parse( JSON.stringify(node) ) )
+                        const destination_id = d[0]; const destination_type = d[1]
+
+                        // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy)
+
+                        for (const node_to_move of to_move_or_copy)
+                        {
+
+                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
+                                if (node_to_move.type === 'ds')
+                                {
+                                        const id = Global_State.identifyNode( node_to_move )[0]
+
+                                        const queryData = new FormData
+
+                                        queryData.append('destination_id', destination_id)
+                                        queryData.append('destination_type', destination_type)
+                                        queryData.append('id', id)
+
+                                        // console.log('arriiiiiiiiiiiiiveeee')
+
+                                        await http.post('move_folder', queryData)
+                                        .then( res => { console.log(res) } )
+                                        .catch( err => { console.log(err); throw err} )
+                                }
+                                else
+                                {
+
+                                }
+                        }
+
+                }
+
+
+                toast((t) => (
+                        <div style={{ width: 'max-content' }} >
+                                <Stack spacing={2} direction = {'row'}
+                                       sx = {
+                                               {
+                                                       display: 'flex',
+                                                       justifyContent: 'center',
+                                                       position: 'relative',
+                                                       alignItems: 'center',
+                                               }
+                                       }
+                                >
+                                        <Button variant="light" onClick={() =>
+                                                {
+                                                        console.log(operation_type, to_move_or_copy[0].id)
+
+                                                        toast.promise(
+                                                        move_to(node),
+                                                        {
+                                                                loading: 'Moving...',
+                                                                success: 'Processus achevé',
+                                                                error: 'err'
+                                                        },
+                                                        {
+                                                                id: 'Moving',
+                                                                // duration: Infinity
+                                                        }
+                                                        )
+
+
+                                                }
+                                        }>
+                                                {operation_type.toUpperCase()}
+                                        </Button>
+                                        <Button   variant="danger" onClick={() =>
+                                        {
+                                                toast.dismiss(operation_type)
+                                        }
+                                        }>
+                                                DISCARD
+                                        </Button>
+                                </Stack>
+                        </div>
+                ),
+                {
+                        id: operation_type,
+                        position: "bottom-right",
+                        duration: Infinity,
+                        style: {
+                                // width: '1700px',
+                                border: '1px solid #0062ff',
+                                padding: '16px',
+                                color: '#0062ff',
+                        },
+                }
+                );
+
+        }
 
         function add(thing_to_add)
         {
@@ -1197,15 +1378,36 @@ export default function FileTable({set})
                                                                 selectedRowNumber === 1 ?
                                                                 <i onClick = {() => { Global_State.EventsManager.emit('viewDetailEnabled', selectedRow[0]); }} className="dropdown-item" data-sidebar-target="#view-detail">Voir les Details</i> : null
                                                         }
-                                                        <i className="dropdown-item">Partager</i>
-                                                        <i className="dropdown-item">Télécharger</i>
-                                                        <i className="dropdown-item">Copier vers</i>
-                                                        <i className="dropdown-item">Déplacer vers</i>
+                                                        <option className="dropdown-item">Partager</option>
+                                                        <option className="dropdown-item">Télécharger</option>
+                                                        <option className="dropdown-item">Copier vers</option>
+                                                        <option className="dropdown-item"
+                                                                onClick={
+                                                                        e =>
+                                                                        {
+                                                                                e.preventDefault()
+                                                                                e.stopPropagation()
+
+                                                                                clearTimeout(clear_clipboard_id.current)
+
+                                                                                clear_clipboard_id.current =
+                                                                                setTimeout(
+                                                                                () => { setMc_state('none'); to_move_or_copy.current = [] }, 2*60000
+                                                                                )
+
+                                                                                to_move_or_copy.current = selectedRow.map(
+                                                                                row => ({id: Global_State.identifyNode(row)[0], type: row.type})
+                                                                                )
+
+                                                                                setMc_state('move')
+                                                                        }
+                                                                }
+                                                        >Déplacer vers</option>
                                                         {
                                                                 selectedRowNumber === 1 ?
-                                                                <i className="dropdown-item">Renommer</i> : null
+                                                                <option className="dropdown-item">Renommer</option> : null
                                                         }
-                                                        <i className="dropdown-item" onClick = { e =>
+                                                        <option className="dropdown-item" onClick = { e =>
                                                         {
                                                                 // http.delete("")
 
@@ -1385,7 +1587,7 @@ export default function FileTable({set})
                                                                 }
                                                                 else localRemove()
 
-                                                        } } >Supprimer</i>
+                                                        } } >Supprimer</option>
                                                 </div>
                                         </li>
                                 }
@@ -2279,8 +2481,8 @@ export default function FileTable({set})
         ]
 
 
-        const SearchComponent = useCallback(
-                function SearchComponent({set, filter, node})
+        const SubHeaderComponent = useCallback(
+                function SubHeaderComponent({set, filter, node})
                 {
 
                         const FilterComponent = useCallback(
@@ -2364,12 +2566,21 @@ export default function FileTable({set})
 
                         return (
                         <div className={'d-flex flex-row align-items-end'} >
-                                {node.isRoot ? <IoArrowUndoOutline size={25} style = {{ marginRight: 20, }} /> :
-                                <IoArrowUndoSharp onClick={ (e) => { e.preventDefault(); Global_State.backend.setCurrentSelectedFolder(previousSelected.pop()) } }  size={25} style = {{ marginRight: 20, }}  />}
+                                <Paste_component />
+                                <IconButton  style = {{ marginRight: 20, }}
+                                             disabled={node.isRoot}
+                                             onClick={ (e) => { e.preventDefault(); Global_State.backend.setCurrentSelectedFolder(previousSelected.pop()) } }
+                                >
+                                        {
+                                                node.isRoot ?
+                                                <IoArrowUndoOutline size={25} /> :
+                                                <IoArrowUndoSharp size={25} color={"black"} />
+                                        }
+                                </IconButton>
                                 <FilterComponent set={set} filter={filter} node={node} />
                         </div>
                         )
-                }, []
+                }, [node, mc_state]
         )
 
 
@@ -2502,7 +2713,7 @@ export default function FileTable({set})
                 persistTableHead = {true}
                 noHeader
                 subHeader
-                subHeaderComponent = { <SearchComponent set = {setFilter} filter={filter} node = {node}  /> }
+                subHeaderComponent = { <SubHeaderComponent set = {setFilter} filter={filter} node = {node}  /> }
                 noDataComponent = {<div style={{textAlign: "center", marginTop: 100}} > Vide 😢 </div>}
                 sortIcon = {<FaSort size={10} />}
                 defaultSortFieldId = {1}
