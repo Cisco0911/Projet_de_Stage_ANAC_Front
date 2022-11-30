@@ -588,6 +588,11 @@ export default function useGetData(TheDatas)
 
         const getNewPath = (new_node, all_nodes, to_update = false) =>
         {
+                if (new_node.type === 'root')
+                {
+                        return `${sections.get(new_node.section_id).name}:`
+                }
+
                 if (!to_update)
                 {
                         for (const node of all_nodes)
@@ -627,7 +632,13 @@ export default function useGetData(TheDatas)
 
                                 for (const node of  all_nodes)
                                 {
-                                        if(node.id === new_node.parentId) parent = JSON.parse(JSON.stringify(node))
+                                        if(node.id === new_node.parentId)
+                                        {
+                                                if (node.type === 'root') parent = { type: 'root', section_id: new_node.section_id }
+                                                else parent = JSON.parse(JSON.stringify(node))
+
+                                                break
+                                        }
                                 }
                                 // console.log('paaaaaaaaaaaaaath', new_node)
 
@@ -639,7 +650,13 @@ export default function useGetData(TheDatas)
 
                                 for (const node of  all_nodes)
                                 {
-                                        if(node.id === new_node.parentId) parent = JSON.parse(JSON.stringify(node))
+                                        if(node.id === new_node.parentId)
+                                        {
+                                                if (node.type === 'root') parent = { type: 'root', section_id: new_node.section_id }
+                                                else parent = JSON.parse(JSON.stringify(node))
+
+                                                break
+                                        }
                                 }
 
                                 return `${getNewPath(parent, all_nodes)}\\${new_node.name}`
@@ -1284,25 +1301,61 @@ export default function useGetData(TheDatas)
                                         {
                                                 if (node.id === updatedNode.id)
                                                 {
-                                                        updatedNode.path = getNewPath(updatedNode, state, true)
+                                                        // updatedNode.path = getNewPath(updatedNode, state, true)
 
                                                         return updatedNode
                                                 }
-                                                else if ( (node.parentId === updatedNode.id) )
-                                                {
-                                                        node.path = getNewPath(node, state, true)
-
-                                                        return node
-                                                }
-                                                else return node
+                                                // else if ( (node.parentId === updatedNode.id) )
+                                                // {
+                                                //         node.path = getNewPath(node, state, true)
+                                                //
+                                                //         return node
+                                                // }
+                                                return node
                                         }
                                 )
 
+                                const update_path = (node, current_state) =>
+                                {
+                                        let up_to_date_node = JSON.parse( JSON.stringify( node ) )
+
+                                        up_to_date_node.path = getNewPath(up_to_date_node, current_state, true)
+
+                                        console.log('current_state', current_state)
+
+                                        let new_state = JSON.parse( JSON.stringify( current_state ) ).map(
+                                                current_node =>
+                                                {
+                                                        if ( (current_node.id === up_to_date_node.id) ) return up_to_date_node
+                                                        return current_node
+                                                }
+                                        )
+
+                                        console.log('new_state', new_state)
+
+                                        let final_state = JSON.parse( JSON.stringify( new_state ) )
+
+                                        new_state.forEach(
+                                                new_node =>
+                                                {
+                                                        if ( (new_node.parentId === up_to_date_node.id) )
+                                                        {
+                                                                final_state = update_path(new_node, final_state)
+                                                        }
+                                                }
+                                        )
+
+                                        return final_state
+
+                                }
+
+                                const finalState = update_path(updatedNode, JSON.parse(JSON.stringify(newState)) )
+
                                 // EventsManager.emit('updateData')
 
-                                console.log('newState', newState)
+                                console.log('finalState', finalState)
 
-                                return JSON.parse(JSON.stringify(newState))
+                                return JSON.parse(JSON.stringify(finalState))
                         }
                         case 'move':
                         {
@@ -1510,20 +1563,21 @@ export default function useGetData(TheDatas)
 
         function useModalManager()
         {
-                const [content, setContent] = useState(null)
+                const [content, setContent] = useState(<div />)
                 const [show, setShow] = useState(false);
-                const [modal_title, setTitle] = useState("");
+                const modal_title = useRef("");
+                const can_close = useRef(true)
 
                 const modal =
                         <Modal
                                 show = {show}
-                                onHide = {() => {setShow(false)}}
+                                onHide = {() => { if (can_close.current) setShow(false) }}
                                 size = "lg"
                                 centered
                                 scrollable
                         >
-                                <Modal.Header closeButton >
-                                        <Modal.Title>{modal_title}</Modal.Title>
+                                <Modal.Header closeButton = {can_close.current} >
+                                        <Modal.Title>{modal_title.current}</Modal.Title>
                                 </Modal.Header>
 
                                 <Modal.Body style={
@@ -1541,7 +1595,7 @@ export default function useGetData(TheDatas)
                 return(
                         {
                                 modal,
-                                open_modal: (title)=>{ setTitle(title); setShow(true) },
+                                open_modal: (title, may_close = true)=>{ can_close.current = may_close; modal_title.current = title; setShow(true) },
                                 close_modal: ()=>{ setShow(false) },
                                 setContent,
                         }

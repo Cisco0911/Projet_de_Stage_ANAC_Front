@@ -43,6 +43,8 @@ import * as yup from 'yup';
 import DatePicker from "react-datepicker";
 import Stack from "@mui/material/Stack";
 import { IconButton } from "@mui/material";
+import ReactDOM from "react-dom/client";
+import { renderToStaticMarkup } from "react-dom/server";
 
 var previousSelected = [];
 
@@ -270,38 +272,45 @@ export default function FileTable(_ref) {
 
         var Paste_component = useCallback(function Paste_component() {
                 var paste_here = function () {
-                        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(node) {
-                                var d, destination_id, destination_type, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, node_to_move, queryData;
+                        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(node) {
+                                var _this2 = this;
 
-                                return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                                var destination_info, destination_id, destination_type, operation_type, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, node_to_move, queryData;
+
+                                return _regeneratorRuntime.wrap(function _callee4$(_context4) {
                                         while (1) {
-                                                switch (_context2.prev = _context2.next) {
+                                                switch (_context4.prev = _context4.next) {
                                                         case 0:
-                                                                d = Global_State.identifyNode(JSON.parse(JSON.stringify(node)));
-                                                                destination_id = d[0];
-                                                                destination_type = d[1];
+                                                                destination_info = Global_State.identifyNode(JSON.parse(JSON.stringify(node)));
+                                                                destination_id = destination_info[0];
+                                                                destination_type = destination_info[1];
 
                                                                 // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy.current)
+
+                                                                operation_type = mc_state;
+
+
+                                                                clearTimeout(clear_clipboard_id.current);
+                                                                setMc_state('none');
+
+                                                                if (!(operation_type === 'move')) {
+                                                                        _context4.next = 45;
+                                                                        break;
+                                                                }
 
                                                                 _iteratorNormalCompletion = true;
                                                                 _didIteratorError = false;
                                                                 _iteratorError = undefined;
-                                                                _context2.prev = 6;
+                                                                _context4.prev = 10;
                                                                 _iterator = to_move_or_copy.current[Symbol.iterator]();
 
-                                                        case 8:
+                                                        case 12:
                                                                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-                                                                        _context2.next = 25;
+                                                                        _context4.next = 29;
                                                                         break;
                                                                 }
 
                                                                 node_to_move = _step.value;
-
-                                                                if (!(node_to_move.type === 'ds')) {
-                                                                        _context2.next = 22;
-                                                                        break;
-                                                                }
-
                                                                 queryData = new FormData();
 
 
@@ -309,75 +318,443 @@ export default function FileTable(_ref) {
                                                                 queryData.append('destination_type', destination_type);
                                                                 queryData.append('id', node_to_move.id);
 
-                                                                // console.log('arriiiiiiiiiiiiiveeee')
+                                                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
 
-                                                                _context2.next = 17;
+                                                                if (!(node_to_move.type === 'ds')) {
+                                                                        _context4.next = 23;
+                                                                        break;
+                                                                }
+
+                                                                _context4.next = 21;
                                                                 return http.post('move_folder', queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 17:
-
-                                                                clearTimeout(clear_clipboard_id.current);
-
-                                                                to_move_or_copy.current = [];
-                                                                setMc_state('none');
-                                                                _context2.next = 22;
+                                                        case 21:
+                                                                _context4.next = 26;
                                                                 break;
 
-                                                        case 22:
+                                                        case 23:
+                                                                if (!(node_to_move.type === 'f')) {
+                                                                        _context4.next = 26;
+                                                                        break;
+                                                                }
+
+                                                                _context4.next = 26;
+                                                                return http.post('move_file', queryData).then(function (res) {
+                                                                        console.log(res);
+                                                                }).catch(function (err) {
+                                                                        console.log(err);throw err;
+                                                                });
+
+                                                        case 26:
                                                                 _iteratorNormalCompletion = true;
-                                                                _context2.next = 8;
+                                                                _context4.next = 12;
                                                                 break;
 
-                                                        case 25:
-                                                                _context2.next = 31;
+                                                        case 29:
+                                                                _context4.next = 35;
                                                                 break;
-
-                                                        case 27:
-                                                                _context2.prev = 27;
-                                                                _context2.t0 = _context2['catch'](6);
-                                                                _didIteratorError = true;
-                                                                _iteratorError = _context2.t0;
 
                                                         case 31:
-                                                                _context2.prev = 31;
-                                                                _context2.prev = 32;
+                                                                _context4.prev = 31;
+                                                                _context4.t0 = _context4['catch'](10);
+                                                                _didIteratorError = true;
+                                                                _iteratorError = _context4.t0;
+
+                                                        case 35:
+                                                                _context4.prev = 35;
+                                                                _context4.prev = 36;
 
                                                                 if (!_iteratorNormalCompletion && _iterator.return) {
                                                                         _iterator.return();
                                                                 }
 
-                                                        case 34:
-                                                                _context2.prev = 34;
+                                                        case 38:
+                                                                _context4.prev = 38;
 
                                                                 if (!_didIteratorError) {
-                                                                        _context2.next = 37;
+                                                                        _context4.next = 41;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError;
 
-                                                        case 37:
-                                                                return _context2.finish(34);
+                                                        case 41:
+                                                                return _context4.finish(38);
 
-                                                        case 38:
-                                                                return _context2.finish(31);
+                                                        case 42:
+                                                                return _context4.finish(35);
 
-                                                        case 39:
+                                                        case 43:
+                                                                _context4.next = 46;
+                                                                break;
+
+                                                        case 45:
+                                                                return _context4.delegateYield( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
+                                                                        var Save_for_rest, _loop, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, node_to_copy, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, _queryData, services, section;
+
+                                                                        return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+                                                                                while (1) {
+                                                                                        switch (_context3.prev = _context3.next) {
+                                                                                                case 0:
+                                                                                                        Save_for_rest = function Save_for_rest() {
+
+                                                                                                                return React.createElement(
+                                                                                                                        'div',
+                                                                                                                        { className: 'd-flex align-items-stretch' },
+                                                                                                                        React.createElement('input', { id: 'save_checkbox', type: 'checkbox',
+                                                                                                                                onChange: function onChange(e) {
+                                                                                                                                        // e.preventDefault()
+                                                                                                                                        console.log('e.target', e.target);
+                                                                                                                                        action.current = { saved: e.target.checked };
+                                                                                                                                }
+                                                                                                                        }),
+                                                                                                                        React.createElement(
+                                                                                                                                'label',
+                                                                                                                                { htmlFor: 'save_checkbox',
+                                                                                                                                        style: {
+                                                                                                                                                fontSize: 12,
+                                                                                                                                                display: "contents"
+                                                                                                                                        }
+                                                                                                                                },
+                                                                                                                                ' Enregistrer l\'action pour autres cas similaires '
+                                                                                                                        )
+                                                                                                                );
+                                                                                                        };
+
+                                                                                                        _loop = /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(node_to_copy) {
+                                                                                                                var _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _iterator4, _step4, child_node;
+
+                                                                                                                return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                                                                                                                        while (1) {
+                                                                                                                                switch (_context2.prev = _context2.next) {
+                                                                                                                                        case 0:
+                                                                                                                                                _iteratorNormalCompletion4 = true;
+                                                                                                                                                _didIteratorError4 = false;
+                                                                                                                                                _iteratorError4 = undefined;
+                                                                                                                                                _context2.prev = 3;
+                                                                                                                                                _iterator4 = node.children[Symbol.iterator]();
+
+                                                                                                                                        case 5:
+                                                                                                                                                if (_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done) {
+                                                                                                                                                        _context2.next = 17;
+                                                                                                                                                        break;
+                                                                                                                                                }
+
+                                                                                                                                                child_node = _step4.value;
+
+                                                                                                                                                if (!(child_node.name === node_to_copy.name)) {
+                                                                                                                                                        _context2.next = 14;
+                                                                                                                                                        break;
+                                                                                                                                                }
+
+                                                                                                                                                if (action.current.saved) {
+                                                                                                                                                        _context2.next = 13;
+                                                                                                                                                        break;
+                                                                                                                                                }
+
+                                                                                                                                                _context2.next = 11;
+                                                                                                                                                return new Promise(function (resolve) {
+                                                                                                                                                        var content = React.createElement(
+                                                                                                                                                                'div',
+                                                                                                                                                                null,
+                                                                                                                                                                React.createElement(
+                                                                                                                                                                        'div',
+                                                                                                                                                                        { className: 'mb-3' },
+                                                                                                                                                                        'La destination pourrait contenir un fichier de meme nom: ',
+                                                                                                                                                                        React.createElement('br', null),
+                                                                                                                                                                        React.createElement(
+                                                                                                                                                                                'span',
+                                                                                                                                                                                { style: { fontWeight: "bold" } },
+                                                                                                                                                                                ' ',
+                                                                                                                                                                                '' + node_to_copy.name,
+                                                                                                                                                                                ' '
+                                                                                                                                                                        )
+                                                                                                                                                                ),
+                                                                                                                                                                React.createElement(Save_for_rest, null),
+                                                                                                                                                                React.createElement(
+                                                                                                                                                                        'div',
+                                                                                                                                                                        { className: 'd-flex justify-content-end' },
+                                                                                                                                                                        React.createElement(
+                                                                                                                                                                                Button,
+                                                                                                                                                                                { className: 'mr-1', variant: 'outline-light', onClick: function onClick(e) {
+                                                                                                                                                                                                e.stopPropagation();resolve(1);
+                                                                                                                                                                                        } },
+                                                                                                                                                                                'IGNORER'
+                                                                                                                                                                        ),
+                                                                                                                                                                        React.createElement(
+                                                                                                                                                                                Button,
+                                                                                                                                                                                { className: 'mr-1', variant: 'outline-primary', onClick: function onClick(e) {
+                                                                                                                                                                                                e.stopPropagation();resolve(2);
+                                                                                                                                                                                        } },
+                                                                                                                                                                                'RENOMER'
+                                                                                                                                                                        ),
+                                                                                                                                                                        React.createElement(
+                                                                                                                                                                                Button,
+                                                                                                                                                                                { variant: 'outline-danger', onClick: function onClick(e) {
+                                                                                                                                                                                                e.stopPropagation();resolve(3);
+                                                                                                                                                                                        } },
+                                                                                                                                                                                'ECRASER'
+                                                                                                                                                                        )
+                                                                                                                                                                )
+                                                                                                                                                        );
+
+                                                                                                                                                        Global_State.modalManager.setContent(content);
+                                                                                                                                                        Global_State.modalManager.open_modal("Conflit de fichiers", false);
+                                                                                                                                                }).then(function (res) {
+                                                                                                                                                        console.log(res, action.current);
+                                                                                                                                                        node_to_copy['on_exist'] = res;
+                                                                                                                                                        if (action.current) action.current = Object.assign({}, action.current, { value: res });
+                                                                                                                                                });
+
+                                                                                                                                        case 11:
+                                                                                                                                                _context2.next = 14;
+                                                                                                                                                break;
+
+                                                                                                                                        case 13:
+                                                                                                                                                node_to_copy['on_exist'] = action.current.value;
+
+                                                                                                                                        case 14:
+                                                                                                                                                _iteratorNormalCompletion4 = true;
+                                                                                                                                                _context2.next = 5;
+                                                                                                                                                break;
+
+                                                                                                                                        case 17:
+                                                                                                                                                _context2.next = 23;
+                                                                                                                                                break;
+
+                                                                                                                                        case 19:
+                                                                                                                                                _context2.prev = 19;
+                                                                                                                                                _context2.t0 = _context2['catch'](3);
+                                                                                                                                                _didIteratorError4 = true;
+                                                                                                                                                _iteratorError4 = _context2.t0;
+
+                                                                                                                                        case 23:
+                                                                                                                                                _context2.prev = 23;
+                                                                                                                                                _context2.prev = 24;
+
+                                                                                                                                                if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                                                                                                                                                        _iterator4.return();
+                                                                                                                                                }
+
+                                                                                                                                        case 26:
+                                                                                                                                                _context2.prev = 26;
+
+                                                                                                                                                if (!_didIteratorError4) {
+                                                                                                                                                        _context2.next = 29;
+                                                                                                                                                        break;
+                                                                                                                                                }
+
+                                                                                                                                                throw _iteratorError4;
+
+                                                                                                                                        case 29:
+                                                                                                                                                return _context2.finish(26);
+
+                                                                                                                                        case 30:
+                                                                                                                                                return _context2.finish(23);
+
+                                                                                                                                        case 31:
+                                                                                                                                        case 'end':
+                                                                                                                                                return _context2.stop();
+                                                                                                                                }
+                                                                                                                        }
+                                                                                                                }, _callee2, _this2, [[3, 19, 23, 31], [24,, 26, 30]]);
+                                                                                                        });
+                                                                                                        _iteratorNormalCompletion2 = true;
+                                                                                                        _didIteratorError2 = false;
+                                                                                                        _iteratorError2 = undefined;
+                                                                                                        _context3.prev = 5;
+                                                                                                        _iterator2 = to_move_or_copy.current[Symbol.iterator]();
+
+                                                                                                case 7:
+                                                                                                        if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
+                                                                                                                _context3.next = 13;
+                                                                                                                break;
+                                                                                                        }
+
+                                                                                                        node_to_copy = _step2.value;
+                                                                                                        return _context3.delegateYield(_loop(node_to_copy), 't0', 10);
+
+                                                                                                case 10:
+                                                                                                        _iteratorNormalCompletion2 = true;
+                                                                                                        _context3.next = 7;
+                                                                                                        break;
+
+                                                                                                case 13:
+                                                                                                        _context3.next = 19;
+                                                                                                        break;
+
+                                                                                                case 15:
+                                                                                                        _context3.prev = 15;
+                                                                                                        _context3.t1 = _context3['catch'](5);
+                                                                                                        _didIteratorError2 = true;
+                                                                                                        _iteratorError2 = _context3.t1;
+
+                                                                                                case 19:
+                                                                                                        _context3.prev = 19;
+                                                                                                        _context3.prev = 20;
+
+                                                                                                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                                                                                                _iterator2.return();
+                                                                                                        }
+
+                                                                                                case 22:
+                                                                                                        _context3.prev = 22;
+
+                                                                                                        if (!_didIteratorError2) {
+                                                                                                                _context3.next = 25;
+                                                                                                                break;
+                                                                                                        }
+
+                                                                                                        throw _iteratorError2;
+
+                                                                                                case 25:
+                                                                                                        return _context3.finish(22);
+
+                                                                                                case 26:
+                                                                                                        return _context3.finish(19);
+
+                                                                                                case 27:
+
+                                                                                                        Global_State.modalManager.close_modal();
+                                                                                                        console.log('to_move_or_copy.current', to_move_or_copy.current);
+
+                                                                                                        _iteratorNormalCompletion3 = true;
+                                                                                                        _didIteratorError3 = false;
+                                                                                                        _iteratorError3 = undefined;
+                                                                                                        _context3.prev = 32;
+                                                                                                        _iterator3 = to_move_or_copy.current[Symbol.iterator]();
+
+                                                                                                case 34:
+                                                                                                        if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
+                                                                                                                _context3.next = 56;
+                                                                                                                break;
+                                                                                                        }
+
+                                                                                                        node_to_copy = _step3.value;
+                                                                                                        _queryData = new FormData();
+
+
+                                                                                                        _queryData.append('destination_id', destination_id);
+                                                                                                        _queryData.append('destination_type', destination_type);
+                                                                                                        _queryData.append('id', node_to_copy.id);
+                                                                                                        _queryData.append('on_exist', node_to_copy.on_exist ? node_to_copy.on_exist : '-1');
+                                                                                                        _queryData.append('section_id', Global_State.selectedSectionId);
+
+                                                                                                        services = void 0;
+
+                                                                                                        if (node.type === 'root') {
+                                                                                                                section = Global_State.sections.get(Global_State.selectedSectionId);
+
+
+                                                                                                                services = section.services.map(function (service) {
+                                                                                                                        return { value: service.id };
+                                                                                                                });
+                                                                                                        } else services = node.services.map(function (service) {
+                                                                                                                return { value: service.id };
+                                                                                                        });
+
+                                                                                                        _queryData.append('services', JSON.stringify(services));
+
+                                                                                                        // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
+
+                                                                                                        if (!(node_to_copy.type === 'ds')) {
+                                                                                                                _context3.next = 50;
+                                                                                                                break;
+                                                                                                        }
+
+                                                                                                        _context3.next = 48;
+                                                                                                        return http.post('copy_folder', _queryData).then(function (res) {
+                                                                                                                console.log(res);
+                                                                                                        }).catch(function (err) {
+                                                                                                                console.log(err);throw err;
+                                                                                                        });
+
+                                                                                                case 48:
+                                                                                                        _context3.next = 53;
+                                                                                                        break;
+
+                                                                                                case 50:
+                                                                                                        if (!(node_to_copy.type === 'f')) {
+                                                                                                                _context3.next = 53;
+                                                                                                                break;
+                                                                                                        }
+
+                                                                                                        _context3.next = 53;
+                                                                                                        return http.post('copy_file', _queryData).then(function (res) {
+                                                                                                                console.log(res);
+                                                                                                        }).catch(function (err) {
+                                                                                                                console.log(err);throw err;
+                                                                                                        });
+
+                                                                                                case 53:
+                                                                                                        _iteratorNormalCompletion3 = true;
+                                                                                                        _context3.next = 34;
+                                                                                                        break;
+
+                                                                                                case 56:
+                                                                                                        _context3.next = 62;
+                                                                                                        break;
+
+                                                                                                case 58:
+                                                                                                        _context3.prev = 58;
+                                                                                                        _context3.t2 = _context3['catch'](32);
+                                                                                                        _didIteratorError3 = true;
+                                                                                                        _iteratorError3 = _context3.t2;
+
+                                                                                                case 62:
+                                                                                                        _context3.prev = 62;
+                                                                                                        _context3.prev = 63;
+
+                                                                                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                                                                                                _iterator3.return();
+                                                                                                        }
+
+                                                                                                case 65:
+                                                                                                        _context3.prev = 65;
+
+                                                                                                        if (!_didIteratorError3) {
+                                                                                                                _context3.next = 68;
+                                                                                                                break;
+                                                                                                        }
+
+                                                                                                        throw _iteratorError3;
+
+                                                                                                case 68:
+                                                                                                        return _context3.finish(65);
+
+                                                                                                case 69:
+                                                                                                        return _context3.finish(62);
+
+                                                                                                case 70:
+                                                                                                case 'end':
+                                                                                                        return _context3.stop();
+                                                                                        }
+                                                                                }
+                                                                        }, _callee3, _this2, [[5, 15, 19, 27], [20,, 22, 26], [32, 58, 62, 70], [63,, 65, 69]]);
+                                                                })(), 't1', 46);
+
+                                                        case 46:
+
+                                                                to_move_or_copy.current = [];
+
+                                                        case 47:
                                                         case 'end':
-                                                                return _context2.stop();
+                                                                return _context4.stop();
                                                 }
                                         }
-                                }, _callee2, this, [[6, 27, 31, 39], [32,, 34, 38]]);
+                                }, _callee4, this, [[10, 31, 35, 43], [36,, 38, 42]]);
                         }));
 
                         return function paste_here(_x2) {
                                 return _ref4.apply(this, arguments);
                         };
                 }();
+
+                var action = useRef({});
 
                 return React.createElement(
                         IconButton,
@@ -392,8 +769,16 @@ export default function FileTable(_ref) {
                                                 success: 'Processus achevé',
                                                 error: 'err'
                                         }, {
-                                                id: 'Pasting'
-                                                // duration: Infinity
+                                                id: 'Pasting',
+                                                duration: Infinity
+                                        }).then(function (res) {
+                                                setTimeout(function () {
+                                                        toast.dismiss('Pasting');
+                                                }, 800);
+                                        }).catch(function (err) {
+                                                setTimeout(function () {
+                                                        toast.dismiss('Pasting');
+                                                }, 800);
                                         });
                                 }
                         },
@@ -401,196 +786,33 @@ export default function FileTable(_ref) {
                 );
         }, [node, mc_state]);
 
-        function handle_to_move_or_copy(operation_type, nodes) {
-                var move_to = function () {
-                        var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3(node) {
-                                var d, destination_id, destination_type, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, node_to_move, id, queryData;
-
-                                return _regeneratorRuntime.wrap(function _callee3$(_context3) {
-                                        while (1) {
-                                                switch (_context3.prev = _context3.next) {
-                                                        case 0:
-                                                                d = Global_State.identifyNode(JSON.parse(JSON.stringify(node)));
-                                                                destination_id = d[0];
-                                                                destination_type = d[1];
-
-                                                                // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy)
-
-                                                                _iteratorNormalCompletion2 = true;
-                                                                _didIteratorError2 = false;
-                                                                _iteratorError2 = undefined;
-                                                                _context3.prev = 6;
-                                                                _iterator2 = to_move_or_copy[Symbol.iterator]();
-
-                                                        case 8:
-                                                                if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-                                                                        _context3.next = 23;
-                                                                        break;
-                                                                }
-
-                                                                node_to_move = _step2.value;
-
-                                                                if (!(node_to_move.type === 'ds')) {
-                                                                        _context3.next = 20;
-                                                                        break;
-                                                                }
-
-                                                                id = Global_State.identifyNode(node_to_move)[0];
-                                                                queryData = new FormData();
-
-
-                                                                queryData.append('destination_id', destination_id);
-                                                                queryData.append('destination_type', destination_type);
-                                                                queryData.append('id', id);
-
-                                                                // console.log('arriiiiiiiiiiiiiveeee')
-
-                                                                _context3.next = 18;
-                                                                return http.post('move_folder', queryData).then(function (res) {
-                                                                        console.log(res);
-                                                                }).catch(function (err) {
-                                                                        console.log(err);throw err;
-                                                                });
-
-                                                        case 18:
-                                                                _context3.next = 20;
-                                                                break;
-
-                                                        case 20:
-                                                                _iteratorNormalCompletion2 = true;
-                                                                _context3.next = 8;
-                                                                break;
-
-                                                        case 23:
-                                                                _context3.next = 29;
-                                                                break;
-
-                                                        case 25:
-                                                                _context3.prev = 25;
-                                                                _context3.t0 = _context3['catch'](6);
-                                                                _didIteratorError2 = true;
-                                                                _iteratorError2 = _context3.t0;
-
-                                                        case 29:
-                                                                _context3.prev = 29;
-                                                                _context3.prev = 30;
-
-                                                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                                                                        _iterator2.return();
-                                                                }
-
-                                                        case 32:
-                                                                _context3.prev = 32;
-
-                                                                if (!_didIteratorError2) {
-                                                                        _context3.next = 35;
-                                                                        break;
-                                                                }
-
-                                                                throw _iteratorError2;
-
-                                                        case 35:
-                                                                return _context3.finish(32);
-
-                                                        case 36:
-                                                                return _context3.finish(29);
-
-                                                        case 37:
-                                                        case 'end':
-                                                                return _context3.stop();
-                                                }
-                                        }
-                                }, _callee3, this, [[6, 25, 29, 37], [30,, 32, 36]]);
-                        }));
-
-                        return function move_to(_x3) {
-                                return _ref5.apply(this, arguments);
-                        };
-                }();
-
-                var to_move_or_copy = nodes.map(function (row) {
-                        return JSON.parse(JSON.stringify(Global_State.getNodeDataById(row.id)));
-                });
-
-                toast(function (t) {
-                        return React.createElement(
-                                'div',
-                                { style: { width: 'max-content' } },
-                                React.createElement(
-                                        Stack,
-                                        { spacing: 2, direction: 'row',
-                                                sx: {
-                                                        display: 'flex',
-                                                        justifyContent: 'center',
-                                                        position: 'relative',
-                                                        alignItems: 'center'
-                                                }
-                                        },
-                                        React.createElement(
-                                                Button,
-                                                { variant: 'light', onClick: function onClick() {
-                                                                console.log(operation_type, to_move_or_copy[0].id);
-
-                                                                toast.promise(move_to(node), {
-                                                                        loading: 'Moving...',
-                                                                        success: 'Processus achevé',
-                                                                        error: 'err'
-                                                                }, {
-                                                                        id: 'Moving'
-                                                                        // duration: Infinity
-                                                                });
-                                                        } },
-                                                operation_type.toUpperCase()
-                                        ),
-                                        React.createElement(
-                                                Button,
-                                                { variant: 'danger', onClick: function onClick() {
-                                                                toast.dismiss(operation_type);
-                                                        } },
-                                                'DISCARD'
-                                        )
-                                )
-                        );
-                }, {
-                        id: operation_type,
-                        position: "bottom-right",
-                        duration: Infinity,
-                        style: {
-                                // width: '1700px',
-                                border: '1px solid #0062ff',
-                                padding: '16px',
-                                color: '#0062ff'
-                        }
-                });
-        }
-
         function add(thing_to_add) {
                 // filtre de service
                 var canAddToService = function canAddToService(authService) {
                         var services = node.isRoot ? Global_State.getCurrentSection().services : node.services;
 
-                        var _iteratorNormalCompletion3 = true;
-                        var _didIteratorError3 = false;
-                        var _iteratorError3 = undefined;
+                        var _iteratorNormalCompletion5 = true;
+                        var _didIteratorError5 = false;
+                        var _iteratorError5 = undefined;
 
                         try {
-                                for (var _iterator3 = services[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                                        var elementService = _step3.value;
+                                for (var _iterator5 = services[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                                        var elementService = _step5.value;
 
                                         // console.log(authService.id, elementService.id)
                                         if (authService.id === parseInt(elementService.id)) return true;
                                 }
                         } catch (err) {
-                                _didIteratorError3 = true;
-                                _iteratorError3 = err;
+                                _didIteratorError5 = true;
+                                _iteratorError5 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                                                _iterator3.return();
+                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                                                _iterator5.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError3) {
-                                                throw _iteratorError3;
+                                        if (_didIteratorError5) {
+                                                throw _iteratorError5;
                                         }
                                 }
                         }
@@ -608,8 +830,8 @@ export default function FileTable(_ref) {
                 });
 
                 // composant de selection de service
-                var SelectServices = function SelectServices(_ref6) {
-                        var updateMethod = _ref6.updateMethod;
+                var SelectServices = function SelectServices(_ref5) {
+                        var updateMethod = _ref5.updateMethod;
 
                         // console.log(servicesList)
                         // console.log(options)
@@ -1685,7 +1907,24 @@ export default function FileTable(_ref) {
                                                 ),
                                                 React.createElement(
                                                         'option',
-                                                        { className: 'dropdown-item' },
+                                                        { className: 'dropdown-item',
+                                                                onClick: function onClick(e) {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+
+                                                                        clearTimeout(clear_clipboard_id.current);
+
+                                                                        clear_clipboard_id.current = setTimeout(function () {
+                                                                                setMc_state('none');to_move_or_copy.current = [];
+                                                                        }, 2 * 60000);
+
+                                                                        to_move_or_copy.current = selectedRow.map(function (row) {
+                                                                                return { id: Global_State.identifyNode(row)[0], type: row.type, name: row.value };
+                                                                        });
+
+                                                                        setMc_state('copy');
+                                                                }
+                                                        },
                                                         'Copier vers'
                                                 ),
                                                 React.createElement(
@@ -1721,30 +1960,30 @@ export default function FileTable(_ref) {
                                                                         // http.delete("")
 
                                                                         var remove = function () {
-                                                                                var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
-                                                                                        return _regeneratorRuntime.wrap(function _callee5$(_context5) {
+                                                                                var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee6() {
+                                                                                        return _regeneratorRuntime.wrap(function _callee6$(_context6) {
                                                                                                 while (1) {
-                                                                                                        switch (_context5.prev = _context5.next) {
+                                                                                                        switch (_context6.prev = _context6.next) {
                                                                                                                 case 0:
-                                                                                                                        _context5.next = 2;
+                                                                                                                        _context6.next = 2;
                                                                                                                         return Promise.all(selectedRow.map(function () {
-                                                                                                                                var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(row) {
+                                                                                                                                var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5(row) {
                                                                                                                                         var nodeIdentity;
-                                                                                                                                        return _regeneratorRuntime.wrap(function _callee4$(_context4) {
+                                                                                                                                        return _regeneratorRuntime.wrap(function _callee5$(_context5) {
                                                                                                                                                 while (1) {
-                                                                                                                                                        switch (_context4.prev = _context4.next) {
+                                                                                                                                                        switch (_context5.prev = _context5.next) {
                                                                                                                                                                 case 0:
                                                                                                                                                                         // console.log(Global_State.identifyNode(row))
                                                                                                                                                                         nodeIdentity = Global_State.identifyNode(row);
                                                                                                                                                                         // const [ id, type ] = Global_State.identifyNode(row)
 
                                                                                                                                                                         console.log(selectedRow);
-                                                                                                                                                                        _context4.t0 = row.type;
-                                                                                                                                                                        _context4.next = _context4.t0 === 'audit' ? 5 : _context4.t0 === 'checkList' ? 8 : _context4.t0 === 'dp' ? 9 : _context4.t0 === 'nonC' ? 10 : _context4.t0 === 'fnc' ? 11 : _context4.t0 === 'ds' ? 14 : _context4.t0 === 'f' ? 17 : 20;
+                                                                                                                                                                        _context5.t0 = row.type;
+                                                                                                                                                                        _context5.next = _context5.t0 === 'audit' ? 5 : _context5.t0 === 'checkList' ? 8 : _context5.t0 === 'dp' ? 9 : _context5.t0 === 'nonC' ? 10 : _context5.t0 === 'fnc' ? 11 : _context5.t0 === 'ds' ? 14 : _context5.t0 === 'f' ? 17 : 20;
                                                                                                                                                                         break;
 
                                                                                                                                                                 case 5:
-                                                                                                                                                                        _context4.next = 7;
+                                                                                                                                                                        _context5.next = 7;
                                                                                                                                                                         return http.delete('del_audit?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -1756,19 +1995,19 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 7:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 8:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 9:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 10:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 11:
-                                                                                                                                                                        _context4.next = 13;
+                                                                                                                                                                        _context5.next = 13;
                                                                                                                                                                         return http.delete('del_fnc?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -1780,10 +2019,10 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 13:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 14:
-                                                                                                                                                                        _context4.next = 16;
+                                                                                                                                                                        _context5.next = 16;
                                                                                                                                                                         return http.delete('del_folder?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -1795,10 +2034,10 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 16:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 17:
-                                                                                                                                                                        _context4.next = 19;
+                                                                                                                                                                        _context5.next = 19;
                                                                                                                                                                         return http.delete('del_file?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -1810,21 +2049,21 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 19:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 20:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 21:
                                                                                                                                                                 case 'end':
-                                                                                                                                                                        return _context4.stop();
+                                                                                                                                                                        return _context5.stop();
                                                                                                                                                         }
                                                                                                                                                 }
-                                                                                                                                        }, _callee4, _this);
+                                                                                                                                        }, _callee5, _this);
                                                                                                                                 }));
 
-                                                                                                                                return function (_x4) {
-                                                                                                                                        return _ref8.apply(this, arguments);
+                                                                                                                                return function (_x3) {
+                                                                                                                                        return _ref7.apply(this, arguments);
                                                                                                                                 };
                                                                                                                         }()
 
@@ -1834,14 +2073,14 @@ export default function FileTable(_ref) {
 
                                                                                                                 case 2:
                                                                                                                 case 'end':
-                                                                                                                        return _context5.stop();
+                                                                                                                        return _context6.stop();
                                                                                                         }
                                                                                                 }
-                                                                                        }, _callee5, _this);
+                                                                                        }, _callee6, _this);
                                                                                 }));
 
                                                                                 return function remove() {
-                                                                                        return _ref7.apply(this, arguments);
+                                                                                        return _ref6.apply(this, arguments);
                                                                                 };
                                                                         }();
 
@@ -1893,9 +2132,16 @@ export default function FileTable(_ref) {
                                                                         // console.log(selectedRow[0].id.substring(2))
                                                                         if (!Global_State.isEditorMode) {
                                                                                 toast.promise(remove(), {
-                                                                                        loading: 'Loading...',
+                                                                                        loading: 'Suppressing...',
                                                                                         success: 'Processus achevé',
                                                                                         error: 'err'
+                                                                                }, {
+                                                                                        id: 'Suppressing',
+                                                                                        duration: Infinity
+                                                                                }).then(function (res) {
+                                                                                        setTimeout(function () {
+                                                                                                toast.dismiss('Suppressing');
+                                                                                        }, 800);
                                                                                 });
                                                                         } else localRemove();
                                                                 } },
@@ -1968,52 +2214,52 @@ export default function FileTable(_ref) {
                         var img = ["jpeg", "jpg", "png", "gif"];
                         var vid = ["mp4", "avi", "MOV", "mpeg"];
 
-                        var _iteratorNormalCompletion4 = true;
-                        var _didIteratorError4 = false;
-                        var _iteratorError4 = undefined;
+                        var _iteratorNormalCompletion6 = true;
+                        var _didIteratorError6 = false;
+                        var _iteratorError6 = undefined;
 
                         try {
-                                for (var _iterator4 = img[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                                        var imgExt = _step4.value;
+                                for (var _iterator6 = img[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                                        var imgExt = _step6.value;
 
                                         if (imgExt === ext) return "img";
                                 }
                         } catch (err) {
-                                _didIteratorError4 = true;
-                                _iteratorError4 = err;
+                                _didIteratorError6 = true;
+                                _iteratorError6 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                                                _iterator4.return();
+                                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                                                _iterator6.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError4) {
-                                                throw _iteratorError4;
+                                        if (_didIteratorError6) {
+                                                throw _iteratorError6;
                                         }
                                 }
                         }
 
-                        var _iteratorNormalCompletion5 = true;
-                        var _didIteratorError5 = false;
-                        var _iteratorError5 = undefined;
+                        var _iteratorNormalCompletion7 = true;
+                        var _didIteratorError7 = false;
+                        var _iteratorError7 = undefined;
 
                         try {
-                                for (var _iterator5 = vid[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                                        var vidExt = _step5.value;
+                                for (var _iterator7 = vid[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                                        var vidExt = _step7.value;
 
                                         if (vidExt === ext) return "vid";
                                 }
                         } catch (err) {
-                                _didIteratorError5 = true;
-                                _iteratorError5 = err;
+                                _didIteratorError7 = true;
+                                _iteratorError7 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                                                _iterator5.return();
+                                        if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                                                _iterator7.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError5) {
-                                                throw _iteratorError5;
+                                        if (_didIteratorError7) {
+                                                throw _iteratorError7;
                                         }
                                 }
                         }
@@ -2022,9 +2268,9 @@ export default function FileTable(_ref) {
                 }
 
                 function TypeIcon(props) {
-                        var _ref9 = [props.data, props.iconSize],
-                            data = _ref9[0],
-                            iconSize = _ref9[1];
+                        var _ref8 = [props.data, props.iconSize],
+                            data = _ref8[0],
+                            iconSize = _ref8[1];
 
                         if (data.global_type === "folder") {
                                 return React.createElement(FcFolder, { size: iconSize });
@@ -2077,7 +2323,11 @@ export default function FileTable(_ref) {
                                                                 Global_State.modalManager.open_modal("Apercu du fichier");
                                                         } });
                                         case "pdf":
-                                                return React.createElement(BsFillFileEarmarkPdfFill, { color: '#ad0b00', size: iconSize, onClick: function onClick(e) {
+                                                return React.createElement(BsFillFileEarmarkPdfFill, { color: '#ad0b00', size: iconSize,
+                                                        style: {
+                                                                pointerEvents: 'all'
+                                                        },
+                                                        onClick: function onClick(e) {
                                                                 console.log(data);
                                                                 Global_State.modalManager.setContent(React.createElement(
                                                                         'div',
@@ -2090,7 +2340,8 @@ export default function FileTable(_ref) {
                                                                         Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : React.createElement('embed', { src: data.url + "#toolbar=0&navpanes=0&scrollbar=0", width: 900, height: 400, type: 'application/pdf' })
                                                                 ));
                                                                 Global_State.modalManager.open_modal("Apercu du fichier");
-                                                        } });
+                                                        }
+                                                });
                                         case "xlsx":
                                                 return React.createElement(SiMicrosoftexcel, { color: '#1f6e43', size: iconSize });
                                         case "pptx":
@@ -2149,8 +2400,8 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var LevelComponent = function LevelComponent(_ref10) {
-                        var data = _ref10.data;
+                var LevelComponent = function LevelComponent(_ref9) {
+                        var data = _ref9.data;
 
                         // const [niv, setNiv] = useState(level)
 
@@ -2187,7 +2438,7 @@ export default function FileTable(_ref) {
                         }
 
                         function handleClick(e) {
-                                var _this2 = this;
+                                var _this3 = this;
 
                                 console.log(level);
                                 var node_data = Global_State.getNodeDataById(data.id);
@@ -2206,12 +2457,12 @@ export default function FileTable(_ref) {
 
                                 if (!Global_State.isEditorMode) {
                                         var update = function () {
-                                                var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee6() {
-                                                        return _regeneratorRuntime.wrap(function _callee6$(_context6) {
+                                                var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee7() {
+                                                        return _regeneratorRuntime.wrap(function _callee7$(_context7) {
                                                                 while (1) {
-                                                                        switch (_context6.prev = _context6.next) {
+                                                                        switch (_context7.prev = _context7.next) {
                                                                                 case 0:
-                                                                                        _context6.next = 2;
+                                                                                        _context7.next = 2;
                                                                                         return http.post('update_fnc', query).then(function (res) {
                                                                                                 console.log(res);
                                                                                         }).catch(function (err) {
@@ -2220,14 +2471,14 @@ export default function FileTable(_ref) {
 
                                                                                 case 2:
                                                                                 case 'end':
-                                                                                        return _context6.stop();
+                                                                                        return _context7.stop();
                                                                         }
                                                                 }
-                                                        }, _callee6, _this2);
+                                                        }, _callee7, _this3);
                                                 }));
 
                                                 return function update() {
-                                                        return _ref11.apply(this, arguments);
+                                                        return _ref10.apply(this, arguments);
                                                 };
                                         }();
 
@@ -2249,8 +2500,8 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var ReviewDateComponenr = function ReviewDateComponenr(_ref12) {
-                        var data = _ref12.data;
+                var ReviewDateComponent = function ReviewDateComponent(_ref11) {
+                        var data = _ref11.data;
 
                         var value = data.review_date ? data.review_date : '____/__/__';
 
@@ -2258,13 +2509,13 @@ export default function FileTable(_ref) {
                                 e.stopPropagation();
                                 console.log("review date handle click");
 
-                                var Date_input = function Date_input(_ref13) {
-                                        var data = _ref13.data;
+                                var Date_input = function Date_input(_ref12) {
+                                        var data = _ref12.data;
 
 
-                                        var CustomInput = forwardRef(function (_ref14, ref) {
-                                                var value = _ref14.value,
-                                                    onClick = _ref14.onClick;
+                                        var CustomInput = forwardRef(function (_ref13, ref) {
+                                                var value = _ref13.value,
+                                                    onClick = _ref13.onClick;
                                                 return React.createElement(
                                                         Stack,
                                                         { direction: 'row', sx: { width: 'fit-content', backgroundColor: 'whitesmoke' } },
@@ -2286,10 +2537,10 @@ export default function FileTable(_ref) {
                                                 );
                                         });
 
-                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref15) {
-                                                var date = _ref15.date,
-                                                    value = _ref15.value,
-                                                    onChange = _ref15.onChange;
+                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref14) {
+                                                var date = _ref14.date,
+                                                    value = _ref14.value,
+                                                    onChange = _ref14.onChange;
 
 
                                                 var validationRules = yup.object().shape({
@@ -2412,12 +2663,12 @@ export default function FileTable(_ref) {
 
                                                 if (!Global_State.isEditorMode) {
                                                         var update = function () {
-                                                                var _ref16 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee7() {
-                                                                        return _regeneratorRuntime.wrap(function _callee7$(_context7) {
+                                                                var _ref15 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee8() {
+                                                                        return _regeneratorRuntime.wrap(function _callee8$(_context8) {
                                                                                 while (1) {
-                                                                                        switch (_context7.prev = _context7.next) {
+                                                                                        switch (_context8.prev = _context8.next) {
                                                                                                 case 0:
-                                                                                                        _context7.next = 2;
+                                                                                                        _context8.next = 2;
                                                                                                         return http.post('update_fnc', query).then(function (res) {
                                                                                                                 console.log(res);
                                                                                                         }).catch(function (err) {
@@ -2426,14 +2677,14 @@ export default function FileTable(_ref) {
 
                                                                                                 case 2:
                                                                                                 case 'end':
-                                                                                                        return _context7.stop();
+                                                                                                        return _context8.stop();
                                                                                         }
                                                                                 }
-                                                                        }, _callee7, _this);
+                                                                        }, _callee8, _this);
                                                                 }));
 
                                                                 return function update() {
-                                                                        return _ref16.apply(this, arguments);
+                                                                        return _ref15.apply(this, arguments);
                                                                 };
                                                         }();
 
@@ -2514,13 +2765,13 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var _iteratorNormalCompletion6 = true;
-                var _didIteratorError6 = false;
-                var _iteratorError6 = undefined;
+                var _iteratorNormalCompletion8 = true;
+                var _didIteratorError8 = false;
+                var _iteratorError8 = undefined;
 
                 try {
-                        for (var _iterator6 = node.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                                var child_node = _step6.value;
+                        for (var _iterator8 = node.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                                var child_node = _step8.value;
 
                                 // console.log('child_node.id', child_node)
                                 var data = child_node; // Global_State.getNodeDataById(child_node.id)
@@ -2547,21 +2798,21 @@ export default function FileTable(_ref) {
                                         global_type: data.global_type,
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
-                                        review_date: data.review_date === undefined ? '' : React.createElement(ReviewDateComponenr, { data: data })
+                                        review_date: data.review_date === undefined ? '' : React.createElement(ReviewDateComponent, { data: data })
 
                                 });
                         }
                 } catch (err) {
-                        _didIteratorError6 = true;
-                        _iteratorError6 = err;
+                        _didIteratorError8 = true;
+                        _iteratorError8 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                                        _iterator6.return();
+                                if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                                        _iterator8.return();
                                 }
                         } finally {
-                                if (_didIteratorError6) {
-                                        throw _iteratorError6;
+                                if (_didIteratorError8) {
+                                        throw _iteratorError8;
                                 }
                         }
                 }
@@ -2573,12 +2824,12 @@ export default function FileTable(_ref) {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref17 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref17[0],
-                            listB = _ref17[1];
-                        var _ref18 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref18[0],
-                            b = _ref18[1];
+                        var _ref16 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref16[0],
+                            listB = _ref16[1];
+                        var _ref17 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref17[0],
+                            b = _ref17[1];
 
 
                         if (a > b) {
@@ -2851,15 +3102,15 @@ export default function FileTable(_ref) {
                 }
         }];
 
-        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref19) {
-                var set = _ref19.set,
-                    filter = _ref19.filter,
-                    node = _ref19.node;
+        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref18) {
+                var set = _ref18.set,
+                    filter = _ref18.filter,
+                    node = _ref18.node;
 
 
-                var FilterComponent = useCallback(function FilterComponent(_ref20) {
-                        var set = _ref20.set,
-                            filter = _ref20.filter;
+                var FilterComponent = useCallback(function FilterComponent(_ref19) {
+                        var set = _ref19.set,
+                            filter = _ref19.filter;
 
                         switch (filter.tag) {
                                 case 'la Date de creation':
@@ -3068,9 +3319,9 @@ export default function FileTable(_ref) {
                         , selectableRowSelected: function selectableRowSelected(row) {
                                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                         },
-                        onSelectedRowsChange: function onSelectedRowsChange(_ref21) {
-                                var selectedCount = _ref21.selectedCount,
-                                    selectedRows = _ref21.selectedRows;
+                        onSelectedRowsChange: function onSelectedRowsChange(_ref20) {
+                                var selectedCount = _ref20.selectedCount,
+                                    selectedRows = _ref20.selectedRows;
                                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                         },
                         clearSelectedRows: Global_State.toggleCleared,

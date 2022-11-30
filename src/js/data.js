@@ -657,6 +657,10 @@ export default function useGetData(TheDatas) {
         var getNewPath = function getNewPath(new_node, all_nodes) {
                 var to_update = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
+                if (new_node.type === 'root') {
+                        return sections.get(new_node.section_id).name + ":";
+                }
+
                 if (!to_update) {
                         var _iteratorNormalCompletion3 = true;
                         var _didIteratorError3 = false;
@@ -740,7 +744,11 @@ export default function useGetData(TheDatas) {
                                                 for (var _iterator5 = all_nodes[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
                                                         var _node2 = _step5.value;
 
-                                                        if (_node2.id === new_node.parentId) parent = JSON.parse(JSON.stringify(_node2));
+                                                        if (_node2.id === new_node.parentId) {
+                                                                if (_node2.type === 'root') parent = { type: 'root', section_id: new_node.section_id };else parent = JSON.parse(JSON.stringify(_node2));
+
+                                                                break;
+                                                        }
                                                 }
                                                 // console.log('paaaaaaaaaaaaaath', new_node)
                                         } catch (err) {
@@ -772,7 +780,11 @@ export default function useGetData(TheDatas) {
                                                 for (var _iterator6 = all_nodes[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
                                                         var _node3 = _step6.value;
 
-                                                        if (_node3.id === new_node.parentId) _parent = JSON.parse(JSON.stringify(_node3));
+                                                        if (_node3.id === new_node.parentId) {
+                                                                if (_node3.type === 'root') _parent = { type: 'root', section_id: new_node.section_id };else _parent = JSON.parse(JSON.stringify(_node3));
+
+                                                                break;
+                                                        }
                                                 }
                                         } catch (err) {
                                                 _didIteratorError6 = true;
@@ -1549,21 +1561,51 @@ export default function useGetData(TheDatas) {
 
                                         var _newState = state.map(function (node) {
                                                 if (node.id === updatedNode.id) {
-                                                        updatedNode.path = getNewPath(updatedNode, state, true);
+                                                        // updatedNode.path = getNewPath(updatedNode, state, true)
 
                                                         return updatedNode;
-                                                } else if (node.parentId === updatedNode.id) {
-                                                        node.path = getNewPath(node, state, true);
-
-                                                        return node;
-                                                } else return node;
+                                                }
+                                                // else if ( (node.parentId === updatedNode.id) )
+                                                // {
+                                                //         node.path = getNewPath(node, state, true)
+                                                //
+                                                //         return node
+                                                // }
+                                                return node;
                                         });
+
+                                        var update_path = function update_path(node, current_state) {
+                                                var up_to_date_node = JSON.parse(JSON.stringify(node));
+
+                                                up_to_date_node.path = getNewPath(up_to_date_node, current_state, true);
+
+                                                console.log('current_state', current_state);
+
+                                                var new_state = JSON.parse(JSON.stringify(current_state)).map(function (current_node) {
+                                                        if (current_node.id === up_to_date_node.id) return up_to_date_node;
+                                                        return current_node;
+                                                });
+
+                                                console.log('new_state', new_state);
+
+                                                var final_state = JSON.parse(JSON.stringify(new_state));
+
+                                                new_state.forEach(function (new_node) {
+                                                        if (new_node.parentId === up_to_date_node.id) {
+                                                                final_state = update_path(new_node, final_state);
+                                                        }
+                                                });
+
+                                                return final_state;
+                                        };
+
+                                        var finalState = update_path(updatedNode, JSON.parse(JSON.stringify(_newState)));
 
                                         // EventsManager.emit('updateData')
 
-                                        console.log('newState', _newState);
+                                        console.log('finalState', finalState);
 
-                                        return JSON.parse(JSON.stringify(_newState));
+                                        return JSON.parse(JSON.stringify(finalState));
                                 }
                         case 'move':
                                 {
@@ -1867,7 +1909,7 @@ export default function useGetData(TheDatas) {
         };
 
         function useModalManager() {
-                var _useState9 = useState(null),
+                var _useState9 = useState(React.createElement("div", null)),
                     _useState10 = _slicedToArray(_useState9, 2),
                     content = _useState10[0],
                     setContent = _useState10[1];
@@ -1877,17 +1919,15 @@ export default function useGetData(TheDatas) {
                     show = _useState12[0],
                     setShow = _useState12[1];
 
-                var _useState13 = useState(""),
-                    _useState14 = _slicedToArray(_useState13, 2),
-                    modal_title = _useState14[0],
-                    setTitle = _useState14[1];
+                var modal_title = useRef("");
+                var can_close = useRef(true);
 
                 var modal = React.createElement(
                         Modal,
                         {
                                 show: show,
                                 onHide: function onHide() {
-                                        setShow(false);
+                                        if (can_close.current) setShow(false);
                                 },
                                 size: "lg",
                                 centered: true,
@@ -1895,11 +1935,11 @@ export default function useGetData(TheDatas) {
                         },
                         React.createElement(
                                 Modal.Header,
-                                { closeButton: true },
+                                { closeButton: can_close.current },
                                 React.createElement(
                                         Modal.Title,
                                         null,
-                                        modal_title
+                                        modal_title.current
                                 )
                         ),
                         React.createElement(
@@ -1912,15 +1952,16 @@ export default function useGetData(TheDatas) {
                         )
                 );
 
-                var _useState15 = useState(React.createElement("div", null)),
-                    _useState16 = _slicedToArray(_useState15, 2),
-                    container = _useState16[0],
-                    setModalOpening = _useState16[1];
+                var _useState13 = useState(React.createElement("div", null)),
+                    _useState14 = _slicedToArray(_useState13, 2),
+                    container = _useState14[0],
+                    setModalOpening = _useState14[1];
 
                 return {
                         modal: modal,
                         open_modal: function open_modal(title) {
-                                setTitle(title);setShow(true);
+                                var may_close = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+                                can_close.current = may_close;modal_title.current = title;setShow(true);
                         },
                         close_modal: function close_modal() {
                                 setShow(false);
@@ -1932,10 +1973,10 @@ export default function useGetData(TheDatas) {
         var modalManager = useModalManager();
 
         function useShowSpinner() {
-                var _useState17 = useState(false),
-                    _useState18 = _slicedToArray(_useState17, 2),
-                    show = _useState18[0],
-                    setShow = _useState18[1];
+                var _useState15 = useState(false),
+                    _useState16 = _slicedToArray(_useState15, 2),
+                    show = _useState16[0],
+                    setShow = _useState16[1];
 
                 var spinner = React.createElement(
                         "div",
@@ -1970,10 +2011,10 @@ export default function useGetData(TheDatas) {
                     icon = _ref2.icon,
                     content = _ref2.content;
 
-                var _useState19 = useState(false),
-                    _useState20 = _slicedToArray(_useState19, 2),
-                    show = _useState20[0],
-                    setShow = _useState20[1];
+                var _useState17 = useState(false),
+                    _useState18 = _slicedToArray(_useState17, 2),
+                    show = _useState18[0],
+                    setShow = _useState18[1];
                 // const setShow = (val) => {
                 //   set(val)
                 //   isLogged = val
@@ -2049,10 +2090,10 @@ export default function useGetData(TheDatas) {
                 initSelectedNodes.set(sct.id, '0');
         });
 
-        var _useState21 = useState(initSelectedNodes),
-            _useState22 = _slicedToArray(_useState21, 2),
-            selectedNodeIdsInSections = _useState22[0],
-            updateSNIdIS = _useState22[1];
+        var _useState19 = useState(initSelectedNodes),
+            _useState20 = _slicedToArray(_useState19, 2),
+            selectedNodeIdsInSections = _useState20[0],
+            updateSNIdIS = _useState20[1];
 
         var sizeFormater = function sizeFormater(size) {
                 var fix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
@@ -2148,7 +2189,7 @@ export default function useGetData(TheDatas) {
         //   }, [ref]);
         // }
 
-        var _useState23 = useState({
+        var _useState21 = useState({
                 style: {
                         display: 'none',
                         position: 'fixed',
@@ -2162,9 +2203,9 @@ export default function useGetData(TheDatas) {
                         // pointerEvents: 'none',
                         // opacity: 0.5,
                 } }),
-            _useState24 = _slicedToArray(_useState23, 2),
-            Overlay_props = _useState24[0],
-            setOverlay_props = _useState24[1];
+            _useState22 = _slicedToArray(_useState21, 2),
+            Overlay_props = _useState22[0],
+            setOverlay_props = _useState22[1];
 
         var Overlay_component = React.createElement("div", Object.assign({}, Overlay_props, { onClick: function onClick(e) {
                         e.stopPropagation();

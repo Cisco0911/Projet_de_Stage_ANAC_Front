@@ -1226,8 +1226,12 @@ export default function useEditor(data) {
                                                                                 success: 'Processus achevé',
                                                                                 error: 'err'
                                                                         }, {
-                                                                                id: 'Saving'
-                                                                                // duration: Infinity
+                                                                                id: 'Saving',
+                                                                                duration: Infinity
+                                                                        }).then(function (res) {
+                                                                                setTimeout(function () {
+                                                                                        toast.dismiss('Saving');
+                                                                                }, 800);
                                                                         });
                                                                 } },
                                                         "SAVE"

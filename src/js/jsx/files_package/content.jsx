@@ -37,6 +37,8 @@ import * as yup from 'yup'
 import DatePicker from "react-datepicker";
 import Stack from "@mui/material/Stack";
 import {IconButton} from "@mui/material";
+import ReactDOM from "react-dom/client";
+import {renderToStaticMarkup} from "react-dom/server";
 
 
 
@@ -214,19 +216,23 @@ export default function FileTable({set})
         const Paste_component = useCallback(
                 function Paste_component()
                 {
+                        const action = useRef({})
 
                         async function paste_here(node)
                         {
-                                const d = Global_State.identifyNode( JSON.parse( JSON.stringify(node) ) )
-                                const destination_id = d[0]; const destination_type = d[1]
+                                const destination_info = Global_State.identifyNode( JSON.parse( JSON.stringify(node) ) )
+                                const destination_id = destination_info[0]; const destination_type = destination_info[1]
 
                                 // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy.current)
 
-                                for (const node_to_move of to_move_or_copy.current)
-                                {
+                                const operation_type = mc_state
 
-                                        // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
-                                        if (node_to_move.type === 'ds')
+                                clearTimeout(clear_clipboard_id.current)
+                                setMc_state('none')
+
+                                if (operation_type === 'move')
+                                {
+                                        for (const node_to_move of to_move_or_copy.current)
                                         {
 
                                                 const queryData = new FormData
@@ -235,22 +241,156 @@ export default function FileTable({set})
                                                 queryData.append('destination_type', destination_type)
                                                 queryData.append('id', node_to_move.id)
 
-                                                // console.log('arriiiiiiiiiiiiiveeee')
+                                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
+                                                if (node_to_move.type === 'ds')
+                                                {
 
-                                                await http.post('move_folder', queryData)
-                                                .then( res => { console.log(res) } )
-                                                .catch( err => { console.log(err); throw err} )
+                                                        // console.log('arriiiiiiiiiiiiiveeee')
 
-                                                clearTimeout(clear_clipboard_id.current)
+                                                        await http.post('move_folder', queryData)
+                                                        .then( res => { console.log(res) } )
+                                                        .catch( err => { console.log(err); throw err} )
+                                                }
+                                                else if (node_to_move.type === 'f')
+                                                {
 
-                                                to_move_or_copy.current = []
-                                                setMc_state('none')
-                                        }
-                                        else
-                                        {
-
+                                                        await http.post('move_file', queryData)
+                                                        .then( res => { console.log(res) } )
+                                                        .catch( err => { console.log(err); throw err} )
+                                                }
                                         }
                                 }
+                                else
+                                {
+                                        const Save_for_rest = () =>
+                                        {
+
+                                                return(
+                                                        <div className={`d-flex align-items-stretch`} >
+                                                                <input id={'save_checkbox'} type={'checkbox'}
+                                                                       onChange={
+                                                                               e => {
+                                                                                       // e.preventDefault()
+                                                                                       console.log('e.target',e.target)
+                                                                                       action.current = { saved: e.target.checked }
+                                                                               }
+                                                                       }
+                                                                />
+                                                                <label htmlFor={'save_checkbox'}
+                                                                       style=
+                                                                       {{
+                                                                               fontSize: 12,
+                                                                               display: "contents"
+                                                                        }}
+                                                                > Enregistrer l'action pour autres cas similaires </label>
+                                                        </div>
+                                                )
+                                        }
+
+
+                                        for (const node_to_copy of to_move_or_copy.current)
+                                        {
+                                                for (const child_node of node.children)
+                                                {
+                                                        if (child_node.name === node_to_copy.name)
+                                                        {
+                                                                if (!action.current.saved)
+                                                                {
+                                                                        await new Promise(
+                                                                        resolve =>
+                                                                        {
+                                                                                const content = (
+                                                                                <div>
+                                                                                        <div className={`mb-3`} >
+                                                                                                {`La destination pourrait contenir un fichier de meme nom: `}
+                                                                                                <br/>
+                                                                                                <span style={{ fontWeight: "bold" }} > {`${node_to_copy.name}`} </span>
+                                                                                        </div>
+
+                                                                                        <Save_for_rest />
+
+                                                                                        <div className={`d-flex justify-content-end`} >
+                                                                                                <Button className={`mr-1`} variant={`outline-light`} onClick={ e => { e.stopPropagation(); resolve(1) } } >
+                                                                                                        IGNORER
+                                                                                                </Button>
+                                                                                                <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); resolve(2) } } >
+                                                                                                        RENOMER
+                                                                                                </Button>
+                                                                                                <Button variant={`outline-danger`} onClick={ e => { e.stopPropagation(); resolve(3) } } >
+                                                                                                        ECRASER
+                                                                                                </Button>
+                                                                                        </div>
+                                                                                </div>
+                                                                                )
+
+                                                                                Global_State.modalManager.setContent(content)
+                                                                                Global_State.modalManager.open_modal("Conflit de fichiers", false)
+
+                                                                        }
+                                                                        ).then(
+                                                                                res =>
+                                                                                {
+                                                                                        console.log(res, action.current)
+                                                                                        node_to_copy['on_exist'] = res
+                                                                                        if (action.current) action.current = {...action.current, value: res}
+                                                                                }
+                                                                        )
+                                                                }
+                                                                else
+                                                                {
+                                                                        node_to_copy['on_exist'] = action.current.value
+                                                                }
+                                                        }
+                                                }
+                                        }
+
+                                        Global_State.modalManager.close_modal()
+                                        console.log( 'to_move_or_copy.current', to_move_or_copy.current )
+
+                                        for (const node_to_copy of to_move_or_copy.current)
+                                        {
+
+                                                const queryData = new FormData
+
+                                                queryData.append('destination_id', destination_id)
+                                                queryData.append('destination_type', destination_type)
+                                                queryData.append('id', node_to_copy.id)
+                                                queryData.append('on_exist', node_to_copy.on_exist ?  node_to_copy.on_exist : '-1')
+                                                queryData.append('section_id', Global_State.selectedSectionId)
+
+                                                let services
+                                                if (node.type === 'root')
+                                                {
+                                                        const section = Global_State.sections.get( Global_State.selectedSectionId )
+
+                                                        services = section.services.map( service => ({value: service.id}) )
+                                                }
+                                                else services = node.services.map( service => ({value: service.id}) )
+
+                                                queryData.append('services', JSON.stringify( services ) )
+
+
+                                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
+                                                if (node_to_copy.type === 'ds')
+                                                {
+
+                                                        // console.log('arriiiiiiiiiiiiiveeee')
+
+                                                        await http.post('copy_folder', queryData)
+                                                        .then( res => { console.log(res) } )
+                                                        .catch( err => { console.log(err); throw err} )
+                                                }
+                                                else if (node_to_copy.type === 'f')
+                                                {
+
+                                                        await http.post('copy_file', queryData)
+                                                        .then( res => { console.log(res) } )
+                                                        .catch( err => { console.log(err); throw err} )
+                                                }
+                                        }
+                                }
+
+                                to_move_or_copy.current = []
 
                         }
 
@@ -268,13 +408,14 @@ export default function FileTable({set})
                                                                 {
                                                                         loading: 'Pasting...',
                                                                         success: 'Processus achevé',
-                                                                        error: 'err'
+                                                                        error: 'err',
                                                                 },
                                                                 {
                                                                         id: 'Pasting',
-                                                                        // duration: Infinity
+                                                                        duration: Infinity
                                                                 }
-                                                        )
+                                                        ).then( res => { setTimeout( () => { toast.dismiss('Pasting') }, 800 ) } )
+                                                        .catch( err => { setTimeout( () => { toast.dismiss('Pasting') }, 800 ) } )
                                                 }
                                         }
                                 >
@@ -284,110 +425,6 @@ export default function FileTable({set})
 
                 }, [node, mc_state]
         )
-
-        function handle_to_move_or_copy(operation_type, nodes)
-        {
-                const to_move_or_copy = nodes.map(
-                        row =>
-                        (
-                                JSON.parse(JSON.stringify( Global_State.getNodeDataById(row.id) ))
-                        )
-                )
-
-                async function move_to(node)
-                {
-                        const d = Global_State.identifyNode( JSON.parse( JSON.stringify(node) ) )
-                        const destination_id = d[0]; const destination_type = d[1]
-
-                        // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy)
-
-                        for (const node_to_move of to_move_or_copy)
-                        {
-
-                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
-                                if (node_to_move.type === 'ds')
-                                {
-                                        const id = Global_State.identifyNode( node_to_move )[0]
-
-                                        const queryData = new FormData
-
-                                        queryData.append('destination_id', destination_id)
-                                        queryData.append('destination_type', destination_type)
-                                        queryData.append('id', id)
-
-                                        // console.log('arriiiiiiiiiiiiiveeee')
-
-                                        await http.post('move_folder', queryData)
-                                        .then( res => { console.log(res) } )
-                                        .catch( err => { console.log(err); throw err} )
-                                }
-                                else
-                                {
-
-                                }
-                        }
-
-                }
-
-
-                toast((t) => (
-                        <div style={{ width: 'max-content' }} >
-                                <Stack spacing={2} direction = {'row'}
-                                       sx = {
-                                               {
-                                                       display: 'flex',
-                                                       justifyContent: 'center',
-                                                       position: 'relative',
-                                                       alignItems: 'center',
-                                               }
-                                       }
-                                >
-                                        <Button variant="light" onClick={() =>
-                                                {
-                                                        console.log(operation_type, to_move_or_copy[0].id)
-
-                                                        toast.promise(
-                                                        move_to(node),
-                                                        {
-                                                                loading: 'Moving...',
-                                                                success: 'Processus achevé',
-                                                                error: 'err'
-                                                        },
-                                                        {
-                                                                id: 'Moving',
-                                                                // duration: Infinity
-                                                        }
-                                                        )
-
-
-                                                }
-                                        }>
-                                                {operation_type.toUpperCase()}
-                                        </Button>
-                                        <Button   variant="danger" onClick={() =>
-                                        {
-                                                toast.dismiss(operation_type)
-                                        }
-                                        }>
-                                                DISCARD
-                                        </Button>
-                                </Stack>
-                        </div>
-                ),
-                {
-                        id: operation_type,
-                        position: "bottom-right",
-                        duration: Infinity,
-                        style: {
-                                // width: '1700px',
-                                border: '1px solid #0062ff',
-                                padding: '16px',
-                                color: '#0062ff',
-                        },
-                }
-                );
-
-        }
 
         function add(thing_to_add)
         {
@@ -1380,7 +1417,28 @@ export default function FileTable({set})
                                                         }
                                                         <option className="dropdown-item">Partager</option>
                                                         <option className="dropdown-item">Télécharger</option>
-                                                        <option className="dropdown-item">Copier vers</option>
+                                                        <option className="dropdown-item"
+                                                                onClick={
+                                                                        e =>
+                                                                        {
+                                                                                e.preventDefault()
+                                                                                e.stopPropagation()
+
+                                                                                clearTimeout(clear_clipboard_id.current)
+
+                                                                                clear_clipboard_id.current =
+                                                                                setTimeout(
+                                                                                () => { setMc_state('none'); to_move_or_copy.current = [] }, 2*60000
+                                                                                )
+
+                                                                                to_move_or_copy.current = selectedRow.map(
+                                                                                row => ({id: Global_State.identifyNode(row)[0], type: row.type, name: row.value})
+                                                                                )
+
+                                                                                setMc_state('copy')
+                                                                        }
+                                                                }
+                                                        >Copier vers</option>
                                                         <option className="dropdown-item"
                                                                 onClick={
                                                                         e =>
@@ -1413,112 +1471,109 @@ export default function FileTable({set})
 
                                                                 const remove = async () =>
                                                                 {
+                                                                        await Promise.all(
+                                                                                selectedRow.map(
+                                                                                        async row =>
+                                                                                        {
+                                                                                                // console.log(Global_State.identifyNode(row))
+                                                                                                const nodeIdentity = Global_State.identifyNode(row)
+                                                                                                // const [ id, type ] = Global_State.identifyNode(row)
 
+                                                                                                console.log(selectedRow)
+                                                                                                switch (row.type) {
+                                                                                                        case 'audit':
 
-                                                                        await Promise.all(selectedRow.map(
-                                                                        async row =>
-                                                                        {
-                                                                                // console.log(Global_State.identifyNode(row))
-                                                                                const nodeIdentity = Global_State.identifyNode(row)
-                                                                                // const [ id, type ] = Global_State.identifyNode(row)
+                                                                                                                await http.delete('del_audit?id=' + nodeIdentity[0])
+                                                                                                                .then( res => {
+                                                                                                                        console.log(res);
+                                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                                                                        {
+                                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
+                                                                                                                        })
 
-                                                                                console.log(selectedRow)
-                                                                                switch (row.type) {
-                                                                                        case 'audit':
+                                                                                                                } )
+                                                                                                                .catch(err =>
+                                                                                                                {
+                                                                                                                        console.log(err);
+                                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Audit est deja dans une file d'attente de suppression: ${row.value}`)
+                                                                                                                        else toast.error("error on this one, Audit: " + row.value)
+                                                                                                                })
 
-                                                                                                await http.delete('del_audit?id=' + nodeIdentity[0])
-                                                                                                .then( res => {
-                                                                                                        console.log(res);
-                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                                                        {
-                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                                                        })
+                                                                                                                break;
+                                                                                                        case 'checkList':
+                                                                                                                break;
+                                                                                                        case 'dp':
+                                                                                                                break;
+                                                                                                        case 'nonC':
+                                                                                                                break;
+                                                                                                        case 'fnc':
 
-                                                                                                } )
-                                                                                                .catch(err =>
-                                                                                                {
-                                                                                                        console.log(err);
-                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Audit est deja dans une file d'attente de suppression: ${row.value}`)
-                                                                                                        else toast.error("error on this one, Audit: " + row.value)
-                                                                                                })
+                                                                                                                await http.delete('del_fnc?id=' + nodeIdentity[0])
+                                                                                                                .then( res => {
+                                                                                                                        console.log(res);
+                                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                                                                        {
+                                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
+                                                                                                                        })
 
-                                                                                                break;
-                                                                                        case 'checkList':
-                                                                                                break;
-                                                                                        case 'dp':
-                                                                                                break;
-                                                                                        case 'nonC':
-                                                                                                break;
-                                                                                        case 'fnc':
+                                                                                                                } )
+                                                                                                                .catch(err =>
+                                                                                                                {
+                                                                                                                        console.log(err);
+                                                                                                                        if(err.response.data === 'en attente') toast.error(`Cette FNC est deja dans une file d'attente de suppression: ${row.value}`)
+                                                                                                                        else toast.error("error on this one, FNC: " + row.value)
+                                                                                                                })
 
-                                                                                                await http.delete('del_fnc?id=' + nodeIdentity[0])
-                                                                                                .then( res => {
-                                                                                                        console.log(res);
-                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                                                        {
-                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                                                        })
+                                                                                                                break;
+                                                                                                        case 'ds':
 
-                                                                                                } )
-                                                                                                .catch(err =>
-                                                                                                {
-                                                                                                        console.log(err);
-                                                                                                        if(err.response.data === 'en attente') toast.error(`Cette FNC est deja dans une file d'attente de suppression: ${row.value}`)
-                                                                                                        else toast.error("error on this one, FNC: " + row.value)
-                                                                                                })
+                                                                                                                await http.delete('del_folder?id=' + nodeIdentity[0])
+                                                                                                                .then( res => {
+                                                                                                                        console.log(res);
+                                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                                                                        {
+                                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
+                                                                                                                        })
 
-                                                                                                break;
-                                                                                        case 'ds':
+                                                                                                                } )
+                                                                                                                .catch(err =>
+                                                                                                                {
+                                                                                                                        console.log(err);
+                                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Dossier est deja dans une file d'attente de suppression: ${row.value}`)
+                                                                                                                        else toast.error("error on this one, Dossier: " + row.value)
+                                                                                                                })
 
-                                                                                                await http.delete('del_folder?id=' + nodeIdentity[0])
-                                                                                                .then( res => {
-                                                                                                        console.log(res);
-                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                                                        {
-                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                                                        })
+                                                                                                                break;
+                                                                                                        case 'f':
+                                                                                                                // console.log(nodeIdentity[0])
 
-                                                                                                } )
-                                                                                                .catch(err =>
-                                                                                                {
-                                                                                                        console.log(err);
-                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Dossier est deja dans une file d'attente de suppression: ${row.value}`)
-                                                                                                        else toast.error("error on this one, Dossier: " + row.value)
-                                                                                                })
+                                                                                                                await http.delete('del_file?id=' + nodeIdentity[0])
+                                                                                                                .then( res => {
+                                                                                                                        console.log(res);
+                                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                                                                        {
+                                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />,
+                                                                                                                        })
 
-                                                                                                break;
-                                                                                        case 'f':
-                                                                                                // console.log(nodeIdentity[0])
+                                                                                                                } )
+                                                                                                                .catch(err =>
+                                                                                                                {
+                                                                                                                        console.log(err);
+                                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Dossier est deja dans une file d'attente de suppression: ${row.value}`)
+                                                                                                                        else toast.error("error on this one, Ficher: " + row.value)
+                                                                                                                })
 
-                                                                                                await http.delete('del_file?id=' + nodeIdentity[0])
-                                                                                                .then( res => {
-                                                                                                        console.log(res);
-                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                                                        {
-                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />,
-                                                                                                        })
+                                                                                                                break;
 
-                                                                                                } )
-                                                                                                .catch(err =>
-                                                                                                {
-                                                                                                        console.log(err);
-                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Dossier est deja dans une file d'attente de suppression: ${row.value}`)
-                                                                                                        else toast.error("error on this one, Ficher: " + row.value)
-                                                                                                })
+                                                                                                        default:
+                                                                                                                break;
+                                                                                                }
 
-                                                                                                break;
+                                                                                                // return 0;
 
-                                                                                        default:
-                                                                                                break;
-                                                                                }
-
-                                                                                // return 0;
-
-                                                                        }
+                                                                                        }
+                                                                                )
                                                                         )
-                                                                        )
-
-
                                                                 }
 
                                                                 const localRemove = () =>
@@ -1576,14 +1631,17 @@ export default function FileTable({set})
                                                                 if( !Global_State.isEditorMode )
                                                                 {
                                                                         toast.promise(
-                                                                        remove(),
-                                                                        {
-                                                                                loading: 'Loading...',
-                                                                                success: 'Processus achevé',
-                                                                                error: 'err'
-                                                                        }
-
-                                                                        )
+                                                                                remove(),
+                                                                                {
+                                                                                        loading: 'Suppressing...',
+                                                                                        success: 'Processus achevé',
+                                                                                        error: 'err'
+                                                                                },
+                                                                                {
+                                                                                        id: 'Suppressing',
+                                                                                        duration: Infinity
+                                                                                }
+                                                                        ).then( res => { setTimeout( () => { toast.dismiss('Suppressing') }, 800 ) } )
                                                                 }
                                                                 else localRemove()
 
@@ -1707,23 +1765,30 @@ export default function FileTable({set})
                                                 }
                                                 } />
                                         case "pdf":
-                                                return <BsFillFileEarmarkPdfFill color='#ad0b00' size={iconSize} onClick = { e =>
-                                                {
-                                                        console.log(data)
-                                                        Global_State.modalManager.setContent(
-                                                        <div style= {
-                                                                {
-                                                                        display: 'flex',
-                                                                        justifyContent: 'center',
-                                                                        position: 'relative',
-                                                                        alignItems: 'center',
+                                                return <BsFillFileEarmarkPdfFill color='#ad0b00' size={iconSize}
+                                                                 style={
+                                                                         {
+                                                                                 pointerEvents: 'all'
+                                                                         }
+                                                                 }
+                                                                 onClick = { e =>
+                                                                        {
+                                                                                console.log(data)
+                                                                                Global_State.modalManager.setContent(
+                                                                                <div style= {
+                                                                                        {
+                                                                                                display: 'flex',
+                                                                                                justifyContent: 'center',
+                                                                                                position: 'relative',
+                                                                                                alignItems: 'center',
+                                                                                        }
+                                                                                } >
+                                                                                        {Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : <embed src = {data.url + "#toolbar=0&navpanes=0&scrollbar=0"} width={900} height= {400} type="application/pdf"  ></embed>}
+                                                                                </div>)
+                                                                                Global_State.modalManager.open_modal("Apercu du fichier")
+                                                                        }
                                                                 }
-                                                        } >
-                                                                {Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : <embed src = {data.url + "#toolbar=0&navpanes=0&scrollbar=0"} width={900} height= {400} type="application/pdf"  ></embed>}
-                                                        </div>)
-                                                        Global_State.modalManager.open_modal("Apercu du fichier")
-                                                }
-                                                }  />
+                                                        />
                                         case "xlsx":
                                                 return <SiMicrosoftexcel color='#1f6e43' size={iconSize} />
                                         case "pptx":
@@ -1875,7 +1940,7 @@ export default function FileTable({set})
                         return( <div className={class_name} onClick = {handleClick} >{level}</div> )
                 }
 
-                const ReviewDateComponenr = ({data}) =>
+                const ReviewDateComponent = ({data}) =>
                 {
                         const value = data.review_date ? data.review_date : '____/__/__'
 
@@ -2164,7 +2229,7 @@ export default function FileTable({set})
                                         global_type: data.global_type,
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
-                                        review_date: data.review_date === undefined ? '' : <ReviewDateComponenr data={data} />,
+                                        review_date: data.review_date === undefined ? '' : <ReviewDateComponent data={data} />,
 
                                 }
                         )

@@ -99,3 +99,26 @@
 {
     background-color: rgba(255, 255, 255, 0);
 }
+
+
+.swal-button--ignorer{
+    background-color: #3b425c;
+}
+.swal-button--ignorer:hover
+{
+    background-color: #1e222f !important;
+}
+.swal-button--renomer{
+    background-color: #0202f8;
+}
+.swal-button--renomer:hover
+{
+    background-color: #020272 !important;
+}
+.swal-button--ecraser{
+    background-color: red;
+}
+.swal-button--ecraser:hover
+{
+    background-color: #750202 !important;
+}

@@ -1102,9 +1102,9 @@ export default function useEditor(data)
                                                                                 },
                                                                                 {
                                                                                         id: 'Saving',
-                                                                                        // duration: Infinity
+                                                                                        duration: Infinity
                                                                                 }
-                                                                        )
+                                                                        ).then( res => { setTimeout( () => { toast.dismiss('Saving') }, 800 ) } )
 
 
                                                                 }
