@@ -1,28 +1,24 @@
 /* eslint-disable import/first */
 
 
-
-
-import React, { useMemo, useState, useEffect, useRef, useCallback, useReducer } from "react";
+import React, {useCallback, useEffect, useMemo, useReducer, useRef, useState} from "react";
 
 
 import parseToJson from "./files_package/parse_to_json";
 import useEditor from './editor'
-import { Global_State } from "./main";
+import {Global_State} from "./main";
 
 import axios from "axios";
 import Echo from 'laravel-echo';
-import Pusher from 'pusher-js';
 import EventEmitter from 'eventemitter3';
 
 import Modal from "react-bootstrap/Modal";
 import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
 
 import toast from "react-hot-toast";
 
+window.Pusher = require('pusher-js');
 
 export const http = axios.create({
         baseURL: 'http://localhost:80',
@@ -241,6 +237,8 @@ export default function useGetData(TheDatas)
         const [authUser, updateAuthUserInfo] = useState(TheDatas.authUser)
         const [isEditorMode, setIsEditorMode] = useState(false)
 
+        const to_refresh = useRef(true)
+
 
         echosHandler =
                 (tag, data = null) =>
@@ -285,7 +283,7 @@ export default function useGetData(TheDatas)
                                         http.post('getDatasByIds', ids)
                                                 .then( res =>
                                                         {
-                                                                console.log(res)
+                                                                console.log('getDatasByIds', res)
 
                                                                 dispatch({type: 'add', data: {...data, 'node': res.data}})
                                                         }
@@ -306,7 +304,11 @@ export default function useGetData(TheDatas)
                                         console.log('echo update ')
 
                                         const ids = new FormData
-                                        ids.append('ids[]', data.node)
+                                        console.log('data.node', data.node)
+                                        data.node.map(element => {
+                                                console.log(element)
+                                                ids.append('ids[]', element)
+                                        });
                                         http.post('getDatasByIds', ids)
                                                 .then( res =>
                                                         {
@@ -1026,9 +1028,71 @@ export default function useGetData(TheDatas)
 
         function reducer( state, action )
         {
+                function create_new_node(node)
+                {
+
+                        const type = node.front_type
+
+                        let parentId
+                        switch (type)
+                        {
+                                case 'audit':
+                                        parentId = '0'
+                                        break;
+                                case 'checkList':
+                                        parentId = 'audit' + node.audit_id
+                                        break;
+                                case 'dp':
+                                        parentId = 'audit' + node.audit_id
+                                        break;
+                                case 'nonC':
+                                        parentId = 'audit' + node.audit_id
+                                        break;
+                                case 'fnc':
+                                        parentId = 'nonC' + node.nc_id
+                                        break;
+                                case 'ds':
+                                        parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id
+                                        break;
+                                case 'f':
+                                        parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id
+                                        break;
+
+                                default:
+                                        break;
+                        }
+
+
+                        return makeNodeData(
+                                type + node.id,
+                                type === 'f' ? 'file' : 'folder',
+                                node.services,
+                                false,
+                                node.name,
+                                type,
+                                false,
+                                parentId,
+                                undefined,
+                                type !== 'f',
+                                type === 'f' ? node.extension : undefined,
+                                node.user,
+                                type === 'fnc' ? node.isClosed : undefined,
+                                type === 'fnc' ? node.review_date : undefined,
+                                node.created_at,//
+                                type === 'fnc' ? node.level : undefined,
+                                parseInt(node.section_id),
+                                type === 'f' ? node.size : undefined,
+                                type === 'f' ? node.url : undefined,
+                        )
+                }
+
                 switch (action.type) {
+                        case 'refresh':
+                                return [...state]
                         case 'add':
                         {
+                                to_refresh.current = true
+
                                 const data = action.data
                                 console.log( 'broadcast.........', data);
 
@@ -1048,7 +1112,8 @@ export default function useGetData(TheDatas)
                                         // console.log("heeeerre", existing_data)
                                         data.node.forEach(node =>
                                                 {
-                                                        const type = data.node_type === 'audit' ? node.sub_type !== undefined ? node.sub_type : data.node_type : data.node_type
+                                                        // const type = data.node_type === 'audit' ? node.sub_type !== undefined ? node.sub_type : data.node_type : data.node_type
+                                                        const type = node.front_type
                                                         let parentId
 
                                                         switch (type)
@@ -1082,7 +1147,7 @@ export default function useGetData(TheDatas)
                                                         state.push(
                                                                 makeNodeData(
                                                                         type + node.id,
-                                                                        data.node_type === 'f' ? 'file' : 'folder',
+                                                                        type === 'f' ? 'file' : 'folder',
                                                                         node.services,
                                                                         false,
                                                                         node.name,
@@ -1090,49 +1155,49 @@ export default function useGetData(TheDatas)
                                                                         false,
                                                                         parentId,
                                                                         undefined,
-                                                                        data.node_type !== 'f',
-                                                                        data.node_type === 'f' ? node.extension : undefined,
+                                                                        type !== 'f',
+                                                                        type === 'f' ? node.extension : undefined,
                                                                         node.user,
-                                                                        data.node_type === 'fnc' ? node.isClosed : undefined,
-                                                                        data.node_type === 'fnc' ? node.review_date : undefined,
+                                                                        type === 'fnc' ? node.isClosed : undefined,
+                                                                        type === 'fnc' ? node.review_date : undefined,
                                                                         node.created_at,//
-                                                                        data.node_type === 'fnc' ? node.level : undefined,
+                                                                        type === 'fnc' ? node.level : undefined,
                                                                         section_id,
-                                                                        data.node_type === 'f' ? node.size : undefined,
-                                                                        data.node_type === 'f' ? node.url : undefined,
+                                                                        type === 'f' ? node.size : undefined,
+                                                                        type === 'f' ? node.url : undefined,
                                                                 )
                                                         )
                                                 }
                                         );
                                 }
-                                else
-                                {
-                                        state.push
-                                        (
-                                                makeNodeData
-                                                (
-                                                        data.node_type + data.node.id,
-                                                        data.node_type === 'f' ? 'file' : 'folder',
-                                                        data.node.services,
-                                                        false,
-                                                        data.node.name,
-                                                        data.node_type,
-                                                        false,
-                                                        data.node_type === 'f' || data.node_type === 'ds' ? data.node.parent_type === '' ? '0' : data.node.parent_type + data.node.parent_id : undefined,
-                                                        undefined,
-                                                        data.node_type !== 'f',
-                                                        data.node_type === 'f' ? data.node.extension : undefined,
-                                                        data.node_type === 'audit' ? data.node.user.name : undefined,
-                                                        data.node_type === 'fnc' ? data.node.isClosed : undefined,
-                                                        data.node_type === 'fnc' ? data.node.review_date : undefined,
-                                                        data.node.created_at,//
-                                                        data.node_type === 'fnc' ? data.node.level : undefined,
-                                                        section_id,
-                                                        data.node_type === 'f' ? data.node.size : undefined,
-                                                        data.node_type === 'f' ? data.node.url : undefined,
-                                                )
-                                        )
-                                }
+                                // else
+                                // {
+                                //         state.push
+                                //         (
+                                //                 makeNodeData
+                                //                 (
+                                //                         data.node_type + data.node.id,
+                                //                         data.node_type === 'f' ? 'file' : 'folder',
+                                //                         data.node.services,
+                                //                         false,
+                                //                         data.node.name,
+                                //                         data.node_type,
+                                //                         false,
+                                //                         data.node_type === 'f' || data.node_type === 'ds' ? data.node.parent_type === '' ? '0' : data.node.parent_type + data.node.parent_id : undefined,
+                                //                         undefined,
+                                //                         data.node_type !== 'f',
+                                //                         data.node_type === 'f' ? data.node.extension : undefined,
+                                //                         data.node_type === 'audit' ? data.node.user.name : undefined,
+                                //                         data.node_type === 'fnc' ? data.node.isClosed : undefined,
+                                //                         data.node_type === 'fnc' ? data.node.review_date : undefined,
+                                //                         data.node.created_at,//
+                                //                         data.node_type === 'fnc' ? data.node.level : undefined,
+                                //                         section_id,
+                                //                         data.node_type === 'f' ? data.node.size : undefined,
+                                //                         data.node_type === 'f' ? data.node.url : undefined,
+                                //                 )
+                                //         )
+                                // }
 
                                 // temp.set(section_id, existing_data)
 
@@ -1144,6 +1209,8 @@ export default function useGetData(TheDatas)
                         }
                         case 'delete':
                         {
+                                to_refresh.current = true
+
                                 const data = action.data
                                 console.log( 'broadcast.........', data);
 
@@ -1216,7 +1283,7 @@ export default function useGetData(TheDatas)
 
                                 // setFnd(temp)
 
-                                const newState = state.filter( node => node.id !== data.node_type + data.node.id ).map( node => node )
+                                const newState = state.filter( node => node.id !== data.node.type + data.node.id ).map( node => node )
 
                                 // EventsManager.emit('updateData')
 
@@ -1226,94 +1293,16 @@ export default function useGetData(TheDatas)
                         }
                         case 'update':
                         {
+                                to_refresh.current = true
+
                                 const data = action.data
                                 console.log( 'broadcast.........', data);
-
-                                const node = data.node[0];
 
                                 // temp.set(section_id, existing_data)
 
                                 // console.log(temp)
 
                                 // setFnd(temp)
-
-
-                                const type = data.node_type === 'audit' ? node.sub_type !== undefined ? node.sub_type : data.node_type : data.node_type
-                                let parentId
-
-                                switch (type)
-                                {
-                                        case 'audit':
-                                                parentId = '0'
-                                                break;
-                                        case 'checkList':
-                                                parentId = 'audit' + node.audit_id
-                                                break;
-                                        case 'dp':
-                                                parentId = 'audit' + node.audit_id
-                                                break;
-                                        case 'nonC':
-                                                parentId = 'audit' + node.audit_id
-                                                break;
-                                        case 'fnc':
-                                                parentId = 'nonC' + node.nc_id
-                                                break;
-                                        case 'ds':
-                                                parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id
-                                                break;
-                                        case 'f':
-                                                parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id
-                                                break;
-
-                                        default:
-                                                break;
-                                }
-
-
-                                const updatedNode = makeNodeData
-                                (
-                                        data.node_type + node.id,
-                                        data.node_type === 'f' ? 'file' : 'folder',
-                                        node.services,
-                                        false,
-                                        node.name,
-                                        data.node_type,
-                                        false,
-                                        parentId,
-                                        undefined,
-                                        data.node_type !== 'f',
-                                        data.node_type === 'f' ? node.extension : undefined,
-                                        data.node_type === 'audit' ? node.user.name : undefined,
-                                        data.node_type === 'fnc' ? node.isClosed : undefined,
-                                        data.node_type === 'fnc' ? node.review_date : undefined,
-                                        node.created_at,//
-                                        data.node_type === 'fnc' ? node.level : undefined,
-                                        parseInt(node.section_id),
-                                        data.node_type === 'f' ? node.size : undefined,
-                                        data.node_type === 'f' ? node.url : undefined,
-                                )
-
-
-                                console.log('updatedNode', updatedNode)
-
-                                let newState = state.map(
-                                        node =>
-                                        {
-                                                if (node.id === updatedNode.id)
-                                                {
-                                                        // updatedNode.path = getNewPath(updatedNode, state, true)
-
-                                                        return updatedNode
-                                                }
-                                                // else if ( (node.parentId === updatedNode.id) )
-                                                // {
-                                                //         node.path = getNewPath(node, state, true)
-                                                //
-                                                //         return node
-                                                // }
-                                                return node
-                                        }
-                                )
 
                                 const update_path = (node, current_state) =>
                                 {
@@ -1324,11 +1313,11 @@ export default function useGetData(TheDatas)
                                         console.log('current_state', current_state)
 
                                         let new_state = JSON.parse( JSON.stringify( current_state ) ).map(
-                                                current_node =>
-                                                {
-                                                        if ( (current_node.id === up_to_date_node.id) ) return up_to_date_node
-                                                        return current_node
-                                                }
+                                        current_node =>
+                                        {
+                                                if ( (current_node.id === up_to_date_node.id) ) return up_to_date_node
+                                                return current_node
+                                        }
                                         )
 
                                         console.log('new_state', new_state)
@@ -1336,20 +1325,50 @@ export default function useGetData(TheDatas)
                                         let final_state = JSON.parse( JSON.stringify( new_state ) )
 
                                         new_state.forEach(
-                                                new_node =>
+                                        new_node =>
+                                        {
+                                                if ( (new_node.parentId === up_to_date_node.id) )
                                                 {
-                                                        if ( (new_node.parentId === up_to_date_node.id) )
-                                                        {
-                                                                final_state = update_path(new_node, final_state)
-                                                        }
+                                                        final_state = update_path(new_node, final_state)
                                                 }
+                                        }
                                         )
 
                                         return final_state
 
                                 }
 
-                                const finalState = update_path(updatedNode, JSON.parse(JSON.stringify(newState)) )
+                                let newState = JSON.parse( JSON.stringify(state) )
+                                let finalState = JSON.parse(JSON.stringify(newState))
+
+                                for (const node of data.node)
+                                {
+                                        const updatedNode = create_new_node(node)
+
+                                        console.log('updatedNode', updatedNode)
+
+                                        const current_state = JSON.parse( JSON.stringify(newState) )
+                                        newState = current_state.map(
+                                                node =>
+                                                {
+                                                        if (node.id === updatedNode.id)
+                                                        {
+                                                                // updatedNode.path = getNewPath(updatedNode, state, true)
+
+                                                                return updatedNode
+                                                        }
+                                                        // else if ( (node.parentId === updatedNode.id) )
+                                                        // {
+                                                        //         node.path = getNewPath(node, state, true)
+                                                        //
+                                                        //         return node
+                                                        // }
+                                                        return node
+                                                }
+                                        )
+
+                                        finalState = update_path(updatedNode, JSON.parse(JSON.stringify(newState)) )
+                                }
 
                                 // EventsManager.emit('updateData')
 
@@ -1357,34 +1376,34 @@ export default function useGetData(TheDatas)
 
                                 return JSON.parse(JSON.stringify(finalState))
                         }
-                        case 'move':
-                        {
-                                const data = action.data
-
-                                dispatch({type: 'update', data})
-
-                                const moved_node = data.node[0];
-
-                                const newState = state.map(
-                                        node =>
-                                        {
-                                                if (node.id === data.node_type + moved_node.id)
-                                                {
-                                                        node.path = getNewPath(node, state)
-
-                                                        return node
-                                                }
-                                                else if ( (node.parentId === data.node_type + moved_node.id) )
-                                                {
-                                                        node.path = getNewPath(node, state)
-                                                }
-                                        }
-                                )
-
-                                console.log('newState', newState)
-
-                                return JSON.parse(JSON.stringify(newState))
-                        }
+                        // case 'move':
+                        // {
+                        //         const data = action.data
+                        //
+                        //         dispatch({type: 'update', data})
+                        //
+                        //         const moved_node = data.node[0];
+                        //
+                        //         const newState = state.map(
+                        //                 node =>
+                        //                 {
+                        //                         if (node.id === data.node_type + moved_node.id)
+                        //                         {
+                        //                                 node.path = getNewPath(node, state)
+                        //
+                        //                                 return node
+                        //                         }
+                        //                         else if ( (node.parentId === data.node_type + moved_node.id) )
+                        //                         {
+                        //                                 node.path = getNewPath(node, state)
+                        //                         }
+                        //                 }
+                        //         )
+                        //
+                        //         console.log('newState', newState)
+                        //
+                        //         return JSON.parse(JSON.stringify(newState))
+                        // }
 
                         default:
                                 break;
@@ -1419,6 +1438,8 @@ export default function useGetData(TheDatas)
                 () =>
                 {
                         editor.update_initData(FetchedNodesData)
+                        if (to_refresh.current) setImmediate( () => { dispatch({type: 'refresh'}) } )
+                        to_refresh.current = false
                 }, [FetchedNodesData]
         )
 

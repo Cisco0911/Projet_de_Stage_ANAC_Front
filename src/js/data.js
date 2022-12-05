@@ -4,11 +4,13 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 var _this = this;
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /* eslint-disable import/first */
 
-import React, { useMemo, useState, useEffect, useRef, useCallback, useReducer } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import parseToJson from "./files_package/parse_to_json";
 import useEditor from './editor';
@@ -16,16 +18,15 @@ import { Global_State } from "./main";
 
 import axios from "axios";
 import Echo from 'laravel-echo';
-import Pusher from 'pusher-js';
 import EventEmitter from 'eventemitter3';
 
 import Modal from "react-bootstrap/Modal";
 import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
 
 import toast from "react-hot-toast";
+
+window.Pusher = require('pusher-js');
 
 export var http = axios.create({
         baseURL: 'http://localhost:80',
@@ -283,6 +284,8 @@ export default function useGetData(TheDatas) {
             isEditorMode = _useState4[0],
             setIsEditorMode = _useState4[1];
 
+        var to_refresh = useRef(true);
+
         echosHandler = function echosHandler(tag) {
                 var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
@@ -319,7 +322,7 @@ export default function useGetData(TheDatas) {
                                 console.log(ids.get('ids[]'));
 
                                 http.post('getDatasByIds', ids).then(function (res) {
-                                        console.log(res);
+                                        console.log('getDatasByIds', res);
 
                                         dispatch({ type: 'add', data: Object.assign({}, data, { 'node': res.data }) });
                                 }).catch(function (err) {
@@ -332,7 +335,11 @@ export default function useGetData(TheDatas) {
                                 console.log('echo update ');
 
                                 var _ids = new FormData();
-                                _ids.append('ids[]', data.node);
+                                console.log('data.node', data.node);
+                                data.node.map(function (element) {
+                                        console.log(element);
+                                        _ids.append('ids[]', element);
+                                });
                                 http.post('getDatasByIds', _ids).then(function (res) {
                                         console.log(res);
 
@@ -1361,9 +1368,49 @@ export default function useGetData(TheDatas) {
         };
 
         function reducer(state, action) {
+                function create_new_node(node) {
+
+                        var type = node.front_type;
+
+                        var parentId = void 0;
+                        switch (type) {
+                                case 'audit':
+                                        parentId = '0';
+                                        break;
+                                case 'checkList':
+                                        parentId = 'audit' + node.audit_id;
+                                        break;
+                                case 'dp':
+                                        parentId = 'audit' + node.audit_id;
+                                        break;
+                                case 'nonC':
+                                        parentId = 'audit' + node.audit_id;
+                                        break;
+                                case 'fnc':
+                                        parentId = 'nonC' + node.nc_id;
+                                        break;
+                                case 'ds':
+                                        parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id;
+                                        break;
+                                case 'f':
+                                        parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id;
+                                        break;
+
+                                default:
+                                        break;
+                        }
+
+                        return makeNodeData(type + node.id, type === 'f' ? 'file' : 'folder', node.services, false, node.name, type, false, parentId, undefined, type !== 'f', type === 'f' ? node.extension : undefined, node.user, type === 'fnc' ? node.isClosed : undefined, type === 'fnc' ? node.review_date : undefined, node.created_at, //
+                        type === 'fnc' ? node.level : undefined, parseInt(node.section_id), type === 'f' ? node.size : undefined, type === 'f' ? node.url : undefined);
+                }
+
                 switch (action.type) {
+                        case 'refresh':
+                                return [].concat(_toConsumableArray(state));
                         case 'add':
                                 {
+                                        to_refresh.current = true;
+
                                         var data = action.data;
                                         console.log('broadcast.........', data);
 
@@ -1381,7 +1428,8 @@ export default function useGetData(TheDatas) {
                                         if (data.node.constructor === Array) {
                                                 // console.log("heeeerre", existing_data)
                                                 data.node.forEach(function (node) {
-                                                        var type = data.node_type === 'audit' ? node.sub_type !== undefined ? node.sub_type : data.node_type : data.node_type;
+                                                        // const type = data.node_type === 'audit' ? node.sub_type !== undefined ? node.sub_type : data.node_type : data.node_type
+                                                        var type = node.front_type;
                                                         var parentId = void 0;
 
                                                         switch (type) {
@@ -1411,13 +1459,38 @@ export default function useGetData(TheDatas) {
                                                                         break;
                                                         }
 
-                                                        state.push(makeNodeData(type + node.id, data.node_type === 'f' ? 'file' : 'folder', node.services, false, node.name, type, false, parentId, undefined, data.node_type !== 'f', data.node_type === 'f' ? node.extension : undefined, node.user, data.node_type === 'fnc' ? node.isClosed : undefined, data.node_type === 'fnc' ? node.review_date : undefined, node.created_at, //
-                                                        data.node_type === 'fnc' ? node.level : undefined, section_id, data.node_type === 'f' ? node.size : undefined, data.node_type === 'f' ? node.url : undefined));
+                                                        state.push(makeNodeData(type + node.id, type === 'f' ? 'file' : 'folder', node.services, false, node.name, type, false, parentId, undefined, type !== 'f', type === 'f' ? node.extension : undefined, node.user, type === 'fnc' ? node.isClosed : undefined, type === 'fnc' ? node.review_date : undefined, node.created_at, //
+                                                        type === 'fnc' ? node.level : undefined, section_id, type === 'f' ? node.size : undefined, type === 'f' ? node.url : undefined));
                                                 });
-                                        } else {
-                                                state.push(makeNodeData(data.node_type + data.node.id, data.node_type === 'f' ? 'file' : 'folder', data.node.services, false, data.node.name, data.node_type, false, data.node_type === 'f' || data.node_type === 'ds' ? data.node.parent_type === '' ? '0' : data.node.parent_type + data.node.parent_id : undefined, undefined, data.node_type !== 'f', data.node_type === 'f' ? data.node.extension : undefined, data.node_type === 'audit' ? data.node.user.name : undefined, data.node_type === 'fnc' ? data.node.isClosed : undefined, data.node_type === 'fnc' ? data.node.review_date : undefined, data.node.created_at, //
-                                                data.node_type === 'fnc' ? data.node.level : undefined, section_id, data.node_type === 'f' ? data.node.size : undefined, data.node_type === 'f' ? data.node.url : undefined));
                                         }
+                                        // else
+                                        // {
+                                        //         state.push
+                                        //         (
+                                        //                 makeNodeData
+                                        //                 (
+                                        //                         data.node_type + data.node.id,
+                                        //                         data.node_type === 'f' ? 'file' : 'folder',
+                                        //                         data.node.services,
+                                        //                         false,
+                                        //                         data.node.name,
+                                        //                         data.node_type,
+                                        //                         false,
+                                        //                         data.node_type === 'f' || data.node_type === 'ds' ? data.node.parent_type === '' ? '0' : data.node.parent_type + data.node.parent_id : undefined,
+                                        //                         undefined,
+                                        //                         data.node_type !== 'f',
+                                        //                         data.node_type === 'f' ? data.node.extension : undefined,
+                                        //                         data.node_type === 'audit' ? data.node.user.name : undefined,
+                                        //                         data.node_type === 'fnc' ? data.node.isClosed : undefined,
+                                        //                         data.node_type === 'fnc' ? data.node.review_date : undefined,
+                                        //                         data.node.created_at,//
+                                        //                         data.node_type === 'fnc' ? data.node.level : undefined,
+                                        //                         section_id,
+                                        //                         data.node_type === 'f' ? data.node.size : undefined,
+                                        //                         data.node_type === 'f' ? data.node.url : undefined,
+                                        //                 )
+                                        //         )
+                                        // }
 
                                         // temp.set(section_id, existing_data)
 
@@ -1429,6 +1502,8 @@ export default function useGetData(TheDatas) {
                                 }
                         case 'delete':
                                 {
+                                        to_refresh.current = true;
+
                                         var _data = action.data;
                                         console.log('broadcast.........', _data);
 
@@ -1499,7 +1574,7 @@ export default function useGetData(TheDatas) {
                                         // setFnd(temp)
 
                                         var newState = state.filter(function (node) {
-                                                return node.id !== _data.node_type + _data.node.id;
+                                                return node.id !== _data.node.type + _data.node.id;
                                         }).map(function (node) {
                                                 return node;
                                         });
@@ -1512,67 +1587,16 @@ export default function useGetData(TheDatas) {
                                 }
                         case 'update':
                                 {
+                                        to_refresh.current = true;
+
                                         var _data2 = action.data;
                                         console.log('broadcast.........', _data2);
-
-                                        var node = _data2.node[0];
 
                                         // temp.set(section_id, existing_data)
 
                                         // console.log(temp)
 
                                         // setFnd(temp)
-
-
-                                        var type = _data2.node_type === 'audit' ? node.sub_type !== undefined ? node.sub_type : _data2.node_type : _data2.node_type;
-                                        var parentId = void 0;
-
-                                        switch (type) {
-                                                case 'audit':
-                                                        parentId = '0';
-                                                        break;
-                                                case 'checkList':
-                                                        parentId = 'audit' + node.audit_id;
-                                                        break;
-                                                case 'dp':
-                                                        parentId = 'audit' + node.audit_id;
-                                                        break;
-                                                case 'nonC':
-                                                        parentId = 'audit' + node.audit_id;
-                                                        break;
-                                                case 'fnc':
-                                                        parentId = 'nonC' + node.nc_id;
-                                                        break;
-                                                case 'ds':
-                                                        parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id;
-                                                        break;
-                                                case 'f':
-                                                        parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id;
-                                                        break;
-
-                                                default:
-                                                        break;
-                                        }
-
-                                        var updatedNode = makeNodeData(_data2.node_type + node.id, _data2.node_type === 'f' ? 'file' : 'folder', node.services, false, node.name, _data2.node_type, false, parentId, undefined, _data2.node_type !== 'f', _data2.node_type === 'f' ? node.extension : undefined, _data2.node_type === 'audit' ? node.user.name : undefined, _data2.node_type === 'fnc' ? node.isClosed : undefined, _data2.node_type === 'fnc' ? node.review_date : undefined, node.created_at, //
-                                        _data2.node_type === 'fnc' ? node.level : undefined, parseInt(node.section_id), _data2.node_type === 'f' ? node.size : undefined, _data2.node_type === 'f' ? node.url : undefined);
-
-                                        console.log('updatedNode', updatedNode);
-
-                                        var _newState = state.map(function (node) {
-                                                if (node.id === updatedNode.id) {
-                                                        // updatedNode.path = getNewPath(updatedNode, state, true)
-
-                                                        return updatedNode;
-                                                }
-                                                // else if ( (node.parentId === updatedNode.id) )
-                                                // {
-                                                //         node.path = getNewPath(node, state, true)
-                                                //
-                                                //         return node
-                                                // }
-                                                return node;
-                                        });
 
                                         var update_path = function update_path(node, current_state) {
                                                 var up_to_date_node = JSON.parse(JSON.stringify(node));
@@ -1599,36 +1623,92 @@ export default function useGetData(TheDatas) {
                                                 return final_state;
                                         };
 
-                                        var finalState = update_path(updatedNode, JSON.parse(JSON.stringify(_newState)));
+                                        var _newState = JSON.parse(JSON.stringify(state));
+                                        var finalState = JSON.parse(JSON.stringify(_newState));
 
-                                        // EventsManager.emit('updateData')
+                                        var _loop2 = function _loop2(node) {
+                                                var updatedNode = create_new_node(node);
+
+                                                console.log('updatedNode', updatedNode);
+
+                                                var current_state = JSON.parse(JSON.stringify(_newState));
+                                                _newState = current_state.map(function (node) {
+                                                        if (node.id === updatedNode.id) {
+                                                                // updatedNode.path = getNewPath(updatedNode, state, true)
+
+                                                                return updatedNode;
+                                                        }
+                                                        // else if ( (node.parentId === updatedNode.id) )
+                                                        // {
+                                                        //         node.path = getNewPath(node, state, true)
+                                                        //
+                                                        //         return node
+                                                        // }
+                                                        return node;
+                                                });
+
+                                                finalState = update_path(updatedNode, JSON.parse(JSON.stringify(_newState)));
+                                        };
+
+                                        var _iteratorNormalCompletion24 = true;
+                                        var _didIteratorError24 = false;
+                                        var _iteratorError24 = undefined;
+
+                                        try {
+                                                for (var _iterator24 = _data2.node[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
+                                                        var node = _step24.value;
+
+                                                        _loop2(node);
+                                                }
+
+                                                // EventsManager.emit('updateData')
+                                        } catch (err) {
+                                                _didIteratorError24 = true;
+                                                _iteratorError24 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion24 && _iterator24.return) {
+                                                                _iterator24.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError24) {
+                                                                throw _iteratorError24;
+                                                        }
+                                                }
+                                        }
 
                                         console.log('finalState', finalState);
 
                                         return JSON.parse(JSON.stringify(finalState));
                                 }
-                        case 'move':
-                                {
-                                        var _data3 = action.data;
-
-                                        dispatch({ type: 'update', data: _data3 });
-
-                                        var moved_node = _data3.node[0];
-
-                                        var _newState2 = state.map(function (node) {
-                                                if (node.id === _data3.node_type + moved_node.id) {
-                                                        node.path = getNewPath(node, state);
-
-                                                        return node;
-                                                } else if (node.parentId === _data3.node_type + moved_node.id) {
-                                                        node.path = getNewPath(node, state);
-                                                }
-                                        });
-
-                                        console.log('newState', _newState2);
-
-                                        return JSON.parse(JSON.stringify(_newState2));
-                                }
+                        // case 'move':
+                        // {
+                        //         const data = action.data
+                        //
+                        //         dispatch({type: 'update', data})
+                        //
+                        //         const moved_node = data.node[0];
+                        //
+                        //         const newState = state.map(
+                        //                 node =>
+                        //                 {
+                        //                         if (node.id === data.node_type + moved_node.id)
+                        //                         {
+                        //                                 node.path = getNewPath(node, state)
+                        //
+                        //                                 return node
+                        //                         }
+                        //                         else if ( (node.parentId === data.node_type + moved_node.id) )
+                        //                         {
+                        //                                 node.path = getNewPath(node, state)
+                        //                         }
+                        //                 }
+                        //         )
+                        //
+                        //         console.log('newState', newState)
+                        //
+                        //         return JSON.parse(JSON.stringify(newState))
+                        // }
 
                         default:
                                 break;
@@ -1660,6 +1740,10 @@ export default function useGetData(TheDatas) {
 
         useEffect(function () {
                 editor.update_initData(FetchedNodesData);
+                if (to_refresh.current) setImmediate(function () {
+                        dispatch({ type: 'refresh' });
+                });
+                to_refresh.current = false;
         }, [FetchedNodesData]);
 
         var dataToUse = useMemo(function () {
@@ -1684,7 +1768,7 @@ export default function useGetData(TheDatas) {
         var structuredData = useMemo(function () {
                 var map = new Map();
 
-                var _loop2 = function _loop2(section) {
+                var _loop3 = function _loop3(section) {
                         map.set(section.id, dataToUse.filter(function (nodeData) {
                                 /*console.log(nodeData.section_id, section.id);*/return nodeData.section_id === section.id || nodeData.section_id === -1;
                         }).map(function (nodeData) {
@@ -1692,27 +1776,27 @@ export default function useGetData(TheDatas) {
                         }));
                 };
 
-                var _iteratorNormalCompletion24 = true;
-                var _didIteratorError24 = false;
-                var _iteratorError24 = undefined;
+                var _iteratorNormalCompletion25 = true;
+                var _didIteratorError25 = false;
+                var _iteratorError25 = undefined;
 
                 try {
-                        for (var _iterator24 = Data_Base.data.sections[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
-                                var section = _step24.value;
+                        for (var _iterator25 = Data_Base.data.sections[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
+                                var section = _step25.value;
 
-                                _loop2(section);
+                                _loop3(section);
                         }
                 } catch (err) {
-                        _didIteratorError24 = true;
-                        _iteratorError24 = err;
+                        _didIteratorError25 = true;
+                        _iteratorError25 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion24 && _iterator24.return) {
-                                        _iterator24.return();
+                                if (!_iteratorNormalCompletion25 && _iterator25.return) {
+                                        _iterator25.return();
                                 }
                         } finally {
-                                if (_didIteratorError24) {
-                                        throw _iteratorError24;
+                                if (_didIteratorError25) {
+                                        throw _iteratorError25;
                                 }
                         }
                 }
@@ -1752,40 +1836,15 @@ export default function useGetData(TheDatas) {
                 var img = ["jpeg", "jpg", "png", "gif"];
                 var vid = ["mp4", "avi", "MOV", "mpeg"];
 
-                var _iteratorNormalCompletion25 = true;
-                var _didIteratorError25 = false;
-                var _iteratorError25 = undefined;
-
-                try {
-                        for (var _iterator25 = img[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
-                                var imgExt = _step25.value;
-
-                                if (imgExt === ext) return "img";
-                        }
-                } catch (err) {
-                        _didIteratorError25 = true;
-                        _iteratorError25 = err;
-                } finally {
-                        try {
-                                if (!_iteratorNormalCompletion25 && _iterator25.return) {
-                                        _iterator25.return();
-                                }
-                        } finally {
-                                if (_didIteratorError25) {
-                                        throw _iteratorError25;
-                                }
-                        }
-                }
-
                 var _iteratorNormalCompletion26 = true;
                 var _didIteratorError26 = false;
                 var _iteratorError26 = undefined;
 
                 try {
-                        for (var _iterator26 = vid[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
-                                var vidExt = _step26.value;
+                        for (var _iterator26 = img[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
+                                var imgExt = _step26.value;
 
-                                if (vidExt === ext) return "vid";
+                                if (imgExt === ext) return "img";
                         }
                 } catch (err) {
                         _didIteratorError26 = true;
@@ -1802,22 +1861,15 @@ export default function useGetData(TheDatas) {
                         }
                 }
 
-                return ext;
-        }
-
-        function getNodeData(id) {
                 var _iteratorNormalCompletion27 = true;
                 var _didIteratorError27 = false;
                 var _iteratorError27 = undefined;
 
                 try {
-                        for (var _iterator27 = displayingSection[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
-                                var node = _step27.value;
+                        for (var _iterator27 = vid[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
+                                var vidExt = _step27.value;
 
-                                // console.log(node.id)
-                                if (id === node.id) {
-                                        return node;
-                                }
+                                if (vidExt === ext) return "vid";
                         }
                 } catch (err) {
                         _didIteratorError27 = true;
@@ -1830,6 +1882,38 @@ export default function useGetData(TheDatas) {
                         } finally {
                                 if (_didIteratorError27) {
                                         throw _iteratorError27;
+                                }
+                        }
+                }
+
+                return ext;
+        }
+
+        function getNodeData(id) {
+                var _iteratorNormalCompletion28 = true;
+                var _didIteratorError28 = false;
+                var _iteratorError28 = undefined;
+
+                try {
+                        for (var _iterator28 = displayingSection[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
+                                var node = _step28.value;
+
+                                // console.log(node.id)
+                                if (id === node.id) {
+                                        return node;
+                                }
+                        }
+                } catch (err) {
+                        _didIteratorError28 = true;
+                        _iteratorError28 = err;
+                } finally {
+                        try {
+                                if (!_iteratorNormalCompletion28 && _iterator28.return) {
+                                        _iterator28.return();
+                                }
+                        } finally {
+                                if (_didIteratorError28) {
+                                        throw _iteratorError28;
                                 }
                         }
                 }
@@ -1851,29 +1935,29 @@ export default function useGetData(TheDatas) {
 
         function getChildren(nodeId) {
                 var children = [];
-                var _iteratorNormalCompletion28 = true;
-                var _didIteratorError28 = false;
-                var _iteratorError28 = undefined;
+                var _iteratorNormalCompletion29 = true;
+                var _didIteratorError29 = false;
+                var _iteratorError29 = undefined;
 
                 try {
-                        for (var _iterator28 = displayingSection[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
-                                var nodeData = _step28.value;
+                        for (var _iterator29 = displayingSection[Symbol.iterator](), _step29; !(_iteratorNormalCompletion29 = (_step29 = _iterator29.next()).done); _iteratorNormalCompletion29 = true) {
+                                var nodeData = _step29.value;
 
                                 if (nodeData.parentId === nodeId) {
                                         children.push(nodeData);
                                 }
                         }
                 } catch (err) {
-                        _didIteratorError28 = true;
-                        _iteratorError28 = err;
+                        _didIteratorError29 = true;
+                        _iteratorError29 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion28 && _iterator28.return) {
-                                        _iterator28.return();
+                                if (!_iteratorNormalCompletion29 && _iterator29.return) {
+                                        _iterator29.return();
                                 }
                         } finally {
-                                if (_didIteratorError28) {
-                                        throw _iteratorError28;
+                                if (_didIteratorError29) {
+                                        throw _iteratorError29;
                                 }
                         }
                 }

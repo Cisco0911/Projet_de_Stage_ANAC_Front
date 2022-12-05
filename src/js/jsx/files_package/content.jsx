@@ -230,6 +230,89 @@ export default function FileTable({set})
                                 clearTimeout(clear_clipboard_id.current)
                                 setMc_state('none')
 
+                                const Save_for_rest = () =>
+                                {
+
+                                        return(
+                                        <div className={`d-flex align-items-stretch`} >
+                                                <input id={'save_checkbox'} type={'checkbox'}
+                                                       onChange={
+                                                               e => {
+                                                                       // e.preventDefault()
+                                                                       console.log('e.target',e.target)
+                                                                       action.current = { saved: e.target.checked }
+                                                               }
+                                                       }
+                                                />
+                                                <label htmlFor={'save_checkbox'}
+                                                       style=
+                                                       {{
+                                                               fontSize: 12,
+                                                               display: "contents"
+                                                       }}
+                                                > Enregistrer l'action pour autres cas similaires </label>
+                                        </div>
+                                        )
+                                }
+
+                                for (const node_to_copy of to_move_or_copy.current)
+                                {
+                                        for (const child_node of node.children)
+                                        {
+                                                if (child_node.name === node_to_copy.name)
+                                                {
+                                                        if (!action.current.saved)
+                                                        {
+                                                                await new Promise(
+                                                                resolve =>
+                                                                {
+                                                                        const content = (
+                                                                        <div>
+                                                                                <div className={`mb-3`} >
+                                                                                        {`La destination pourrait contenir un fichier de meme nom: `}
+                                                                                        <br/>
+                                                                                        <span style={{ fontWeight: "bold" }} > {`${node_to_copy.name}`} </span>
+                                                                                </div>
+
+                                                                                <Save_for_rest />
+
+                                                                                <div className={`d-flex justify-content-end`} >
+                                                                                        <Button className={`mr-1`} variant={`outline-light`} onClick={ e => { e.stopPropagation(); resolve(1) } } >
+                                                                                                IGNORER
+                                                                                        </Button>
+                                                                                        <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); resolve(2) } } >
+                                                                                                RENOMER
+                                                                                        </Button>
+                                                                                        <Button variant={`outline-danger`} onClick={ e => { e.stopPropagation(); resolve(3) } } >
+                                                                                                ECRASER
+                                                                                        </Button>
+                                                                                </div>
+                                                                        </div>
+                                                                        )
+
+                                                                        Global_State.modalManager.setContent(content)
+                                                                        Global_State.modalManager.open_modal("Conflit de fichiers", false)
+
+                                                                }
+                                                                ).then(
+                                                                res =>
+                                                                {
+                                                                        console.log(res, action.current)
+                                                                        node_to_copy['on_exist'] = res
+                                                                        if (action.current) action.current = {...action.current, value: res}
+                                                                }
+                                                                )
+                                                        }
+                                                        else
+                                                        {
+                                                                node_to_copy['on_exist'] = action.current.value
+                                                        }
+                                                }
+                                        }
+                                }
+
+                                Global_State.modalManager.close_modal()
+
                                 if (operation_type === 'move')
                                 {
                                         for (const node_to_move of to_move_or_copy.current)
@@ -240,6 +323,7 @@ export default function FileTable({set})
                                                 queryData.append('destination_id', destination_id)
                                                 queryData.append('destination_type', destination_type)
                                                 queryData.append('id', node_to_move.id)
+                                                queryData.append('on_exist', node_to_move.on_exist ?  node_to_move.on_exist : '-1')
 
                                                 // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
                                                 if (node_to_move.type === 'ds')
@@ -262,93 +346,12 @@ export default function FileTable({set})
                                 }
                                 else
                                 {
-                                        const Save_for_rest = () =>
-                                        {
 
-                                                return(
-                                                        <div className={`d-flex align-items-stretch`} >
-                                                                <input id={'save_checkbox'} type={'checkbox'}
-                                                                       onChange={
-                                                                               e => {
-                                                                                       // e.preventDefault()
-                                                                                       console.log('e.target',e.target)
-                                                                                       action.current = { saved: e.target.checked }
-                                                                               }
-                                                                       }
-                                                                />
-                                                                <label htmlFor={'save_checkbox'}
-                                                                       style=
-                                                                       {{
-                                                                               fontSize: 12,
-                                                                               display: "contents"
-                                                                        }}
-                                                                > Enregistrer l'action pour autres cas similaires </label>
-                                                        </div>
-                                                )
-                                        }
-
-
-                                        for (const node_to_copy of to_move_or_copy.current)
-                                        {
-                                                for (const child_node of node.children)
-                                                {
-                                                        if (child_node.name === node_to_copy.name)
-                                                        {
-                                                                if (!action.current.saved)
-                                                                {
-                                                                        await new Promise(
-                                                                        resolve =>
-                                                                        {
-                                                                                const content = (
-                                                                                <div>
-                                                                                        <div className={`mb-3`} >
-                                                                                                {`La destination pourrait contenir un fichier de meme nom: `}
-                                                                                                <br/>
-                                                                                                <span style={{ fontWeight: "bold" }} > {`${node_to_copy.name}`} </span>
-                                                                                        </div>
-
-                                                                                        <Save_for_rest />
-
-                                                                                        <div className={`d-flex justify-content-end`} >
-                                                                                                <Button className={`mr-1`} variant={`outline-light`} onClick={ e => { e.stopPropagation(); resolve(1) } } >
-                                                                                                        IGNORER
-                                                                                                </Button>
-                                                                                                <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); resolve(2) } } >
-                                                                                                        RENOMER
-                                                                                                </Button>
-                                                                                                <Button variant={`outline-danger`} onClick={ e => { e.stopPropagation(); resolve(3) } } >
-                                                                                                        ECRASER
-                                                                                                </Button>
-                                                                                        </div>
-                                                                                </div>
-                                                                                )
-
-                                                                                Global_State.modalManager.setContent(content)
-                                                                                Global_State.modalManager.open_modal("Conflit de fichiers", false)
-
-                                                                        }
-                                                                        ).then(
-                                                                                res =>
-                                                                                {
-                                                                                        console.log(res, action.current)
-                                                                                        node_to_copy['on_exist'] = res
-                                                                                        if (action.current) action.current = {...action.current, value: res}
-                                                                                }
-                                                                        )
-                                                                }
-                                                                else
-                                                                {
-                                                                        node_to_copy['on_exist'] = action.current.value
-                                                                }
-                                                        }
-                                                }
-                                        }
-
-                                        Global_State.modalManager.close_modal()
                                         console.log( 'to_move_or_copy.current', to_move_or_copy.current )
 
                                         for (const node_to_copy of to_move_or_copy.current)
                                         {
+                                                // if (node_to_copy.on_exist === 1) continue
 
                                                 const queryData = new FormData
 
@@ -1454,7 +1457,7 @@ export default function FileTable({set})
                                                                                 )
 
                                                                                 to_move_or_copy.current = selectedRow.map(
-                                                                                row => ({id: Global_State.identifyNode(row)[0], type: row.type})
+                                                                                row => ({id: Global_State.identifyNode(row)[0], type: row.type, name: row.value})
                                                                                 )
 
                                                                                 setMc_state('move')
