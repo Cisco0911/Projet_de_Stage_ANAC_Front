@@ -176,8 +176,20 @@ export default function FileTable({set})
         const justChecking = useRef(false)
 
         const [mc_state, setMc_state] = useState('none')
-        const [to_move_or_copy, clear_clipboard_id] = [useRef([]), useRef(0)]
+        const [to_move_or_copy, from_id, clear_clipboard_id] = [useRef([]), useRef(undefined), useRef(undefined)]
 
+        useEffect(
+                () =>
+                {
+                        if (mc_state === 'none')
+                        {
+                                to_move_or_copy.current = []
+                                clearTimeout(clear_clipboard_id.current)
+                                clear_clipboard_id.current = undefined
+                                from_id.current = undefined
+                        }
+                }, [mc_state]
+        )
 
 
         // useEffect(
@@ -220,15 +232,13 @@ export default function FileTable({set})
 
                         async function paste_here(node)
                         {
-                                const destination_info = Global_State.identifyNode( JSON.parse( JSON.stringify(node) ) )
+                                const destination_node = JSON.parse( JSON.stringify(node) )
+                                const destination_info = Global_State.identifyNode( destination_node )
                                 const destination_id = destination_info[0]; const destination_type = destination_info[1]
 
                                 // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy.current)
 
                                 const operation_type = mc_state
-
-                                clearTimeout(clear_clipboard_id.current)
-                                setMc_state('none')
 
                                 const Save_for_rest = () =>
                                 {
@@ -255,6 +265,19 @@ export default function FileTable({set})
                                         )
                                 }
 
+                                // console.log('destination_node.id === from_id.current', destination_node.id, from_id.current)
+                                if (destination_node.id === from_id.current)
+                                {
+                                        if (operation_type === 'copy') action.current = { saved: true, value: 2 }
+                                        else if (operation_type === 'move')
+                                        {
+                                                setMc_state('none')
+
+                                                return 'nothing to do'
+                                        }
+
+                                }
+
                                 for (const node_to_copy of to_move_or_copy.current)
                                 {
                                         for (const child_node of node.children)
@@ -264,43 +287,43 @@ export default function FileTable({set})
                                                         if (!action.current.saved)
                                                         {
                                                                 await new Promise(
-                                                                resolve =>
-                                                                {
-                                                                        const content = (
-                                                                        <div>
-                                                                                <div className={`mb-3`} >
-                                                                                        {`La destination pourrait contenir un fichier de meme nom: `}
-                                                                                        <br/>
-                                                                                        <span style={{ fontWeight: "bold" }} > {`${node_to_copy.name}`} </span>
+                                                                        resolve =>
+                                                                        {
+                                                                                const content = (
+                                                                                <div>
+                                                                                        <div className={`mb-3`} >
+                                                                                                {`La destination pourrait contenir un fichier de meme nom: `}
+                                                                                                <br/>
+                                                                                                <span style={{ fontWeight: "bold" }} > {`${node_to_copy.name}`} </span>
+                                                                                        </div>
+
+                                                                                        <Save_for_rest />
+
+                                                                                        <div className={`d-flex justify-content-end`} >
+                                                                                                <Button className={`mr-1`} variant={`outline-light`} onClick={ e => { e.stopPropagation(); resolve(1) } } >
+                                                                                                        IGNORER
+                                                                                                </Button>
+                                                                                                <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); resolve(2) } } >
+                                                                                                        RENOMER
+                                                                                                </Button>
+                                                                                                <Button variant={`outline-danger`} onClick={ e => { e.stopPropagation(); resolve(3) } } >
+                                                                                                        ECRASER
+                                                                                                </Button>
+                                                                                        </div>
                                                                                 </div>
+                                                                                )
 
-                                                                                <Save_for_rest />
+                                                                                Global_State.modalManager.setContent(content)
+                                                                                Global_State.modalManager.open_modal("Conflit de fichiers", false)
 
-                                                                                <div className={`d-flex justify-content-end`} >
-                                                                                        <Button className={`mr-1`} variant={`outline-light`} onClick={ e => { e.stopPropagation(); resolve(1) } } >
-                                                                                                IGNORER
-                                                                                        </Button>
-                                                                                        <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); resolve(2) } } >
-                                                                                                RENOMER
-                                                                                        </Button>
-                                                                                        <Button variant={`outline-danger`} onClick={ e => { e.stopPropagation(); resolve(3) } } >
-                                                                                                ECRASER
-                                                                                        </Button>
-                                                                                </div>
-                                                                        </div>
-                                                                        )
-
-                                                                        Global_State.modalManager.setContent(content)
-                                                                        Global_State.modalManager.open_modal("Conflit de fichiers", false)
-
-                                                                }
+                                                                        }
                                                                 ).then(
-                                                                res =>
-                                                                {
-                                                                        console.log(res, action.current)
-                                                                        node_to_copy['on_exist'] = res
-                                                                        if (action.current) action.current = {...action.current, value: res}
-                                                                }
+                                                                        res =>
+                                                                        {
+                                                                                console.log(res, action.current)
+                                                                                node_to_copy['on_exist'] = res
+                                                                                if (action.current.saved) action.current = {...action.current, value: res}
+                                                                        }
                                                                 )
                                                         }
                                                         else
@@ -313,9 +336,16 @@ export default function FileTable({set})
 
                                 Global_State.modalManager.close_modal()
 
+                                // console.log('taaaaaaaaaaaaaaaaaaaaaaaaaa')
+                                // console.log( 'to_move_or_copy.current1', to_move_or_copy.current )
                                 if (operation_type === 'move')
                                 {
-                                        for (const node_to_move of to_move_or_copy.current)
+                                        const to_move = [...to_move_or_copy.current]
+
+                                        setMc_state('none')
+
+                                        // console.log('zaaaaaaaaaaaaaaaaaaaaaa')
+                                        for (const node_to_move of to_move)
                                         {
 
                                                 const queryData = new FormData
@@ -325,22 +355,36 @@ export default function FileTable({set})
                                                 queryData.append('id', node_to_move.id)
                                                 queryData.append('on_exist', node_to_move.on_exist ?  node_to_move.on_exist : '-1')
 
-                                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
+                                                console.log('arriiiiiiiiiiiiiveeee', node_to_move)
                                                 if (node_to_move.type === 'ds')
                                                 {
 
                                                         // console.log('arriiiiiiiiiiiiiveeee')
 
-                                                        await http.post('move_folder', queryData)
-                                                        .then( res => { console.log(res) } )
-                                                        .catch( err => { console.log(err); throw err} )
+                                                        if (Global_State.isEditorMode)
+                                                        {
+                                                                Global_State.editor.folder.move(queryData)
+                                                        }
+                                                        else
+                                                        {
+                                                                await http.post('move_folder', queryData)
+                                                                .then( res => { console.log(res) } )
+                                                                .catch( err => { console.log(err); throw err} )
+                                                        }
                                                 }
                                                 else if (node_to_move.type === 'f')
                                                 {
 
-                                                        await http.post('move_file', queryData)
-                                                        .then( res => { console.log(res) } )
-                                                        .catch( err => { console.log(err); throw err} )
+                                                        if (Global_State.isEditorMode)
+                                                        {
+                                                                Global_State.editor.files.move(queryData)
+                                                        }
+                                                        else
+                                                        {
+                                                                await http.post('move_file', queryData)
+                                                                .then( res => { console.log(res) } )
+                                                                .catch( err => { console.log(err); throw err} )
+                                                        }
                                                 }
                                         }
                                 }
@@ -393,12 +437,12 @@ export default function FileTable({set})
                                         }
                                 }
 
-                                to_move_or_copy.current = []
+                                // to_move_or_copy.current = []
 
                         }
 
                         return (
-                                <IconButton
+                                <IconButton id={`ctrl_v`}
                                         disabled={mc_state === 'none'}
                                         style = {{ marginRight: 20, }}
                                         onClick={
@@ -406,19 +450,25 @@ export default function FileTable({set})
                                                 {
                                                         console.log(to_move_or_copy.current, node.id)
 
-                                                        toast.promise(
-                                                                paste_here(node),
-                                                                {
-                                                                        loading: 'Pasting...',
-                                                                        success: 'Processus achevé',
-                                                                        error: 'err',
-                                                                },
-                                                                {
-                                                                        id: 'Pasting',
-                                                                        duration: Infinity
-                                                                }
-                                                        ).then( res => { setTimeout( () => { toast.dismiss('Pasting') }, 800 ) } )
-                                                        .catch( err => { setTimeout( () => { toast.dismiss('Pasting') }, 800 ) } )
+                                                        if (Global_State.isEditorMode) paste_here(node)
+                                                        else
+                                                        {
+                                                                toast.promise(
+                                                                        paste_here(node),
+                                                                        {
+                                                                                loading: 'Pasting...',
+                                                                                success: 'Processus achevé',
+                                                                                error: 'err',
+                                                                        },
+                                                                        {
+                                                                                id: 'Pasting',
+                                                                                duration: Infinity
+                                                                        }
+                                                                ).then( res => { setTimeout( () => { toast.dismiss('Pasting') }, 800 ) } )
+                                                                .catch( err => { setTimeout( () => { toast.dismiss('Pasting') }, 800 ) } )
+
+                                                        }
+
                                                 }
                                         }
                                 >
@@ -1420,47 +1470,64 @@ export default function FileTable({set})
                                                         }
                                                         <option className="dropdown-item">Partager</option>
                                                         <option className="dropdown-item">Télécharger</option>
-                                                        <option className="dropdown-item"
+                                                        <option id={`ctrl_c`} className="dropdown-item"
                                                                 onClick={
                                                                         e =>
                                                                         {
-                                                                                e.preventDefault()
-                                                                                e.stopPropagation()
+                                                                                if (selectedRow.length > 0)
+                                                                                {
+                                                                                        e.preventDefault()
+                                                                                        e.stopPropagation()
 
-                                                                                clearTimeout(clear_clipboard_id.current)
+                                                                                        clearTimeout(clear_clipboard_id.current)
 
-                                                                                clear_clipboard_id.current =
-                                                                                setTimeout(
-                                                                                () => { setMc_state('none'); to_move_or_copy.current = [] }, 2*60000
-                                                                                )
+                                                                                        clear_clipboard_id.current =
+                                                                                        setTimeout(
+                                                                                        () => { setMc_state('none') }, 10*60000
+                                                                                        )
 
-                                                                                to_move_or_copy.current = selectedRow.map(
-                                                                                row => ({id: Global_State.identifyNode(row)[0], type: row.type, name: row.value})
-                                                                                )
+                                                                                        to_move_or_copy.current = selectedRow.map(
+                                                                                                row =>
+                                                                                                {
+                                                                                                        const node_data = Global_State.getNodeDataById(row.id)
 
-                                                                                setMc_state('copy')
-                                                                        }
+                                                                                                        return(
+                                                                                                                {...node_data, id: Global_State.identifyNode(node_data)[0]}
+                                                                                                        )
+                                                                                                }
+                                                                                        )
+
+                                                                                        from_id.current = node.id
+
+                                                                                        setMc_state('copy')
+                                                                                }
+                                                                                }
                                                                 }
                                                         >Copier vers</option>
-                                                        <option className="dropdown-item"
+                                                        <option id={`ctrl_x`} className="dropdown-item"
                                                                 onClick={
                                                                         e =>
                                                                         {
-                                                                                e.preventDefault()
-                                                                                e.stopPropagation()
+                                                                                if (selectedRow.length > 0)
+                                                                                {
+                                                                                        e.preventDefault()
+                                                                                        e.stopPropagation()
 
-                                                                                clearTimeout(clear_clipboard_id.current)
+                                                                                        clearTimeout(clear_clipboard_id.current)
 
-                                                                                clear_clipboard_id.current =
-                                                                                setTimeout(
-                                                                                () => { setMc_state('none'); to_move_or_copy.current = [] }, 2*60000
-                                                                                )
+                                                                                        clear_clipboard_id.current =
+                                                                                        setTimeout(
+                                                                                        () => { setMc_state('none'); to_move_or_copy.current = [] }, 2*60000
+                                                                                        )
 
-                                                                                to_move_or_copy.current = selectedRow.map(
-                                                                                row => ({id: Global_State.identifyNode(row)[0], type: row.type, name: row.value})
-                                                                                )
+                                                                                        to_move_or_copy.current = selectedRow.map(
+                                                                                                row => ({id: Global_State.identifyNode(row)[0], type: row.type, name: row.value})
+                                                                                        )
 
-                                                                                setMc_state('move')
+                                                                                        from_id.current = node.id
+
+                                                                                        setMc_state('move')
+                                                                                }
                                                                         }
                                                                 }
                                                         >Déplacer vers</option>
@@ -1468,7 +1535,7 @@ export default function FileTable({set})
                                                                 selectedRowNumber === 1 ?
                                                                 <option className="dropdown-item">Renommer</option> : null
                                                         }
-                                                        <option className="dropdown-item" onClick = { e =>
+                                                        <option id={'ctrl_d'} className="dropdown-item" onClick = { e =>
                                                         {
                                                                 // http.delete("")
 

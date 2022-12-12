@@ -51,16 +51,21 @@ export default function useGetFiles(Global_research) {
                                 setImmediate(function () {
                                         var gr_input = document.getElementById('global_research_input');
                                         gr_input.focus();
+                                        gr_input.select();
                                 });
+                        } else if (e.ctrlKey && e.key.length === 1) {
+                                // console.log(e)
+                                var component = document.getElementById("ctrl_" + e.key);
+                                if (component) component.click();
                         }
                 };
 
                 // console.log('Global_research', Global_research)
 
-                document.addEventListener('keyup', handleKeyDown);
+                document.addEventListener('keydown', handleKeyDown);
 
                 return function () {
-                        document.removeEventListener('keyup', handleKeyDown);
+                        document.removeEventListener('keydown', handleKeyDown);
                 };
         }, []);
 

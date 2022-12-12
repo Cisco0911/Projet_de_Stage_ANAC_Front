@@ -1811,6 +1811,32 @@ export default function useGetData(TheDatas)
                 }
         }
 
+        const parseModelToFrontType = model =>
+        {
+                switch (model)
+                {
+                        case 'App\\Models\\Section':
+                                return 'root'
+                        case 'App\\Models\\Audit':
+                                return 'audit'
+                        case 'App\\Models\\checkList':
+                                return 'checkList'
+                        case 'App\\Models\\DossierPreuve':
+                                return 'dp'
+                        case 'App\\Models\\Nc':
+                                return 'nonC'
+                        case 'App\\Models\\NonConformite':
+                                return 'fnc'
+                        case 'App\\Models\\DossierSimple':
+                                return 'ds'
+                        case 'App\\Models\\Fichier':
+                                return 'f'
+                        default:
+                                return null
+
+                }
+        }
+
         // function useOutsideAlerter(ref) {
         //   useEffect(() => {
         //     /**
@@ -1876,14 +1902,16 @@ export default function useGetData(TheDatas)
                         editor,
                         changeMode: () => { setIsEditorMode(t => !t) },
                         createNodeData: makeNodeData,
+                        parseModelToFrontType,
                         getNodeDataById: getNodeData,
                         getChildrenById: getChildren,
                         getType: getType,
+                        getNewPath,
                         modalManager,
                         spinnerManager,
                         selectedSectionId,
                         setSectionId,
-                        sections: sections,
+                        sections,
                         FetchedNodesData: structuredData,
                         // setFnd,
                         selectedNodeIdsInSections,

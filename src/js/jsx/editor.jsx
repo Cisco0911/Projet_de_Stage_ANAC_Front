@@ -1,21 +1,17 @@
 /* eslint-disable import/first */
 
-import React, {useState, useEffect, useRef, useReducer} from 'react';
+import React, {useEffect, useReducer, useRef, useState} from 'react';
 
 import isEqual from "lodash.isequal";
 
-import { http } from "./data";
-import { Global_State } from "./main";
+import {http} from "./data";
+import {Global_State} from "./main";
 
 import Button from 'react-bootstrap/Button';
 
 import toast from "react-hot-toast";
 
-import { Stack } from '@mui/material';
-import { useMemo } from 'react';
-
-
-
+import {Stack} from '@mui/material';
 
 
 export default function useEditor(data)
@@ -133,6 +129,50 @@ export default function useEditor(data)
 
         function data_reducer( state, action )
         {
+
+                const suppress_from = ( list_, qualified_id ) =>
+                {
+                        let rest = list_.filter(
+                        node => ( node.id !== qualified_id )
+                        )
+
+                        const children = Global_State.getChildrenById(qualified_id)
+
+                        // console.log('childreeeeeeeeeeeeen', children)
+
+                        for (const child of children)
+                        {
+                                // console.log(id, node.parentId)
+                                rest = suppress_from(rest, child.id)
+                        }
+
+                        // console.log('resttttttttttttttttt', rest)
+                        return rest
+                }
+
+                const isExisting = (node_name, destination_id) =>
+                {
+                        const children = Global_State.getChildrenById(destination_id)
+
+                        for (const child of children) if (child.name === node_name) return true
+
+                        return false
+                }
+
+                const getNewName = (original_name, destination_id) =>
+                {
+                        let new_name = original_name
+                        let num = 1
+                        let num_copy = num === 1 ? `Copie` : `Copie (${num})`
+
+                        while ( isExisting(new_name, destination_id) )
+                        {
+                                new_name = `${original_name} - ${num_copy}`
+                        }
+
+                        return new_name
+                }
+
                 switch (action.type) {
                         case 'reset':
                         {
@@ -224,27 +264,96 @@ export default function useEditor(data)
                         case 'del_folder':
                         {
 
-                                const suppress_from = ( list_, id ) =>
-                                {
-                                        let rest = list_.filter(
-                                                node => ( node.id !== id )
-                                        )
-
-                                        for (const node of list_)
-                                        {
-                                                // console.log(id, node.parentId)
-                                                if( id === node.parentId ) rest = suppress_from(rest, node.id)
-                                        }
-
-                                        // console.log('resttttttttttttttttt', rest)
-                                        return rest
-                                }
-
                                 const newState = suppress_from(state, `ds${action.id}`)
 
                                 // console.log('new_staaaaaaaaaaaaate', newState)
 
                                 return JSON.parse(JSON.stringify(newState))
+                        }
+                        case 'move_folder':
+                        {
+                                const now_state = [...state]
+
+                                const data = action.job
+
+                                const to_delete = []
+
+                                const destination = Global_State.getNodeDataById(`${ Global_State.parseModelToFrontType(data.destination_type) === 'root' ?  '0' : `${Global_State.parseModelToFrontType(data.destination_type)}${data.destination_id}`}` )
+
+                                let new_state = now_state.map(
+                                        node =>
+                                        {
+                                                if (node.id === `ds${data.id}`)
+                                                {
+                                                        const parent_type = destination.type
+
+                                                        const new_node = JSON.parse( JSON.stringify(node) )
+
+                                                        if (parent_type === 'root')
+                                                        {
+                                                                const section = Global_State.getCurrentSection()
+
+                                                                new_node.parentId = '0'
+                                                                new_node.section_id = section.id
+                                                                new_node.services = section.services
+                                                        }
+                                                        else
+                                                        {
+                                                                new_node.parentId = parent_type + data.destination_id
+                                                                new_node.section_id = destination.section_id
+                                                                new_node.services = destination.services
+                                                        }
+
+                                                        if ( isExisting(node.name, destination.id) )
+                                                        {
+                                                                console.log('on_________exist', data)
+
+                                                                switch ( parseInt(data.on_exist) )
+                                                                {
+                                                                        case 1:
+                                                                        {
+                                                                                return node
+                                                                        }
+                                                                        case 2:
+                                                                        {
+
+                                                                                new_node.name = getNewName(new_node.name, destination.id)
+                                                                                // console.log('getNewName(new_node.name, destination.id)', getNewName(new_node.name, destination.id))
+
+                                                                                break
+                                                                        }
+                                                                        case 3:
+                                                                        {
+                                                                                const children = Global_State.getChildrenById(destination.id)
+
+                                                                                for (const child of children) if (child.name === node.name) to_delete.push(child.id)
+
+                                                                                break
+                                                                        }
+                                                                        default:
+                                                                                return node
+                                                                }
+
+                                                        }
+
+                                                        new_node.path = Global_State.getNewPath(new_node, now_state, true)
+
+                                                        return new_node
+                                                }
+                                                return node
+                                        }
+                                )
+
+                                to_delete.map(
+                                        qualified_id =>
+                                        {
+                                                const current_state = JSON.parse(JSON.stringify(new_state))
+
+                                                new_state = suppress_from(current_state, qualified_id)
+                                        }
+                                )
+
+                                return new_state
                         }
                         case 'add_files':
                         {
@@ -298,22 +407,6 @@ export default function useEditor(data)
                         case 'del_file':
                         {
 
-                                const suppress_from = ( list_, id ) =>
-                                {
-                                        let rest = list_.filter(
-                                        node => ( node.id !== id )
-                                        )
-
-                                        for (const node of list_)
-                                        {
-                                                // console.log(id, node.parentId)
-                                                if( id === node.parentId ) rest = suppress_from(rest, node.id)
-                                        }
-
-                                        // console.log('resttttttttttttttttt', rest)
-                                        return rest
-                                }
-
                                 const newState = suppress_from(state, `f${action.id}`)
 
                                 // console.log('new_staaaaaaaaaaaaate', newState)
@@ -365,23 +458,7 @@ export default function useEditor(data)
                         case 'del_audit':
                         {
 
-                                const suppress_from_data = ( list_, id ) =>
-                                {
-                                        let rest = list_.filter(
-                                        node => ( node.id !== id )
-                                        )
-
-                                        for (const node of list_)
-                                        {
-                                                // console.log(id, node.parentId)
-                                                if( id === node.parentId ) rest = suppress_from_data(rest, node.id)
-                                        }
-
-                                        // console.log('resttttttttttttttttt', rest)
-                                        return rest
-                                }
-
-                                const newState = suppress_from_data(state, `audit${action.id}`)
+                                const newState = suppress_from(state, `audit${action.id}`)
 
                                 // console.log('new_staaaaaaaaaaaaate', newState)
 
@@ -436,22 +513,6 @@ export default function useEditor(data)
                         case 'del_fnc':
                         {
 
-                                const suppress_from = ( list_, id ) =>
-                                {
-                                        let rest = list_.filter(
-                                        node => ( node.id !== id )
-                                        )
-
-                                        for (const node of list_)
-                                        {
-                                                // console.log(id, node.parentId)
-                                                if( id === node.parentId ) rest = suppress_from(rest, node.id)
-                                        }
-
-                                        // console.log('resttttttttttttttttt', rest)
-                                        return rest
-                                }
-
                                 const newState = suppress_from(state, `fnc${action.id}`)
 
                                 // console.log('new_staaaaaaaaaaaaate', newState)
@@ -500,7 +561,7 @@ export default function useEditor(data)
         function jobs_reducer( state, action )
         {
 
-                const getJob = key =>
+                const getJobByKey = key =>
                 {
                         try
                         {
@@ -543,6 +604,16 @@ export default function useEditor(data)
                                 }
                         }
                         return []
+                }
+
+                const getJobByNodeId = (node_id, node_model) =>
+                {
+                        for (const job of state)
+                        {
+                                if ( (job.node_id === parseInt(node_id)) && (job.node_model === node_model) ) return {...job}
+                        }
+
+                        return null
                 }
 
 
@@ -600,12 +671,12 @@ export default function useEditor(data)
                                         {
                                                 // console.log(job, job.dependencies[0], id)
                                                 if (
-                                                (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                (Array.isArray(job.dependencies) && getJobByKey(job.dependencies[0]).node_id === id)
                                                 ||
                                                 (job.data !== undefined && `${job.data.front_parent_type}${job.data.parent_id}` === `ds${id}`)
                                                 )
                                                 {
-                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                        // console.log(job, job.dependencies[0], getJobByKey(job.dependencies[0]), id)
                                                         new_job_list = supress_from_jobs(new_job_list, job.node_id)
                                                 }
                                         }
@@ -637,6 +708,136 @@ export default function useEditor(data)
 
                                 return new_state
 
+                        }
+                        case 'move_folder':
+                        {
+                                let new_state = [...state];
+
+                                const request = action.request
+
+                                const json_request = form_to_json(request)
+
+                                console.log('mooooooove', json_request)
+
+                                if (parseInt(json_request.id) > 0)
+                                {
+                                        const existant_job = getJobByNodeId(json_request.id, 'App\\Models\\DossierSimple')
+                                        if (existant_job && existant_job.operation === 'move')
+                                        {
+                                                // const existant_job = getJobByNodeId(json_request.id, 'App\\Models\\DossierSimple')
+                                                new_state = new_state.map(
+                                                job =>
+                                                {
+                                                        if (job.operation === 'move')
+                                                        {
+                                                                if ( ( job.node_model === 'App\\Models\\DossierSimple' ) && ( job.node_id === parseInt(json_request.id) ) )
+                                                                {
+                                                                        return {...job, data: json_request}
+                                                                }
+                                                                return job
+                                                        }
+                                                        else return job
+                                                }
+                                                )
+                                        }
+                                        else
+                                        {
+                                                const job =
+                                                {
+                                                        id: job_id.current,
+                                                        operation: 'move',
+                                                        node_id: parseInt(json_request.id),
+                                                        node_model: 'App\\Models\\DossierSimple',
+                                                        data: json_request,
+                                                        etat: 'waiting',
+                                                }
+
+                                                new_state.push(job)
+
+                                                job_id.current = job_id.current + 1
+                                        }
+                                }
+                                else
+                                {
+                                        // const existant_job = getJobByNodeId(json_request.id, 'App\\Models\\DossierSimple')
+                                        new_state = new_state.map(
+                                        job =>
+                                        {
+                                                if (job.operation === 'add')
+                                                {
+                                                        if ( ( job.node_model === 'App\\Models\\DossierSimple' ) && ( job.node_id === parseInt(json_request.id) ) )
+                                                        {
+                                                                const destination = Global_State.getNodeDataById(Global_State.parseModelToFrontType(json_request.destination_type)+json_request.destination_id)
+                                                                console.log('destination', destination)
+
+                                                                const services = destination.services.map(
+                                                                        service => ({vale: service.id, name: service.name})
+                                                                )
+                                                                const new_data =
+                                                                {
+                                                                        front_parent_type: destination.type,
+                                                                        parent_id: json_request.destination_id,
+                                                                        parent_type: json_request.destination_type,
+                                                                        section_id: destination.section_id,
+                                                                        services
+
+                                                                }
+
+                                                                return {
+                                                                        ...job,
+                                                                        data: new_data,
+                                                                        dependencies: getDependencies(json_request.destination_id, json_request.destination_type)
+                                                                }
+                                                        }
+                                                        return job
+                                                }
+                                                else return job
+                                        }
+                                        )
+                                }
+
+                                setDatasState({type: 'move_folder', job: json_request})
+
+                                // const existant_job = getJobByNodeId(json_request.id, 'App\\Models\\DossierSimple')
+                                // if (existant_job && existant_job.operation === 'move')
+                                // {
+                                //         // const existant_job = getJobByNodeId(json_request.id, 'App\\Models\\DossierSimple')
+                                //         new_state = new_state.map(
+                                //                 job =>
+                                //                 {
+                                //                         if (job.operation === 'move')
+                                //                         {
+                                //                                 if ( ( job.node_model === 'App\\Models\\DossierSimple' ) && ( job.node_id === parseInt(json_request.id) ) )
+                                //                                 {
+                                //                                         return {...job, data: json_request}
+                                //                                 }
+                                //                                 return job
+                                //                         }
+                                //                         else return job
+                                //                 }
+                                //         )
+                                // }
+                                // else
+                                // {
+                                //         const job =
+                                //         {
+                                //                 id: job_id.current,
+                                //                 operation: 'move',
+                                //                 node_id: parseInt(json_request.id),
+                                //                 node_model: 'App\\Models\\DossierSimple',
+                                //                 data: json_request,
+                                //                 etat: 'waiting',
+                                //                 dependencies: getDependencies(json_request.destination_id, json_request.destination_type)
+                                //         }
+                                //
+                                //         new_state.push(job)
+                                //
+                                //         job_id.current = job_id.current + 1
+                                // }
+
+                                // setDatasState({type: 'move_folder', job})
+
+                                return new_state
                         }
                         case 'add_files':
                         {
@@ -811,12 +1012,12 @@ export default function useEditor(data)
                                         {
                                                 // console.log(job, job.dependencies[0], id)
                                                 if (
-                                                (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                (Array.isArray(job.dependencies) && getJobByKey(job.dependencies[0]).node_id === id)
                                                 ||
                                                 (job.data !== undefined && `${job.data.front_parent_type}${job.data.parent_id}` === `audit${id}`)
                                                 )
                                                 {
-                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                        // console.log(job, job.dependencies[0], getJobByKey(job.dependencies[0]), id)
                                                         new_job_list = supress_from_jobs(new_job_list, job.node_id)
                                                 }
                                         }
@@ -897,12 +1098,12 @@ export default function useEditor(data)
                                         {
                                                 // console.log(job, job.dependencies[0], id)
                                                 if (
-                                                        (Array.isArray(job.dependencies) && getJob(job.dependencies[0]).node_id === id)
+                                                        (Array.isArray(job.dependencies) && getJobByKey(job.dependencies[0]).node_id === id)
                                                         ||
                                                         (job.data !== undefined && `${job.data.front_parent_type}${job.data.parent_id}` === `fnc${id}`)
                                                 )
                                                 {
-                                                        // console.log(job, job.dependencies[0], getJob(job.dependencies[0]), id)
+                                                        // console.log(job, job.dependencies[0], getJobByKey(job.dependencies[0]), id)
                                                         new_job_list = supress_from_jobs(new_job_list, job.node_id)
                                                 }
                                         }
@@ -1166,7 +1367,8 @@ export default function useEditor(data)
                         folder:
                         {
                                 add: (request) => { dispatch_job({ type: 'add_folder', request }) },
-                                delete: (id) => { dispatch_job({ type: 'del_folder', id }) }
+                                delete: (id) => { dispatch_job({ type: 'del_folder', id }) },
+                                move: (request) => { dispatch_job({ type: 'move_folder', request }) }
                         },
                         files:
                         {

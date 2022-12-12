@@ -2,6 +2,8 @@ import _regeneratorRuntime from 'babel-runtime/regenerator';
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /* eslint-disable import/first */
@@ -214,9 +216,20 @@ export default function FileTable(_ref) {
             mc_state = _useState10[0],
             setMc_state = _useState10[1];
 
-        var _ref2 = [useRef([]), useRef(0)],
+        var _ref2 = [useRef([]), useRef(undefined), useRef(undefined)],
             to_move_or_copy = _ref2[0],
-            clear_clipboard_id = _ref2[1];
+            from_id = _ref2[1],
+            clear_clipboard_id = _ref2[2];
+
+
+        useEffect(function () {
+                if (mc_state === 'none') {
+                        to_move_or_copy.current = [];
+                        clearTimeout(clear_clipboard_id.current);
+                        clear_clipboard_id.current = undefined;
+                        from_id.current = undefined;
+                }
+        }, [mc_state]);
 
         // useEffect(
         //     () =>
@@ -275,23 +288,20 @@ export default function FileTable(_ref) {
                         var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3(node) {
                                 var _this2 = this;
 
-                                var destination_info, destination_id, destination_type, operation_type, Save_for_rest, _loop, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, node_to_copy, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, node_to_move, queryData, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, _queryData, services, section;
+                                var destination_node, destination_info, destination_id, destination_type, operation_type, Save_for_rest, _loop, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, node_to_copy, to_move, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, node_to_move, queryData, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, _queryData, services, section;
 
                                 return _regeneratorRuntime.wrap(function _callee3$(_context3) {
                                         while (1) {
                                                 switch (_context3.prev = _context3.next) {
                                                         case 0:
-                                                                destination_info = Global_State.identifyNode(JSON.parse(JSON.stringify(node)));
+                                                                destination_node = JSON.parse(JSON.stringify(node));
+                                                                destination_info = Global_State.identifyNode(destination_node);
                                                                 destination_id = destination_info[0];
                                                                 destination_type = destination_info[1];
 
                                                                 // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy.current)
 
                                                                 operation_type = mc_state;
-
-
-                                                                clearTimeout(clear_clipboard_id.current);
-                                                                setMc_state('none');
 
                                                                 Save_for_rest = function Save_for_rest() {
 
@@ -318,6 +328,34 @@ export default function FileTable(_ref) {
                                                                         );
                                                                 };
 
+                                                                // console.log('destination_node.id === from_id.current', destination_node.id, from_id.current)
+
+
+                                                                if (!(destination_node.id === from_id.current)) {
+                                                                        _context3.next = 14;
+                                                                        break;
+                                                                }
+
+                                                                if (!(operation_type === 'copy')) {
+                                                                        _context3.next = 11;
+                                                                        break;
+                                                                }
+
+                                                                action.current = { saved: true, value: 2 };
+                                                                _context3.next = 14;
+                                                                break;
+
+                                                        case 11:
+                                                                if (!(operation_type === 'move')) {
+                                                                        _context3.next = 14;
+                                                                        break;
+                                                                }
+
+                                                                setMc_state('none');
+
+                                                                return _context3.abrupt('return', 'nothing to do');
+
+                                                        case 14:
                                                                 _loop = /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(node_to_copy) {
                                                                         var _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _iterator4, _step4, child_node;
 
@@ -400,7 +438,7 @@ export default function FileTable(_ref) {
                                                                                                         }).then(function (res) {
                                                                                                                 console.log(res, action.current);
                                                                                                                 node_to_copy['on_exist'] = res;
-                                                                                                                if (action.current) action.current = Object.assign({}, action.current, { value: res });
+                                                                                                                if (action.current.saved) action.current = Object.assign({}, action.current, { value: res });
                                                                                                         });
 
                                                                                                 case 11:
@@ -459,75 +497,84 @@ export default function FileTable(_ref) {
                                                                 _iteratorNormalCompletion = true;
                                                                 _didIteratorError = false;
                                                                 _iteratorError = undefined;
-                                                                _context3.prev = 11;
+                                                                _context3.prev = 18;
                                                                 _iterator = to_move_or_copy.current[Symbol.iterator]();
 
-                                                        case 13:
+                                                        case 20:
                                                                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-                                                                        _context3.next = 19;
+                                                                        _context3.next = 26;
                                                                         break;
                                                                 }
 
                                                                 node_to_copy = _step.value;
-                                                                return _context3.delegateYield(_loop(node_to_copy), 't0', 16);
+                                                                return _context3.delegateYield(_loop(node_to_copy), 't0', 23);
 
-                                                        case 16:
+                                                        case 23:
                                                                 _iteratorNormalCompletion = true;
-                                                                _context3.next = 13;
+                                                                _context3.next = 20;
                                                                 break;
 
-                                                        case 19:
-                                                                _context3.next = 25;
+                                                        case 26:
+                                                                _context3.next = 32;
                                                                 break;
 
-                                                        case 21:
-                                                                _context3.prev = 21;
-                                                                _context3.t1 = _context3['catch'](11);
+                                                        case 28:
+                                                                _context3.prev = 28;
+                                                                _context3.t1 = _context3['catch'](18);
                                                                 _didIteratorError = true;
                                                                 _iteratorError = _context3.t1;
 
-                                                        case 25:
-                                                                _context3.prev = 25;
-                                                                _context3.prev = 26;
+                                                        case 32:
+                                                                _context3.prev = 32;
+                                                                _context3.prev = 33;
 
                                                                 if (!_iteratorNormalCompletion && _iterator.return) {
                                                                         _iterator.return();
                                                                 }
 
-                                                        case 28:
-                                                                _context3.prev = 28;
+                                                        case 35:
+                                                                _context3.prev = 35;
 
                                                                 if (!_didIteratorError) {
-                                                                        _context3.next = 31;
+                                                                        _context3.next = 38;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError;
 
-                                                        case 31:
-                                                                return _context3.finish(28);
+                                                        case 38:
+                                                                return _context3.finish(35);
 
-                                                        case 32:
-                                                                return _context3.finish(25);
+                                                        case 39:
+                                                                return _context3.finish(32);
 
-                                                        case 33:
+                                                        case 40:
 
                                                                 Global_State.modalManager.close_modal();
 
+                                                                // console.log('taaaaaaaaaaaaaaaaaaaaaaaaaa')
+                                                                // console.log( 'to_move_or_copy.current1', to_move_or_copy.current )
+
                                                                 if (!(operation_type === 'move')) {
-                                                                        _context3.next = 74;
+                                                                        _context3.next = 92;
                                                                         break;
                                                                 }
 
+                                                                to_move = [].concat(_toConsumableArray(to_move_or_copy.current));
+
+
+                                                                setMc_state('none');
+
+                                                                // console.log('zaaaaaaaaaaaaaaaaaaaaaa')
                                                                 _iteratorNormalCompletion2 = true;
                                                                 _didIteratorError2 = false;
                                                                 _iteratorError2 = undefined;
-                                                                _context3.prev = 38;
-                                                                _iterator2 = to_move_or_copy.current[Symbol.iterator]();
+                                                                _context3.prev = 47;
+                                                                _iterator2 = to_move[Symbol.iterator]();
 
-                                                        case 40:
+                                                        case 49:
                                                                 if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-                                                                        _context3.next = 58;
+                                                                        _context3.next = 76;
                                                                         break;
                                                                 }
 
@@ -540,93 +587,113 @@ export default function FileTable(_ref) {
                                                                 queryData.append('id', node_to_move.id);
                                                                 queryData.append('on_exist', node_to_move.on_exist ? node_to_move.on_exist : '-1');
 
-                                                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
+                                                                console.log('arriiiiiiiiiiiiiveeee', node_to_move);
 
                                                                 if (!(node_to_move.type === 'ds')) {
-                                                                        _context3.next = 52;
+                                                                        _context3.next = 66;
                                                                         break;
                                                                 }
 
-                                                                _context3.next = 50;
+                                                                if (!Global_State.isEditorMode) {
+                                                                        _context3.next = 62;
+                                                                        break;
+                                                                }
+
+                                                                Global_State.editor.folder.move(queryData);
+                                                                _context3.next = 64;
+                                                                break;
+
+                                                        case 62:
+                                                                _context3.next = 64;
                                                                 return http.post('move_folder', queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 50:
-                                                                _context3.next = 55;
+                                                        case 64:
+                                                                _context3.next = 73;
                                                                 break;
 
-                                                        case 52:
+                                                        case 66:
                                                                 if (!(node_to_move.type === 'f')) {
-                                                                        _context3.next = 55;
+                                                                        _context3.next = 73;
                                                                         break;
                                                                 }
 
-                                                                _context3.next = 55;
+                                                                if (!Global_State.isEditorMode) {
+                                                                        _context3.next = 71;
+                                                                        break;
+                                                                }
+
+                                                                Global_State.editor.files.move(queryData);
+                                                                _context3.next = 73;
+                                                                break;
+
+                                                        case 71:
+                                                                _context3.next = 73;
                                                                 return http.post('move_file', queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 55:
+                                                        case 73:
                                                                 _iteratorNormalCompletion2 = true;
-                                                                _context3.next = 40;
+                                                                _context3.next = 49;
                                                                 break;
 
-                                                        case 58:
-                                                                _context3.next = 64;
+                                                        case 76:
+                                                                _context3.next = 82;
                                                                 break;
 
-                                                        case 60:
-                                                                _context3.prev = 60;
-                                                                _context3.t2 = _context3['catch'](38);
+                                                        case 78:
+                                                                _context3.prev = 78;
+                                                                _context3.t2 = _context3['catch'](47);
                                                                 _didIteratorError2 = true;
                                                                 _iteratorError2 = _context3.t2;
 
-                                                        case 64:
-                                                                _context3.prev = 64;
-                                                                _context3.prev = 65;
+                                                        case 82:
+                                                                _context3.prev = 82;
+                                                                _context3.prev = 83;
 
                                                                 if (!_iteratorNormalCompletion2 && _iterator2.return) {
                                                                         _iterator2.return();
                                                                 }
 
-                                                        case 67:
-                                                                _context3.prev = 67;
+                                                        case 85:
+                                                                _context3.prev = 85;
 
                                                                 if (!_didIteratorError2) {
-                                                                        _context3.next = 70;
+                                                                        _context3.next = 88;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError2;
 
-                                                        case 70:
-                                                                return _context3.finish(67);
+                                                        case 88:
+                                                                return _context3.finish(85);
 
-                                                        case 71:
-                                                                return _context3.finish(64);
+                                                        case 89:
+                                                                return _context3.finish(82);
 
-                                                        case 72:
-                                                                _context3.next = 116;
+                                                        case 90:
+                                                                _context3.next = 134;
                                                                 break;
 
-                                                        case 74:
+                                                        case 92:
 
                                                                 console.log('to_move_or_copy.current', to_move_or_copy.current);
 
                                                                 _iteratorNormalCompletion3 = true;
                                                                 _didIteratorError3 = false;
                                                                 _iteratorError3 = undefined;
-                                                                _context3.prev = 78;
+                                                                _context3.prev = 96;
                                                                 _iterator3 = to_move_or_copy.current[Symbol.iterator]();
 
-                                                        case 80:
+                                                        case 98:
                                                                 if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
-                                                                        _context3.next = 102;
+                                                                        _context3.next = 120;
                                                                         break;
                                                                 }
 
@@ -661,83 +728,79 @@ export default function FileTable(_ref) {
                                                                 // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
 
                                                                 if (!(node_to_copy.type === 'ds')) {
-                                                                        _context3.next = 96;
+                                                                        _context3.next = 114;
                                                                         break;
                                                                 }
 
-                                                                _context3.next = 94;
+                                                                _context3.next = 112;
                                                                 return http.post('copy_folder', _queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 94:
-                                                                _context3.next = 99;
+                                                        case 112:
+                                                                _context3.next = 117;
                                                                 break;
 
-                                                        case 96:
+                                                        case 114:
                                                                 if (!(node_to_copy.type === 'f')) {
-                                                                        _context3.next = 99;
+                                                                        _context3.next = 117;
                                                                         break;
                                                                 }
 
-                                                                _context3.next = 99;
+                                                                _context3.next = 117;
                                                                 return http.post('copy_file', _queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 99:
+                                                        case 117:
                                                                 _iteratorNormalCompletion3 = true;
-                                                                _context3.next = 80;
+                                                                _context3.next = 98;
                                                                 break;
 
-                                                        case 102:
-                                                                _context3.next = 108;
+                                                        case 120:
+                                                                _context3.next = 126;
                                                                 break;
 
-                                                        case 104:
-                                                                _context3.prev = 104;
-                                                                _context3.t3 = _context3['catch'](78);
+                                                        case 122:
+                                                                _context3.prev = 122;
+                                                                _context3.t3 = _context3['catch'](96);
                                                                 _didIteratorError3 = true;
                                                                 _iteratorError3 = _context3.t3;
 
-                                                        case 108:
-                                                                _context3.prev = 108;
-                                                                _context3.prev = 109;
+                                                        case 126:
+                                                                _context3.prev = 126;
+                                                                _context3.prev = 127;
 
                                                                 if (!_iteratorNormalCompletion3 && _iterator3.return) {
                                                                         _iterator3.return();
                                                                 }
 
-                                                        case 111:
-                                                                _context3.prev = 111;
+                                                        case 129:
+                                                                _context3.prev = 129;
 
                                                                 if (!_didIteratorError3) {
-                                                                        _context3.next = 114;
+                                                                        _context3.next = 132;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError3;
 
-                                                        case 114:
-                                                                return _context3.finish(111);
+                                                        case 132:
+                                                                return _context3.finish(129);
 
-                                                        case 115:
-                                                                return _context3.finish(108);
+                                                        case 133:
+                                                                return _context3.finish(126);
 
-                                                        case 116:
-
-                                                                to_move_or_copy.current = [];
-
-                                                        case 117:
+                                                        case 134:
                                                         case 'end':
                                                                 return _context3.stop();
                                                 }
                                         }
-                                }, _callee3, this, [[11, 21, 25, 33], [26,, 28, 32], [38, 60, 64, 72], [65,, 67, 71], [78, 104, 108, 116], [109,, 111, 115]]);
+                                }, _callee3, this, [[18, 28, 32, 40], [33,, 35, 39], [47, 78, 82, 90], [83,, 85, 89], [96, 122, 126, 134], [127,, 129, 133]]);
                         }));
 
                         return function paste_here(_x2) {
@@ -749,28 +812,30 @@ export default function FileTable(_ref) {
 
                 return React.createElement(
                         IconButton,
-                        {
+                        { id: 'ctrl_v',
                                 disabled: mc_state === 'none',
                                 style: { marginRight: 20 },
                                 onClick: function onClick(e) {
                                         console.log(to_move_or_copy.current, node.id);
 
-                                        toast.promise(paste_here(node), {
-                                                loading: 'Pasting...',
-                                                success: 'Processus achevé',
-                                                error: 'err'
-                                        }, {
-                                                id: 'Pasting',
-                                                duration: Infinity
-                                        }).then(function (res) {
-                                                setTimeout(function () {
-                                                        toast.dismiss('Pasting');
-                                                }, 800);
-                                        }).catch(function (err) {
-                                                setTimeout(function () {
-                                                        toast.dismiss('Pasting');
-                                                }, 800);
-                                        });
+                                        if (Global_State.isEditorMode) paste_here(node);else {
+                                                toast.promise(paste_here(node), {
+                                                        loading: 'Pasting...',
+                                                        success: 'Processus achevé',
+                                                        error: 'err'
+                                                }, {
+                                                        id: 'Pasting',
+                                                        duration: Infinity
+                                                }).then(function (res) {
+                                                        setTimeout(function () {
+                                                                toast.dismiss('Pasting');
+                                                        }, 800);
+                                                }).catch(function (err) {
+                                                        setTimeout(function () {
+                                                                toast.dismiss('Pasting');
+                                                        }, 800);
+                                                });
+                                        }
                                 }
                         },
                         React.createElement(FaPaste, { size: 25, color: '' + (mc_state === 'none' ? '' : 'blue') })
@@ -1898,44 +1963,54 @@ export default function FileTable(_ref) {
                                                 ),
                                                 React.createElement(
                                                         'option',
-                                                        { className: 'dropdown-item',
+                                                        { id: 'ctrl_c', className: 'dropdown-item',
                                                                 onClick: function onClick(e) {
-                                                                        e.preventDefault();
-                                                                        e.stopPropagation();
+                                                                        if (selectedRow.length > 0) {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
 
-                                                                        clearTimeout(clear_clipboard_id.current);
+                                                                                clearTimeout(clear_clipboard_id.current);
 
-                                                                        clear_clipboard_id.current = setTimeout(function () {
-                                                                                setMc_state('none');to_move_or_copy.current = [];
-                                                                        }, 2 * 60000);
+                                                                                clear_clipboard_id.current = setTimeout(function () {
+                                                                                        setMc_state('none');
+                                                                                }, 10 * 60000);
 
-                                                                        to_move_or_copy.current = selectedRow.map(function (row) {
-                                                                                return { id: Global_State.identifyNode(row)[0], type: row.type, name: row.value };
-                                                                        });
+                                                                                to_move_or_copy.current = selectedRow.map(function (row) {
+                                                                                        var node_data = Global_State.getNodeDataById(row.id);
 
-                                                                        setMc_state('copy');
+                                                                                        return Object.assign({}, node_data, { id: Global_State.identifyNode(node_data)[0] });
+                                                                                });
+
+                                                                                from_id.current = node.id;
+
+                                                                                setMc_state('copy');
+                                                                        }
                                                                 }
                                                         },
                                                         'Copier vers'
                                                 ),
                                                 React.createElement(
                                                         'option',
-                                                        { className: 'dropdown-item',
+                                                        { id: 'ctrl_x', className: 'dropdown-item',
                                                                 onClick: function onClick(e) {
-                                                                        e.preventDefault();
-                                                                        e.stopPropagation();
+                                                                        if (selectedRow.length > 0) {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
 
-                                                                        clearTimeout(clear_clipboard_id.current);
+                                                                                clearTimeout(clear_clipboard_id.current);
 
-                                                                        clear_clipboard_id.current = setTimeout(function () {
-                                                                                setMc_state('none');to_move_or_copy.current = [];
-                                                                        }, 2 * 60000);
+                                                                                clear_clipboard_id.current = setTimeout(function () {
+                                                                                        setMc_state('none');to_move_or_copy.current = [];
+                                                                                }, 2 * 60000);
 
-                                                                        to_move_or_copy.current = selectedRow.map(function (row) {
-                                                                                return { id: Global_State.identifyNode(row)[0], type: row.type, name: row.value };
-                                                                        });
+                                                                                to_move_or_copy.current = selectedRow.map(function (row) {
+                                                                                        return { id: Global_State.identifyNode(row)[0], type: row.type, name: row.value };
+                                                                                });
 
-                                                                        setMc_state('move');
+                                                                                from_id.current = node.id;
+
+                                                                                setMc_state('move');
+                                                                        }
                                                                 }
                                                         },
                                                         'D\xE9placer vers'
@@ -1947,7 +2022,7 @@ export default function FileTable(_ref) {
                                                 ) : null,
                                                 React.createElement(
                                                         'option',
-                                                        { className: 'dropdown-item', onClick: function onClick(e) {
+                                                        { id: 'ctrl_d', className: 'dropdown-item', onClick: function onClick(e) {
                                                                         // http.delete("")
 
                                                                         var remove = function () {
