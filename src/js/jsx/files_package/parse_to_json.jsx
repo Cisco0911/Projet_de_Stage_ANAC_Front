@@ -152,7 +152,7 @@ export default function parseToJson(value) {
         for(let childData of childrenData)
         {
           let children1 = makeChildren(childData)
-          
+
           // let child = makeJsonNode(
           //   childData.id,
           //   childData.global_type,
@@ -188,51 +188,69 @@ export default function parseToJson(value) {
       else return undefined
       
     }
+
+        function makeChildrenV2(root)
+        {
+                // Triage de la liste de fichiers selon l'ordre hiérarchique
+                value.sort((a, b) => {
+                        if (a.isRoot) return -1
+                        else if (b.isRoot) return  1
+
+                        const pathA = a.path.split('\\')
+                        const pathB = b.path.split('\\')
+
+                        // console.log('pathAB', pathA, pathB)
+
+                        return pathA.length - pathB.length
+
+                });
+
+                // console.log('value', value)
+
+                // Création d'un objet qui associe chaque identifiant de fichier à son noeud dans l'arbre
+                const nodesById = {
+                        [root.id]: root,
+                };
+
+                // Parcours de la liste de fichiers pour créer les noeuds de l'arbre
+                for (const file of value) {
+
+                        if (file.isRoot) continue
+
+                        const node = {
+                                ...file,
+                                children: [],
+                        };
+                        nodesById[node.id] = node; // Ajout du noeud dans l'objet nodesById
+
+                        // Récupération du noeud parent à partir de l'objet nodesById
+                        const parentNode = nodesById[file.parentId] || root;
+
+                        // if (!parentNode) continue
+
+                        // console.log('file.parentId', file.parentId, nodesById)
+
+                        // Ajout du noeud en tant que enfant du noeud parent
+                        parentNode.children.push(node);
+                }
+
+                return root;
+        }
     
     function makeJsonTree()
     {
       for(let node of nodesData.data)
       {
         if (node.isRoot) {
-                let children = makeChildren(node)
-                let racine = {}
+                node.children = []
 
-                // node.forEach(
-                //         (value, key) =>
-                //         {
-                //                 racine[key] = JSON.parse(JSON.stringify(value))
-                //         }
-                // );
-                // racine['children'] = children
+                makeChildrenV2(node)
 
           return (
 
                 {
-                        ...JSON.parse(JSON.stringify(node)),
-                        children
+                        ...JSON.parse(JSON.stringify(node))
                 }
-
-            // makeJsonNode(
-            //   node.id,
-            //   node.global_type,
-            //   node.services,
-            //   node.name,
-            //   node.type,
-            //   node.isOpen,
-            //   children,
-            //   node.isRoot,
-            //   node.parentId,
-            //   node.path,
-            //   node.hasChildren,
-            //   node.ext,
-            //   node.ra,
-            //   node.isClosed,
-            //   node.created_at,
-            //   node.level,
-            //   node.taille,
-            //   node.url,
-            //
-            //   )
 
           )
         }

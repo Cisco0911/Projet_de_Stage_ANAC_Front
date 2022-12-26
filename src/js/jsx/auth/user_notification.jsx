@@ -353,7 +353,7 @@ function useOperationNotif()
         return operationNotifComponents
 }
 
-function useOnScreen(target, root) {
+function useOnScreen(root) {
 
         const [isIntersecting, setIntersecting] = useState(false)
 
@@ -365,13 +365,21 @@ function useOnScreen(target, root) {
                 }
         )
 
-        useEffect(() => {
-                observer.observe(target.current)
-                // Remove the observer as soon as the component is unmounted
-                return () => { observer.disconnect() }
-        }, [])
+        // useEffect(() => {
+        //         observer.observe(target.current)
+        //         // Remove the observer as soon as the component is unmounted
+        //         return () => { observer.disconnect() }
+        // }, [])
 
-        return isIntersecting
+
+
+        return (
+                [
+                        isIntersecting,
+                        (target) => { observer.observe(target) },
+                        () => { console.log('disconect') }
+                ]
+        )
 }
 
 function useUnreadReviewNotif()
@@ -576,32 +584,15 @@ function useReadReviewNotif()
         )
 }
 
+function useOpen(init_val)
+{
+        return(
+                useState(init_val)
+        )
+}
+
 export default function Notifications()
 {
-
-        const ref = useRef()
-        const isVisible = useOnScreen(ref, document.querySelector('#root'))
-
-        useEffect(
-                () =>
-                {
-                        console.log(isVisible, "notifPanel")
-                        if ( (readNotifs.length !== 0) && !isVisible)
-                        {
-
-                                const notif_ids = new FormData
-                                readNotifs.map(notif_id => {
-                                        // console.log(notif_id)
-                                        notif_ids.append('notif_ids[]', notif_id)
-                                });
-
-                                http.post(`markAsRead`, notif_ids)
-                                .then( res => { console.log(res) } )
-                                .catch(err => { console.log(err) })
-                        }
-
-                }, [isVisible]
-        )
 
         const StyledBadge = styled(Badge)(({ theme }) => ({
                 '& .MuiBadge-badge': {
@@ -637,18 +628,68 @@ export default function Notifications()
 
 
         const renderingComponent = count ? (
-        <List ref={ref} id={'notifRenderingComponent'} >
+        <List id={'notifRenderingComponent'} >
                 {operationNotifs}
                 {unreadReviewNotifs}
                 <Divider textAlign="left"> LU </Divider>
                 {readReviewNotifs}
         </List>
         ):
-        (<div ref={ref} className='d-flex justify-content-center align-items-center' >
+        (<div id={'notifRenderingComponent'} className='d-flex justify-content-center align-items-center' >
                 Vide 😢
         </div>)
 
+        // const [isVisible, observe, disconect] = useOnScreen(document.querySelector('#root'))
 
-        return <Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />
+        const [isOpen, setOpenState] = useState(false)
+
+        useEffect(
+                () =>
+                {
+                        // Global_State.EventsManager.on('observe_notif_panel', () => { const ref = document.getElementById('notifRenderingComponent');  console.log(ref); observe(ref) })
+                        // Global_State.EventsManager.on('unobserve_notif_panel', disconect)
+                        Global_State.EventsManager.on('setOpenState', setOpenState)
+
+                        return(
+                                () =>
+                                {
+                                        // Global_State.EventsManager.off('observe_notif_panel')
+                                        // Global_State.EventsManager.off('unobserve_notif_panel')
+                                        Global_State.EventsManager.off('setOpenState')
+                                }
+                        )
+
+                }, []
+        )
+
+
+        useEffect(
+        () =>
+        {
+                console.log(isOpen, "notifPanel")
+                if ( (readNotifs.length !== 0) && !isOpen)
+                {
+
+                        const notif_ids = new FormData
+                        readNotifs.map(notif_id => {
+                                // console.log(notif_id)
+                                notif_ids.append('notif_ids[]', notif_id)
+                        });
+
+                        http.post(`markAsRead`, notif_ids)
+                        .then( res => { console.log(res) } )
+                        .catch(err => { console.log(err) })
+                }
+
+        }, [isOpen]
+        )
+
+
+        return (
+                useMemo(
+                        () => ( <Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} /> ),
+                        []
+                )
+        )
 
 }

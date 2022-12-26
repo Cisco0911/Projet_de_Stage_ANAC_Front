@@ -17,6 +17,8 @@ import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
 
 import toast from "react-hot-toast";
+import {Box, Popper} from "@mui/material";
+import {Queue} from "@mui/icons-material";
 
 window.Pusher = require('pusher-js');
 
@@ -238,116 +240,244 @@ export default function useGetData(TheDatas)
         const [isEditorMode, setIsEditorMode] = useState(false)
 
         const to_refresh = useRef(true)
+        const handling_node_events = useRef(false)
+        const node_events_queue = useRef([])
 
 
-        echosHandler =
-                (tag, data = null) =>
+        echosHandler = useCallback(
+                async (tag, data = null) =>
                 {
                         switch (tag) {
                                 case 'updateAuthUserInfo':
                                 {
                                         console.log('updateAuthUserInfo')
-                                        http.get('user').then(res =>
-                                                {
-                                                        console.log(res)
-                                                        updateAuthUserInfo(res.data)
-                                                }
+                                        await http.get('user')
+                                        .then(res =>
+                                        {
+                                                console.log(res)
+                                                updateAuthUserInfo(res.data)
+                                        }
                                         )
-                                                .catch( err => { console.log(err) })
-                                }
+                                        .catch( err => { console.log(err) })
                                         break;
+                                }
+                                case 'handle_node_events':
+                                {
+                                        handling_node_events.current = true
+
+                                        do {
+                                                // console.log('start', node_events_queue.current)
+                                                const data = node_events_queue.current.shift()
+
+                                                if (data.operation === 'add')
+                                                {
+                                                        console.log('emitting echo')
+                                                        console.log(data)
+                                                        const ids = new FormData
+                                                        data.node.map(element => {
+                                                                console.log(element)
+                                                                ids.append('ids[]', element)
+                                                        });
+                                                        console.log(ids.get('ids[]'))
+
+                                                        await http.post('getDatasByIds', ids)
+                                                        .then( res =>
+                                                        {
+                                                                console.log('getDatasByIds', res)
+
+                                                                setImmediate( () => { dispatch({type: 'add', data: {...data, 'node': res.data}}) } )
+                                                        }
+                                                        )
+                                                        .catch( err =>
+                                                        {
+                                                                console.log(err)
+                                                        }
+                                                        )
+                                                }
+                                                else if(data.operation === 'delete')
+                                                {
+                                                        console.log('emitting echo')
+                                                        setImmediate( () => { dispatch({type: 'delete', data}) } )
+                                                }
+                                                else if(data.operation === 'update')
+                                                {
+                                                        console.log('echo update ')
+
+                                                        const ids = new FormData
+                                                        console.log('data.node', data.node)
+                                                        data.node.map(element => {
+                                                                console.log(element)
+                                                                ids.append('ids[]', element)
+                                                        });
+                                                        await http.post('getDatasByIds', ids)
+                                                        .then( res =>
+                                                        {
+                                                                console.log(res)
+
+                                                                setImmediate( () => { dispatch({type: 'update', data: {...data, 'node': res.data}}) } )
+                                                        }
+                                                        )
+                                                        .catch( err =>
+                                                        {
+                                                                console.log(err)
+                                                        }
+                                                        )
+                                                }
+                                                // else if (data.operation === 'move')
+                                                // {
+                                                //         console.log('emitting move echo', data)
+                                                //         const ids = new FormData
+                                                //         data.node.map(element => {
+                                                //                 console.log(element)
+                                                //                 ids.append('ids[]', element)
+                                                //         });
+                                                //         console.log(ids.get('ids[]'))
+                                                //
+                                                //         http.post('getDatasByIds', ids)
+                                                //         .then( res =>
+                                                //         {
+                                                //                 console.log(res)
+                                                //
+                                                //                 dispatch({type: 'move', data: {...data, 'node': res.data}})
+                                                //         }
+                                                //         )
+                                                //         .catch( err =>
+                                                //         {
+                                                //                 console.log(err)
+                                                //         }
+                                                //         )
+                                                // }
+
+                                                // console.log('end', node_events_queue.current)
+                                        }
+                                        while (node_events_queue.current.length)
+
+                                        handling_node_events.current = false
+
+                                        break
+                                }
 
                                 default:
                                         break;
                         }
 
-                }
+                }, []
+        )
+
+
+        // const handle_node_events = () =>
+        // {
+        //         handling_node_events.current = true
+        //
+        //         for (const event_data of node_events_queue.current)
+        //         {
+        //                 const data = event_data
+        //
+        //                 if (data.operation === 'add')
+        //                 {
+        //                         console.log('emitting echo')
+        //                         console.log(data)
+        //                         const ids = new FormData
+        //                         data.node.map(element => {
+        //                                 console.log(element)
+        //                                 ids.append('ids[]', element)
+        //                         });
+        //                         console.log(ids.get('ids[]'))
+        //
+        //                         http.post('getDatasByIds', ids)
+        //                         .then( res =>
+        //                         {
+        //                                 console.log('getDatasByIds', res)
+        //
+        //                                 dispatch({type: 'add', data: {...data, 'node': res.data}})
+        //                         }
+        //                         )
+        //                         .catch( err =>
+        //                         {
+        //                                 console.log(err)
+        //                         }
+        //                         )
+        //                 }
+        //                 else if(data.operation === 'delete')
+        //                 {
+        //                         console.log('emitting echo')
+        //                         // while (true) {
+        //                         //         if (!wait_for_update.current) {
+        //                         //                 console.log('deleteeeee')
+        //                         //                 dispatch({type: 'delete', data})
+        //                         //                 break
+        //                         //         }
+        //                         // }
+        //
+        //                 }
+        //                 else if(data.operation === 'update')
+        //                 {
+        //                         console.log('echo update ')
+        //
+        //                         const ids = new FormData
+        //                         console.log('data.node', data.node)
+        //                         data.node.map(element => {
+        //                                 console.log(element)
+        //                                 ids.append('ids[]', element)
+        //                         });
+        //                         wait_for_update.current = true
+        //                         http.post('getDatasByIds', ids)
+        //                         .then( res =>
+        //                         {
+        //                                 console.log(res)
+        //
+        //                                 dispatch({type: 'update', data: {...data, 'node': res.data}})
+        //                                 wait_for_update.current = false
+        //                         }
+        //                         )
+        //                         .catch( err =>
+        //                         {
+        //                                 console.log(err)
+        //                                 wait_for_update.current = false
+        //                         }
+        //                         )
+        //                 }
+        //                 else if (data.operation === 'move')
+        //                 {
+        //                         console.log('emitting move echo', data)
+        //                         const ids = new FormData
+        //                         data.node.map(element => {
+        //                                 console.log(element)
+        //                                 ids.append('ids[]', element)
+        //                         });
+        //                         console.log(ids.get('ids[]'))
+        //
+        //                         http.post('getDatasByIds', ids)
+        //                         .then( res =>
+        //                         {
+        //                                 console.log(res)
+        //
+        //                                 dispatch({type: 'move', data: {...data, 'node': res.data}})
+        //                         }
+        //                         )
+        //                         .catch( err =>
+        //                         {
+        //                                 console.log(err)
+        //                         }
+        //                         )
+        //                 }
+        //         }
+        //
+        //         handling_node_events.current = false
+        // }
+
 
         useEffect(
                 () =>
                 {
 
-                        echo.channel(`nodeUpdate`).listen( 'NodeUpdateEvent', (data) => {
-                                // EventsManager.emit('updateData')
-                                if (data.operation === 'add')
+                        echo.channel(`nodeUpdate`).listen( 'NodeUpdateEvent', (data) =>
                                 {
-                                        console.log('emitting echo')
-                                        console.log(data)
-                                        const ids = new FormData
-                                        data.node.map(element => {
-                                                console.log(element)
-                                                ids.append('ids[]', element)
-                                        });
-                                        console.log(ids.get('ids[]'))
-
-                                        http.post('getDatasByIds', ids)
-                                                .then( res =>
-                                                        {
-                                                                console.log('getDatasByIds', res)
-
-                                                                dispatch({type: 'add', data: {...data, 'node': res.data}})
-                                                        }
-                                                )
-                                                .catch( err =>
-                                                        {
-                                                                console.log(err)
-                                                        }
-                                                )
+                                        node_events_queue.current.push(data)
+                                        console.log('NodeUpdateEvent')
+                                        if (!handling_node_events.current) echosHandler('handle_node_events')
                                 }
-                                else if(data.operation === 'delete')
-                                {
-                                        console.log('emitting echo')
-                                        dispatch({type: 'delete', data})
-                                }
-                                else if(data.operation === 'update')
-                                {
-                                        console.log('echo update ')
-
-                                        const ids = new FormData
-                                        console.log('data.node', data.node)
-                                        data.node.map(element => {
-                                                console.log(element)
-                                                ids.append('ids[]', element)
-                                        });
-                                        http.post('getDatasByIds', ids)
-                                                .then( res =>
-                                                        {
-                                                                console.log(res)
-
-                                                                dispatch({type: 'update', data: {...data, 'node': res.data}})
-                                                        }
-                                                )
-                                                .catch( err =>
-                                                        {
-                                                                console.log(err)
-                                                        }
-                                                )
-                                }
-                                else if (data.operation === 'move')
-                                {
-                                        console.log('emitting move echo', data)
-                                        const ids = new FormData
-                                        data.node.map(element => {
-                                                console.log(element)
-                                                ids.append('ids[]', element)
-                                        });
-                                        console.log(ids.get('ids[]'))
-
-                                        http.post('getDatasByIds', ids)
-                                        .then( res =>
-                                        {
-                                                console.log(res)
-
-                                                dispatch({type: 'move', data: {...data, 'node': res.data}})
-                                        }
-                                        )
-                                        .catch( err =>
-                                        {
-                                                console.log(err)
-                                        }
-                                        )
-                                }
-                        });
+                        );
 
                         echo.private(`user.${authUser.id}`).listen('AuthUserUpdate',
                                 () =>
@@ -590,8 +720,11 @@ export default function useGetData(TheDatas)
 
         const getNewPath = (new_node, all_nodes, to_update = false) =>
         {
+                if (!new_node) return 'undefined'
+
                 if (new_node.type === 'root')
                 {
+                        console.log('sectionnnnnnnnnnnnnnnnnnnnnnnnnn', sections.get(1), new_node)
                         return `${sections.get(new_node.section_id).name}:`
                 }
 
@@ -628,6 +761,39 @@ export default function useGetData(TheDatas)
 
                                 return `${getNewPath(audit, all_nodes)}\\${new_node.name}`
                         }
+                        case 'dp':
+                        {
+                                let audit
+
+                                for (const node of  all_nodes)
+                                {
+                                        if(node.id === new_node.parentId) audit = JSON.parse(JSON.stringify(node))
+                                }
+
+                                return `${getNewPath(audit, all_nodes)}\\${new_node.name}`
+                        }
+                        case 'nonC':
+                        {
+                                let audit
+
+                                for (const node of  all_nodes)
+                                {
+                                        if(node.id === new_node.parentId) audit = JSON.parse(JSON.stringify(node))
+                                }
+
+                                return `${getNewPath(audit, all_nodes)}\\${new_node.name}`
+                        }
+                        case 'fnc':
+                        {
+                                let nc
+
+                                for (const node of  all_nodes)
+                                {
+                                        if(node.id === new_node.parentId) nc = JSON.parse(JSON.stringify(node))
+                                }
+
+                                return `${getNewPath(nc, all_nodes)}\\${new_node.name}`
+                        }
                         case 'ds':
                         {
                                 let parent
@@ -642,6 +808,7 @@ export default function useGetData(TheDatas)
                                                 break
                                         }
                                 }
+                                // if (new_node.name === "Levius") console.log("Levius***************", all_nodes, parent, new_node)
                                 // console.log('paaaaaaaaaaaaaath', new_node)
 
                                 return `${getNewPath(parent, all_nodes)}\\${new_node.name}`
@@ -1086,6 +1253,18 @@ export default function useGetData(TheDatas)
                         )
                 }
 
+                function supress_from_list(qualified_id, list_of_data)
+                {
+                        let new_list = [...list_of_data].filter( node => node.id !== qualified_id )
+
+                        for ( const child of [...getChildrenFrom([...new_list], qualified_id)] )
+                        {
+                                new_list = supress_from_list(child.id, [...new_list])
+                        }
+
+                        return new_list
+                }
+
                 switch (action.type) {
                         case 'refresh':
                                 return [...state]
@@ -1096,114 +1275,22 @@ export default function useGetData(TheDatas)
                                 const data = action.data
                                 console.log( 'broadcast.........', data);
 
-                                // const temp = new Map()
+                                // const section_id = data.node.constructor === Array ? parseInt(data.node[0].section_id) : parseInt(data.node.section_id)
 
-                                // FetchedNodesData.forEach((value, key) =>
-                                //   {
-                                //     temp.set(key, JSON.parse( JSON.stringify(value) ))
-                                //   }
-                                // )
-
-                                const section_id = data.node.constructor === Array ? parseInt(data.node[0].section_id) : parseInt(data.node.section_id)
-
-                                // const existing_data = temp.get(section_id)
                                 if (data.node.constructor === Array)
                                 {
                                         // console.log("heeeerre", existing_data)
                                         data.node.forEach(node =>
                                                 {
-                                                        // const type = data.node_type === 'audit' ? node.sub_type !== undefined ? node.sub_type : data.node_type : data.node_type
-                                                        const type = node.front_type
-                                                        let parentId
 
-                                                        switch (type)
-                                                        {
-                                                                case 'audit':
-                                                                        parentId = '0'
-                                                                        break;
-                                                                case 'checkList':
-                                                                        parentId = 'audit' + node.audit_id
-                                                                        break;
-                                                                case 'dp':
-                                                                        parentId = 'audit' + node.audit_id
-                                                                        break;
-                                                                case 'nonC':
-                                                                        parentId = 'audit' + node.audit_id
-                                                                        break;
-                                                                case 'fnc':
-                                                                        parentId = 'nonC' + node.nc_id
-                                                                        break;
-                                                                case 'ds':
-                                                                        parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id
-                                                                        break;
-                                                                case 'f':
-                                                                        parentId = node.parent_type === '' ? '0' : node.parent_type + node.parent_id
-                                                                        break;
+                                                        const new_node = create_new_node(node)
 
-                                                                default:
-                                                                        break;
-                                                        }
+                                                        new_node.path = getNewPath({...new_node}, [...state], true)
 
-                                                        state.push(
-                                                                makeNodeData(
-                                                                        type + node.id,
-                                                                        type === 'f' ? 'file' : 'folder',
-                                                                        node.services,
-                                                                        false,
-                                                                        node.name,
-                                                                        type,
-                                                                        false,
-                                                                        parentId,
-                                                                        undefined,
-                                                                        type !== 'f',
-                                                                        type === 'f' ? node.extension : undefined,
-                                                                        node.user,
-                                                                        type === 'fnc' ? node.isClosed : undefined,
-                                                                        type === 'fnc' ? node.review_date : undefined,
-                                                                        node.created_at,//
-                                                                        type === 'fnc' ? node.level : undefined,
-                                                                        section_id,
-                                                                        type === 'f' ? node.size : undefined,
-                                                                        type === 'f' ? node.url : undefined,
-                                                                )
-                                                        )
+                                                        state.push(new_node)
                                                 }
                                         );
                                 }
-                                // else
-                                // {
-                                //         state.push
-                                //         (
-                                //                 makeNodeData
-                                //                 (
-                                //                         data.node_type + data.node.id,
-                                //                         data.node_type === 'f' ? 'file' : 'folder',
-                                //                         data.node.services,
-                                //                         false,
-                                //                         data.node.name,
-                                //                         data.node_type,
-                                //                         false,
-                                //                         data.node_type === 'f' || data.node_type === 'ds' ? data.node.parent_type === '' ? '0' : data.node.parent_type + data.node.parent_id : undefined,
-                                //                         undefined,
-                                //                         data.node_type !== 'f',
-                                //                         data.node_type === 'f' ? data.node.extension : undefined,
-                                //                         data.node_type === 'audit' ? data.node.user.name : undefined,
-                                //                         data.node_type === 'fnc' ? data.node.isClosed : undefined,
-                                //                         data.node_type === 'fnc' ? data.node.review_date : undefined,
-                                //                         data.node.created_at,//
-                                //                         data.node_type === 'fnc' ? data.node.level : undefined,
-                                //                         section_id,
-                                //                         data.node_type === 'f' ? data.node.size : undefined,
-                                //                         data.node_type === 'f' ? data.node.url : undefined,
-                                //                 )
-                                //         )
-                                // }
-
-                                // temp.set(section_id, existing_data)
-
-                                // console.log(temp)
-
-                                // setFnd(temp)
 
                                 return JSON.parse(JSON.stringify(state))
                         }
@@ -1213,55 +1300,6 @@ export default function useGetData(TheDatas)
 
                                 const data = action.data
                                 console.log( 'broadcast.........', data);
-
-                                // const temp = new Map()
-
-                                // console.log( 'fnd.........', FetchedNodesData);
-
-                                // FetchedNodesData.forEach((value, key) =>
-                                //   {
-                                //     temp.set(key, JSON.parse( JSON.stringify(value) ))
-                                //   }
-                                // )
-
-                                // const section_id = parseInt(data.node.section_id)
-
-                                // const existing_data = temp.get(section_id)
-
-
-                                // console.log( 'exist.........', existing_data);
-
-                                // try
-                                // {
-
-                                //   console.log('enter notif update')
-
-                                //   authUser.operation_notifications.forEach(notif =>
-                                //     {
-                                //       console.log(notif.operable_id, data.node.id, notif.operable_id === data.node.id)
-                                //       if (notif.operable_id === data.node.id)
-                                //       {
-                                //         console.log('notif update')
-                                //         echosHandler('updateAuthUserInfo')
-                                //         EventsManager.emit('updateNotif', notif.id)
-                                //       }
-                                //     }
-                                //     );
-
-                                //   // existing_data.forEach(node =>
-                                //   //   {
-                                //   //     if(node.id === data.node_type + data.node.id)
-                                //   //     {
-                                //   //       existing_data.splice(existing_data.indexOf(node),1)
-                                //   //       throw 'endForEach'
-                                //   //     }
-                                //   //   }
-                                //   // );
-                                // }
-                                // catch (error)
-                                // {
-                                //   console.log(error, existing_data);
-                                // }
 
                                 console.log('enter notif update')
 
@@ -1277,13 +1315,7 @@ export default function useGetData(TheDatas)
                                         }
                                 );
 
-                                // temp.set(section_id, existing_data)
-
-                                // console.log(temp)
-
-                                // setFnd(temp)
-
-                                const newState = state.filter( node => node.id !== data.node.type + data.node.id ).map( node => node )
+                                const newState = supress_from_list(data.node.type + data.node.id, [...state])
 
                                 // EventsManager.emit('updateData')
 
@@ -1297,12 +1329,6 @@ export default function useGetData(TheDatas)
 
                                 const data = action.data
                                 console.log( 'broadcast.........', data);
-
-                                // temp.set(section_id, existing_data)
-
-                                // console.log(temp)
-
-                                // setFnd(temp)
 
                                 const update_path = (node, current_state) =>
                                 {
@@ -1376,34 +1402,6 @@ export default function useGetData(TheDatas)
 
                                 return JSON.parse(JSON.stringify(finalState))
                         }
-                        // case 'move':
-                        // {
-                        //         const data = action.data
-                        //
-                        //         dispatch({type: 'update', data})
-                        //
-                        //         const moved_node = data.node[0];
-                        //
-                        //         const newState = state.map(
-                        //                 node =>
-                        //                 {
-                        //                         if (node.id === data.node_type + moved_node.id)
-                        //                         {
-                        //                                 node.path = getNewPath(node, state)
-                        //
-                        //                                 return node
-                        //                         }
-                        //                         else if ( (node.parentId === data.node_type + moved_node.id) )
-                        //                         {
-                        //                                 node.path = getNewPath(node, state)
-                        //                         }
-                        //                 }
-                        //         )
-                        //
-                        //         console.log('newState', newState)
-                        //
-                        //         return JSON.parse(JSON.stringify(newState))
-                        // }
 
                         default:
                                 break;
@@ -1542,9 +1540,9 @@ export default function useGetData(TheDatas)
                 }
         }
 
-        function getChildren(nodeId) {
+        function getChildrenFrom(list_of_data, nodeId) {
                 let children = [];
-                for(let nodeData of displayingSection)
+                for(let nodeData of list_of_data)
                 {
                         if (nodeData.parentId === nodeId) {
                                 children.push(nodeData);
@@ -1654,30 +1652,101 @@ export default function useGetData(TheDatas)
 
         const spinnerManager = useShowSpinner()
 
+        // const [show, setShow] = useState(false);
+        // const dropdown = useRef();
+        //
+        //
+        // EventsManager.once(id, () => { console.log(id); setShow(true) })
+        //
+        // useEffect(() => {
+        //         /**
+        //          * Alert if clicked on outside of element
+        //          */
+        //         function handleClickOutside(event) {
+        //                 if (dropdown.current && !dropdown.current.contains(event.target)) {
+        //                         // console.log('outside')
+        //                         setShow(false);
+        //                 }
+        //         }
+        //         // Bind the event listener
+        //         document.addEventListener("click", handleClickOutside);
+        //         return () => {
+        //                 // Unbind the event listener on clean up
+        //                 document.removeEventListener("click", handleClickOutside);
+        //                 EventsManager.off(id);
+        //
+        //         };
+        //
+        // }, []);
+        //
+        // // const ref = useRef()
+        //
+        // return (
+        // <div className = {useMemo(() => (`dropdown ${show ? 'show' : ''}`), [show])} ref = {dropdown}
+        //      style={{
+        //              height: "fit-content",
+        //              width: "fit-content"
+        //      }}
+        // >
+        //
+        //         <div id={id} style={{ width: "fit-content", height: "fit-content" }} data-toggle="dropdown" aria-haspopup="true" aria-expanded = {show} onMouseEnter = {() => { setShow(true) }} >
+        //                 {icon}
+        //         </div>
+        //
+        //         <div className = {useMemo(() => (`dropdown-menu ${show ? 'show' : ''}`), [show])} aria-labelledby="userPanel" onMouseLeave = {() => { setShow(false) }}
+        //              style={{
+        //                      position: "absolute",
+        //                      willChange: 'transform',
+        //                      top: 0,
+        //                      left: 0,
+        //                      transform: 'translate3d(-160px, 5px, 0px)',
+        //                      maxHeight: ( (window.innerHeight/100)*80 ),
+        //                      overflow: 'auto' ,
+        //                      paddingTop: 0,
+        //              }} >
+        //                 <div className="p-1" style={{ backgroundColor: 'white', zIndex: 999, position: 'sticky', top: 0 }} ></div>
+        //                 {content}
+        //         </div>
+        // </div>
+        // )
 
         const CustomDropDown = useCallback(
-                function CustomDropDown({id, icon, content})
+                function CustomDropDown({id, icon, content, f = undefined})
                 {
 
-                        const [show, setShow] = useState(false);
-                        // const setShow = (val) => {
-                        //   set(val)
-                        //   isLogged = val
-                        //   console.log(isLogged)
-                        // }
-                        const dropdown = useRef();
+                        const [anchorEl, setAnchorEl] = useState(null);
 
+                        const handleEnter = (event) => {
+                                setAnchorEl(event.currentTarget);
+                        };
 
-                        EventsManager.once(id, () => { console.log(id); setShow(true) })
+                        const handleLeave = () => {
+                                setAnchorEl(null);
+                        };
+
+                        const open = Boolean(anchorEl);
+                        const drop_id = open ? id : undefined;
+
+                        useEffect(
+                        () =>
+                        {
+                                if (id === 'notifPanel')
+                                {
+                                        EventsManager.emit('setOpenState', open)
+                                }
+                        }, [anchorEl]
+                        )
 
                         useEffect(() => {
                                 /**
                                  * Alert if clicked on outside of element
                                  */
                                 function handleClickOutside(event) {
-                                        if (dropdown.current && !dropdown.current.contains(event.target)) {
+                                        // console.log('outside')
+                                        const dropdown = document.getElementById(id)
+                                        if (dropdown && !dropdown.contains(event.target)) {
                                                 // console.log('outside')
-                                                setShow(false);
+                                                handleLeave()
                                         }
                                 }
                                 // Bind the event listener
@@ -1685,40 +1754,35 @@ export default function useGetData(TheDatas)
                                 return () => {
                                         // Unbind the event listener on clean up
                                         document.removeEventListener("click", handleClickOutside);
-                                        EventsManager.off(id);
 
                                 };
 
-                        }, []);
+                        }, [])
 
                         return (
-                                <div className = {useMemo(() => (`dropdown ${show ? 'show' : ''}`), [show])} ref = {dropdown}>
-                                        {/* <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Dropdown
-                </button> */}
-
-
-                                        <div onMouseEnter = {() => { setShow(true) }} id={id} data-toggle="dropdown" aria-haspopup="true" aria-expanded = {show} >
-                                                {icon}
-                                        </div>
-
-
-                                        <div className = {useMemo(() => (`dropdown-menu ${show ? 'show' : ''}`), [show])} onMouseLeave = {() => { setShow(false) }} aria-labelledby="userPanel"
-                                             style={{
-                                                     position: 'absolute',
-                                                     willChange: 'transform',
-                                                     top: 0,
-                                                     left: 0,
-                                                     transform: 'translate3d(-160px, 5px, 0px)',
-                                                     maxHeight: ( (window.innerHeight/100)*80 ),
-                                                     overflow: 'auto' ,
-                                                     paddingTop: 0,
-                                             }} >
-                                                <div className="p-1" style={{ backgroundColor: 'white', zIndex: 999, position: 'sticky', top: 0 }} ></div>
-                                                {content}
-                                        </div>
+                                <div onMouseEnter={handleEnter} onMouseLeave={handleLeave} >
+                                        {icon}
+                                        <Popper id={drop_id}
+                                                style={{
+                                                        zIndex: 999,
+                                                        borderRadius: '0.25rem',
+                                                        fontSize: '14px',
+                                                        border: 'none',
+                                                        boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
+                                                        overflow: 'hidden',
+                                                        padding: '0.5rem',
+                                                        maxHeight: ( (window.innerHeight/100)*80 ),
+                                                        backgroundColor: "white",
+                                                }}
+                                                open={open}
+                                                anchorEl={anchorEl}
+                                        >
+                                                <Box>
+                                                        {content}
+                                                </Box>
+                                        </Popper>
                                 </div>
-                        )
+                        );
 
                 },
                 []
@@ -1837,6 +1901,58 @@ export default function useGetData(TheDatas)
                 }
         }
 
+        function copyObject(obj)
+        {
+                if (!obj) return obj
+
+                const constructors =
+                {
+                        is_json: (json) => (json.constructor === Object),
+                        is_array: (array) => (array.constructor === Array),
+                        is_map: (map) => (map.constructor === Map),
+                        is_file: (file) => (file.constructor === File),
+
+
+                }
+
+                if ( constructors.is_map(obj) )
+                {
+                        const map = new Map()
+
+                        obj.forEach(
+                                (value, key) =>
+                                {
+                                        map.set(key, copyObject(value))
+                                }
+                        )
+
+                        return map
+                }
+                else if ( constructors.is_array(obj) )
+                {
+                        const array = []
+
+                        for (const arrayElement of obj)
+                        {
+                                array.push( copyObject(arrayElement) )
+                        }
+
+                        return array
+                }
+                else if ( constructors.is_json(obj) )
+                {
+                        const json = {}
+
+                        for (const key in obj)
+                        {
+                                json[`${key}`] = copyObject(obj[`${key}`])
+                        }
+
+                        return json
+                }
+                else return obj
+        }
+
         // function useOutsideAlerter(ref) {
         //   useEffect(() => {
         //     /**
@@ -1904,9 +2020,10 @@ export default function useGetData(TheDatas)
                         createNodeData: makeNodeData,
                         parseModelToFrontType,
                         getNodeDataById: getNodeData,
-                        getChildrenById: getChildren,
+                        getChildrenById: getChildrenFrom,
                         getType: getType,
                         getNewPath,
+                        copyObject,
                         modalManager,
                         spinnerManager,
                         selectedSectionId,

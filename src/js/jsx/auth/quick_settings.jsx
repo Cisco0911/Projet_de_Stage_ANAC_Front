@@ -77,7 +77,7 @@ export default function QuickSettings()
         ), []
     )
 
-    const switchRef = document.getElementById('switchRef')
+    // const switchRef = document.getElementById('switchRef')
 
 
     const settingButton = 
@@ -98,7 +98,7 @@ export default function QuickSettings()
             <ListItem key={'mode éditeur'} >
                 <Stack direction="row" spacing={1} alignItems="center">
                     <AntSwitch id={'switchRef'} checked={Global_State.isEditorMode} onClick={handleChange}  />
-                    <span style={{ width: 'max-content', cursor: 'pointer' }} onClick = { () => { console.log('switchRef'); switchRef.click() } } > { `${ Global_State.editorMode ? 'désactiver' : 'activer' } le mode éditeur` } </span>
+                    <label style={{ width: 'max-content', cursor: 'pointer' }} htmlFor={'switchRef'} > { `${ Global_State.editorMode ? 'désactiver' : 'activer' } le mode éditeur` } </label>
                 </Stack>
                 <Divider />
             </ListItem>

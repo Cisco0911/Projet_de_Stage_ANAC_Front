@@ -156,7 +156,7 @@ function Header()
 
 
         return (
-        <Navbar /* bg="light"  */ expand="sm" style={{padding: 0}}>
+                <Navbar /* bg="light"  */ expand="sm" style={{padding: 0}}>
                 <Container fluid style={{ justifyContent: 'end', alignItems: 'start', paddingRight: '15px', }} >
                         {/* <Navbar.Brand href="#">Navbar scroll</Navbar.Brand> */}
                         <Navbar.Toggle className='p-0  justify-content-start align-items-start d-flex d-sm-none' aria-controls={`offcanvasNavbar-expand-${'sm'}`} children = {<GiOverhead size={40} />}
@@ -323,6 +323,7 @@ function Home()
 
         document.onkeydown = function (e) {
                 if(e.ctrlKey && e.key === 'f') return false
+                if(e.ctrlKey && e.key === 'd') return false
         }
 
         const [Data_Base, setData_base] = useState(null)

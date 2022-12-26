@@ -1,5 +1,7 @@
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 /* eslint-disable import/first */
 
 // import { findByDisplayValue } from '@testing-library/react';
@@ -250,54 +252,50 @@ export default function parseToJson(value) {
     } else return undefined;
   }
 
-  function makeJsonTree() {
+  function makeChildrenV2(root) {
+    // Triage de la liste de fichiers selon l'ordre hiérarchique
+    value.sort(function (a, b) {
+      if (a.isRoot) return -1;else if (b.isRoot) return 1;
+
+      var pathA = a.path.split('\\');
+      var pathB = b.path.split('\\');
+
+      // console.log('pathAB', pathA, pathB)
+
+      return pathA.length - pathB.length;
+    });
+
+    // console.log('value', value)
+
+    // Création d'un objet qui associe chaque identifiant de fichier à son noeud dans l'arbre
+    var nodesById = _defineProperty({}, root.id, root);
+
+    // Parcours de la liste de fichiers pour créer les noeuds de l'arbre
     var _iteratorNormalCompletion4 = true;
     var _didIteratorError4 = false;
     var _iteratorError4 = undefined;
 
     try {
-      for (var _iterator4 = nodesData.data[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-        var node = _step4.value;
+      for (var _iterator4 = value[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+        var file = _step4.value;
 
-        if (node.isRoot) {
-          var children = makeChildren(node);
-          var racine = {};
 
-          // node.forEach(
-          //         (value, key) =>
-          //         {
-          //                 racine[key] = JSON.parse(JSON.stringify(value))
-          //         }
-          // );
-          // racine['children'] = children
+        if (file.isRoot) continue;
 
-          return Object.assign({}, JSON.parse(JSON.stringify(node)), {
-            children: children
+        var node = Object.assign({}, file, {
+          children: []
+        });
+        nodesById[node.id] = node; // Ajout du noeud dans l'objet nodesById
 
-            // makeJsonNode(
-            //   node.id,
-            //   node.global_type,
-            //   node.services,
-            //   node.name,
-            //   node.type,
-            //   node.isOpen,
-            //   children,
-            //   node.isRoot,
-            //   node.parentId,
-            //   node.path,
-            //   node.hasChildren,
-            //   node.ext,
-            //   node.ra,
-            //   node.isClosed,
-            //   node.created_at,
-            //   node.level,
-            //   node.taille,
-            //   node.url,
-            //
-            //   )
+        // Récupération du noeud parent à partir de l'objet nodesById
+        var parentNode = nodesById[file.parentId] || root;
 
-          });
-        }
+        // if (!parentNode) continue
+
+        // console.log('file.parentId', file.parentId, nodesById)
+
+        // Ajout du noeud en tant que enfant du noeud parent
+        parentNode.children.push(node);
       }
     } catch (err) {
       _didIteratorError4 = true;
@@ -310,6 +308,41 @@ export default function parseToJson(value) {
       } finally {
         if (_didIteratorError4) {
           throw _iteratorError4;
+        }
+      }
+    }
+
+    return root;
+  }
+
+  function makeJsonTree() {
+    var _iteratorNormalCompletion5 = true;
+    var _didIteratorError5 = false;
+    var _iteratorError5 = undefined;
+
+    try {
+      for (var _iterator5 = nodesData.data[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+        var node = _step5.value;
+
+        if (node.isRoot) {
+          node.children = [];
+
+          makeChildrenV2(node);
+
+          return Object.assign({}, JSON.parse(JSON.stringify(node)));
+        }
+      }
+    } catch (err) {
+      _didIteratorError5 = true;
+      _iteratorError5 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+          _iterator5.return();
+        }
+      } finally {
+        if (_didIteratorError5) {
+          throw _iteratorError5;
         }
       }
     }

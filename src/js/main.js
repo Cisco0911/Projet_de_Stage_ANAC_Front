@@ -338,6 +338,7 @@ function Home() {
 
         document.onkeydown = function (e) {
                 if (e.ctrlKey && e.key === 'f') return false;
+                if (e.ctrlKey && e.key === 'd') return false;
         };
 
         var _useState5 = useState(null),

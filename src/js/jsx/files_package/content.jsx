@@ -1,27 +1,26 @@
 /* eslint-disable import/first */
 
-import React, {useMemo, useState, useReducer, useEffect, useRef, useCallback, forwardRef} from 'react';
+import React, {forwardRef, useCallback, useEffect, useMemo, useReducer, useRef, useState} from 'react';
 
 import {Global_State} from '../main';
-import { http } from "../data";
+import {http} from "../data";
 
 import DataTable from 'react-data-table-component';
 import swal from 'sweetalert';
 import toast from "react-hot-toast";
 import {useDropzone} from 'react-dropzone';
-import FileIcon from 'react-file-icon';
-import Avatar from "react-avatar";
 
 import Select from "react-select";
+import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
 
-import { FaSort, FaInfoCircle } from "react-icons/fa";
-import { FcFolder, FcVideoFile } from "react-icons/fc";
-import { BsCardImage, BsFileWord, BsFillFileEarmarkPdfFill } from "react-icons/bs";
-import { RiFileWord2Fill } from "react-icons/ri";
-import { SiMicrosoftpowerpoint, SiMicrosoftexcel } from "react-icons/si";
-import { AiFillFileUnknown } from "react-icons/ai";
-import { IoArrowUndoOutline, IoArrowUndoSharp } from "react-icons/io5";
+import {FaInfoCircle, FaPaste, FaSort} from "react-icons/fa";
+import {FcFolder, FcVideoFile} from "react-icons/fc";
+import {BsFillFileEarmarkPdfFill} from "react-icons/bs";
+import {RiFileWord2Fill} from "react-icons/ri";
+import {SiMicrosoftexcel, SiMicrosoftpowerpoint} from "react-icons/si";
+import {AiFillFileUnknown} from "react-icons/ai";
+import {IoArrowUndoOutline, IoArrowUndoSharp} from "react-icons/io5";
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -29,17 +28,13 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
 import {HiSaveAs} from 'react-icons/hi'
-import {FaPaste} from 'react-icons/fa'
 
-import { Formik, useFormik } from 'formik';
+import {useFormik} from 'formik';
 import * as yup from 'yup'
 
 import DatePicker from "react-datepicker";
 import Stack from "@mui/material/Stack";
-import {IconButton} from "@mui/material";
-import ReactDOM from "react-dom/client";
-import {renderToStaticMarkup} from "react-dom/server";
-
+import {IconButton, Tooltip} from "@mui/material";
 
 
 let previousSelected = []
@@ -191,25 +186,6 @@ export default function FileTable({set})
                 }, [mc_state]
         )
 
-
-        // useEffect(
-        //     () =>
-        //     {
-        //         selectedRow.forEach(selectedNode =>
-        //             {
-        //                 console.log('checkkkkk', selectedNode, selectedNode.id, node )
-        //                 if( Global_State.getNodeDataById(selectedNode.id).section_id === Global_State.selectedSectionId)
-        //                 {
-        //                     let isDeleted = true
-        //                     node.children.forEach(child => { if(selectedNode.id === child.id) isDeleted = false } );
-        //                     if(isDeleted) Global_State.clearSelected(setSelectedRows)
-        //                 }
-        //             }
-        //         );
-        //     },
-        //     [node]
-        // )
-
         useEffect(
         () =>
         {
@@ -232,6 +208,8 @@ export default function FileTable({set})
 
                         async function paste_here(node)
                         {
+                                const concern_nodes = Global_State.copyObject(to_move_or_copy.current)
+
                                 const destination_node = JSON.parse( JSON.stringify(node) )
                                 const destination_info = Global_State.identifyNode( destination_node )
                                 const destination_id = destination_info[0]; const destination_type = destination_info[1]
@@ -278,21 +256,52 @@ export default function FileTable({set})
 
                                 }
 
-                                for (const node_to_copy of to_move_or_copy.current)
+                                for (const node_to_copy of concern_nodes)
                                 {
                                         for (const child_node of node.children)
                                         {
-                                                if (child_node.name === node_to_copy.name)
+                                                if (child_node.name === (node_to_copy.onCopy || node_to_copy.name) )
                                                 {
                                                         if (!action.current.saved)
                                                         {
+                                                                // console.log('node_to_copy__________', to_move_or_copy.current)
+                                                                if ( !node_to_copy.onCopy && (parseInt(node_to_copy.id) < 0) && (operation_type === 'move') )
+                                                                {
+                                                                        // toast.error(`Selon les données locales, il existe deja un ${node_to_copy.type === 'f' ? 'fichier' : 'dossiser'} de ce nom á la destination:\n${node_to_copy.name}`)
+                                                                        toast(
+                                                                        <div>
+                                                                                {
+                                                                                        `Selon les données locales, il existe deja un ${node_to_copy.type === 'f' ? 'fichier' : 'dossiser'} de ce nom á la destination:`
+                                                                                }
+                                                                                <br/>
+                                                                                "<span style={{ fontWeight: "bold", fontSize: 18 }}>{node_to_copy.name}</span>"
+                                                                        </div>,
+                                                                        { type: "error" }
+                                                                        );
+                                                                        continue
+                                                                }
+
+                                                                if ( node.path.indexOf(node_to_copy.path) !== -1 )
+                                                                {
+                                                                        continue
+                                                                }
+
                                                                 await new Promise(
                                                                         resolve =>
                                                                         {
+                                                                                const BsToMuiComp = React.forwardRef(function MyComponent(props, ref) {
+                                                                                        //  Spread the props to the underlying DOM element.
+                                                                                        return (
+                                                                                                <Button {...props} ref={ref}>
+                                                                                                        FUSIONNER
+                                                                                                </Button>
+                                                                                        );
+                                                                                });
+
                                                                                 const content = (
                                                                                 <div>
                                                                                         <div className={`mb-3`} >
-                                                                                                {`La destination pourrait contenir un fichier de meme nom: `}
+                                                                                                {`La destination pourrait contenir un ${child_node.type === 'f' ? 'fichier' : 'dossier'} de meme nom: `}
                                                                                                 <br/>
                                                                                                 <span style={{ fontWeight: "bold" }} > {`${node_to_copy.name}`} </span>
                                                                                         </div>
@@ -303,18 +312,26 @@ export default function FileTable({set})
                                                                                                 <Button className={`mr-1`} variant={`outline-light`} onClick={ e => { e.stopPropagation(); resolve(1) } } >
                                                                                                         IGNORER
                                                                                                 </Button>
-                                                                                                <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); resolve(2) } } >
+                                                                                                <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); console.log('RENOMEEEEEEEEEEER'); resolve(2) } } >
                                                                                                         RENOMER
                                                                                                 </Button>
-                                                                                                <Button variant={`outline-danger`} onClick={ e => { e.stopPropagation(); resolve(3) } } >
-                                                                                                        ECRASER
-                                                                                                </Button>
+                                                                                                {
+                                                                                                        child_node.global_type === 'folder' ?
+                                                                                                        <Tooltip title="Les fichiers en conflits seront écraser à la destination">
+                                                                                                                <span>
+                                                                                                                        <BsToMuiComp disabled={ parseInt(node_to_copy.id) < 0 } variant={`outline-danger`} onClick={ e => { e.stopPropagation(); resolve(3) } }  />
+                                                                                                                </span>
+                                                                                                        </Tooltip>:
+                                                                                                        <Button disabled={ parseInt(node_to_copy.id) < 0 } variant={`outline-danger`} onClick={ e => { e.stopPropagation(); resolve(3) } } >
+                                                                                                                ECRASER
+                                                                                                        </Button>
+                                                                                                }
                                                                                         </div>
                                                                                 </div>
                                                                                 )
 
                                                                                 Global_State.modalManager.setContent(content)
-                                                                                Global_State.modalManager.open_modal("Conflit de fichiers", false)
+                                                                                Global_State.modalManager.open_modal(`Conflit de ${child_node.type === 'f' ? 'fichiers' : 'dossiers'}`, false)
 
                                                                         }
                                                                 ).then(
@@ -340,13 +357,31 @@ export default function FileTable({set})
                                 // console.log( 'to_move_or_copy.current1', to_move_or_copy.current )
                                 if (operation_type === 'move')
                                 {
-                                        const to_move = [...to_move_or_copy.current]
+                                        const to_move = [...concern_nodes]
 
                                         setMc_state('none')
 
                                         // console.log('zaaaaaaaaaaaaaaaaaaaaaa')
                                         for (const node_to_move of to_move)
                                         {
+
+                                                if ( node.path.indexOf(node_to_move.path) !== -1 )
+                                                {
+                                                        toast(
+                                                        <div>
+                                                                {
+                                                                        `Le dossier de destination est un sous-dossier du dossier source.`
+                                                                }
+                                                                <br/>
+                                                                <br/>
+                                                                source: <span style={{ fontWeight: "bold", fontSize: 12 }}>{node_to_move.path}</span>
+                                                                <br/>
+                                                                destination: <span style={{ fontWeight: "bold", fontSize: 12 }}>{node.path}</span>
+                                                        </div>,
+                                                        { type: "error" }
+                                                        );
+                                                        continue
+                                                }
 
                                                 const queryData = new FormData
 
@@ -391,11 +426,29 @@ export default function FileTable({set})
                                 else
                                 {
 
-                                        console.log( 'to_move_or_copy.current', to_move_or_copy.current )
+                                        console.log( 'to_move_or_copy.current', concern_nodes )
 
-                                        for (const node_to_copy of to_move_or_copy.current)
+                                        for (const node_to_copy of concern_nodes)
                                         {
                                                 // if (node_to_copy.on_exist === 1) continue
+
+                                                if ( node.path.indexOf(node_to_copy.path) !== -1 )
+                                                {
+                                                        toast(
+                                                                <div>
+                                                                        {
+                                                                                `Le dossier de destination est un sous-dossier du dossier source.`
+                                                                        }
+                                                                        <br/>
+                                                                        <br/>
+                                                                        source: <span style={{ fontWeight: "bold", fontSize: 12 }}>{node_to_copy.path}</span>
+                                                                        <br/>
+                                                                        destination: <span style={{ fontWeight: "bold", fontSize: 12 }}>{node.path}</span>
+                                                                </div>,
+                                                                { type: "error" }
+                                                        );
+                                                        continue
+                                                }
 
                                                 const queryData = new FormData
 
@@ -423,16 +476,30 @@ export default function FileTable({set})
 
                                                         // console.log('arriiiiiiiiiiiiiveeee')
 
-                                                        await http.post('copy_folder', queryData)
-                                                        .then( res => { console.log(res) } )
-                                                        .catch( err => { console.log(err); throw err} )
+                                                        if (Global_State.isEditorMode)
+                                                        {
+                                                                Global_State.editor.folder.copy(queryData)
+                                                        }
+                                                        else
+                                                        {
+                                                                await http.post('copy_folder', queryData)
+                                                                .then( res => { console.log(res) } )
+                                                                .catch( err => { console.log(err); throw err} )
+                                                        }
                                                 }
                                                 else if (node_to_copy.type === 'f')
                                                 {
 
-                                                        await http.post('copy_file', queryData)
-                                                        .then( res => { console.log(res) } )
-                                                        .catch( err => { console.log(err); throw err} )
+                                                        if (Global_State.isEditorMode)
+                                                        {
+                                                                Global_State.editor.files.copy(queryData)
+                                                        }
+                                                        else
+                                                        {
+                                                                await http.post('copy_file', queryData)
+                                                                .then( res => { console.log(res) } )
+                                                                .catch( err => { console.log(err); throw err} )
+                                                        }
                                                 }
                                         }
                                 }
@@ -494,10 +561,10 @@ export default function FileTable({set})
                 }
                 let servicesList = Global_State.authUser.services.filter( (service) => { return canAddToService(service) } ).map((service) => { return service } )
                 // formatage en options
-                const options = servicesList.map( (service) => { return {value: service.id, label: service.name } } )
+                const options_services = servicesList.map( (service) => { return {value: service.id, label: service.name } } )
 
                 // composant de selection de service
-                const SelectServices = ({updateMethod}) =>
+                const SelectComponent = ({updateMethod, options, placeholder}) =>
                 {
                         // console.log(servicesList)
                         // console.log(options)
@@ -508,10 +575,85 @@ export default function FileTable({set})
                         options = { options }
                         defaultValue = { options.slice(0, 1) }
                         isMulti = { true }
-                        placeholder = { "Sélectionner au moins 1 service" }
+                        placeholder = { placeholder }
                         closeMenuOnSelect = { false }
                         components = { makeAnimated() }
                         isDisabled = { options.length === 1 }
+
+                        />
+                        )
+                }
+
+                const AsyncSelectComponent = ({areFixed, updateMethod, defaultOptions, placeholder}) =>
+                {
+                        const styles = {
+                                multiValue: (base, state) => {
+                                        return state.data.isFix ? { ...base, backgroundColor: 'gray' } : base;
+                                },
+                                multiValueLabel: (base, state) => {
+                                        return state.data.isFix
+                                        ? { ...base, fontWeight: 'bold', color: 'white', paddingRight: 6 }
+                                        : base;
+                                },
+                                multiValueRemove: (base, state) => {
+                                        return state.data.isFix ? { ...base, display: 'none' } : base;
+                                },
+                        };
+
+                        const filterUsers = (inputValue, list) => {
+                                return list.filter((i) =>
+                                i.label.toLowerCase().includes(inputValue.toLowerCase())
+                                );
+                        };
+
+                        const promiseOptions = (inputValue) =>
+                        new Promise(
+                                (resolve) =>
+                                {
+                                        http.get('get_users')
+                                        .then(
+                                                res =>
+                                                {
+                                                        // console.log('userrsssss', res)
+                                                        const users = res.data.map( user => ( {value: user.id, label: `${user.name} ${user.second_name}`} ) )
+                                                       resolve(filterUsers(inputValue, users))
+                                                }
+                                        )
+                                }
+                        );
+
+                        areFixed = [...areFixed].map( fix_el => ({...fix_el, isFix: true}) )
+
+                        const [values, setValue] = useState(areFixed)
+
+                        const handleChange = (e) =>
+                        {
+                               const new_val = [...areFixed]
+
+                                for (const element of e)
+                                {
+                                        // if ( !areFixed.find( fix_el => fix_el.value === element.value ) ) new_val.push(element)
+                                        if ( !element.isFix ) new_val.push(element)
+                                }
+
+                                setValue(new_val)
+
+                                updateMethod(new_val)
+                        }
+
+                        return(
+                        <AsyncSelect
+                                value={values}
+                                styles={styles}
+                                onChange = { handleChange }
+                                loadOptions={promiseOptions}
+                                defaultValue = { areFixed }
+                                isClearable={values.some( (v) => !v.isFix )}
+                                isMulti = { true }
+                                placeholder = { placeholder }
+                                closeMenuOnSelect = { false }
+                                components = { makeAnimated() }
+                                // isDisabled = { options.length === 1 }
 
                         />
                         )
@@ -528,11 +670,14 @@ export default function FileTable({set})
 
                                 const handleSubmit = (submittedInfo) => {
                                         // console.log(submittedInfo)
+                                        // return
                                         submittedInfo.num_chrono = submittedInfo.num_chrono < 10 ? "0" + submittedInfo.num_chrono : submittedInfo.num_chrono.toString()
                                         submittedInfo.annee = submittedInfo.annee < 10 ? "0" + submittedInfo.annee : submittedInfo.annee.toString()
 
                                         let queryBody = new FormData()
 
+                                        const inspector_ids = submittedInfo.inspectors.map( element => parseInt(element.value) )
+                                        // console.log(inspector_ids)
 
                                         const service =  submittedInfo.services[0].label
 
@@ -540,6 +685,7 @@ export default function FileTable({set})
                                         submittedInfo.type_audit + "-" + service + "-" + submittedInfo.annee + "-" + submittedInfo.num_chrono
                                         )
                                         queryBody.append("services", JSON.stringify(submittedInfo.services))
+                                        queryBody.append("inspectors", JSON.stringify(inspector_ids))
                                         queryBody.append("ra_id", Global_State.authUser.id)
                                         queryBody.append("section_id", Global_State.selectedSectionId)
 
@@ -559,8 +705,9 @@ export default function FileTable({set})
                                                 // Handle the response from backend here
                                                 .then((res) =>
                                                 {
-                                                        // console.log(res)
-                                                        if(res.status === 201)
+                                                        console.log(res)
+
+                                                        if (res.data.statue === 'success')
                                                         {
                                                                 swal({
                                                                         title: "FIN!",
@@ -569,48 +716,48 @@ export default function FileTable({set})
                                                                 });
                                                                 Global_State.modalManager.close_modal()
                                                         }
-                                                        else if(res.status === 200 && res.data === "existAlready")
+                                                        else
                                                         {
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Audit existant !",
-                                                                        icon: "info",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data === "Something went wrong !")
-                                                        {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data,
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.setContent(<Audit_form/>)
-                                                        }
-                                                        else if(res.status === 200 && res.data.msg === "storingError")
-                                                        {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data.value,
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data.msg === 'catchException')
-                                                        {
-                                                                swal({
-                                                                        title: "ERREUR!",
-                                                                        text: res.data.value.errorInfo[2],
-                                                                        icon: "error",
-                                                                });
-                                                                // console.log(res)
-                                                                Global_State.modalManager.setContent(<Audit_form/>)
+                                                                // console.log('cooooooode', res.data.data.code)
+                                                                switch (parseInt(res.data.data.code))
+                                                                {
+                                                                        case 0:
+                                                                        {
+                                                                                swal({
+                                                                                        title: "FIN!",
+                                                                                        text: "Ce Audit existe deja !",
+                                                                                        icon: "info",
+                                                                                });
+                                                                                Global_State.modalManager.close_modal()
+                                                                                break
+                                                                        }
+                                                                        case 1:
+                                                                        {
+                                                                                swal({
+                                                                                        title: "ERROR!",
+                                                                                        text: res.data.data.msg,
+                                                                                        icon: "error",
+                                                                                });
+                                                                                Global_State.modalManager.setContent(<Audit_form/>)
+                                                                                break
+                                                                        }
+                                                                        default:
+                                                                        {
+                                                                                swal({
+                                                                                        title: "ERROR!",
+                                                                                        text: res.data.data.msg,
+                                                                                        icon: "error",
+                                                                                });
+                                                                                Global_State.modalManager.setContent(<Audit_form/>)
+                                                                                break
+                                                                        }
+                                                                }
                                                         }
                                                 })
 
                                                 // Catch errors if any
                                                 .catch((err) => {
-                                                        // console.log(err)
+                                                        console.log(err)
                                                         let msg
                                                         if(err.response.status === 500) msg = "erreur interne au serveur"
                                                         else if(err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page"
@@ -638,9 +785,12 @@ export default function FileTable({set})
                                 const validationRules = yup.object().shape({
                                         num_chrono: yup.number().required().positive().integer(),
                                         annee: yup.number().required().positive().integer().max(100),
+                                        inspectors: yup.array().min(1).required('Au moins 1'),
                                         services: yup.array().min(1).required('Au moins 1'),
 
                                 });
+
+                                const ra = { value: parseInt(Global_State.authUser.id), label: `${Global_State.authUser.name} ${Global_State.authUser.second_name}` }
 
                                 const formik = useFormik(
                                 {
@@ -651,7 +801,8 @@ export default function FileTable({set})
                                                 type_audit: "AE",
                                                 num_chrono: "",
                                                 annee: '',
-                                                services: options.slice(0, 1)
+                                                inspectors: [ra],
+                                                services: options_services.slice(0, 1)
                                         }
                                 }
                                 )
@@ -710,8 +861,27 @@ export default function FileTable({set})
                                         </Row>
 
                                         <Form.Group className="mb-3" >
+                                                <Form.Label>Inspecteurs</Form.Label>
+                                                <AsyncSelectComponent
+                                                        updateMethod=
+                                                        {
+                                                                (r) =>
+                                                                {
+                                                                        console.log('new_val', r)
+                                                                        // const e = Global_State.copyObject(r)
+                                                                        // if (!r.length) r.unshift( { value: parseInt(Global_State.authUser.id), label: `${Global_State.authUser.name} ${Global_State.authUser.second_name}` } );
+                                                                        formik.setFieldValue("inspectors", r)
+                                                                }
+                                                        }
+                                                        areFixed={ [ra] }
+                                                        placeholder={"Sélectionner au moins 1 inspecteur"}
+                                                />
+                                                <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.inspectors ? "Au moins 1 inspecteur doit être sélectionné" : null}</span>
+                                        </Form.Group>
+
+                                        <Form.Group className="mb-3" >
                                                 <Form.Label>Service</Form.Label>
-                                                <SelectServices updateMethod= {(e) => {formik.setFieldValue("services", e)}} />
+                                                <SelectComponent updateMethod= {(e) => {formik.setFieldValue("services", e)}} options={options_services}  placeholder={"Sélectionner au moins 1 service"} />
                                                 <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.services ? "Au moins 1 service doit être sélectionné" : null}</span>
                                         </Form.Group>
 
@@ -753,42 +923,6 @@ export default function FileTable({set})
 
                                         const [parent_id, parent_type] = Global_State.identifyNode(node)
 
-                                        // console.log(parent_id, parent_type)
-
-                                        // switch (node.type) {
-                                        //     case 'root':
-                                        //         parent_type = 'App\\Models\\Section'
-                                        //         parent_id = Global_State.getCurrentSection().id
-                                        //         break;
-                                        //     case 'audit':
-                                        //         parent_type = "App\\Models\\Audit"
-                                        //         parent_id = parseInt(node.id.substring(5), 10)
-                                        //         break;
-                                        //     case 'checkList':
-                                        //         parent_type = "App\\Models\\checkList"
-                                        //         parent_id = parseInt(node.id.substring(9), 10)
-                                        //         break;
-                                        //     case 'dp':
-                                        //         parent_type = 'App\\Models\\DossierPreuve'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-                                        //     case 'nonC':
-                                        //         parent_type = 'App\\Models\\Nc'
-                                        //         parent_id = parseInt(node.id.substring(4), 10)
-                                        //         break;
-                                        //     case 'fnc':
-                                        //         parent_type = 'App\\Models\\NonConformite'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-                                        //     case 'ds':
-                                        //         parent_type = 'App\\Models\\DossierSimple'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-
-                                        //     default:
-                                        //         break;
-                                        // }
-
                                         queryBody.append("services", JSON.stringify(submittedInfo.services))
 
                                         queryBody.append("name", submittedInfo.name)
@@ -813,7 +947,8 @@ export default function FileTable({set})
                                                 // Handle the response from backend here
                                                 .then((res) =>
                                                 {
-                                                        if(res.status === 201)
+                                                        console.log('res', res)
+                                                        if (res.data.statue === 'success')
                                                         {
                                                                 swal({
                                                                         title: "FIN!",
@@ -822,35 +957,42 @@ export default function FileTable({set})
                                                                 });
                                                                 Global_State.modalManager.close_modal()
                                                         }
-                                                        else if(res.status === 200 && res.data === "Something went wrong !")
+                                                        else
                                                         {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data,
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.setContent(<Folder_form/>)
+                                                                switch (res.data.data.code)
+                                                                {
+                                                                        case 0:
+                                                                        {
+                                                                                swal({
+                                                                                        title: "FIN!",
+                                                                                        text: "Ce Dossier existe deja !",
+                                                                                        icon: "info",
+                                                                                });
+                                                                                Global_State.modalManager.close_modal()
+                                                                                break
+                                                                        }
+                                                                        case 1:
+                                                                        {
+                                                                                swal({
+                                                                                        title: "ERROR!",
+                                                                                        text: res.data.data.msg,
+                                                                                        icon: "error",
+                                                                                });
+                                                                                Global_State.modalManager.setContent(<Folder_form/>)
+                                                                                break
+                                                                        }
+                                                                        default:
+                                                                        {
+                                                                                swal({
+                                                                                        title: "ERROR!",
+                                                                                        text: res.data.data.msg,
+                                                                                        icon: "error",
+                                                                                });
+                                                                                Global_State.modalManager.setContent(<Folder_form/>)
+                                                                                break
+                                                                        }
+                                                                }
                                                         }
-                                                        else if(res.status === 200 && res.data.msg === "storingError")
-                                                        {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data.value,
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.setContent(<Folder_form/>)
-                                                        }
-                                                        else if(res.data === "existAlready")
-                                                        {
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Ce Dossier existe deja !",
-                                                                        icon: "info",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else console.log(res)
-                                                        // console.log(res)
                                                 })
 
                                                 // Catch errors if any
@@ -892,7 +1034,7 @@ export default function FileTable({set})
                                         initialValues:
                                         {
                                                 name: "Nouveau Dossier",
-                                                services: options.slice(0, 1)
+                                                services: options_services.slice(0, 1)
                                         }
                                 }
                                 )
@@ -922,7 +1064,7 @@ export default function FileTable({set})
 
                                         <Form.Group className="mb-3" >
                                                 <Form.Label>Service</Form.Label>
-                                                <SelectServices updateMethod= {(e) => {formik.setFieldValue("services", e)}} />
+                                                <SelectComponent updateMethod= {(e) => {formik.setFieldValue("services", e)}} options={options_services}  placeholder={"Sélectionner au moins 1 service"} />
                                                 <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.services ? "Au moins 1 service doit être sélectionné" : null}</span>
                                         </Form.Group>
 
@@ -1084,7 +1226,7 @@ export default function FileTable({set})
                                                 debut: "",
                                                 fin: "",
                                                 level: "",
-                                                services: options.slice(0, 1)
+                                                services: options_services.slice(0, 1)
                                         }
                                 }
                                 )
@@ -1159,8 +1301,8 @@ export default function FileTable({set})
 
                                         <Form.Group className="mb-3" >
                                                 <Form.Label>Service</Form.Label>
-                                                <SelectServices updateMethod= {(e) => {formik.setFieldValue("services", e)}} />
-                                                <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.services}</span>
+                                                <SelectComponent updateMethod= {(e) => {formik.setFieldValue("services", e)}} options={options_services}  placeholder={"Sélectionner au moins 1 service"} />
+                                                <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.services ? "Au moins 1 service doit être sélectionné" : null}</span>
                                         </Form.Group>
 
                                         <div
@@ -1203,40 +1345,6 @@ export default function FileTable({set})
 
                                         const [parent_id, parent_type] = Global_State.identifyNode(node)
 
-                                        // switch (node.type) {
-                                        //     case 'root':
-                                        //         parent_type = 'App\\Models\\Section'
-                                        //         parent_id = Global_State.getCurrentSection().id
-                                        //         break;
-                                        //     case 'audit':
-                                        //         parent_type = "App\\Models\\Audit"
-                                        //         parent_id = parseInt(node.id.substring(5), 10)
-                                        //         break;
-                                        //     case 'checkList':
-                                        //         parent_type = "App\\Models\\checkList"
-                                        //         parent_id = parseInt(node.id.substring(9), 10)
-                                        //         break;
-                                        //     case 'dp':
-                                        //         parent_type = 'App\\Models\\DossierPreuve'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-                                        //     case 'nonC':
-                                        //         parent_type = 'App\\Models\\Nc'
-                                        //         parent_id = parseInt(node.id.substring(4), 10)
-                                        //         break;
-                                        //     case 'fnc':
-                                        //         parent_type = 'App\\Models\\NonConformite'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-                                        //     case 'ds':
-                                        //         parent_type = 'App\\Models\\DossierSimple'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-
-                                        //     default:
-                                        //         break;
-                                        // }
-
 
                                         queryBody.append("parent_type", parent_type)
                                         queryBody.append("parent_id", parent_id)
@@ -1265,69 +1373,49 @@ export default function FileTable({set})
                                                 // Handle the response from backend here
                                                 .then((res) =>
                                                 {
-                                                        // console.log(res)
-                                                        if(res.status === 200 && res.data === "ok")
+                                                        console.log(res)
+
+                                                        if (res.data.statue === 'success')
                                                         {
-                                                                // console.log("looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Fichier(s) ajouté avec success !",
-                                                                        icon: "success",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data.msg === "duplicated")
-                                                        {
-                                                                // console.log(res)
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Certains fichiers son existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.value),
-                                                                        icon: "info",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data.msg === "existAlready")
-                                                        {
-                                                                // console.log(res)
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Certains fichiers son existant ou possède le mm chemin !\n" + JSON.stringify(res.data.value),
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data === "Something went wrong !")
-                                                        {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data,
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.setContent(<Fs_form/>)
-                                                        }
-                                                        else if(res.status === 200 && res.data.msg === "storingError")
-                                                        {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data.value,
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data.msg === 'catchException')
-                                                        {
-                                                                console.log(res)
-                                                                swal({
-                                                                        title: "ERREUR!",
-                                                                        text: res.data.value.errorInfo[2],
-                                                                        icon: "error",
-                                                                });
-                                                                // console.log(res)
-                                                                Global_State.modalManager.setContent(<Fs_form/>)
+                                                                if (res.data.data.msg === 'ok')
+                                                                {
+                                                                        swal({
+                                                                                title: "FIN!",
+                                                                                text: "Fichier(s) ajouté avec success !",
+                                                                                icon: "success",
+                                                                        });
+                                                                        Global_State.modalManager.close_modal()
+                                                                }
+                                                                else if (res.data.data.list)
+                                                                {
+                                                                        swal({
+                                                                                title: "FIN!",
+                                                                                text: "Certains fichiers son existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.data.list),
+                                                                                icon: "info",
+                                                                        });
+                                                                        Global_State.modalManager.close_modal()
+                                                                }
                                                         }
                                                         else
                                                         {
-                                                                console.log(res)
+                                                                if (res.data.data.list)
+                                                                {
+                                                                        swal({
+                                                                                title: "FIN!",
+                                                                                text: `${res.data.data.msg}\n` + JSON.stringify(res.data.data.list),
+                                                                                icon: "error",
+                                                                        });
+                                                                        Global_State.modalManager.close_modal()
+                                                                }
+                                                                else
+                                                                {
+                                                                        swal({
+                                                                                title: "ERREUR!",
+                                                                                text: res.data.data.msg,
+                                                                                icon: "error",
+                                                                        });
+                                                                        Global_State.modalManager.setContent(<Fs_form/>)
+                                                                }
                                                         }
                                                 })
 
@@ -1371,7 +1459,7 @@ export default function FileTable({set})
                                         initialValues:
                                         {
                                                 files: null,
-                                                services: options.slice(0, 1)
+                                                services: options_services.slice(0, 1)
                                         }
                                 }
                                 )
@@ -1387,8 +1475,8 @@ export default function FileTable({set})
 
                                         <Form.Group className="mb-3" >
                                                 <Form.Label>Service</Form.Label>
-                                                <SelectServices updateMethod = {(e) => {formik.setFieldValue("services", e)}} />
-                                                <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.services}</span>
+                                                <SelectComponent updateMethod= {(e) => {formik.setFieldValue("services", e)}} options={options_services}  placeholder={"Sélectionner au moins 1 service"} />
+                                                <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.services ? "Au moins 1 service doit être sélectionné" : null}</span>
                                         </Form.Group>
 
                                         <div
@@ -1413,23 +1501,6 @@ export default function FileTable({set})
                         Global_State.modalManager.open_modal("Ajouter des Fichiers")
                 }
         }
-
-
-        // node:
-        // {
-        //  id,
-        //  name,
-        //  type,
-        //  isOpen,
-        //  children,
-        //  isRoot,
-        //  parentId
-        //  path,
-        //  hasChildren,
-        //  ext,
-        //  createdAt,
-        //  modifiedAt,
-        // }
 
 
         const ActionsMenu = () =>
@@ -1521,7 +1592,14 @@ export default function FileTable({set})
                                                                                         )
 
                                                                                         to_move_or_copy.current = selectedRow.map(
-                                                                                                row => ({id: Global_State.identifyNode(row)[0], type: row.type, name: row.value})
+                                                                                                row =>
+                                                                                                {
+                                                                                                        const node_data = Global_State.getNodeDataById(row.id)
+
+                                                                                                        return(
+                                                                                                        {...node_data, id: Global_State.identifyNode(node_data)[0]}
+                                                                                                        )
+                                                                                                }
                                                                                         )
 
                                                                                         from_id.current = node.id
@@ -1736,16 +1814,6 @@ export default function FileTable({set})
 
         }
 
-        // const SubHeaderComponent = () =>
-        // {
-        //     return (
-        //         <React.Fragment>
-        //             {node.isRoot ? <IoArrowUndoOutline size={25} style = {{ marginRight: 20, }} /> :
-        //             <IoArrowUndoSharp onClick={ (e) => { e.preventDefault(); backend.setCurrentSelectedFolder(previousSelected.pop()) } }  size={25} style = {{ marginRight: 20, }}  />}
-        //             <SearchComponent set = {recherche} tag = {tag} />
-        //         </React.Fragment>
-        //     )
-        // }
 
         const dataFormater = (node) =>
         {

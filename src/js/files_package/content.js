@@ -8,7 +8,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 /* eslint-disable import/first */
 
-import React, { useMemo, useState, useReducer, useEffect, useRef, useCallback, forwardRef } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
 import { Global_State } from '../main';
 import { http } from "../data";
@@ -17,17 +17,16 @@ import DataTable from 'react-data-table-component';
 import swal from 'sweetalert';
 import toast from "react-hot-toast";
 import { useDropzone } from 'react-dropzone';
-import FileIcon from 'react-file-icon';
-import Avatar from "react-avatar";
 
 import Select from "react-select";
+import AsyncSelect from 'react-select/async';
 import makeAnimated from 'react-select/animated';
 
-import { FaSort, FaInfoCircle } from "react-icons/fa";
+import { FaInfoCircle, FaPaste, FaSort } from "react-icons/fa";
 import { FcFolder, FcVideoFile } from "react-icons/fc";
-import { BsCardImage, BsFileWord, BsFillFileEarmarkPdfFill } from "react-icons/bs";
+import { BsFillFileEarmarkPdfFill } from "react-icons/bs";
 import { RiFileWord2Fill } from "react-icons/ri";
-import { SiMicrosoftpowerpoint, SiMicrosoftexcel } from "react-icons/si";
+import { SiMicrosoftexcel, SiMicrosoftpowerpoint } from "react-icons/si";
 import { AiFillFileUnknown } from "react-icons/ai";
 import { IoArrowUndoOutline, IoArrowUndoSharp } from "react-icons/io5";
 
@@ -37,16 +36,13 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
 import { HiSaveAs } from 'react-icons/hi';
-import { FaPaste } from 'react-icons/fa';
 
-import { Formik, useFormik } from 'formik';
+import { useFormik } from 'formik';
 import * as yup from 'yup';
 
 import DatePicker from "react-datepicker";
 import Stack from "@mui/material/Stack";
-import { IconButton } from "@mui/material";
-import ReactDOM from "react-dom/client";
-import { renderToStaticMarkup } from "react-dom/server";
+import { IconButton, Tooltip } from "@mui/material";
 
 var previousSelected = [];
 
@@ -231,24 +227,6 @@ export default function FileTable(_ref) {
                 }
         }, [mc_state]);
 
-        // useEffect(
-        //     () =>
-        //     {
-        //         selectedRow.forEach(selectedNode =>
-        //             {
-        //                 console.log('checkkkkk', selectedNode, selectedNode.id, node )
-        //                 if( Global_State.getNodeDataById(selectedNode.id).section_id === Global_State.selectedSectionId)
-        //                 {
-        //                     let isDeleted = true
-        //                     node.children.forEach(child => { if(selectedNode.id === child.id) isDeleted = false } );
-        //                     if(isDeleted) Global_State.clearSelected(setSelectedRows)
-        //                 }
-        //             }
-        //         );
-        //     },
-        //     [node]
-        // )
-
         useEffect(function () {
 
                 Global_State.EventsManager.on('clearSelected', function () {
@@ -285,15 +263,16 @@ export default function FileTable(_ref) {
 
         var Paste_component = useCallback(function Paste_component() {
                 var paste_here = function () {
-                        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3(node) {
+                        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(node) {
                                 var _this2 = this;
 
-                                var destination_node, destination_info, destination_id, destination_type, operation_type, Save_for_rest, _loop, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, node_to_copy, to_move, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, node_to_move, queryData, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, _queryData, services, section;
+                                var concern_nodes, destination_node, destination_info, destination_id, destination_type, operation_type, Save_for_rest, _loop, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, node_to_copy, to_move, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, node_to_move, queryData, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, _queryData, services, section;
 
-                                return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+                                return _regeneratorRuntime.wrap(function _callee4$(_context4) {
                                         while (1) {
-                                                switch (_context3.prev = _context3.next) {
+                                                switch (_context4.prev = _context4.next) {
                                                         case 0:
+                                                                concern_nodes = Global_State.copyObject(to_move_or_copy.current);
                                                                 destination_node = JSON.parse(JSON.stringify(node));
                                                                 destination_info = Global_State.identifyNode(destination_node);
                                                                 destination_id = destination_info[0];
@@ -332,223 +311,295 @@ export default function FileTable(_ref) {
 
 
                                                                 if (!(destination_node.id === from_id.current)) {
-                                                                        _context3.next = 14;
+                                                                        _context4.next = 15;
                                                                         break;
                                                                 }
 
                                                                 if (!(operation_type === 'copy')) {
-                                                                        _context3.next = 11;
+                                                                        _context4.next = 12;
                                                                         break;
                                                                 }
 
                                                                 action.current = { saved: true, value: 2 };
-                                                                _context3.next = 14;
+                                                                _context4.next = 15;
                                                                 break;
 
-                                                        case 11:
+                                                        case 12:
                                                                 if (!(operation_type === 'move')) {
-                                                                        _context3.next = 14;
+                                                                        _context4.next = 15;
                                                                         break;
                                                                 }
 
                                                                 setMc_state('none');
 
-                                                                return _context3.abrupt('return', 'nothing to do');
+                                                                return _context4.abrupt('return', 'nothing to do');
 
-                                                        case 14:
-                                                                _loop = /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(node_to_copy) {
-                                                                        var _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _iterator4, _step4, child_node;
+                                                        case 15:
+                                                                _loop = /*#__PURE__*/_regeneratorRuntime.mark(function _callee3(node_to_copy) {
+                                                                        var _loop2, _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _iterator4, _step4, child_node, _ret2;
 
-                                                                        return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                                                                        return _regeneratorRuntime.wrap(function _callee3$(_context3) {
                                                                                 while (1) {
-                                                                                        switch (_context2.prev = _context2.next) {
+                                                                                        switch (_context3.prev = _context3.next) {
                                                                                                 case 0:
+                                                                                                        _loop2 = /*#__PURE__*/_regeneratorRuntime.mark(function _callee2(child_node) {
+                                                                                                                return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                                                                                                                        while (1) {
+                                                                                                                                switch (_context2.prev = _context2.next) {
+                                                                                                                                        case 0:
+                                                                                                                                                if (!(child_node.name === (node_to_copy.onCopy || node_to_copy.name))) {
+                                                                                                                                                        _context2.next = 12;
+                                                                                                                                                        break;
+                                                                                                                                                }
+
+                                                                                                                                                if (action.current.saved) {
+                                                                                                                                                        _context2.next = 11;
+                                                                                                                                                        break;
+                                                                                                                                                }
+
+                                                                                                                                                if (!(!node_to_copy.onCopy && parseInt(node_to_copy.id) < 0 && operation_type === 'move')) {
+                                                                                                                                                        _context2.next = 5;
+                                                                                                                                                        break;
+                                                                                                                                                }
+
+                                                                                                                                                // toast.error(`Selon les données locales, il existe deja un ${node_to_copy.type === 'f' ? 'fichier' : 'dossiser'} de ce nom á la destination:\n${node_to_copy.name}`)
+                                                                                                                                                toast(React.createElement(
+                                                                                                                                                        'div',
+                                                                                                                                                        null,
+                                                                                                                                                        'Selon les donn\xE9es locales, il existe deja un ' + (node_to_copy.type === 'f' ? 'fichier' : 'dossiser') + ' de ce nom \xE1 la destination:',
+                                                                                                                                                        React.createElement('br', null),
+                                                                                                                                                        '"',
+                                                                                                                                                        React.createElement(
+                                                                                                                                                                'span',
+                                                                                                                                                                { style: { fontWeight: "bold", fontSize: 18 } },
+                                                                                                                                                                node_to_copy.name
+                                                                                                                                                        ),
+                                                                                                                                                        '"'
+                                                                                                                                                ), { type: "error" });
+                                                                                                                                                return _context2.abrupt('return', 'continue');
+
+                                                                                                                                        case 5:
+                                                                                                                                                if (!(node.path.indexOf(node_to_copy.path) !== -1)) {
+                                                                                                                                                        _context2.next = 7;
+                                                                                                                                                        break;
+                                                                                                                                                }
+
+                                                                                                                                                return _context2.abrupt('return', 'continue');
+
+                                                                                                                                        case 7:
+                                                                                                                                                _context2.next = 9;
+                                                                                                                                                return new Promise(function (resolve) {
+                                                                                                                                                        var BsToMuiComp = React.forwardRef(function MyComponent(props, ref) {
+                                                                                                                                                                //  Spread the props to the underlying DOM element.
+                                                                                                                                                                return React.createElement(
+                                                                                                                                                                        Button,
+                                                                                                                                                                        Object.assign({}, props, { ref: ref }),
+                                                                                                                                                                        'FUSIONNER'
+                                                                                                                                                                );
+                                                                                                                                                        });
+
+                                                                                                                                                        var content = React.createElement(
+                                                                                                                                                                'div',
+                                                                                                                                                                null,
+                                                                                                                                                                React.createElement(
+                                                                                                                                                                        'div',
+                                                                                                                                                                        { className: 'mb-3' },
+                                                                                                                                                                        'La destination pourrait contenir un ' + (child_node.type === 'f' ? 'fichier' : 'dossier') + ' de meme nom: ',
+                                                                                                                                                                        React.createElement('br', null),
+                                                                                                                                                                        React.createElement(
+                                                                                                                                                                                'span',
+                                                                                                                                                                                { style: { fontWeight: "bold" } },
+                                                                                                                                                                                ' ',
+                                                                                                                                                                                '' + node_to_copy.name,
+                                                                                                                                                                                ' '
+                                                                                                                                                                        )
+                                                                                                                                                                ),
+                                                                                                                                                                React.createElement(Save_for_rest, null),
+                                                                                                                                                                React.createElement(
+                                                                                                                                                                        'div',
+                                                                                                                                                                        { className: 'd-flex justify-content-end' },
+                                                                                                                                                                        React.createElement(
+                                                                                                                                                                                Button,
+                                                                                                                                                                                { className: 'mr-1', variant: 'outline-light', onClick: function onClick(e) {
+                                                                                                                                                                                                e.stopPropagation();resolve(1);
+                                                                                                                                                                                        } },
+                                                                                                                                                                                'IGNORER'
+                                                                                                                                                                        ),
+                                                                                                                                                                        React.createElement(
+                                                                                                                                                                                Button,
+                                                                                                                                                                                { className: 'mr-1', variant: 'outline-primary', onClick: function onClick(e) {
+                                                                                                                                                                                                e.stopPropagation();console.log('RENOMEEEEEEEEEEER');resolve(2);
+                                                                                                                                                                                        } },
+                                                                                                                                                                                'RENOMER'
+                                                                                                                                                                        ),
+                                                                                                                                                                        child_node.global_type === 'folder' ? React.createElement(
+                                                                                                                                                                                Tooltip,
+                                                                                                                                                                                { title: 'Les fichiers en conflits seront \xE9craser \xE0 la destination' },
+                                                                                                                                                                                React.createElement(
+                                                                                                                                                                                        'span',
+                                                                                                                                                                                        null,
+                                                                                                                                                                                        React.createElement(BsToMuiComp, { disabled: parseInt(node_to_copy.id) < 0, variant: 'outline-danger', onClick: function onClick(e) {
+                                                                                                                                                                                                        e.stopPropagation();resolve(3);
+                                                                                                                                                                                                } })
+                                                                                                                                                                                )
+                                                                                                                                                                        ) : React.createElement(
+                                                                                                                                                                                Button,
+                                                                                                                                                                                { disabled: parseInt(node_to_copy.id) < 0, variant: 'outline-danger', onClick: function onClick(e) {
+                                                                                                                                                                                                e.stopPropagation();resolve(3);
+                                                                                                                                                                                        } },
+                                                                                                                                                                                'ECRASER'
+                                                                                                                                                                        )
+                                                                                                                                                                )
+                                                                                                                                                        );
+
+                                                                                                                                                        Global_State.modalManager.setContent(content);
+                                                                                                                                                        Global_State.modalManager.open_modal('Conflit de ' + (child_node.type === 'f' ? 'fichiers' : 'dossiers'), false);
+                                                                                                                                                }).then(function (res) {
+                                                                                                                                                        console.log(res, action.current);
+                                                                                                                                                        node_to_copy['on_exist'] = res;
+                                                                                                                                                        if (action.current.saved) action.current = Object.assign({}, action.current, { value: res });
+                                                                                                                                                });
+
+                                                                                                                                        case 9:
+                                                                                                                                                _context2.next = 12;
+                                                                                                                                                break;
+
+                                                                                                                                        case 11:
+                                                                                                                                                node_to_copy['on_exist'] = action.current.value;
+
+                                                                                                                                        case 12:
+                                                                                                                                        case 'end':
+                                                                                                                                                return _context2.stop();
+                                                                                                                                }
+                                                                                                                        }
+                                                                                                                }, _callee2, _this2);
+                                                                                                        });
                                                                                                         _iteratorNormalCompletion4 = true;
                                                                                                         _didIteratorError4 = false;
                                                                                                         _iteratorError4 = undefined;
-                                                                                                        _context2.prev = 3;
+                                                                                                        _context3.prev = 4;
                                                                                                         _iterator4 = node.children[Symbol.iterator]();
 
-                                                                                                case 5:
+                                                                                                case 6:
                                                                                                         if (_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done) {
-                                                                                                                _context2.next = 17;
+                                                                                                                _context3.next = 15;
                                                                                                                 break;
                                                                                                         }
 
                                                                                                         child_node = _step4.value;
+                                                                                                        return _context3.delegateYield(_loop2(child_node), 't0', 9);
 
-                                                                                                        if (!(child_node.name === node_to_copy.name)) {
-                                                                                                                _context2.next = 14;
+                                                                                                case 9:
+                                                                                                        _ret2 = _context3.t0;
+
+                                                                                                        if (!(_ret2 === 'continue')) {
+                                                                                                                _context3.next = 12;
                                                                                                                 break;
                                                                                                         }
 
-                                                                                                        if (action.current.saved) {
-                                                                                                                _context2.next = 13;
-                                                                                                                break;
-                                                                                                        }
+                                                                                                        return _context3.abrupt('continue', 12);
 
-                                                                                                        _context2.next = 11;
-                                                                                                        return new Promise(function (resolve) {
-                                                                                                                var content = React.createElement(
-                                                                                                                        'div',
-                                                                                                                        null,
-                                                                                                                        React.createElement(
-                                                                                                                                'div',
-                                                                                                                                { className: 'mb-3' },
-                                                                                                                                'La destination pourrait contenir un fichier de meme nom: ',
-                                                                                                                                React.createElement('br', null),
-                                                                                                                                React.createElement(
-                                                                                                                                        'span',
-                                                                                                                                        { style: { fontWeight: "bold" } },
-                                                                                                                                        ' ',
-                                                                                                                                        '' + node_to_copy.name,
-                                                                                                                                        ' '
-                                                                                                                                )
-                                                                                                                        ),
-                                                                                                                        React.createElement(Save_for_rest, null),
-                                                                                                                        React.createElement(
-                                                                                                                                'div',
-                                                                                                                                { className: 'd-flex justify-content-end' },
-                                                                                                                                React.createElement(
-                                                                                                                                        Button,
-                                                                                                                                        { className: 'mr-1', variant: 'outline-light', onClick: function onClick(e) {
-                                                                                                                                                        e.stopPropagation();resolve(1);
-                                                                                                                                                } },
-                                                                                                                                        'IGNORER'
-                                                                                                                                ),
-                                                                                                                                React.createElement(
-                                                                                                                                        Button,
-                                                                                                                                        { className: 'mr-1', variant: 'outline-primary', onClick: function onClick(e) {
-                                                                                                                                                        e.stopPropagation();resolve(2);
-                                                                                                                                                } },
-                                                                                                                                        'RENOMER'
-                                                                                                                                ),
-                                                                                                                                React.createElement(
-                                                                                                                                        Button,
-                                                                                                                                        { variant: 'outline-danger', onClick: function onClick(e) {
-                                                                                                                                                        e.stopPropagation();resolve(3);
-                                                                                                                                                } },
-                                                                                                                                        'ECRASER'
-                                                                                                                                )
-                                                                                                                        )
-                                                                                                                );
-
-                                                                                                                Global_State.modalManager.setContent(content);
-                                                                                                                Global_State.modalManager.open_modal("Conflit de fichiers", false);
-                                                                                                        }).then(function (res) {
-                                                                                                                console.log(res, action.current);
-                                                                                                                node_to_copy['on_exist'] = res;
-                                                                                                                if (action.current.saved) action.current = Object.assign({}, action.current, { value: res });
-                                                                                                        });
-
-                                                                                                case 11:
-                                                                                                        _context2.next = 14;
+                                                                                                case 12:
+                                                                                                        _iteratorNormalCompletion4 = true;
+                                                                                                        _context3.next = 6;
                                                                                                         break;
 
-                                                                                                case 13:
-                                                                                                        node_to_copy['on_exist'] = action.current.value;
-
-                                                                                                case 14:
-                                                                                                        _iteratorNormalCompletion4 = true;
-                                                                                                        _context2.next = 5;
+                                                                                                case 15:
+                                                                                                        _context3.next = 21;
                                                                                                         break;
 
                                                                                                 case 17:
-                                                                                                        _context2.next = 23;
-                                                                                                        break;
-
-                                                                                                case 19:
-                                                                                                        _context2.prev = 19;
-                                                                                                        _context2.t0 = _context2['catch'](3);
+                                                                                                        _context3.prev = 17;
+                                                                                                        _context3.t1 = _context3['catch'](4);
                                                                                                         _didIteratorError4 = true;
-                                                                                                        _iteratorError4 = _context2.t0;
+                                                                                                        _iteratorError4 = _context3.t1;
 
-                                                                                                case 23:
-                                                                                                        _context2.prev = 23;
-                                                                                                        _context2.prev = 24;
+                                                                                                case 21:
+                                                                                                        _context3.prev = 21;
+                                                                                                        _context3.prev = 22;
 
                                                                                                         if (!_iteratorNormalCompletion4 && _iterator4.return) {
                                                                                                                 _iterator4.return();
                                                                                                         }
 
-                                                                                                case 26:
-                                                                                                        _context2.prev = 26;
+                                                                                                case 24:
+                                                                                                        _context3.prev = 24;
 
                                                                                                         if (!_didIteratorError4) {
-                                                                                                                _context2.next = 29;
+                                                                                                                _context3.next = 27;
                                                                                                                 break;
                                                                                                         }
 
                                                                                                         throw _iteratorError4;
 
+                                                                                                case 27:
+                                                                                                        return _context3.finish(24);
+
+                                                                                                case 28:
+                                                                                                        return _context3.finish(21);
+
                                                                                                 case 29:
-                                                                                                        return _context2.finish(26);
-
-                                                                                                case 30:
-                                                                                                        return _context2.finish(23);
-
-                                                                                                case 31:
                                                                                                 case 'end':
-                                                                                                        return _context2.stop();
+                                                                                                        return _context3.stop();
                                                                                         }
                                                                                 }
-                                                                        }, _callee2, _this2, [[3, 19, 23, 31], [24,, 26, 30]]);
+                                                                        }, _callee3, _this2, [[4, 17, 21, 29], [22,, 24, 28]]);
                                                                 });
                                                                 _iteratorNormalCompletion = true;
                                                                 _didIteratorError = false;
                                                                 _iteratorError = undefined;
-                                                                _context3.prev = 18;
-                                                                _iterator = to_move_or_copy.current[Symbol.iterator]();
+                                                                _context4.prev = 19;
+                                                                _iterator = concern_nodes[Symbol.iterator]();
 
-                                                        case 20:
+                                                        case 21:
                                                                 if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-                                                                        _context3.next = 26;
+                                                                        _context4.next = 27;
                                                                         break;
                                                                 }
 
                                                                 node_to_copy = _step.value;
-                                                                return _context3.delegateYield(_loop(node_to_copy), 't0', 23);
+                                                                return _context4.delegateYield(_loop(node_to_copy), 't0', 24);
 
-                                                        case 23:
+                                                        case 24:
                                                                 _iteratorNormalCompletion = true;
-                                                                _context3.next = 20;
+                                                                _context4.next = 21;
                                                                 break;
 
-                                                        case 26:
-                                                                _context3.next = 32;
+                                                        case 27:
+                                                                _context4.next = 33;
                                                                 break;
 
-                                                        case 28:
-                                                                _context3.prev = 28;
-                                                                _context3.t1 = _context3['catch'](18);
+                                                        case 29:
+                                                                _context4.prev = 29;
+                                                                _context4.t1 = _context4['catch'](19);
                                                                 _didIteratorError = true;
-                                                                _iteratorError = _context3.t1;
+                                                                _iteratorError = _context4.t1;
 
-                                                        case 32:
-                                                                _context3.prev = 32;
-                                                                _context3.prev = 33;
+                                                        case 33:
+                                                                _context4.prev = 33;
+                                                                _context4.prev = 34;
 
                                                                 if (!_iteratorNormalCompletion && _iterator.return) {
                                                                         _iterator.return();
                                                                 }
 
-                                                        case 35:
-                                                                _context3.prev = 35;
+                                                        case 36:
+                                                                _context4.prev = 36;
 
                                                                 if (!_didIteratorError) {
-                                                                        _context3.next = 38;
+                                                                        _context4.next = 39;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError;
 
-                                                        case 38:
-                                                                return _context3.finish(35);
-
                                                         case 39:
-                                                                return _context3.finish(32);
+                                                                return _context4.finish(36);
 
                                                         case 40:
+                                                                return _context4.finish(33);
+
+                                                        case 41:
 
                                                                 Global_State.modalManager.close_modal();
 
@@ -556,11 +607,11 @@ export default function FileTable(_ref) {
                                                                 // console.log( 'to_move_or_copy.current1', to_move_or_copy.current )
 
                                                                 if (!(operation_type === 'move')) {
-                                                                        _context3.next = 92;
+                                                                        _context4.next = 96;
                                                                         break;
                                                                 }
 
-                                                                to_move = [].concat(_toConsumableArray(to_move_or_copy.current));
+                                                                to_move = [].concat(_toConsumableArray(concern_nodes));
 
 
                                                                 setMc_state('none');
@@ -569,16 +620,45 @@ export default function FileTable(_ref) {
                                                                 _iteratorNormalCompletion2 = true;
                                                                 _didIteratorError2 = false;
                                                                 _iteratorError2 = undefined;
-                                                                _context3.prev = 47;
+                                                                _context4.prev = 48;
                                                                 _iterator2 = to_move[Symbol.iterator]();
 
-                                                        case 49:
+                                                        case 50:
                                                                 if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-                                                                        _context3.next = 76;
+                                                                        _context4.next = 80;
                                                                         break;
                                                                 }
 
                                                                 node_to_move = _step2.value;
+
+                                                                if (!(node.path.indexOf(node_to_move.path) !== -1)) {
+                                                                        _context4.next = 55;
+                                                                        break;
+                                                                }
+
+                                                                toast(React.createElement(
+                                                                        'div',
+                                                                        null,
+                                                                        'Le dossier de destination est un sous-dossier du dossier source.',
+                                                                        React.createElement('br', null),
+                                                                        React.createElement('br', null),
+                                                                        'source: ',
+                                                                        React.createElement(
+                                                                                'span',
+                                                                                { style: { fontWeight: "bold", fontSize: 12 } },
+                                                                                node_to_move.path
+                                                                        ),
+                                                                        React.createElement('br', null),
+                                                                        'destination: ',
+                                                                        React.createElement(
+                                                                                'span',
+                                                                                { style: { fontWeight: "bold", fontSize: 12 } },
+                                                                                node.path
+                                                                        )
+                                                                ), { type: "error" });
+                                                                return _context4.abrupt('continue', 77);
+
+                                                        case 55:
                                                                 queryData = new FormData();
 
 
@@ -590,117 +670,143 @@ export default function FileTable(_ref) {
                                                                 console.log('arriiiiiiiiiiiiiveeee', node_to_move);
 
                                                                 if (!(node_to_move.type === 'ds')) {
-                                                                        _context3.next = 66;
+                                                                        _context4.next = 70;
                                                                         break;
                                                                 }
 
                                                                 if (!Global_State.isEditorMode) {
-                                                                        _context3.next = 62;
+                                                                        _context4.next = 66;
                                                                         break;
                                                                 }
 
                                                                 Global_State.editor.folder.move(queryData);
-                                                                _context3.next = 64;
+                                                                _context4.next = 68;
                                                                 break;
 
-                                                        case 62:
-                                                                _context3.next = 64;
+                                                        case 66:
+                                                                _context4.next = 68;
                                                                 return http.post('move_folder', queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 64:
-                                                                _context3.next = 73;
+                                                        case 68:
+                                                                _context4.next = 77;
                                                                 break;
 
-                                                        case 66:
+                                                        case 70:
                                                                 if (!(node_to_move.type === 'f')) {
-                                                                        _context3.next = 73;
+                                                                        _context4.next = 77;
                                                                         break;
                                                                 }
 
                                                                 if (!Global_State.isEditorMode) {
-                                                                        _context3.next = 71;
+                                                                        _context4.next = 75;
                                                                         break;
                                                                 }
 
                                                                 Global_State.editor.files.move(queryData);
-                                                                _context3.next = 73;
+                                                                _context4.next = 77;
                                                                 break;
 
-                                                        case 71:
-                                                                _context3.next = 73;
+                                                        case 75:
+                                                                _context4.next = 77;
                                                                 return http.post('move_file', queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 73:
+                                                        case 77:
                                                                 _iteratorNormalCompletion2 = true;
-                                                                _context3.next = 49;
+                                                                _context4.next = 50;
                                                                 break;
 
-                                                        case 76:
-                                                                _context3.next = 82;
+                                                        case 80:
+                                                                _context4.next = 86;
                                                                 break;
-
-                                                        case 78:
-                                                                _context3.prev = 78;
-                                                                _context3.t2 = _context3['catch'](47);
-                                                                _didIteratorError2 = true;
-                                                                _iteratorError2 = _context3.t2;
 
                                                         case 82:
-                                                                _context3.prev = 82;
-                                                                _context3.prev = 83;
+                                                                _context4.prev = 82;
+                                                                _context4.t2 = _context4['catch'](48);
+                                                                _didIteratorError2 = true;
+                                                                _iteratorError2 = _context4.t2;
+
+                                                        case 86:
+                                                                _context4.prev = 86;
+                                                                _context4.prev = 87;
 
                                                                 if (!_iteratorNormalCompletion2 && _iterator2.return) {
                                                                         _iterator2.return();
                                                                 }
 
-                                                        case 85:
-                                                                _context3.prev = 85;
+                                                        case 89:
+                                                                _context4.prev = 89;
 
                                                                 if (!_didIteratorError2) {
-                                                                        _context3.next = 88;
+                                                                        _context4.next = 92;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError2;
 
-                                                        case 88:
-                                                                return _context3.finish(85);
+                                                        case 92:
+                                                                return _context4.finish(89);
 
-                                                        case 89:
-                                                                return _context3.finish(82);
+                                                        case 93:
+                                                                return _context4.finish(86);
 
-                                                        case 90:
-                                                                _context3.next = 134;
+                                                        case 94:
+                                                                _context4.next = 149;
                                                                 break;
 
-                                                        case 92:
+                                                        case 96:
 
-                                                                console.log('to_move_or_copy.current', to_move_or_copy.current);
+                                                                console.log('to_move_or_copy.current', concern_nodes);
 
                                                                 _iteratorNormalCompletion3 = true;
                                                                 _didIteratorError3 = false;
                                                                 _iteratorError3 = undefined;
-                                                                _context3.prev = 96;
-                                                                _iterator3 = to_move_or_copy.current[Symbol.iterator]();
+                                                                _context4.prev = 100;
+                                                                _iterator3 = concern_nodes[Symbol.iterator]();
 
-                                                        case 98:
+                                                        case 102:
                                                                 if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
-                                                                        _context3.next = 120;
+                                                                        _context4.next = 135;
                                                                         break;
                                                                 }
 
                                                                 node_to_copy = _step3.value;
 
-                                                                // if (node_to_copy.on_exist === 1) continue
+                                                                if (!(node.path.indexOf(node_to_copy.path) !== -1)) {
+                                                                        _context4.next = 107;
+                                                                        break;
+                                                                }
 
+                                                                toast(React.createElement(
+                                                                        'div',
+                                                                        null,
+                                                                        'Le dossier de destination est un sous-dossier du dossier source.',
+                                                                        React.createElement('br', null),
+                                                                        React.createElement('br', null),
+                                                                        'source: ',
+                                                                        React.createElement(
+                                                                                'span',
+                                                                                { style: { fontWeight: "bold", fontSize: 12 } },
+                                                                                node_to_copy.path
+                                                                        ),
+                                                                        React.createElement('br', null),
+                                                                        'destination: ',
+                                                                        React.createElement(
+                                                                                'span',
+                                                                                { style: { fontWeight: "bold", fontSize: 12 } },
+                                                                                node.path
+                                                                        )
+                                                                ), { type: "error" });
+                                                                return _context4.abrupt('continue', 132);
+
+                                                        case 107:
                                                                 _queryData = new FormData();
 
 
@@ -728,79 +834,99 @@ export default function FileTable(_ref) {
                                                                 // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
 
                                                                 if (!(node_to_copy.type === 'ds')) {
-                                                                        _context3.next = 114;
+                                                                        _context4.next = 125;
                                                                         break;
                                                                 }
 
-                                                                _context3.next = 112;
+                                                                if (!Global_State.isEditorMode) {
+                                                                        _context4.next = 121;
+                                                                        break;
+                                                                }
+
+                                                                Global_State.editor.folder.copy(_queryData);
+                                                                _context4.next = 123;
+                                                                break;
+
+                                                        case 121:
+                                                                _context4.next = 123;
                                                                 return http.post('copy_folder', _queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 112:
-                                                                _context3.next = 117;
+                                                        case 123:
+                                                                _context4.next = 132;
                                                                 break;
 
-                                                        case 114:
+                                                        case 125:
                                                                 if (!(node_to_copy.type === 'f')) {
-                                                                        _context3.next = 117;
+                                                                        _context4.next = 132;
                                                                         break;
                                                                 }
 
-                                                                _context3.next = 117;
+                                                                if (!Global_State.isEditorMode) {
+                                                                        _context4.next = 130;
+                                                                        break;
+                                                                }
+
+                                                                Global_State.editor.files.copy(_queryData);
+                                                                _context4.next = 132;
+                                                                break;
+
+                                                        case 130:
+                                                                _context4.next = 132;
                                                                 return http.post('copy_file', _queryData).then(function (res) {
                                                                         console.log(res);
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 117:
+                                                        case 132:
                                                                 _iteratorNormalCompletion3 = true;
-                                                                _context3.next = 98;
+                                                                _context4.next = 102;
                                                                 break;
 
-                                                        case 120:
-                                                                _context3.next = 126;
+                                                        case 135:
+                                                                _context4.next = 141;
                                                                 break;
 
-                                                        case 122:
-                                                                _context3.prev = 122;
-                                                                _context3.t3 = _context3['catch'](96);
+                                                        case 137:
+                                                                _context4.prev = 137;
+                                                                _context4.t3 = _context4['catch'](100);
                                                                 _didIteratorError3 = true;
-                                                                _iteratorError3 = _context3.t3;
+                                                                _iteratorError3 = _context4.t3;
 
-                                                        case 126:
-                                                                _context3.prev = 126;
-                                                                _context3.prev = 127;
+                                                        case 141:
+                                                                _context4.prev = 141;
+                                                                _context4.prev = 142;
 
                                                                 if (!_iteratorNormalCompletion3 && _iterator3.return) {
                                                                         _iterator3.return();
                                                                 }
 
-                                                        case 129:
-                                                                _context3.prev = 129;
+                                                        case 144:
+                                                                _context4.prev = 144;
 
                                                                 if (!_didIteratorError3) {
-                                                                        _context3.next = 132;
+                                                                        _context4.next = 147;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError3;
 
-                                                        case 132:
-                                                                return _context3.finish(129);
+                                                        case 147:
+                                                                return _context4.finish(144);
 
-                                                        case 133:
-                                                                return _context3.finish(126);
+                                                        case 148:
+                                                                return _context4.finish(141);
 
-                                                        case 134:
+                                                        case 149:
                                                         case 'end':
-                                                                return _context3.stop();
+                                                                return _context4.stop();
                                                 }
                                         }
-                                }, _callee3, this, [[18, 28, 32, 40], [33,, 35, 39], [47, 78, 82, 90], [83,, 85, 89], [96, 122, 126, 134], [127,, 129, 133]]);
+                                }, _callee4, this, [[19, 29, 33, 41], [34,, 36, 40], [48, 82, 86, 94], [87,, 89, 93], [100, 137, 141, 149], [142,, 144, 148]]);
                         }));
 
                         return function paste_here(_x2) {
@@ -881,13 +1007,15 @@ export default function FileTable(_ref) {
                         return service;
                 });
                 // formatage en options
-                var options = servicesList.map(function (service) {
+                var options_services = servicesList.map(function (service) {
                         return { value: service.id, label: service.name };
                 });
 
                 // composant de selection de service
-                var SelectServices = function SelectServices(_ref5) {
-                        var updateMethod = _ref5.updateMethod;
+                var SelectComponent = function SelectComponent(_ref5) {
+                        var updateMethod = _ref5.updateMethod,
+                            options = _ref5.options,
+                            placeholder = _ref5.placeholder;
 
                         // console.log(servicesList)
                         // console.log(options)
@@ -897,10 +1025,107 @@ export default function FileTable(_ref) {
                                 options: options,
                                 defaultValue: options.slice(0, 1),
                                 isMulti: true,
-                                placeholder: "Sélectionner au moins 1 service",
+                                placeholder: placeholder,
                                 closeMenuOnSelect: false,
                                 components: makeAnimated(),
                                 isDisabled: options.length === 1
+
+                        });
+                };
+
+                var AsyncSelectComponent = function AsyncSelectComponent(_ref6) {
+                        var areFixed = _ref6.areFixed,
+                            updateMethod = _ref6.updateMethod,
+                            defaultOptions = _ref6.defaultOptions,
+                            placeholder = _ref6.placeholder;
+
+                        var styles = {
+                                multiValue: function multiValue(base, state) {
+                                        return state.data.isFix ? Object.assign({}, base, { backgroundColor: 'gray' }) : base;
+                                },
+                                multiValueLabel: function multiValueLabel(base, state) {
+                                        return state.data.isFix ? Object.assign({}, base, { fontWeight: 'bold', color: 'white', paddingRight: 6 }) : base;
+                                },
+                                multiValueRemove: function multiValueRemove(base, state) {
+                                        return state.data.isFix ? Object.assign({}, base, { display: 'none' }) : base;
+                                }
+                        };
+
+                        var filterUsers = function filterUsers(inputValue, list) {
+                                return list.filter(function (i) {
+                                        return i.label.toLowerCase().includes(inputValue.toLowerCase());
+                                });
+                        };
+
+                        var promiseOptions = function promiseOptions(inputValue) {
+                                return new Promise(function (resolve) {
+                                        http.get('get_users').then(function (res) {
+                                                // console.log('userrsssss', res)
+                                                var users = res.data.map(function (user) {
+                                                        return { value: user.id, label: user.name + ' ' + user.second_name };
+                                                });
+                                                resolve(filterUsers(inputValue, users));
+                                        });
+                                });
+                        };
+
+                        areFixed = [].concat(_toConsumableArray(areFixed)).map(function (fix_el) {
+                                return Object.assign({}, fix_el, { isFix: true });
+                        });
+
+                        var _useState11 = useState(areFixed),
+                            _useState12 = _slicedToArray(_useState11, 2),
+                            values = _useState12[0],
+                            setValue = _useState12[1];
+
+                        var handleChange = function handleChange(e) {
+                                var new_val = [].concat(_toConsumableArray(areFixed));
+
+                                var _iteratorNormalCompletion6 = true;
+                                var _didIteratorError6 = false;
+                                var _iteratorError6 = undefined;
+
+                                try {
+                                        for (var _iterator6 = e[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                                                var element = _step6.value;
+
+                                                // if ( !areFixed.find( fix_el => fix_el.value === element.value ) ) new_val.push(element)
+                                                if (!element.isFix) new_val.push(element);
+                                        }
+                                } catch (err) {
+                                        _didIteratorError6 = true;
+                                        _iteratorError6 = err;
+                                } finally {
+                                        try {
+                                                if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                                                        _iterator6.return();
+                                                }
+                                        } finally {
+                                                if (_didIteratorError6) {
+                                                        throw _iteratorError6;
+                                                }
+                                        }
+                                }
+
+                                setValue(new_val);
+
+                                updateMethod(new_val);
+                        };
+
+                        return React.createElement(AsyncSelect, {
+                                value: values,
+                                styles: styles,
+                                onChange: handleChange,
+                                loadOptions: promiseOptions,
+                                defaultValue: areFixed,
+                                isClearable: values.some(function (v) {
+                                        return !v.isFix;
+                                }),
+                                isMulti: true,
+                                placeholder: placeholder,
+                                closeMenuOnSelect: false,
+                                components: makeAnimated()
+                                // isDisabled = { options.length === 1 }
 
                         });
                 };
@@ -914,15 +1139,22 @@ export default function FileTable(_ref) {
 
                                 var handleSubmit = function handleSubmit(submittedInfo) {
                                         // console.log(submittedInfo)
+                                        // return
                                         submittedInfo.num_chrono = submittedInfo.num_chrono < 10 ? "0" + submittedInfo.num_chrono : submittedInfo.num_chrono.toString();
                                         submittedInfo.annee = submittedInfo.annee < 10 ? "0" + submittedInfo.annee : submittedInfo.annee.toString();
 
                                         var queryBody = new FormData();
 
+                                        var inspector_ids = submittedInfo.inspectors.map(function (element) {
+                                                return parseInt(element.value);
+                                        });
+                                        // console.log(inspector_ids)
+
                                         var service = submittedInfo.services[0].label;
 
                                         queryBody.append("name", submittedInfo.type_audit + "-" + service + "-" + submittedInfo.annee + "-" + submittedInfo.num_chrono);
                                         queryBody.append("services", JSON.stringify(submittedInfo.services));
+                                        queryBody.append("inspectors", JSON.stringify(inspector_ids));
                                         queryBody.append("ra_id", Global_State.authUser.id);
                                         queryBody.append("section_id", Global_State.selectedSectionId);
 
@@ -938,49 +1170,55 @@ export default function FileTable(_ref) {
 
                                                 // Handle the response from backend here
                                                 .then(function (res) {
-                                                        // console.log(res)
-                                                        if (res.status === 201) {
+                                                        console.log(res);
+
+                                                        if (res.data.statue === 'success') {
                                                                 swal({
                                                                         title: "FIN!",
                                                                         text: "Audit ajouté avec success !",
                                                                         icon: "success"
                                                                 });
                                                                 Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data === "existAlready") {
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Audit existant !",
-                                                                        icon: "info"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data === "Something went wrong !") {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data,
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.setContent(React.createElement(Audit_form, null));
-                                                        } else if (res.status === 200 && res.data.msg === "storingError") {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data.value,
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data.msg === 'catchException') {
-                                                                swal({
-                                                                        title: "ERREUR!",
-                                                                        text: res.data.value.errorInfo[2],
-                                                                        icon: "error"
-                                                                });
-                                                                // console.log(res)
-                                                                Global_State.modalManager.setContent(React.createElement(Audit_form, null));
+                                                        } else {
+                                                                // console.log('cooooooode', res.data.data.code)
+                                                                switch (parseInt(res.data.data.code)) {
+                                                                        case 0:
+                                                                                {
+                                                                                        swal({
+                                                                                                title: "FIN!",
+                                                                                                text: "Ce Audit existe deja !",
+                                                                                                icon: "info"
+                                                                                        });
+                                                                                        Global_State.modalManager.close_modal();
+                                                                                        break;
+                                                                                }
+                                                                        case 1:
+                                                                                {
+                                                                                        swal({
+                                                                                                title: "ERROR!",
+                                                                                                text: res.data.data.msg,
+                                                                                                icon: "error"
+                                                                                        });
+                                                                                        Global_State.modalManager.setContent(React.createElement(Audit_form, null));
+                                                                                        break;
+                                                                                }
+                                                                        default:
+                                                                                {
+                                                                                        swal({
+                                                                                                title: "ERROR!",
+                                                                                                text: res.data.data.msg,
+                                                                                                icon: "error"
+                                                                                        });
+                                                                                        Global_State.modalManager.setContent(React.createElement(Audit_form, null));
+                                                                                        break;
+                                                                                }
+                                                                }
                                                         }
                                                 })
 
                                                 // Catch errors if any
                                                 .catch(function (err) {
-                                                        // console.log(err)
+                                                        console.log(err);
                                                         var msg = void 0;
                                                         if (err.response.status === 500) msg = "erreur interne au serveur";else if (err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page";
                                                         swal({
@@ -1004,9 +1242,12 @@ export default function FileTable(_ref) {
                                 var validationRules = yup.object().shape({
                                         num_chrono: yup.number().required().positive().integer(),
                                         annee: yup.number().required().positive().integer().max(100),
+                                        inspectors: yup.array().min(1).required('Au moins 1'),
                                         services: yup.array().min(1).required('Au moins 1')
 
                                 });
+
+                                var ra = { value: parseInt(Global_State.authUser.id), label: Global_State.authUser.name + ' ' + Global_State.authUser.second_name };
 
                                 var formik = useFormik({
                                         validationSchema: validationRules,
@@ -1015,7 +1256,8 @@ export default function FileTable(_ref) {
                                                 type_audit: "AE",
                                                 num_chrono: "",
                                                 annee: '',
-                                                services: options.slice(0, 1)
+                                                inspectors: [ra],
+                                                services: options_services.slice(0, 1)
                                         }
                                 });
 
@@ -1116,11 +1358,35 @@ export default function FileTable(_ref) {
                                                 React.createElement(
                                                         Form.Label,
                                                         null,
+                                                        'Inspecteurs'
+                                                ),
+                                                React.createElement(AsyncSelectComponent, {
+                                                        updateMethod: function updateMethod(r) {
+                                                                console.log('new_val', r);
+                                                                // const e = Global_State.copyObject(r)
+                                                                // if (!r.length) r.unshift( { value: parseInt(Global_State.authUser.id), label: `${Global_State.authUser.name} ${Global_State.authUser.second_name}` } );
+                                                                formik.setFieldValue("inspectors", r);
+                                                        },
+                                                        areFixed: [ra],
+                                                        placeholder: "Sélectionner au moins 1 inspecteur"
+                                                }),
+                                                React.createElement(
+                                                        'span',
+                                                        { className: 'text-danger', style: { fontSize: 11.2 } },
+                                                        formik.errors.inspectors ? "Au moins 1 inspecteur doit être sélectionné" : null
+                                                )
+                                        ),
+                                        React.createElement(
+                                                Form.Group,
+                                                { className: 'mb-3' },
+                                                React.createElement(
+                                                        Form.Label,
+                                                        null,
                                                         'Service'
                                                 ),
-                                                React.createElement(SelectServices, { updateMethod: function updateMethod(e) {
+                                                React.createElement(SelectComponent, { updateMethod: function updateMethod(e) {
                                                                 formik.setFieldValue("services", e);
-                                                        } }),
+                                                        }, options: options_services, placeholder: "Sélectionner au moins 1 service" }),
                                                 React.createElement(
                                                         'span',
                                                         { className: 'text-danger', style: { fontSize: 11.2 } },
@@ -1165,42 +1431,6 @@ export default function FileTable(_ref) {
                                             parent_id = _Global_State$identif2[0],
                                             parent_type = _Global_State$identif2[1];
 
-                                        // console.log(parent_id, parent_type)
-
-                                        // switch (node.type) {
-                                        //     case 'root':
-                                        //         parent_type = 'App\\Models\\Section'
-                                        //         parent_id = Global_State.getCurrentSection().id
-                                        //         break;
-                                        //     case 'audit':
-                                        //         parent_type = "App\\Models\\Audit"
-                                        //         parent_id = parseInt(node.id.substring(5), 10)
-                                        //         break;
-                                        //     case 'checkList':
-                                        //         parent_type = "App\\Models\\checkList"
-                                        //         parent_id = parseInt(node.id.substring(9), 10)
-                                        //         break;
-                                        //     case 'dp':
-                                        //         parent_type = 'App\\Models\\DossierPreuve'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-                                        //     case 'nonC':
-                                        //         parent_type = 'App\\Models\\Nc'
-                                        //         parent_id = parseInt(node.id.substring(4), 10)
-                                        //         break;
-                                        //     case 'fnc':
-                                        //         parent_type = 'App\\Models\\NonConformite'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-                                        //     case 'ds':
-                                        //         parent_type = 'App\\Models\\DossierSimple'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-
-                                        //     default:
-                                        //         break;
-                                        // }
-
                                         queryBody.append("services", JSON.stringify(submittedInfo.services));
 
                                         queryBody.append("name", submittedInfo.name);
@@ -1221,36 +1451,48 @@ export default function FileTable(_ref) {
 
                                                 // Handle the response from backend here
                                                 .then(function (res) {
-                                                        if (res.status === 201) {
+                                                        console.log('res', res);
+                                                        if (res.data.statue === 'success') {
                                                                 swal({
                                                                         title: "FIN!",
                                                                         text: "Dossier ajouté avec success !",
                                                                         icon: "success"
                                                                 });
                                                                 Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data === "Something went wrong !") {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data,
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.setContent(React.createElement(Folder_form, null));
-                                                        } else if (res.status === 200 && res.data.msg === "storingError") {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data.value,
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.setContent(React.createElement(Folder_form, null));
-                                                        } else if (res.data === "existAlready") {
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Ce Dossier existe deja !",
-                                                                        icon: "info"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else console.log(res);
-                                                        // console.log(res)
+                                                        } else {
+                                                                switch (res.data.data.code) {
+                                                                        case 0:
+                                                                                {
+                                                                                        swal({
+                                                                                                title: "FIN!",
+                                                                                                text: "Ce Dossier existe deja !",
+                                                                                                icon: "info"
+                                                                                        });
+                                                                                        Global_State.modalManager.close_modal();
+                                                                                        break;
+                                                                                }
+                                                                        case 1:
+                                                                                {
+                                                                                        swal({
+                                                                                                title: "ERROR!",
+                                                                                                text: res.data.data.msg,
+                                                                                                icon: "error"
+                                                                                        });
+                                                                                        Global_State.modalManager.setContent(React.createElement(Folder_form, null));
+                                                                                        break;
+                                                                                }
+                                                                        default:
+                                                                                {
+                                                                                        swal({
+                                                                                                title: "ERROR!",
+                                                                                                text: res.data.data.msg,
+                                                                                                icon: "error"
+                                                                                        });
+                                                                                        Global_State.modalManager.setContent(React.createElement(Folder_form, null));
+                                                                                        break;
+                                                                                }
+                                                                }
+                                                        }
                                                 })
 
                                                 // Catch errors if any
@@ -1287,7 +1529,7 @@ export default function FileTable(_ref) {
                                         onSubmit: handleSubmit,
                                         initialValues: {
                                                 name: "Nouveau Dossier",
-                                                services: options.slice(0, 1)
+                                                services: options_services.slice(0, 1)
                                         }
                                 });
 
@@ -1332,9 +1574,9 @@ export default function FileTable(_ref) {
                                                         null,
                                                         'Service'
                                                 ),
-                                                React.createElement(SelectServices, { updateMethod: function updateMethod(e) {
+                                                React.createElement(SelectComponent, { updateMethod: function updateMethod(e) {
                                                                 formik.setFieldValue("services", e);
-                                                        } }),
+                                                        }, options: options_services, placeholder: "Sélectionner au moins 1 service" }),
                                                 React.createElement(
                                                         'span',
                                                         { className: 'text-danger', style: { fontSize: 11.2 } },
@@ -1459,15 +1701,15 @@ export default function FileTable(_ref) {
                                         // console.log(queryBody.get("name"))
                                 };
 
-                                var _useState11 = useState(1),
-                                    _useState12 = _slicedToArray(_useState11, 2),
-                                    min = _useState12[0],
-                                    setMin = _useState12[1];
-
-                                var _useState13 = useState(false),
+                                var _useState13 = useState(1),
                                     _useState14 = _slicedToArray(_useState13, 2),
-                                    enableEnd = _useState14[0],
-                                    setEndState = _useState14[1];
+                                    min = _useState14[0],
+                                    setMin = _useState14[1];
+
+                                var _useState15 = useState(false),
+                                    _useState16 = _slicedToArray(_useState15, 2),
+                                    enableEnd = _useState16[0],
+                                    setEndState = _useState16[1];
 
                                 var validationRules = yup.object().shape({
                                         debut: yup.number().required("Le champs doit être rempli").positive("la valeur doit être positive").integer("Les décimaux sont invalide"),
@@ -1484,7 +1726,7 @@ export default function FileTable(_ref) {
                                                 debut: "",
                                                 fin: "",
                                                 level: "",
-                                                services: options.slice(0, 1)
+                                                services: options_services.slice(0, 1)
                                         }
                                 });
 
@@ -1599,13 +1841,13 @@ export default function FileTable(_ref) {
                                                         null,
                                                         'Service'
                                                 ),
-                                                React.createElement(SelectServices, { updateMethod: function updateMethod(e) {
+                                                React.createElement(SelectComponent, { updateMethod: function updateMethod(e) {
                                                                 formik.setFieldValue("services", e);
-                                                        } }),
+                                                        }, options: options_services, placeholder: "Sélectionner au moins 1 service" }),
                                                 React.createElement(
                                                         'span',
                                                         { className: 'text-danger', style: { fontSize: 11.2 } },
-                                                        formik.errors.services
+                                                        formik.errors.services ? "Au moins 1 service doit être sélectionné" : null
                                                 )
                                         ),
                                         React.createElement(
@@ -1648,41 +1890,6 @@ export default function FileTable(_ref) {
                                             parent_id = _Global_State$identif4[0],
                                             parent_type = _Global_State$identif4[1];
 
-                                        // switch (node.type) {
-                                        //     case 'root':
-                                        //         parent_type = 'App\\Models\\Section'
-                                        //         parent_id = Global_State.getCurrentSection().id
-                                        //         break;
-                                        //     case 'audit':
-                                        //         parent_type = "App\\Models\\Audit"
-                                        //         parent_id = parseInt(node.id.substring(5), 10)
-                                        //         break;
-                                        //     case 'checkList':
-                                        //         parent_type = "App\\Models\\checkList"
-                                        //         parent_id = parseInt(node.id.substring(9), 10)
-                                        //         break;
-                                        //     case 'dp':
-                                        //         parent_type = 'App\\Models\\DossierPreuve'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-                                        //     case 'nonC':
-                                        //         parent_type = 'App\\Models\\Nc'
-                                        //         parent_id = parseInt(node.id.substring(4), 10)
-                                        //         break;
-                                        //     case 'fnc':
-                                        //         parent_type = 'App\\Models\\NonConformite'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-                                        //     case 'ds':
-                                        //         parent_type = 'App\\Models\\DossierSimple'
-                                        //         parent_id = parseInt(node.id.substring(2), 10)
-                                        //         break;
-
-                                        //     default:
-                                        //         break;
-                                        // }
-
-
                                         queryBody.append("parent_type", parent_type);
                                         queryBody.append("parent_id", parent_id);
                                         submittedInfo.files.map(function (fileObject) {
@@ -1708,56 +1915,40 @@ export default function FileTable(_ref) {
 
                                                 // Handle the response from backend here
                                                 .then(function (res) {
-                                                        // console.log(res)
-                                                        if (res.status === 200 && res.data === "ok") {
-                                                                // console.log("looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Fichier(s) ajouté avec success !",
-                                                                        icon: "success"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data.msg === "duplicated") {
-                                                                // console.log(res)
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Certains fichiers son existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.value),
-                                                                        icon: "info"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data.msg === "existAlready") {
-                                                                // console.log(res)
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "Certains fichiers son existant ou possède le mm chemin !\n" + JSON.stringify(res.data.value),
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data === "Something went wrong !") {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data,
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.setContent(React.createElement(Fs_form, null));
-                                                        } else if (res.status === 200 && res.data.msg === "storingError") {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data.value,
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data.msg === 'catchException') {
-                                                                console.log(res);
-                                                                swal({
-                                                                        title: "ERREUR!",
-                                                                        text: res.data.value.errorInfo[2],
-                                                                        icon: "error"
-                                                                });
-                                                                // console.log(res)
-                                                                Global_State.modalManager.setContent(React.createElement(Fs_form, null));
+                                                        console.log(res);
+
+                                                        if (res.data.statue === 'success') {
+                                                                if (res.data.data.msg === 'ok') {
+                                                                        swal({
+                                                                                title: "FIN!",
+                                                                                text: "Fichier(s) ajouté avec success !",
+                                                                                icon: "success"
+                                                                        });
+                                                                        Global_State.modalManager.close_modal();
+                                                                } else if (res.data.data.list) {
+                                                                        swal({
+                                                                                title: "FIN!",
+                                                                                text: "Certains fichiers son existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.data.list),
+                                                                                icon: "info"
+                                                                        });
+                                                                        Global_State.modalManager.close_modal();
+                                                                }
                                                         } else {
-                                                                console.log(res);
+                                                                if (res.data.data.list) {
+                                                                        swal({
+                                                                                title: "FIN!",
+                                                                                text: res.data.data.msg + '\n' + JSON.stringify(res.data.data.list),
+                                                                                icon: "error"
+                                                                        });
+                                                                        Global_State.modalManager.close_modal();
+                                                                } else {
+                                                                        swal({
+                                                                                title: "ERREUR!",
+                                                                                text: res.data.data.msg,
+                                                                                icon: "error"
+                                                                        });
+                                                                        Global_State.modalManager.setContent(React.createElement(Fs_form, null));
+                                                                }
                                                         }
                                                 })
 
@@ -1796,7 +1987,7 @@ export default function FileTable(_ref) {
                                         onSubmit: handleSubmit,
                                         initialValues: {
                                                 files: null,
-                                                services: options.slice(0, 1)
+                                                services: options_services.slice(0, 1)
                                         }
                                 });
 
@@ -1823,13 +2014,13 @@ export default function FileTable(_ref) {
                                                         null,
                                                         'Service'
                                                 ),
-                                                React.createElement(SelectServices, { updateMethod: function updateMethod(e) {
+                                                React.createElement(SelectComponent, { updateMethod: function updateMethod(e) {
                                                                 formik.setFieldValue("services", e);
-                                                        } }),
+                                                        }, options: options_services, placeholder: "Sélectionner au moins 1 service" }),
                                                 React.createElement(
                                                         'span',
                                                         { className: 'text-danger', style: { fontSize: 11.2 } },
-                                                        formik.errors.services
+                                                        formik.errors.services ? "Au moins 1 service doit être sélectionné" : null
                                                 )
                                         ),
                                         React.createElement(
@@ -1855,23 +2046,6 @@ export default function FileTable(_ref) {
                         Global_State.modalManager.open_modal("Ajouter des Fichiers");
                 }
         }
-
-        // node:
-        // {
-        //  id,
-        //  name,
-        //  type,
-        //  isOpen,
-        //  children,
-        //  isRoot,
-        //  parentId
-        //  path,
-        //  hasChildren,
-        //  ext,
-        //  createdAt,
-        //  modifiedAt,
-        // }
-
 
         var ActionsMenu = function ActionsMenu() {
                 // let label1 =  ?  : node.type === "audit" ? "Nouvelle Non-Conformité" : "Nouveau Fichier de preuve"
@@ -2004,7 +2178,9 @@ export default function FileTable(_ref) {
                                                                                 }, 2 * 60000);
 
                                                                                 to_move_or_copy.current = selectedRow.map(function (row) {
-                                                                                        return { id: Global_State.identifyNode(row)[0], type: row.type, name: row.value };
+                                                                                        var node_data = Global_State.getNodeDataById(row.id);
+
+                                                                                        return Object.assign({}, node_data, { id: Global_State.identifyNode(node_data)[0] });
                                                                                 });
 
                                                                                 from_id.current = node.id;
@@ -2026,30 +2202,30 @@ export default function FileTable(_ref) {
                                                                         // http.delete("")
 
                                                                         var remove = function () {
-                                                                                var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
-                                                                                        return _regeneratorRuntime.wrap(function _callee5$(_context5) {
+                                                                                var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee6() {
+                                                                                        return _regeneratorRuntime.wrap(function _callee6$(_context6) {
                                                                                                 while (1) {
-                                                                                                        switch (_context5.prev = _context5.next) {
+                                                                                                        switch (_context6.prev = _context6.next) {
                                                                                                                 case 0:
-                                                                                                                        _context5.next = 2;
+                                                                                                                        _context6.next = 2;
                                                                                                                         return Promise.all(selectedRow.map(function () {
-                                                                                                                                var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(row) {
+                                                                                                                                var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5(row) {
                                                                                                                                         var nodeIdentity;
-                                                                                                                                        return _regeneratorRuntime.wrap(function _callee4$(_context4) {
+                                                                                                                                        return _regeneratorRuntime.wrap(function _callee5$(_context5) {
                                                                                                                                                 while (1) {
-                                                                                                                                                        switch (_context4.prev = _context4.next) {
+                                                                                                                                                        switch (_context5.prev = _context5.next) {
                                                                                                                                                                 case 0:
                                                                                                                                                                         // console.log(Global_State.identifyNode(row))
                                                                                                                                                                         nodeIdentity = Global_State.identifyNode(row);
                                                                                                                                                                         // const [ id, type ] = Global_State.identifyNode(row)
 
                                                                                                                                                                         console.log(selectedRow);
-                                                                                                                                                                        _context4.t0 = row.type;
-                                                                                                                                                                        _context4.next = _context4.t0 === 'audit' ? 5 : _context4.t0 === 'checkList' ? 8 : _context4.t0 === 'dp' ? 9 : _context4.t0 === 'nonC' ? 10 : _context4.t0 === 'fnc' ? 11 : _context4.t0 === 'ds' ? 14 : _context4.t0 === 'f' ? 17 : 20;
+                                                                                                                                                                        _context5.t0 = row.type;
+                                                                                                                                                                        _context5.next = _context5.t0 === 'audit' ? 5 : _context5.t0 === 'checkList' ? 8 : _context5.t0 === 'dp' ? 9 : _context5.t0 === 'nonC' ? 10 : _context5.t0 === 'fnc' ? 11 : _context5.t0 === 'ds' ? 14 : _context5.t0 === 'f' ? 17 : 20;
                                                                                                                                                                         break;
 
                                                                                                                                                                 case 5:
-                                                                                                                                                                        _context4.next = 7;
+                                                                                                                                                                        _context5.next = 7;
                                                                                                                                                                         return http.delete('del_audit?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -2061,19 +2237,19 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 7:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 8:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 9:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 10:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 11:
-                                                                                                                                                                        _context4.next = 13;
+                                                                                                                                                                        _context5.next = 13;
                                                                                                                                                                         return http.delete('del_fnc?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -2085,10 +2261,10 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 13:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 14:
-                                                                                                                                                                        _context4.next = 16;
+                                                                                                                                                                        _context5.next = 16;
                                                                                                                                                                         return http.delete('del_folder?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -2100,10 +2276,10 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 16:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 17:
-                                                                                                                                                                        _context4.next = 19;
+                                                                                                                                                                        _context5.next = 19;
                                                                                                                                                                         return http.delete('del_file?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                                                                 console.log(res);
                                                                                                                                                                                 if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
@@ -2115,21 +2291,21 @@ export default function FileTable(_ref) {
                                                                                                                                                                         });
 
                                                                                                                                                                 case 19:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 20:
-                                                                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                                                                        return _context5.abrupt('break', 21);
 
                                                                                                                                                                 case 21:
                                                                                                                                                                 case 'end':
-                                                                                                                                                                        return _context4.stop();
+                                                                                                                                                                        return _context5.stop();
                                                                                                                                                         }
                                                                                                                                                 }
-                                                                                                                                        }, _callee4, _this);
+                                                                                                                                        }, _callee5, _this);
                                                                                                                                 }));
 
                                                                                                                                 return function (_x3) {
-                                                                                                                                        return _ref7.apply(this, arguments);
+                                                                                                                                        return _ref8.apply(this, arguments);
                                                                                                                                 };
                                                                                                                         }()
 
@@ -2139,14 +2315,14 @@ export default function FileTable(_ref) {
 
                                                                                                                 case 2:
                                                                                                                 case 'end':
-                                                                                                                        return _context5.stop();
+                                                                                                                        return _context6.stop();
                                                                                                         }
                                                                                                 }
-                                                                                        }, _callee5, _this);
+                                                                                        }, _callee6, _this);
                                                                                 }));
 
                                                                                 return function remove() {
-                                                                                        return _ref6.apply(this, arguments);
+                                                                                        return _ref7.apply(this, arguments);
                                                                                 };
                                                                         }();
 
@@ -2260,17 +2436,6 @@ export default function FileTable(_ref) {
                 );
         };
 
-        // const SubHeaderComponent = () =>
-        // {
-        //     return (
-        //         <React.Fragment>
-        //             {node.isRoot ? <IoArrowUndoOutline size={25} style = {{ marginRight: 20, }} /> :
-        //             <IoArrowUndoSharp onClick={ (e) => { e.preventDefault(); backend.setCurrentSelectedFolder(previousSelected.pop()) } }  size={25} style = {{ marginRight: 20, }}  />}
-        //             <SearchComponent set = {recherche} tag = {tag} />
-        //         </React.Fragment>
-        //     )
-        // }
-
         var dataFormater = function dataFormater(node) {
 
                 // console.log(node)
@@ -2280,40 +2445,15 @@ export default function FileTable(_ref) {
                         var img = ["jpeg", "jpg", "png", "gif"];
                         var vid = ["mp4", "avi", "MOV", "mpeg"];
 
-                        var _iteratorNormalCompletion6 = true;
-                        var _didIteratorError6 = false;
-                        var _iteratorError6 = undefined;
-
-                        try {
-                                for (var _iterator6 = img[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                                        var imgExt = _step6.value;
-
-                                        if (imgExt === ext) return "img";
-                                }
-                        } catch (err) {
-                                _didIteratorError6 = true;
-                                _iteratorError6 = err;
-                        } finally {
-                                try {
-                                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                                                _iterator6.return();
-                                        }
-                                } finally {
-                                        if (_didIteratorError6) {
-                                                throw _iteratorError6;
-                                        }
-                                }
-                        }
-
                         var _iteratorNormalCompletion7 = true;
                         var _didIteratorError7 = false;
                         var _iteratorError7 = undefined;
 
                         try {
-                                for (var _iterator7 = vid[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-                                        var vidExt = _step7.value;
+                                for (var _iterator7 = img[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                                        var imgExt = _step7.value;
 
-                                        if (vidExt === ext) return "vid";
+                                        if (imgExt === ext) return "img";
                                 }
                         } catch (err) {
                                 _didIteratorError7 = true;
@@ -2330,13 +2470,38 @@ export default function FileTable(_ref) {
                                 }
                         }
 
+                        var _iteratorNormalCompletion8 = true;
+                        var _didIteratorError8 = false;
+                        var _iteratorError8 = undefined;
+
+                        try {
+                                for (var _iterator8 = vid[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                                        var vidExt = _step8.value;
+
+                                        if (vidExt === ext) return "vid";
+                                }
+                        } catch (err) {
+                                _didIteratorError8 = true;
+                                _iteratorError8 = err;
+                        } finally {
+                                try {
+                                        if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                                                _iterator8.return();
+                                        }
+                                } finally {
+                                        if (_didIteratorError8) {
+                                                throw _iteratorError8;
+                                        }
+                                }
+                        }
+
                         return ext;
                 }
 
                 function TypeIcon(props) {
-                        var _ref8 = [props.data, props.iconSize],
-                            data = _ref8[0],
-                            iconSize = _ref8[1];
+                        var _ref9 = [props.data, props.iconSize],
+                            data = _ref9[0],
+                            iconSize = _ref9[1];
 
                         if (data.global_type === "folder") {
                                 return React.createElement(FcFolder, { size: iconSize });
@@ -2466,8 +2631,8 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var LevelComponent = function LevelComponent(_ref9) {
-                        var data = _ref9.data;
+                var LevelComponent = function LevelComponent(_ref10) {
+                        var data = _ref10.data;
 
                         // const [niv, setNiv] = useState(level)
 
@@ -2523,12 +2688,12 @@ export default function FileTable(_ref) {
 
                                 if (!Global_State.isEditorMode) {
                                         var update = function () {
-                                                var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee6() {
-                                                        return _regeneratorRuntime.wrap(function _callee6$(_context6) {
+                                                var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee7() {
+                                                        return _regeneratorRuntime.wrap(function _callee7$(_context7) {
                                                                 while (1) {
-                                                                        switch (_context6.prev = _context6.next) {
+                                                                        switch (_context7.prev = _context7.next) {
                                                                                 case 0:
-                                                                                        _context6.next = 2;
+                                                                                        _context7.next = 2;
                                                                                         return http.post('update_fnc', query).then(function (res) {
                                                                                                 console.log(res);
                                                                                         }).catch(function (err) {
@@ -2537,14 +2702,14 @@ export default function FileTable(_ref) {
 
                                                                                 case 2:
                                                                                 case 'end':
-                                                                                        return _context6.stop();
+                                                                                        return _context7.stop();
                                                                         }
                                                                 }
-                                                        }, _callee6, _this3);
+                                                        }, _callee7, _this3);
                                                 }));
 
                                                 return function update() {
-                                                        return _ref10.apply(this, arguments);
+                                                        return _ref11.apply(this, arguments);
                                                 };
                                         }();
 
@@ -2566,8 +2731,8 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var ReviewDateComponent = function ReviewDateComponent(_ref11) {
-                        var data = _ref11.data;
+                var ReviewDateComponent = function ReviewDateComponent(_ref12) {
+                        var data = _ref12.data;
 
                         var value = data.review_date ? data.review_date : '____/__/__';
 
@@ -2575,13 +2740,13 @@ export default function FileTable(_ref) {
                                 e.stopPropagation();
                                 console.log("review date handle click");
 
-                                var Date_input = function Date_input(_ref12) {
-                                        var data = _ref12.data;
+                                var Date_input = function Date_input(_ref13) {
+                                        var data = _ref13.data;
 
 
-                                        var CustomInput = forwardRef(function (_ref13, ref) {
-                                                var value = _ref13.value,
-                                                    onClick = _ref13.onClick;
+                                        var CustomInput = forwardRef(function (_ref14, ref) {
+                                                var value = _ref14.value,
+                                                    onClick = _ref14.onClick;
                                                 return React.createElement(
                                                         Stack,
                                                         { direction: 'row', sx: { width: 'fit-content', backgroundColor: 'whitesmoke' } },
@@ -2603,10 +2768,10 @@ export default function FileTable(_ref) {
                                                 );
                                         });
 
-                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref14) {
-                                                var date = _ref14.date,
-                                                    value = _ref14.value,
-                                                    onChange = _ref14.onChange;
+                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref15) {
+                                                var date = _ref15.date,
+                                                    value = _ref15.value,
+                                                    onChange = _ref15.onChange;
 
 
                                                 var validationRules = yup.object().shape({
@@ -2688,10 +2853,10 @@ export default function FileTable(_ref) {
                                                 );
                                         }, []);
 
-                                        var _useState15 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
-                                            _useState16 = _slicedToArray(_useState15, 2),
-                                            startDate = _useState16[0],
-                                            setStartDate = _useState16[1];
+                                        var _useState17 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
+                                            _useState18 = _slicedToArray(_useState17, 2),
+                                            startDate = _useState18[0],
+                                            setStartDate = _useState18[1];
 
                                         var new_review_date = startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate() + ' ' + startDate.getHours() + ':' + startDate.getMinutes();
                                         console.log('new_review_date', new_review_date, e);
@@ -2729,12 +2894,12 @@ export default function FileTable(_ref) {
 
                                                 if (!Global_State.isEditorMode) {
                                                         var update = function () {
-                                                                var _ref15 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee7() {
-                                                                        return _regeneratorRuntime.wrap(function _callee7$(_context7) {
+                                                                var _ref16 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee8() {
+                                                                        return _regeneratorRuntime.wrap(function _callee8$(_context8) {
                                                                                 while (1) {
-                                                                                        switch (_context7.prev = _context7.next) {
+                                                                                        switch (_context8.prev = _context8.next) {
                                                                                                 case 0:
-                                                                                                        _context7.next = 2;
+                                                                                                        _context8.next = 2;
                                                                                                         return http.post('update_fnc', query).then(function (res) {
                                                                                                                 console.log(res);
                                                                                                         }).catch(function (err) {
@@ -2743,14 +2908,14 @@ export default function FileTable(_ref) {
 
                                                                                                 case 2:
                                                                                                 case 'end':
-                                                                                                        return _context7.stop();
+                                                                                                        return _context8.stop();
                                                                                         }
                                                                                 }
-                                                                        }, _callee7, _this);
+                                                                        }, _callee8, _this);
                                                                 }));
 
                                                                 return function update() {
-                                                                        return _ref15.apply(this, arguments);
+                                                                        return _ref16.apply(this, arguments);
                                                                 };
                                                         }();
 
@@ -2831,13 +2996,13 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var _iteratorNormalCompletion8 = true;
-                var _didIteratorError8 = false;
-                var _iteratorError8 = undefined;
+                var _iteratorNormalCompletion9 = true;
+                var _didIteratorError9 = false;
+                var _iteratorError9 = undefined;
 
                 try {
-                        for (var _iterator8 = node.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                                var child_node = _step8.value;
+                        for (var _iterator9 = node.children[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                                var child_node = _step9.value;
 
                                 // console.log('child_node.id', child_node)
                                 var data = child_node; // Global_State.getNodeDataById(child_node.id)
@@ -2869,16 +3034,16 @@ export default function FileTable(_ref) {
                                 });
                         }
                 } catch (err) {
-                        _didIteratorError8 = true;
-                        _iteratorError8 = err;
+                        _didIteratorError9 = true;
+                        _iteratorError9 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion8 && _iterator8.return) {
-                                        _iterator8.return();
+                                if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                                        _iterator9.return();
                                 }
                         } finally {
-                                if (_didIteratorError8) {
-                                        throw _iteratorError8;
+                                if (_didIteratorError9) {
+                                        throw _iteratorError9;
                                 }
                         }
                 }
@@ -2890,12 +3055,12 @@ export default function FileTable(_ref) {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref16 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref16[0],
-                            listB = _ref16[1];
-                        var _ref17 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref17[0],
-                            b = _ref17[1];
+                        var _ref17 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref17[0],
+                            listB = _ref17[1];
+                        var _ref18 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref18[0],
+                            b = _ref18[1];
 
 
                         if (a > b) {
@@ -3168,15 +3333,15 @@ export default function FileTable(_ref) {
                 }
         }];
 
-        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref18) {
-                var set = _ref18.set,
-                    filter = _ref18.filter,
-                    node = _ref18.node;
+        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref19) {
+                var set = _ref19.set,
+                    filter = _ref19.filter,
+                    node = _ref19.node;
 
 
-                var FilterComponent = useCallback(function FilterComponent(_ref19) {
-                        var set = _ref19.set,
-                            filter = _ref19.filter;
+                var FilterComponent = useCallback(function FilterComponent(_ref20) {
+                        var set = _ref20.set,
+                            filter = _ref20.filter;
 
                         switch (filter.tag) {
                                 case 'la Date de creation':
@@ -3385,9 +3550,9 @@ export default function FileTable(_ref) {
                         , selectableRowSelected: function selectableRowSelected(row) {
                                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                         },
-                        onSelectedRowsChange: function onSelectedRowsChange(_ref20) {
-                                var selectedCount = _ref20.selectedCount,
-                                    selectedRows = _ref20.selectedRows;
+                        onSelectedRowsChange: function onSelectedRowsChange(_ref21) {
+                                var selectedCount = _ref21.selectedCount,
+                                    selectedRows = _ref21.selectedRows;
                                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                         },
                         clearSelectedRows: Global_State.toggleCleared,

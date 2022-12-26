@@ -437,7 +437,7 @@ function useOperationNotif() {
         return operationNotifComponents;
 }
 
-function useOnScreen(target, root) {
+function useOnScreen(root) {
         var _useState3 = useState(false),
             _useState4 = _slicedToArray(_useState3, 2),
             isIntersecting = _useState4[0],
@@ -453,15 +453,18 @@ function useOnScreen(target, root) {
                 threshold: 1.0
         });
 
-        useEffect(function () {
-                observer.observe(target.current);
-                // Remove the observer as soon as the component is unmounted
-                return function () {
-                        observer.disconnect();
-                };
-        }, []);
+        // useEffect(() => {
+        //         observer.observe(target.current)
+        //         // Remove the observer as soon as the component is unmounted
+        //         return () => { observer.disconnect() }
+        // }, [])
 
-        return isIntersecting;
+
+        return [isIntersecting, function (target) {
+                observer.observe(target);
+        }, function () {
+                console.log('disconect');
+        }];
 }
 
 function useUnreadReviewNotif() {
@@ -693,28 +696,11 @@ function useReadReviewNotif() {
         });
 }
 
+function useOpen(init_val) {
+        return useState(init_val);
+}
+
 export default function Notifications() {
-
-        var ref = useRef();
-        var isVisible = useOnScreen(ref, document.querySelector('#root'));
-
-        useEffect(function () {
-                console.log(isVisible, "notifPanel");
-                if (readNotifs.length !== 0 && !isVisible) {
-
-                        var notif_ids = new FormData();
-                        readNotifs.map(function (notif_id) {
-                                // console.log(notif_id)
-                                notif_ids.append('notif_ids[]', notif_id);
-                        });
-
-                        http.post("markAsRead", notif_ids).then(function (res) {
-                                console.log(res);
-                        }).catch(function (err) {
-                                console.log(err);
-                        });
-                }
-        }, [isVisible]);
 
         var StyledBadge = styled(Badge)(function (_ref8) {
                 var theme = _ref8.theme;
@@ -754,7 +740,7 @@ export default function Notifications() {
 
         var renderingComponent = count ? React.createElement(
                 List,
-                { ref: ref, id: 'notifRenderingComponent' },
+                { id: 'notifRenderingComponent' },
                 operationNotifs,
                 unreadReviewNotifs,
                 React.createElement(
@@ -765,9 +751,48 @@ export default function Notifications() {
                 readReviewNotifs
         ) : React.createElement(
                 "div",
-                { ref: ref, className: "d-flex justify-content-center align-items-center" },
+                { id: 'notifRenderingComponent', className: "d-flex justify-content-center align-items-center" },
                 "Vide \uD83D\uDE22"
         );
 
-        return React.createElement(Global_State.CustomDropDown, { id: 'notifPanel', icon: notifButton, content: renderingComponent });
+        // const [isVisible, observe, disconect] = useOnScreen(document.querySelector('#root'))
+
+        var _useState5 = useState(false),
+            _useState6 = _slicedToArray(_useState5, 2),
+            isOpen = _useState6[0],
+            setOpenState = _useState6[1];
+
+        useEffect(function () {
+                // Global_State.EventsManager.on('observe_notif_panel', () => { const ref = document.getElementById('notifRenderingComponent');  console.log(ref); observe(ref) })
+                // Global_State.EventsManager.on('unobserve_notif_panel', disconect)
+                Global_State.EventsManager.on('setOpenState', setOpenState);
+
+                return function () {
+                        // Global_State.EventsManager.off('observe_notif_panel')
+                        // Global_State.EventsManager.off('unobserve_notif_panel')
+                        Global_State.EventsManager.off('setOpenState');
+                };
+        }, []);
+
+        useEffect(function () {
+                console.log(isOpen, "notifPanel");
+                if (readNotifs.length !== 0 && !isOpen) {
+
+                        var notif_ids = new FormData();
+                        readNotifs.map(function (notif_id) {
+                                // console.log(notif_id)
+                                notif_ids.append('notif_ids[]', notif_id);
+                        });
+
+                        http.post("markAsRead", notif_ids).then(function (res) {
+                                console.log(res);
+                        }).catch(function (err) {
+                                console.log(err);
+                        });
+                }
+        }, [isOpen]);
+
+        return useMemo(function () {
+                return React.createElement(Global_State.CustomDropDown, { id: 'notifPanel', icon: notifButton, content: renderingComponent });
+        }, []);
 }

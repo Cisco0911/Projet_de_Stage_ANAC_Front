@@ -63,7 +63,8 @@ export default function QuickSettings() {
         });
     }, []);
 
-    var switchRef = document.getElementById('switchRef');
+    // const switchRef = document.getElementById('switchRef')
+
 
     var settingButton = React.createElement(
         IconButton,
@@ -86,10 +87,8 @@ export default function QuickSettings() {
                 { direction: "row", spacing: 1, alignItems: "center" },
                 React.createElement(AntSwitch, { id: 'switchRef', checked: Global_State.isEditorMode, onClick: handleChange }),
                 React.createElement(
-                    "span",
-                    { style: { width: 'max-content', cursor: 'pointer' }, onClick: function onClick() {
-                            console.log('switchRef');switchRef.click();
-                        } },
+                    "label",
+                    { style: { width: 'max-content', cursor: 'pointer' }, htmlFor: 'switchRef' },
                     " ",
                     (Global_State.editorMode ? 'désactiver' : 'activer') + " le mode \xE9diteur",
                     " "
