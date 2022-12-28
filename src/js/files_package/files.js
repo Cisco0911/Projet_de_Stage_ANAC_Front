@@ -1,5 +1,7 @@
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 /* eslint-disable import/first */
@@ -86,6 +88,10 @@ function FileTree(_ref) {
         var data = _ref.data;
 
 
+        // console.log('data111111', data)
+        //
+        // data = [...data].filter( node_data => ( node_data.global_type === 'folder' ) )
+
         var tree = useRef();
 
         var _useState = useState(['0']),
@@ -154,35 +160,43 @@ function FileTree(_ref) {
         var Label = function Label(_ref4) {
                 var node = _ref4.node;
 
-                // let icon
-                // expanded.forEach(element => {
-
-                // });
-                // const expended = useRef(['0'])
-
-                var item = useRef();
-
                 var _useState3 = useState(expanded.indexOf(node.id) !== -1),
                     _useState4 = _slicedToArray(_useState3, 2),
                     isOpen = _useState4[0],
                     setIsOpen = _useState4[1];
 
                 var handleDbClick = function handleDbClick(e) {
+                        // console.log('db_eeeeeeeeeeeeeevent', e, e.nativeEvent.is_opening)
+
                         if (e) e.stopPropagation();
-                        item.current.click();
 
-                        // console.log(item);
-                        var t = expanded;
-                        if (expanded.indexOf(node.id.toString()) !== -1) {
-                                t.splice(expanded.indexOf(node.id.toString()), 1);
-                                setIsOpen(false);
-                        } else {
-                                t.push(node.id);
+                        var force_open = e ? e.nativeEvent.is_opening : undefined;
+                        // console.log('db_eeeeeeeeeeeeeevent force_state', force_state)
+                        // if (force_open !== false) tree_row.click();
+
+                        var open = function open() {
+                                expanded.push(node.id);
                                 setIsOpen(true);
-                        }
-                        // console.log(t);
+                        },
+                            close = function close() {
+                                expanded.splice(expanded.indexOf(node.id.toString()), 1);
+                                setIsOpen(false);
+                        };
 
-                        setExpanded(t);
+                        if (force_open === undefined) {
+                                if (expanded.find(function (id) {
+                                        return id === node.id.toString();
+                                })) close();else open();
+                        } else if (force_open && !isOpen) open();else if (!force_open && isOpen) close();
+
+                        console.log(expanded);
+
+                        setExpanded([].concat(_toConsumableArray(expanded)));
+                };
+
+                var handleClick = function handleClick(e) {
+                        if (e) e.stopPropagation();
+                        Global_State.backend.setCurrentSelectedFolder(node.id);
                 };
 
                 useEffect(function () {
@@ -196,7 +210,7 @@ function FileTree(_ref) {
 
                 return React.createElement(
                         "div",
-                        { ref: item, onDoubleClick: handleDbClick },
+                        { id: "treeRow-" + node.id, onClick: handleClick, onDoubleClick: handleDbClick },
                         React.createElement(
                                 "span",
                                 { className: "mr-1" },
@@ -207,34 +221,45 @@ function FileTree(_ref) {
         };
 
         var RenderTree = useCallback(function RenderTree(_ref5) {
-                var nodes = _ref5.nodes;
+                var node = _ref5.node;
 
                 // console.log(tree.current.expanded)
 
                 return React.createElement(
                         StyledTreeItem,
-                        { key: nodes.id, nodeId: nodes.id.toString(), label: React.createElement(Label, { node: nodes }),
+                        { key: node.id, nodeId: node.id.toString(), label: useMemo(function () {
+                                        return React.createElement(Label, { node: node });
+                                }, []),
                                 expandIcon: React.createElement(ChevronRightIcon, { onClick: function onClick(e) {
-                                                Global_State.EventsManager.emit("toggle" + nodes.id, e);
+                                                Global_State.EventsManager.emit("toggle" + node.id, e);
                                         } }),
                                 collapseIcon: React.createElement(ExpandMoreIcon, { onClick: function onClick(e) {
-                                                Global_State.EventsManager.emit("toggle" + nodes.id, e);
+                                                Global_State.EventsManager.emit("toggle" + node.id, e);
                                         } })
                         },
-                        Array.isArray(nodes.children) ? nodes.children.map(function (node) {
-                                return React.createElement(RenderTree, { key: node.id, nodes: node });
+                        Array.isArray(node.children) ? node.children.filter(function (node) {
+                                return node.global_type === 'folder';
+                        }).map(function (node) {
+                                return React.createElement(RenderTree, { key: node.id, node: node });
                         }) : null
                 );
         }, []);
 
-        var handleFocus = function handleFocus(event, nodeId) {
+        // const handleFocus = (event) =>
+        // {
+        //         event.preventDefault()
+        //         event.stopPropagation()
+        //         console.log( 'foooooooooooooooooooooooooooooooocuuuuuuuuuuuuuuuuuuuuuus', event )
+        //         // Global_State.backend.setCurrentSelectedFolder(nodeId)
+        //
+        //         // setExpanded( [nodeId] )
+        // }
 
-                Global_State.backend.setCurrentSelectedFolder(nodeId);
+        console.log('data22222', data);
 
-                // setExpanded( [nodeId] )
-        };
-
-        console.log(data);
+        useEffect(function () {
+                console.log('expand_change', expanded);
+        }, [expanded]);
 
         return React.createElement(
                 TreeView,
@@ -245,12 +270,10 @@ function FileTree(_ref) {
                         defaultExpanded: ['0'],
                         defaultExpandIcon: React.createElement(ChevronRightIcon, null),
                         sx: { height: 'max-content', flexGrow: 1, width: 'max-content', overflowY: 'auto' },
-                        expanded: expanded
-                        // onNodeToggle = { e => { console.log(e); } }
-                        , onNodeFocus: handleFocus,
+                        expanded: expanded,
                         multiSelect: true,
                         ref: tree
                 },
-                React.createElement(RenderTree, { nodes: data })
+                React.createElement(RenderTree, { node: data })
         );
 }

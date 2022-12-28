@@ -57,6 +57,12 @@ import {Toaster} from "react-hot-toast";
 import EventEmitter from 'eventemitter3';
 import zIndex from "@mui/material/styles/zIndex";
 
+import useCustomCheckBox  from './custom_checkBox/custom_check'
+
+
+
+
+
 export const test = "Success"
 
 
@@ -65,55 +71,22 @@ export let Global_State = {};
 
 
 function Lol({lal}) {
-    const EventsManager = new EventEmitter();
 
-    const [o, setO] = useState([2,6,9,7,3])
+    const [o, setO] = useState(true)
 
-    const [p, setP] = useState('p')
-
-    function usela(g)
-    {
-        return setP
-    }
-
-    function emit()
-    {
-        
-        console.log('dddddddd')
-        EventsManager.emit('p')
-    }
-
-    function reducer(state, action)
-    {
-        return [action]
-    }
-
-    const [h, dispatch] = useReducer(reducer, ['89'])
-    EventsManager.on('p', () => {console.log('set'); setP(t => t+t)})
-
-    useEffect(
-        () =>
-        {
-            EventsManager.emit('p')
-        }, [h]
-    )
-
-    // useEffect(()=>{
-    //     setTimeout(function()
-    // {
-    
-    //     setO(o + 5)
-
-    // }, 2000)
-    // })
-    
-    console.log( p, h)
-
-    // const k = usela()
+        const checkBox_package = useCustomCheckBox()
 
     return (
-        <div className="container" onClick={ () => {dispatch('22222')} } >
-            {p}
+        <div style={
+                {
+                        width: '100vh',
+                        height: '100vh',
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                }
+        } >
+                <checkBox_package.CheckBox2_switch  />
         </div>
     );
 }
@@ -286,7 +259,7 @@ function File_section()
                                     return (
                                         <li key={ section.id } className= { sections.length - 1 === idx ? "flex-grow-1" : "" } style = {{marginBottom: 10}} onClick = { async () => { 
                                             await Global_State.setSectionId(section.id) 
-                                            Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.get(section.id) )
+                                            Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.current.get(section.id) )
                                             } } > 
     
                                             <a  className= { Global_State.selectedSectionId === section.id ? "active" : "" } >

@@ -1,5 +1,7 @@
 import _regeneratorRuntime from 'babel-runtime/regenerator';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -43,6 +45,10 @@ import * as yup from 'yup';
 import DatePicker from "react-datepicker";
 import Stack from "@mui/material/Stack";
 import { IconButton, Tooltip } from "@mui/material";
+
+import { useSpring, animated } from 'react-spring';
+import { FormCheck } from "react-bootstrap";
+import useCustomCheckBox, { CheckBox1 } from "../custom_checkBox/custom_check";
 
 var previousSelected = [];
 
@@ -1614,91 +1620,129 @@ export default function FileTable(_ref) {
                                 var handleSubmit = function handleSubmit(submittedInfo) {
                                         console.log(submittedInfo);
 
-                                        var queryBody = new FormData();
+                                        var check_feasibility = function check_feasibility(debut, fin, nonC_id) {
+                                                var nonC = Global_State.getNodeDataById(nonC_id);
+                                                var audit = Global_State.getNodeDataById(nonC.parentId);
 
-                                        var service = submittedInfo.services[0].label;
+                                                // const existing_fncs = Global_State.getChildrenById(Global_State.value, nonC_id)
 
-                                        queryBody.append("nonC_id", parseInt(node.id.substring(4)));
-                                        queryBody.append("services", JSON.stringify(submittedInfo.services));
-                                        queryBody.append("debut", submittedInfo.debut);
-                                        queryBody.append("fin", submittedInfo.fin);
-                                        queryBody.append("level", submittedInfo.level);
+                                                var _loop3 = function _loop3(i) {
+                                                        if (Global_State.value.find(function (node) {
+                                                                return node.path === nonC.path + '\\FNC-' + audit.name + '-' + i;
+                                                        })) return {
+                                                                        v: false
+                                                                };
+                                                };
 
-                                        // console.log("services", queryBody.get("services"))
-                                        // console.log("nc_id", queryBody.get("nonC_id"))
-                                        // console.log("debut", queryBody.get("debut"))
-                                        // console.log("fin", queryBody.get("fin"))
+                                                for (var i = debut; i < fin + 1; i++) {
+                                                        var _ret3 = _loop3(i);
 
-                                        if (!Global_State.isEditorMode) {
+                                                        if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object") return _ret3.v;
+                                                }
+                                                return true;
+                                        };
 
-                                                Global_State.modalManager.setContent(Global_State.spinnerManager.spinner);
+                                        if (check_feasibility(parseInt(submittedInfo.debut), parseInt(submittedInfo.fin), node.id)) {
 
-                                                http.post('add_fncs', queryBody)
+                                                var queryBody = new FormData();
 
-                                                // Handle the response from backend here
-                                                .then(function (res) {
-                                                        // console.log(res)
-                                                        if (res.status === 201) {
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "FNC ajouté avec success !",
-                                                                        icon: "success"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data === "existAlready") {
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "FNC existant !",
-                                                                        icon: "info"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data === "Something went wrong !") {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data,
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.setContent(React.createElement(FNCs_form, null));
-                                                        } else if (res.status === 200 && res.data.msg === "storingError") {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data.value,
-                                                                        icon: "error"
-                                                                });
-                                                                Global_State.modalManager.close_modal();
-                                                        } else if (res.status === 200 && res.data.msg === 'catchException') {
+                                                var service = submittedInfo.services[0].label;
+
+                                                queryBody.append("nonC_id", parseInt(node.id.substring(4)));
+                                                queryBody.append("services", JSON.stringify(submittedInfo.services));
+                                                queryBody.append("debut", submittedInfo.debut);
+                                                queryBody.append("fin", submittedInfo.fin);
+                                                queryBody.append("level", submittedInfo.level);
+
+                                                // console.log("services", queryBody.get("services"))
+                                                // console.log("nc_id", queryBody.get("nonC_id"))
+                                                // console.log("debut", queryBody.get("debut"))
+                                                // console.log("fin", queryBody.get("fin"))
+
+                                                if (!Global_State.isEditorMode) {
+
+                                                        Global_State.modalManager.setContent(Global_State.spinnerManager.spinner);
+
+                                                        http.post('add_fncs', queryBody)
+
+                                                        // Handle the response from backend here
+                                                        .then(function (res) {
+                                                                console.log(res);
+
+                                                                if (res.data.statue === 'success') {
+                                                                        if (res.data.data.existing_fnc) {
+                                                                                swal({
+                                                                                        title: "FIN!",
+                                                                                        text: "Certains FNC sont existants ou possède le mm chemin !\n" + JSON.stringify(res.data.data.existing_fnc),
+                                                                                        icon: "info"
+                                                                                });
+                                                                                Global_State.modalManager.close_modal();
+                                                                        } else {
+                                                                                swal({
+                                                                                        title: "FIN!",
+                                                                                        text: "Dossier ajouté avec success !",
+                                                                                        icon: "success"
+                                                                                });
+                                                                                Global_State.modalManager.close_modal();
+                                                                        }
+                                                                } else {
+                                                                        switch (res.data.data.code) {
+                                                                                case 1:
+                                                                                        {
+                                                                                                swal({
+                                                                                                        title: "ERROR!",
+                                                                                                        text: res.data.data.msg,
+                                                                                                        icon: "error"
+                                                                                                });
+                                                                                                Global_State.modalManager.setContent(React.createElement(FNCs_form, null));
+                                                                                                break;
+                                                                                        }
+                                                                                default:
+                                                                                        {
+                                                                                                swal({
+                                                                                                        title: "ERROR!",
+                                                                                                        text: res.data.data.msg,
+                                                                                                        icon: "error"
+                                                                                                });
+                                                                                                Global_State.modalManager.setContent(React.createElement(FNCs_form, null));
+                                                                                                break;
+                                                                                        }
+                                                                        }
+                                                                }
+                                                        })
+
+                                                        // Catch errors if any
+                                                        .catch(function (err) {
+                                                                console.log(err);
+                                                                var msg = void 0;
+                                                                if (err.response.status === 500) msg = "erreur interne au serveur";else if (err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page";
                                                                 swal({
                                                                         title: "ERREUR!",
-                                                                        text: res.data.value.errorInfo[2],
+                                                                        text: err.response.data.message + "\n" + msg,
                                                                         icon: "error"
                                                                 });
-                                                                // console.log(res)
                                                                 Global_State.modalManager.setContent(React.createElement(FNCs_form, null));
-                                                        } else console.log(res);
-                                                })
-
-                                                // Catch errors if any
-                                                .catch(function (err) {
-                                                        console.log(err);
-                                                        var msg = void 0;
-                                                        if (err.response.status === 500) msg = "erreur interne au serveur";else if (err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page";
-                                                        swal({
-                                                                title: "ERREUR!",
-                                                                text: err.response.data.message + "\n" + msg,
-                                                                icon: "error"
                                                         });
-                                                        Global_State.modalManager.setContent(React.createElement(FNCs_form, null));
-                                                });
+                                                } else {
+                                                        console.log('editorHandle fnc');
+
+                                                        queryBody.set('front_parent_type', node.type);
+                                                        Global_State.editor.fnc.add(queryBody);
+
+                                                        Global_State.modalManager.close_modal();
+                                                }
+
+                                                // console.log(queryBody.get("name"))
                                         } else {
-                                                console.log('editorHandle fnc');
+                                                console.log('not feasible');
 
-                                                queryBody.set('front_parent_type', node.type);
-                                                Global_State.editor.fnc.add(queryBody);
-
+                                                swal({
+                                                        title: "ERROR!",
+                                                        text: 'La plage de génération contient des numéros de FNC existant !',
+                                                        icon: "warning"
+                                                });
                                                 Global_State.modalManager.close_modal();
                                         }
-
-                                        // console.log(queryBody.get("name"))
                                 };
 
                                 var _useState13 = useState(1),
@@ -1928,7 +1972,7 @@ export default function FileTable(_ref) {
                                                                 } else if (res.data.data.list) {
                                                                         swal({
                                                                                 title: "FIN!",
-                                                                                text: "Certains fichiers son existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.data.list),
+                                                                                text: "Certains fichiers sont existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.data.list),
                                                                                 icon: "info"
                                                                         });
                                                                         Global_State.modalManager.close_modal();
@@ -2996,6 +3040,112 @@ export default function FileTable(_ref) {
                         );
                 };
 
+                var ValidBadge = function ValidBadge(_ref17) {
+                        var data = _ref17.data;
+
+                        var _useState19 = useState(false),
+                            _useState20 = _slicedToArray(_useState19, 2),
+                            checked = _useState20[0],
+                            check = _useState20[1];
+
+                        function handleClick(e) {
+                                var _this4 = this;
+
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                console.log(e);
+
+                                var _Global_State$identif11 = Global_State.identifyNode(data),
+                                    _Global_State$identif12 = _slicedToArray(_Global_State$identif11, 2),
+                                    id = _Global_State$identif12[0],
+                                    model = _Global_State$identif12[1];
+                                // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
+
+                                var query = new FormData();
+                                query.append('id', id);
+                                query.append('update_object', 'is_validated');
+                                query.append('new_value', data.is_validated ? 0 : 1);
+                                query.append('additional_info', JSON.stringify({}));
+
+                                var route = void 0;
+
+                                switch (model) {
+                                        case 'App\\Models\\Section':
+                                                break;
+                                        case 'App\\Models\\Audit':
+                                                break;
+                                        case 'App\\Models\\checkList':
+                                                break;
+                                        case 'App\\Models\\DossierPreuve':
+                                                break;
+                                        case 'App\\Models\\Nc':
+                                                break;
+                                        case 'App\\Models\\NonConformite':
+                                                break;
+                                        case 'App\\Models\\DossierSimple':
+                                                route = 'update_folder';
+                                                break;
+                                        case 'App\\Models\\Fichier':
+                                                break;
+                                        default:
+                                                return null;
+
+                                }
+
+                                if (!Global_State.isEditorMode) {
+                                        var update = function () {
+                                                var _ref18 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee9() {
+                                                        return _regeneratorRuntime.wrap(function _callee9$(_context9) {
+                                                                while (1) {
+                                                                        switch (_context9.prev = _context9.next) {
+                                                                                case 0:
+                                                                                        _context9.next = 2;
+                                                                                        return http.post('' + route, query).then(function (res) {
+                                                                                                console.log(res);
+                                                                                        }).catch(function (err) {
+                                                                                                console.log(err);throw err;
+                                                                                        });
+
+                                                                                case 2:
+                                                                                case 'end':
+                                                                                        return _context9.stop();
+                                                                        }
+                                                                }
+                                                        }, _callee9, _this4);
+                                                }));
+
+                                                return function update() {
+                                                        return _ref18.apply(this, arguments);
+                                                };
+                                        }();
+
+                                        // console.log(selectedRow[0].id.substring(2))
+                                        toast.promise(update(), {
+                                                loading: 'Validation...',
+                                                success: 'Validation achevé',
+                                                error: 'err'
+                                        });
+                                } else {
+                                        // Global_State.editor.folder.update(query)
+                                }
+                        }
+
+                        var checkBox_package = useCustomCheckBox();
+
+                        return React.createElement(
+                                'div',
+                                { className: 'd-flex align-items-center justify-content-center', style: { width: 40, height: 30 }, onClick: handleClick },
+                                React.createElement(checkBox_package.CheckBox1, {
+                                        id: data.id,
+                                        color: '#14cc2e',
+                                        style: { margin: 0, borderRadius: '75%' },
+                                        checked: data.is_validated
+                                        // onChange={ handleClick }
+                                })
+                        );
+                };
+
                 var _iteratorNormalCompletion9 = true;
                 var _didIteratorError9 = false;
                 var _iteratorError9 = undefined;
@@ -3029,7 +3179,8 @@ export default function FileTable(_ref) {
                                         global_type: data.global_type,
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
-                                        review_date: data.review_date === undefined ? '' : React.createElement(ReviewDateComponent, { data: data })
+                                        review_date: data.review_date === undefined ? '' : React.createElement(ReviewDateComponent, { data: data }),
+                                        valid_badge: React.createElement(ValidBadge, { data: data })
 
                                 });
                         }
@@ -3055,12 +3206,12 @@ export default function FileTable(_ref) {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref17 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref17[0],
-                            listB = _ref17[1];
-                        var _ref18 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref18[0],
-                            b = _ref18[1];
+                        var _ref19 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref19[0],
+                            listB = _ref19[1];
+                        var _ref20 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref20[0],
+                            b = _ref20[1];
 
 
                         if (a > b) {
@@ -3107,17 +3258,24 @@ export default function FileTable(_ref) {
         };
 
         var columns = useMemo(function () {
-                var columns_of_the_type = void 0;
+                var columns_of_the_type = [{
+                        name: '',
+                        selector: function selector(row) {
+                                return row.valid_badge;
+                        },
+                        sortable: false,
+                        width: "11%"
+                }, {
+                        name: 'NOM',
+                        selector: function selector(row) {
+                                return row.name;
+                        },
+                        sortable: true,
+                        sortFunction: sortByName
+                }];
 
                 if (node.type === "root" && contain_audit) {
-                        columns_of_the_type = [{
-                                name: 'NOM',
-                                selector: function selector(row) {
-                                        return row.name;
-                                },
-                                sortable: true,
-                                sortFunction: sortByName
-                        }, {
+                        columns_of_the_type.push.apply(columns_of_the_type, [{
                                 name: 'CREE LE',
                                 selector: function selector(row) {
                                         return row.created_at;
@@ -3131,31 +3289,17 @@ export default function FileTable(_ref) {
                                 },
                                 sortable: true,
                                 width: "20%"
-                        }];
+                        }]);
                 } else if (node.type === "audit") {
-                        columns_of_the_type = [{
-                                name: 'NOM',
-                                selector: function selector(row) {
-                                        return row.name;
-                                },
-                                sortable: true,
-                                sortFunction: sortByName
-                        }, {
+                        columns_of_the_type.push.apply(columns_of_the_type, [{
                                 name: 'RA',
                                 selector: function selector(row) {
                                         return row.RA;
                                 },
                                 sortable: true
-                        }];
+                        }]);
                 } else if (node.type === "nonC") {
-                        columns_of_the_type = [{
-                                name: 'NOM',
-                                selector: function selector(row) {
-                                        return row.name;
-                                },
-                                sortable: true,
-                                sortFunction: sortByName
-                        }, {
+                        columns_of_the_type.push.apply(columns_of_the_type, [{
                                 name: 'NIVEAU',
                                 selector: function selector(row) {
                                         return row.level;
@@ -3176,15 +3320,8 @@ export default function FileTable(_ref) {
                                         return row.isClosed;
                                 },
                                 width: "16%"
-                        }];
-                } else columns_of_the_type = [{
-                        name: 'NOM',
-                        selector: function selector(row) {
-                                return row.name;
-                        },
-                        sortable: true,
-                        sortFunction: sortByName
-                }, {
+                        }]);
+                } else columns_of_the_type.push.apply(columns_of_the_type, [{
                         name: 'CREE LE',
                         selector: function selector(row) {
                                 return row.created_at;
@@ -3196,7 +3333,7 @@ export default function FileTable(_ref) {
                                 return row.size;
                         },
                         sortable: true
-                }];
+                }]);
 
                 return columns_of_the_type;
         }, [node]);
@@ -3302,10 +3439,76 @@ export default function FileTable(_ref) {
                 dispatch({ type: 'toggleSelection', nodeIds: ids });
         }, [selectedRow]);
 
-        var onRowDoubleClicked = function onRowDoubleClicked(row, event) {
-                Global_State.backend.setCurrentSelectedFolder(row.id);
-                // console.log('dbclick',row)
-        };
+        var onRowDoubleClicked = function () {
+                var _ref21 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee10(row, event) {
+                        var tree_row, full_row_data, parent_node, doubleClickEvent;
+                        return _regeneratorRuntime.wrap(function _callee10$(_context10) {
+                                while (1) {
+                                        switch (_context10.prev = _context10.next) {
+                                                case 0:
+                                                        console.log('db_cliked_row', row);
+                                                        tree_row = document.getElementById('treeRow-' + row.id);
+
+                                                        if (tree_row) {
+                                                                _context10.next = 15;
+                                                                break;
+                                                        }
+
+                                                        console.log('checkpoint 1', tree_row);
+                                                        full_row_data = Global_State.getNodeDataById(row.id);
+
+                                                        console.log('checkpoint 1.5', full_row_data);
+
+                                                        if (!(full_row_data.global_type === 'folder')) {
+                                                                _context10.next = 14;
+                                                                break;
+                                                        }
+
+                                                        console.log('checkpoint 2', full_row_data);
+
+                                                        parent_node = Global_State.getNodeDataById(full_row_data.parentId);
+                                                        _context10.next = 11;
+                                                        return onRowDoubleClicked(parent_node, '');
+
+                                                case 11:
+                                                        tree_row = document.getElementById('treeRow-' + row.id);
+                                                        _context10.next = 15;
+                                                        break;
+
+                                                case 14:
+                                                        return _context10.abrupt('return');
+
+                                                case 15:
+
+                                                        tree_row.click();
+
+                                                        doubleClickEvent = new MouseEvent("dblclick", {
+                                                                view: window,
+                                                                bubbles: true,
+                                                                cancelable: true
+                                                        });
+
+                                                        doubleClickEvent.is_opening = true;
+
+                                                        // console.log('dbclick_proggggggg', doubleClickEvent, doubleClickEvent.is_opening)
+
+                                                        tree_row.dispatchEvent(doubleClickEvent);
+
+                                                        // Global_State.backend.setCurrentSelectedFolder(row.id)
+                                                        // console.log('dbclick',row)
+
+                                                case 19:
+                                                case 'end':
+                                                        return _context10.stop();
+                                        }
+                                }
+                        }, _callee10, _this);
+                }));
+
+                return function onRowDoubleClicked(_x5, _x6) {
+                        return _ref21.apply(this, arguments);
+                };
+        }();
 
         var handleClick = function handleClick(row, event) {
                 // console.log(row.id, event);
@@ -3315,6 +3518,18 @@ export default function FileTable(_ref) {
 
                 // selectedRowsByClick.current = [row]
         };
+
+        var style = useSpring({
+                from: {
+                        opacity: 0,
+                        transform: 'translate3d(20px,0,0)'
+                },
+                to: {
+                        opacity: 1,
+                        transform: 'translate3d(' + 0 + 'px,0,0)'
+                },
+                delay: 5000
+        });
 
         var rowsStyles = [{
                 when: function when(row) {
@@ -3333,15 +3548,15 @@ export default function FileTable(_ref) {
                 }
         }];
 
-        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref19) {
-                var set = _ref19.set,
-                    filter = _ref19.filter,
-                    node = _ref19.node;
+        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref22) {
+                var set = _ref22.set,
+                    filter = _ref22.filter,
+                    node = _ref22.node;
 
 
-                var FilterComponent = useCallback(function FilterComponent(_ref20) {
-                        var set = _ref20.set,
-                            filter = _ref20.filter;
+                var FilterComponent = useCallback(function FilterComponent(_ref23) {
+                        var set = _ref23.set,
+                            filter = _ref23.filter;
 
                         switch (filter.tag) {
                                 case 'la Date de creation':
@@ -3447,10 +3662,28 @@ export default function FileTable(_ref) {
                         React.createElement(Paste_component, null),
                         React.createElement(
                                 IconButton,
-                                { style: { marginRight: 20 },
+                                {
+                                        style: { marginRight: 20 },
                                         disabled: node.isRoot,
                                         onClick: function onClick(e) {
-                                                e.preventDefault();Global_State.backend.setCurrentSelectedFolder(previousSelected.pop());
+                                                e.preventDefault();
+
+                                                var tree_row = document.getElementById('treeRow-' + node.id);
+
+                                                if (tree_row) {
+                                                        var doubleClickEvent = new MouseEvent("dblclick", {
+                                                                view: window,
+                                                                bubbles: true,
+                                                                cancelable: true
+                                                        });
+                                                        doubleClickEvent.is_opening = false;
+
+                                                        tree_row.dispatchEvent(doubleClickEvent);
+                                                }
+
+                                                // console.log('prrrrrrreeeeeeeeeeev', Global_State.backend.prev.current)
+
+                                                Global_State.backend.setCurrentSelectedFolder(previousSelected.pop());
                                         }
                                 },
                                 node.isRoot ? React.createElement(IoArrowUndoOutline, { size: 25 }) : React.createElement(IoArrowUndoSharp, { size: 25, color: "black" })
@@ -3526,7 +3759,7 @@ export default function FileTable(_ref) {
         console.log('dataaaaaaas', datas);
 
         return React.createElement(
-                'div',
+                animated.div,
                 { className: 'col-xl-8' },
                 React.createElement(
                         'div',
@@ -3550,9 +3783,9 @@ export default function FileTable(_ref) {
                         , selectableRowSelected: function selectableRowSelected(row) {
                                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                         },
-                        onSelectedRowsChange: function onSelectedRowsChange(_ref21) {
-                                var selectedCount = _ref21.selectedCount,
-                                    selectedRows = _ref21.selectedRows;
+                        onSelectedRowsChange: function onSelectedRowsChange(_ref24) {
+                                var selectedCount = _ref24.selectedCount,
+                                    selectedRows = _ref24.selectedRows;
                                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                         },
                         clearSelectedRows: Global_State.toggleCleared,

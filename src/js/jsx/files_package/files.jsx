@@ -99,6 +99,10 @@ export default function useGetFiles(Global_research) {
 
 function FileTree({data}) {
 
+        // console.log('data111111', data)
+        //
+        // data = [...data].filter( node_data => ( node_data.global_type === 'folder' ) )
+
         const tree = useRef()
 
         const [expanded, setExpanded] = useState(['0'])
@@ -163,35 +167,51 @@ function FileTree({data}) {
 
         const Label = ({node}) =>
         {
-                // let icon
-                // expanded.forEach(element => {
-
-                // });
-                // const expended = useRef(['0'])
-
-                const item = useRef()
                 const [isOpen, setIsOpen] = useState((expanded.indexOf(node.id) !== -1))
 
                 const handleDbClick = e =>
                 {
+                        // console.log('db_eeeeeeeeeeeeeevent', e, e.nativeEvent.is_opening)
+
                         if(e) e.stopPropagation();
-                        item.current.click();
 
-                        // console.log(item);
-                        let t = expanded
-                        if(expanded.indexOf(node.id.toString()) !== -1)
-                        {
-                                t.splice(expanded.indexOf(node.id.toString()), 1)
-                                setIsOpen(false)
-                        }
-                        else
-                        {
-                                t.push(node.id)
-                                setIsOpen(true)
-                        }
-                        // console.log(t);
+                        const force_open = e ? e.nativeEvent.is_opening : undefined
+                        // console.log('db_eeeeeeeeeeeeeevent force_state', force_state)
+                        // if (force_open !== false) tree_row.click();
 
-                        setExpanded( t )
+                        const [ open, close ] =
+                        [
+                                () =>
+                                {
+                                        expanded.push(node.id)
+                                        setIsOpen(true)
+                                },
+                                () =>
+                                {
+                                        expanded.splice(expanded.indexOf(node.id.toString()), 1)
+                                        setIsOpen(false)
+                                },
+                        ]
+
+                        if (force_open === undefined)
+                        {
+                                if(expanded.find( id => id === node.id.toString() )) close()
+                                else open()
+                        }
+                        else if (force_open && !isOpen) open()
+                        else if (!force_open && isOpen) close()
+
+
+
+                        console.log(expanded);
+
+                        setExpanded( [...expanded] )
+                }
+
+                const handleClick = e =>
+                {
+                        if(e) e.stopPropagation();
+                        Global_State.backend.setCurrentSelectedFolder(node.id)
                 }
 
 
@@ -208,10 +228,10 @@ function FileTree({data}) {
                 )
 
                 return (
-                <div ref = {item} onDoubleClick = { handleDbClick } >
-        <span className = 'mr-1'  >
-          {isOpen ? <FcOpenedFolder size={28} />:<FcFolder size={28} />}
-        </span>
+                <div id={`treeRow-${node.id}`} onClick={ handleClick } onDoubleClick = { handleDbClick } >
+                        <span className = 'mr-1'  >
+                                {isOpen ? <FcOpenedFolder size={28} />:<FcFolder size={28} />}
+                        </span>
                         {node.name}
                 </div>
                 )
@@ -219,33 +239,44 @@ function FileTree({data}) {
 
 
         const RenderTree = useCallback(
-        function RenderTree({nodes})
+        function RenderTree({node})
         {
                 // console.log(tree.current.expanded)
 
                 return (
-                <StyledTreeItem key={nodes.id} nodeId={nodes.id.toString()} label={<Label node = {nodes} />}
-                                expandIcon = {<ChevronRightIcon onClick = { e => { Global_State.EventsManager.emit(`toggle${nodes.id}`, e) } } />}
-                                collapseIcon = {<ExpandMoreIcon onClick = { e => { Global_State.EventsManager.emit(`toggle${nodes.id}`, e) } } />}
+                <StyledTreeItem key={node.id} nodeId={node.id.toString()} label={useMemo( () => <Label node = {node} />, [] )}
+                                expandIcon = {<ChevronRightIcon onClick = { e => { Global_State.EventsManager.emit(`toggle${node.id}`, e) } } />}
+                                collapseIcon = {<ExpandMoreIcon onClick = { e => { Global_State.EventsManager.emit(`toggle${node.id}`, e) } } />}
                 >
-                        {Array.isArray(nodes.children)
-                        ? nodes.children.map((node) => <RenderTree key={node.id} nodes = {node} /> )
-                        : null}
+                        {
+                                Array.isArray(node.children) ?
+                                node.children.filter( node => ( node.global_type === 'folder' ) ).map((node) => <RenderTree key={node.id} node = {node} /> )
+                                : null
+                        }
                 </StyledTreeItem>
                 );
         },[]
         )
 
 
-        const handleFocus = (event, nodeId) =>
+        // const handleFocus = (event) =>
+        // {
+        //         event.preventDefault()
+        //         event.stopPropagation()
+        //         console.log( 'foooooooooooooooooooooooooooooooocuuuuuuuuuuuuuuuuuuuuuus', event )
+        //         // Global_State.backend.setCurrentSelectedFolder(nodeId)
+        //
+        //         // setExpanded( [nodeId] )
+        // }
+
+        console.log('data22222', data)
+
+        useEffect(
+        () =>
         {
-
-                Global_State.backend.setCurrentSelectedFolder(nodeId)
-
-                // setExpanded( [nodeId] )
-        }
-
-        console.log(data)
+                console.log('expand_change', expanded)
+        }, [expanded]
+        )
 
         return (
         <TreeView
@@ -256,12 +287,10 @@ function FileTree({data}) {
         defaultExpandIcon={<ChevronRightIcon />}
         sx={{ height: 'max-content', flexGrow: 1, width: 'max-content', overflowY: 'auto' }}
         expanded={expanded}
-        // onNodeToggle = { e => { console.log(e); } }
-        onNodeFocus = {handleFocus}
         multiSelect
         ref={tree}
         >
-                <RenderTree nodes = {data} />
+                <RenderTree node = {data} />
         </TreeView>
         );
 }

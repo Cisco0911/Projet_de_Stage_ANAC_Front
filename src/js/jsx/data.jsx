@@ -19,6 +19,7 @@ import Button from 'react-bootstrap/Button';
 import toast from "react-hot-toast";
 import {Box, Popper} from "@mui/material";
 import {Queue} from "@mui/icons-material";
+import {useSpring, animated} from "react-spring";
 
 window.Pusher = require('pusher-js');
 
@@ -679,7 +680,7 @@ export default function useGetData(TheDatas)
         Data_Base.data.ds = Data_Base.data.ds.filter((element) => { return haveRightToSee(element.services, Data_Base.authUser.services) }).map((visibleElement) => {return visibleElement})
         Data_Base.data.fs = Data_Base.data.fs.filter((element) => { return haveRightToSee(element.services, Data_Base.authUser.services) }).map((visibleElement) => {return visibleElement})
 
-        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, isClosed, review_date, created_at, level, section_id, taille, url)
+        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, isClosed, review_date, created_at, level, section_id, taille, url, is_validated, validator_id)
         {
 
 
@@ -691,6 +692,8 @@ export default function useGetData(TheDatas)
                         section_id,
                         name,
                         type,
+                        is_validated,
+                        validator_id,
                         taille,
                         level,
                         created_at,
@@ -1173,6 +1176,8 @@ export default function useGetData(TheDatas)
                                         d.section_id,
                                         undefined,
                                         undefined,
+                                        d.is_validated,
+                                        d.validator_id
                                 )
                         )
                 }
@@ -1250,6 +1255,8 @@ export default function useGetData(TheDatas)
                                 parseInt(node.section_id),
                                 type === 'f' ? node.size : undefined,
                                 type === 'f' ? node.url : undefined,
+                                node.is_validated,
+                                node.validator_id
                         )
                 }
 
@@ -1759,6 +1766,15 @@ export default function useGetData(TheDatas)
 
                         }, [])
 
+                        // const popperAnimation = useSpring({
+                        //         from: { transform: 'translate3d(0, -20px, 0)'},
+                        //         to: { transform: 'translate3d(0, 0, 0)' },
+                        //         config: { duration: 200},
+                        //         // pause: to_delay === 3,
+                        //         reset: true,
+                        //         loop: true,
+                        // });
+
                         return (
                                 <div onMouseEnter={handleEnter} onMouseLeave={handleLeave} >
                                         {icon}
@@ -1798,7 +1814,7 @@ export default function useGetData(TheDatas)
                 }
         )
 
-        const [selectedNodeIdsInSections, updateSNIdIS] = useState(initSelectedNodes)
+        const selectedNodeIdsInSections = useRef(initSelectedNodes)
 
         const sizeFormater = (size, fix = true, unit = "Bytes") =>
         {
@@ -2032,7 +2048,6 @@ export default function useGetData(TheDatas)
                         FetchedNodesData: structuredData,
                         // setFnd,
                         selectedNodeIdsInSections,
-                        updateSNIdIS,
                         getCurrentSection,
                         sizeFormater,
                         identifyNode,

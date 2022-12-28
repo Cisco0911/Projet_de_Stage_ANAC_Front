@@ -36,6 +36,9 @@ import DatePicker from "react-datepicker";
 import Stack from "@mui/material/Stack";
 import {IconButton, Tooltip} from "@mui/material";
 
+import { useSpring, animated } from 'react-spring';
+import {FormCheck} from "react-bootstrap";
+import useCustomCheckBox, {CheckBox1} from "../custom_checkBox/custom_check";
 
 let previousSelected = []
 
@@ -1101,109 +1104,141 @@ export default function FileTable({set})
                                 const handleSubmit = (submittedInfo) => {
                                         console.log(submittedInfo)
 
-                                        let queryBody = new FormData()
+                                        const check_feasibility = (debut, fin, nonC_id) =>
+                                        {
+                                                const nonC = Global_State.getNodeDataById(nonC_id)
+                                                const audit = Global_State.getNodeDataById(nonC.parentId)
 
+                                                // const existing_fncs = Global_State.getChildrenById(Global_State.value, nonC_id)
 
-                                        const service =  submittedInfo.services[0].label
+                                                for (let i = debut; i < fin+1; i++)
+                                                {
+                                                        if ( Global_State.value.find( node => node.path === `${nonC.path}\\FNC-${audit.name}-${i}` ) ) return false
+                                                }
+                                                return true
+                                        }
 
-                                        queryBody.append("nonC_id", parseInt(node.id.substring(4)))
-                                        queryBody.append("services", JSON.stringify(submittedInfo.services))
-                                        queryBody.append("debut", submittedInfo.debut)
-                                        queryBody.append("fin", submittedInfo.fin)
-                                        queryBody.append("level", submittedInfo.level)
-
-
-                                        // console.log("services", queryBody.get("services"))
-                                        // console.log("nc_id", queryBody.get("nonC_id"))
-                                        // console.log("debut", queryBody.get("debut"))
-                                        // console.log("fin", queryBody.get("fin"))
-
-                                        if(!Global_State.isEditorMode)
+                                        if ( check_feasibility( parseInt(submittedInfo.debut), parseInt(submittedInfo.fin), node.id ) )
                                         {
 
-                                                Global_State.modalManager.setContent(Global_State.spinnerManager.spinner)
+                                                let queryBody = new FormData()
 
 
-                                                http.post('add_fncs', queryBody)
+                                                const service =  submittedInfo.services[0].label
 
-                                                // Handle the response from backend here
-                                                .then((res) =>
+                                                queryBody.append("nonC_id", parseInt(node.id.substring(4)))
+                                                queryBody.append("services", JSON.stringify(submittedInfo.services))
+                                                queryBody.append("debut", submittedInfo.debut)
+                                                queryBody.append("fin", submittedInfo.fin)
+                                                queryBody.append("level", submittedInfo.level)
+
+
+                                                // console.log("services", queryBody.get("services"))
+                                                // console.log("nc_id", queryBody.get("nonC_id"))
+                                                // console.log("debut", queryBody.get("debut"))
+                                                // console.log("fin", queryBody.get("fin"))
+
+                                                if(!Global_State.isEditorMode)
                                                 {
-                                                        // console.log(res)
-                                                        if(res.status === 201)
+
+                                                        Global_State.modalManager.setContent(Global_State.spinnerManager.spinner)
+
+
+                                                        http.post('add_fncs', queryBody)
+
+                                                        // Handle the response from backend here
+                                                        .then((res) =>
                                                         {
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "FNC ajouté avec success !",
-                                                                        icon: "success",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data === "existAlready")
-                                                        {
-                                                                swal({
-                                                                        title: "FIN!",
-                                                                        text: "FNC existant !",
-                                                                        icon: "info",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data === "Something went wrong !")
-                                                        {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data,
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.setContent(<FNCs_form/>)
-                                                        }
-                                                        else if(res.status === 200 && res.data.msg === "storingError")
-                                                        {
-                                                                swal({
-                                                                        title: "ERROR!",
-                                                                        text: res.data.value,
-                                                                        icon: "error",
-                                                                });
-                                                                Global_State.modalManager.close_modal()
-                                                        }
-                                                        else if(res.status === 200 && res.data.msg === 'catchException')
-                                                        {
+                                                                console.log(res)
+
+                                                                if (res.data.statue === 'success')
+                                                                {
+                                                                        if (res.data.data.existing_fnc)
+                                                                        {
+                                                                                swal({
+                                                                                        title: "FIN!",
+                                                                                        text: "Certains FNC sont existants ou possède le mm chemin !\n" + JSON.stringify(res.data.data.existing_fnc),
+                                                                                        icon: "info",
+                                                                                });
+                                                                                Global_State.modalManager.close_modal()
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                                swal({
+                                                                                        title: "FIN!",
+                                                                                        text: "Dossier ajouté avec success !",
+                                                                                        icon: "success",
+                                                                                });
+                                                                                Global_State.modalManager.close_modal()
+                                                                        }
+                                                                }
+                                                                else
+                                                                {
+                                                                        switch (res.data.data.code)
+                                                                        {
+                                                                                case 1:
+                                                                                {
+                                                                                        swal({
+                                                                                                title: "ERROR!",
+                                                                                                text: res.data.data.msg,
+                                                                                                icon: "error",
+                                                                                        });
+                                                                                        Global_State.modalManager.setContent(<FNCs_form/>)
+                                                                                        break
+                                                                                }
+                                                                                default:
+                                                                                {
+                                                                                        swal({
+                                                                                                title: "ERROR!",
+                                                                                                text: res.data.data.msg,
+                                                                                                icon: "error",
+                                                                                        });
+                                                                                        Global_State.modalManager.setContent(<FNCs_form/>)
+                                                                                        break
+                                                                                }
+                                                                        }
+                                                                }
+
+
+                                                        })
+
+                                                        // Catch errors if any
+                                                        .catch((err) => {
+                                                                console.log(err)
+                                                                let msg
+                                                                if(err.response.status === 500) msg = "erreur interne au serveur"
+                                                                else if(err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page"
                                                                 swal({
                                                                         title: "ERREUR!",
-                                                                        text: res.data.value.errorInfo[2],
+                                                                        text: err.response.data.message + "\n" + msg,
                                                                         icon: "error",
                                                                 });
-                                                                // console.log(res)
                                                                 Global_State.modalManager.setContent(<FNCs_form/>)
-                                                        }
-                                                        else console.log(res)
-                                                })
+                                                        })
+                                                }
+                                                else
+                                                {
+                                                        console.log('editorHandle fnc')
 
-                                                // Catch errors if any
-                                                .catch((err) => {
-                                                        console.log(err)
-                                                        let msg
-                                                        if(err.response.status === 500) msg = "erreur interne au serveur"
-                                                        else if(err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page"
-                                                        swal({
-                                                                title: "ERREUR!",
-                                                                text: err.response.data.message + "\n" + msg,
-                                                                icon: "error",
-                                                        });
-                                                        Global_State.modalManager.setContent(<FNCs_form/>)
-                                                })
+                                                        queryBody.set('front_parent_type', node.type)
+                                                        Global_State.editor.fnc.add(queryBody)
+
+                                                        Global_State.modalManager.close_modal()
+                                                }
+
+                                                // console.log(queryBody.get("name"))
                                         }
                                         else
                                         {
-                                                console.log('editorHandle fnc')
+                                                console.log('not feasible')
 
-                                                queryBody.set('front_parent_type', node.type)
-                                                Global_State.editor.fnc.add(queryBody)
-
+                                                swal({
+                                                        title: "ERROR!",
+                                                        text: 'La plage de génération contient des numéros de FNC existant !',
+                                                        icon: "warning",
+                                                });
                                                 Global_State.modalManager.close_modal()
                                         }
-
-                                        // console.log(queryBody.get("name"))
                                 };
 
                                 const [min, setMin] = useState(1)
@@ -1270,13 +1305,13 @@ export default function FileTable({set})
                                                         <Form.Group className="mb-3" onClick = { () => { if(!enableEnd) toast.error('Veuillez renseigner le debut d’abord', { position: 'top-center', } ) } } >
                                                                 <Form.Label>Fin</Form.Label>
                                                                 <Form.Control
-                                                                disabled = {!enableEnd}
-                                                                name="fin"
-                                                                value={formik.values.fin}
-                                                                onChange={formik.handleChange}
-                                                                type="number"
-                                                                placeholder="Ex: 147"
-                                                                isInvalid={!!formik.errors.fin}
+                                                                        disabled = {!enableEnd}
+                                                                        name="fin"
+                                                                        value={formik.values.fin}
+                                                                        onChange={formik.handleChange}
+                                                                        type="number"
+                                                                        placeholder="Ex: 147"
+                                                                        isInvalid={!!formik.errors.fin}
                                                                 />
                                                                 <Form.Control.Feedback type="invalid">
                                                                         {formik.errors.fin}
@@ -1284,6 +1319,7 @@ export default function FileTable({set})
                                                         </Form.Group>
                                                 </Col>
                                         </Row>
+
                                         <Form.Group className="mb-3" >
                                                 <Form.Label>Niveau des FNCs à générer</Form.Label>
                                                 <Form.Control
@@ -1390,7 +1426,7 @@ export default function FileTable({set})
                                                                 {
                                                                         swal({
                                                                                 title: "FIN!",
-                                                                                text: "Certains fichiers son existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.data.list),
+                                                                                text: "Certains fichiers sont existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.data.list),
                                                                                 icon: "info",
                                                                         });
                                                                         Global_State.modalManager.close_modal()
@@ -2347,6 +2383,98 @@ export default function FileTable({set})
                         )
                 }
 
+                const ValidBadge = ({data}) =>
+                {
+                        const [checked, check] = useState(false)
+
+                        function handleClick(e)
+                        {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                console.log(e)
+
+                                const [id, model] = Global_State.identifyNode(data)
+                                // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
+
+                                const query = new FormData;
+                                query.append('id', id)
+                                query.append('update_object', 'is_validated')
+                                query.append('new_value', data.is_validated ? 0 : 1)
+                                query.append('additional_info', JSON.stringify( {} ))
+
+                                let route
+
+                                switch (model)
+                                {
+                                        case 'App\\Models\\Section':
+                                                break
+                                        case 'App\\Models\\Audit':
+                                                break
+                                        case 'App\\Models\\checkList':
+                                                break
+                                        case 'App\\Models\\DossierPreuve':
+                                                break
+                                        case 'App\\Models\\Nc':
+                                                break
+                                        case 'App\\Models\\NonConformite':
+                                                break
+                                        case 'App\\Models\\DossierSimple':
+                                                route = 'update_folder'
+                                                break
+                                        case 'App\\Models\\Fichier':
+                                                break
+                                        default:
+                                                return null
+
+                                }
+
+                                if(!Global_State.isEditorMode)
+                                {
+                                        const update = async () =>
+                                        {
+
+                                                await http.post(`${route}`, query)
+                                                .then( res => {
+                                                        console.log(res)
+                                                } )
+                                                .catch(err => { console.log(err); throw err })
+                                        }
+
+                                        // console.log(selectedRow[0].id.substring(2))
+                                        toast.promise(
+                                        update(),
+                                        {
+                                                loading: 'Validation...',
+                                                success: 'Validation achevé',
+                                                error: 'err'
+                                        }
+
+                                        )
+                                }
+                                else
+                                {
+                                        // Global_State.editor.folder.update(query)
+                                }
+
+
+                        }
+
+                        const checkBox_package = useCustomCheckBox()
+
+                        return (
+                                <div className={'d-flex align-items-center justify-content-center'} style={{ width: 40, height: 30 }} onClick={ handleClick } >
+                                        <checkBox_package.CheckBox1
+                                                id={data.id}
+                                                color={'#14cc2e'}
+                                                style={ { margin: 0, borderRadius: '75%' } }
+                                                checked={data.is_validated}
+                                                // onChange={ handleClick }
+                                        />
+                                </div>
+                        );
+                }
+
                 for(let child_node of node.children )
                 {
                         // console.log('child_node.id', child_node)
@@ -2368,6 +2496,7 @@ export default function FileTable({set})
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
                                         review_date: data.review_date === undefined ? '' : <ReviewDateComponent data={data} />,
+                                        valid_badge: <ValidBadge data={data} />
 
                                 }
                         )
@@ -2433,99 +2562,93 @@ export default function FileTable({set})
 
         const columns = useMemo(() =>
         {
-                let columns_of_the_type
+                const columns_of_the_type =
+                [
+                        {
+                                name: '',
+                                selector: row => row.valid_badge,
+                                sortable: false,
+                                width: "11%"
+                        },
+                        {
+                                name: 'NOM',
+                                selector: row => row.name,
+                                sortable: true,
+                                sortFunction: sortByName,
+                        },
+                ]
 
                 if (node.type === "root" && contain_audit) {
-                        columns_of_the_type =
-                        [
-                                {
-                                        name: 'NOM',
-                                        selector: row => row.name,
-                                        sortable: true,
-                                        sortFunction: sortByName,
-                                },
-                                {
-                                        name: 'CREE LE',
-                                        selector: row => row.created_at,
-                                        sortable: true,
-                                        width: "30%"
-                                },
-                                {
-                                        name: 'RA',
-                                        selector: row => row.RA,
-                                        sortable: true,
-                                        width: "20%"
-                                },
+                        columns_of_the_type.push(
+                                ...[
+                                        {
+                                                name: 'CREE LE',
+                                                selector: row => row.created_at,
+                                                sortable: true,
+                                                width: "30%"
+                                        },
+                                        {
+                                                name: 'RA',
+                                                selector: row => row.RA,
+                                                sortable: true,
+                                                width: "20%"
+                                        },
 
-                        ]
+                                ]
+                        )
                 }
                 else if (node.type === "audit") {
-                        columns_of_the_type =
-                        [
-                                {
-                                        name: 'NOM',
-                                        selector: row => row.name,
-                                        sortable: true,
-                                        sortFunction: sortByName,
-                                },
-                                {
-                                        name: 'RA',
-                                        selector: row => row.RA,
-                                        sortable: true,
-                                },
+                        columns_of_the_type.push(
+                                ...[
+                                        {
+                                                name: 'RA',
+                                                selector: row => row.RA,
+                                                sortable: true,
+                                        },
 
-                        ]
+                                ]
+                        )
                 }
                 else if(node.type === "nonC") {
-                        columns_of_the_type =
-                        [
-                                {
-                                        name: 'NOM',
-                                        selector: row => row.name,
-                                        sortable: true,
-                                        sortFunction: sortByName,
-                                },
-                                {
-                                        name: 'NIVEAU',
-                                        selector: row => row.level,
-                                        sortable: true,
-                                        sortFunction: sortByLevel,
-                                        width: "11%"
-                                },
-                                {
-                                        name: 'DATE DE REVISION',
-                                        selector: row => row.review_date,
-                                        sortable: true,
-                                        width: "22%"
-                                },
-                                {
-                                        name: 'STATUE',
-                                        selector: row => row.isClosed,
-                                        width: "16%"
-                                },
+                        columns_of_the_type.push(
+                                ...[
+                                        {
+                                                name: 'NIVEAU',
+                                                selector: row => row.level,
+                                                sortable: true,
+                                                sortFunction: sortByLevel,
+                                                width: "11%"
+                                        },
+                                        {
+                                                name: 'DATE DE REVISION',
+                                                selector: row => row.review_date,
+                                                sortable: true,
+                                                width: "22%"
+                                        },
+                                        {
+                                                name: 'STATUE',
+                                                selector: row => row.isClosed,
+                                                width: "16%"
+                                        },
 
-                        ]
+                                ]
+                        )
                 }
-                else columns_of_the_type =
-                        [
-                                {
-                                        name: 'NOM',
-                                        selector: row => row.name,
-                                        sortable: true,
-                                        sortFunction: sortByName,
-                                },
-                                {
-                                        name: 'CREE LE',
-                                        selector: row => row.created_at,
-                                        sortable: true,
-                                },
-                                {
-                                        name: 'TAILLE',
-                                        selector: row => row.size,
-                                        sortable: true,
-                                },
+                else columns_of_the_type.push(
+                                ...[
+                                        {
+                                                name: 'CREE LE',
+                                                selector: row => row.created_at,
+                                                sortable: true,
+                                        },
+                                        {
+                                                name: 'TAILLE',
+                                                selector: row => row.size,
+                                                sortable: true,
+                                        },
 
-                        ]
+                                ]
+                        )
 
                 return columns_of_the_type
         },
@@ -2645,10 +2768,44 @@ export default function FileTable({set})
         }, [selectedRow]
         )
 
-        const onRowDoubleClicked = (row, event) =>
+        const onRowDoubleClicked =
+         async (row, event) =>
         {
-                Global_State.backend.setCurrentSelectedFolder(row.id)
+                console.log('db_cliked_row', row)
+                let tree_row = document.getElementById(`treeRow-${row.id}`)
+
+                if (!tree_row)
+                {
+                        console.log('checkpoint 1', tree_row)
+                        const full_row_data = Global_State.getNodeDataById(row.id)
+                        console.log('checkpoint 1.5', full_row_data)
+                        if (full_row_data.global_type === 'folder')
+                        {
+                                console.log('checkpoint 2', full_row_data)
+
+                                const parent_node = Global_State.getNodeDataById(full_row_data.parentId)
+                                await onRowDoubleClicked(parent_node, '')
+                                tree_row = document.getElementById(`treeRow-${row.id}`)
+                        }
+                        else return
+                }
+
+                tree_row.click()
+
+                const doubleClickEvent = new MouseEvent("dblclick", {
+                        view: window,
+                        bubbles: true,
+                        cancelable: true,
+                });
+                doubleClickEvent.is_opening = true
+
+                // console.log('dbclick_proggggggg', doubleClickEvent, doubleClickEvent.is_opening)
+
+                tree_row.dispatchEvent(doubleClickEvent);
+
+                // Global_State.backend.setCurrentSelectedFolder(row.id)
                 // console.log('dbclick',row)
+
         }
 
         const handleClick = (row, event) =>
@@ -2662,7 +2819,17 @@ export default function FileTable({set})
                 // selectedRowsByClick.current = [row]
         }
 
-
+        const style = useSpring({
+                from: {
+                        opacity: 0,
+                        transform: 'translate3d(20px,0,0)',
+                },
+                to: {
+                        opacity: 1,
+                        transform: `translate3d(${0}px,0,0)`,
+                },
+                delay:5000
+        });
 
         const rowsStyles =
         [
@@ -2770,9 +2937,33 @@ export default function FileTable({set})
                         return (
                         <div className={'d-flex flex-row align-items-end'} >
                                 <Paste_component />
-                                <IconButton  style = {{ marginRight: 20, }}
-                                             disabled={node.isRoot}
-                                             onClick={ (e) => { e.preventDefault(); Global_State.backend.setCurrentSelectedFolder(previousSelected.pop()) } }
+                                <IconButton
+                                        style = {{ marginRight: 20, }}
+                                        disabled={node.isRoot}
+                                        onClick={
+                                                (e) =>
+                                                {
+                                                        e.preventDefault();
+
+                                                        const tree_row = document.getElementById(`treeRow-${node.id}`)
+
+                                                        if (tree_row)
+                                                        {
+                                                                const doubleClickEvent = new MouseEvent("dblclick", {
+                                                                        view: window,
+                                                                        bubbles: true,
+                                                                        cancelable: true,
+                                                                });
+                                                                doubleClickEvent.is_opening = false
+
+                                                                tree_row.dispatchEvent(doubleClickEvent);
+                                                        }
+
+                                                        // console.log('prrrrrrreeeeeeeeeeev', Global_State.backend.prev.current)
+
+                                                        Global_State.backend.setCurrentSelectedFolder(previousSelected.pop())
+                                                }
+                                        }
                                 >
                                         {
                                                 node.isRoot ?
@@ -2872,9 +3063,8 @@ export default function FileTable({set})
 
         console.log('dataaaaaaas', datas)
 
-
         return (
-        <div className="col-xl-8">
+        <animated.div className="col-xl-8" >
                 <div className="content-title mt-0">
                         <h4>{node.name}</h4>
                 </div>
@@ -2921,7 +3111,7 @@ export default function FileTable({set})
                 sortIcon = {<FaSort size={10} />}
                 defaultSortFieldId = {1}
                 />
-        </div>
+        </animated.div>
         )
 }
 

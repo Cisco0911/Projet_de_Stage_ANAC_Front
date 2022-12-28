@@ -27,6 +27,7 @@ import Button from 'react-bootstrap/Button';
 import toast from "react-hot-toast";
 import { Box, Popper } from "@mui/material";
 import { Queue } from "@mui/icons-material";
+import { useSpring, animated } from "react-spring";
 
 window.Pusher = require('pusher-js');
 
@@ -812,7 +813,7 @@ export default function useGetData(TheDatas) {
                 return visibleElement;
         });
 
-        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, isClosed, review_date, created_at, level, section_id, taille, url) {
+        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, isClosed, review_date, created_at, level, section_id, taille, url, is_validated, validator_id) {
 
                 return {
                         id: id,
@@ -822,6 +823,8 @@ export default function useGetData(TheDatas) {
                         section_id: section_id,
                         name: name,
                         type: type,
+                        is_validated: is_validated,
+                        validator_id: validator_id,
                         taille: taille,
                         level: level,
                         created_at: created_at,
@@ -1587,7 +1590,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator25 = ds[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
                                 var d = _step25.value;
 
-                                allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19), undefined, d.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19), undefined, d.section_id, undefined, undefined, d.is_validated, d.validator_id));
                         }
 
                         // console.log("DataFormater", allDataAsNodeData)
@@ -1681,7 +1684,7 @@ export default function useGetData(TheDatas) {
                         }
 
                         return makeNodeData(type + node.id, type === 'f' ? 'file' : 'folder', node.services, false, node.name, type, false, parentId, undefined, type !== 'f', type === 'f' ? node.extension : undefined, node.user, type === 'fnc' ? node.isClosed : undefined, type === 'fnc' ? node.review_date : undefined, node.created_at, //
-                        type === 'fnc' ? node.level : undefined, parseInt(node.section_id), type === 'f' ? node.size : undefined, type === 'f' ? node.url : undefined);
+                        type === 'fnc' ? node.level : undefined, parseInt(node.section_id), type === 'f' ? node.size : undefined, type === 'f' ? node.url : undefined, node.is_validated, node.validator_id);
                 }
 
                 function supress_from_list(qualified_id, list_of_data) {
@@ -2329,6 +2332,15 @@ export default function useGetData(TheDatas) {
                         };
                 }, []);
 
+                // const popperAnimation = useSpring({
+                //         from: { transform: 'translate3d(0, -20px, 0)'},
+                //         to: { transform: 'translate3d(0, 0, 0)' },
+                //         config: { duration: 200},
+                //         // pause: to_delay === 3,
+                //         reset: true,
+                //         loop: true,
+                // });
+
                 return React.createElement(
                         "div",
                         { onMouseEnter: handleEnter, onMouseLeave: handleLeave },
@@ -2367,10 +2379,7 @@ export default function useGetData(TheDatas) {
                 initSelectedNodes.set(sct.id, '0');
         });
 
-        var _useState19 = useState(initSelectedNodes),
-            _useState20 = _slicedToArray(_useState19, 2),
-            selectedNodeIdsInSections = _useState20[0],
-            updateSNIdIS = _useState20[1];
+        var selectedNodeIdsInSections = useRef(initSelectedNodes);
 
         var sizeFormater = function sizeFormater(size) {
                 var fix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
@@ -2557,7 +2566,7 @@ export default function useGetData(TheDatas) {
         //   }, [ref]);
         // }
 
-        var _useState21 = useState({
+        var _useState19 = useState({
                 style: {
                         display: 'none',
                         position: 'fixed',
@@ -2571,9 +2580,9 @@ export default function useGetData(TheDatas) {
                         // pointerEvents: 'none',
                         // opacity: 0.5,
                 } }),
-            _useState22 = _slicedToArray(_useState21, 2),
-            Overlay_props = _useState22[0],
-            setOverlay_props = _useState22[1];
+            _useState20 = _slicedToArray(_useState19, 2),
+            Overlay_props = _useState20[0],
+            setOverlay_props = _useState20[1];
 
         var Overlay_component = React.createElement("div", Object.assign({}, Overlay_props, { onClick: function onClick(e) {
                         e.stopPropagation();
@@ -2616,7 +2625,6 @@ export default function useGetData(TheDatas) {
                 FetchedNodesData: structuredData,
                 // setFnd,
                 selectedNodeIdsInSections: selectedNodeIdsInSections,
-                updateSNIdIS: updateSNIdIS,
                 getCurrentSection: getCurrentSection,
                 sizeFormater: sizeFormater,
                 identifyNode: identifyNode,

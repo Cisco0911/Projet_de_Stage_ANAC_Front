@@ -24,6 +24,7 @@ import {MdNotificationsActive} from "react-icons/md";
 import Button from 'react-bootstrap/Button';
 import Divider from "@mui/material/Divider";
 import {Chip} from "@mui/material";
+import {useSpring, animated} from "react-spring";
 
 
 let readNotifs = []
@@ -591,6 +592,44 @@ function useOpen(init_val)
         )
 }
 
+function RingingBell({icon})
+{
+        const [reverse, set] = useState(false)
+        const [to_delay, setD] = useState(0)
+
+        // Define the animation
+        const ringingAnimation = useSpring({
+                from: { transform: 'scale(1)'},
+                to: { transform: 'scale(1.3)' },
+                config: { duration: 200},
+                // pause: to_delay === 3,
+                reset: true,
+                loop: true,
+                reverse,
+                onRest: () => { set(!reverse) }
+        });
+
+        // Use the useEffect hook to run the animation repeatedly
+        // useEffect(() => {
+        //   const interval = setInterval(() => {
+        //     ringingAnimation.start();
+        //   }, 1000);
+        //   return () => clearInterval(interval);
+        // }, []);
+
+        return (
+        <animated.div style={
+                {
+                        width: 'fit-content',
+                        height: 'fit-content',
+                        ...ringingAnimation
+                }
+        }>
+                {icon}
+        </animated.div>
+        );
+}
+
 export default function Notifications()
 {
 
@@ -607,11 +646,14 @@ export default function Notifications()
 
         const notifButton = (
                 count ?
-                <IconButton aria-label="notification" style={{ width: 36, height: 36, }} >
-                        <StyledBadge badgeContent={count} color="primary">
-                                <MdNotificationsActive color='#cd0606' size={30} />
-                        </StyledBadge>
-                </IconButton>
+                <RingingBell icon={
+                        <IconButton aria-label="notification" style={{ width: 36, height: 36, }} >
+                                <StyledBadge badgeContent={count} color="primary">
+                                        <MdNotificationsActive color='#cd0606' size={30} />
+                                </StyledBadge>
+                        </IconButton>
+                } />
+
                 :
                 <IconButton aria-label="notification" style={{ width: 36, height: 36, }} >
                         <StyledBadge badgeContent={count} color="primary">
@@ -627,17 +669,30 @@ export default function Notifications()
 
 
 
-        const renderingComponent = count ? (
-        <List id={'notifRenderingComponent'} >
-                {operationNotifs}
-                {unreadReviewNotifs}
-                <Divider textAlign="left"> LU </Divider>
-                {readReviewNotifs}
-        </List>
-        ):
-        (<div id={'notifRenderingComponent'} className='d-flex justify-content-center align-items-center' >
-                Vide 😢
-        </div>)
+        let renderingComponent
+
+        if (count)
+        {
+                renderingComponent = <List id={'notifRenderingComponent'} >
+                        {operationNotifs}
+                        {unreadReviewNotifs}
+                        <Divider textAlign="left"> LU </Divider>
+                        {readReviewNotifs}
+                </List>
+        }
+        else if (readReviewNotifs.length)
+        {
+                renderingComponent = <List id={'notifRenderingComponent'} >
+                        <Divider textAlign="left"> LU </Divider>
+                        {readReviewNotifs}
+                </List>
+        }
+        else
+        {
+                renderingComponent = <div id={'notifRenderingComponent'} className='d-flex justify-content-center align-items-center' >
+                        Vide 😢
+                </div>
+        }
 
         // const [isVisible, observe, disconect] = useOnScreen(document.querySelector('#root'))
 

@@ -63,6 +63,8 @@ import { Toaster } from "react-hot-toast";
 import EventEmitter from 'eventemitter3';
 import zIndex from "@mui/material/styles/zIndex";
 
+import useCustomCheckBox from './custom_checkBox/custom_check';
+
 export var test = "Success";
 
 export var Global_State = {};
@@ -70,66 +72,23 @@ export var Global_State = {};
 function Lol(_ref) {
         var lal = _ref.lal;
 
-        var EventsManager = new EventEmitter();
-
-        var _useState = useState([2, 6, 9, 7, 3]),
+        var _useState = useState(true),
             _useState2 = _slicedToArray(_useState, 2),
             o = _useState2[0],
             setO = _useState2[1];
 
-        var _useState3 = useState('p'),
-            _useState4 = _slicedToArray(_useState3, 2),
-            p = _useState4[0],
-            setP = _useState4[1];
-
-        function usela(g) {
-                return setP;
-        }
-
-        function emit() {
-
-                console.log('dddddddd');
-                EventsManager.emit('p');
-        }
-
-        function reducer(state, action) {
-                return [action];
-        }
-
-        var _useReducer = useReducer(reducer, ['89']),
-            _useReducer2 = _slicedToArray(_useReducer, 2),
-            h = _useReducer2[0],
-            dispatch = _useReducer2[1];
-
-        EventsManager.on('p', function () {
-                console.log('set');setP(function (t) {
-                        return t + t;
-                });
-        });
-
-        useEffect(function () {
-                EventsManager.emit('p');
-        }, [h]);
-
-        // useEffect(()=>{
-        //     setTimeout(function()
-        // {
-
-        //     setO(o + 5)
-
-        // }, 2000)
-        // })
-
-        console.log(p, h);
-
-        // const k = usela()
+        var checkBox_package = useCustomCheckBox();
 
         return React.createElement(
                 'div',
-                { className: 'container', onClick: function onClick() {
-                                dispatch('22222');
+                { style: {
+                                width: '100vh',
+                                height: '100vh',
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
                         } },
-                p
+                React.createElement(checkBox_package.CheckBox2_switch, null)
         );
 }
 
@@ -291,7 +250,7 @@ function File_section() {
                                                                                                                         return Global_State.setSectionId(section.id);
 
                                                                                                                 case 2:
-                                                                                                                        Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.get(section.id));
+                                                                                                                        Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.current.get(section.id));
 
                                                                                                                 case 3:
                                                                                                                 case 'end':
@@ -341,10 +300,10 @@ function Home() {
                 if (e.ctrlKey && e.key === 'd') return false;
         };
 
-        var _useState5 = useState(null),
-            _useState6 = _slicedToArray(_useState5, 2),
-            Data_Base = _useState6[0],
-            setData_base = _useState6[1];
+        var _useState3 = useState(null),
+            _useState4 = _slicedToArray(_useState3, 2),
+            Data_Base = _useState4[0],
+            setData_base = _useState4[1];
 
         // useEffect(()=>(
         //     console.log("Daaa a change !!!", Data_Base)
@@ -375,10 +334,10 @@ function Home() {
 
                 var leftSideBar = React.createElement(File_section, null);
 
-                var _useState7 = useState(false),
-                    _useState8 = _slicedToArray(_useState7, 2),
-                    hide = _useState8[0],
-                    setHide = _useState8[1];
+                var _useState5 = useState(false),
+                    _useState6 = _slicedToArray(_useState5, 2),
+                    hide = _useState6[0],
+                    setHide = _useState6[1];
 
                 var overlaySideBar = React.createElement(
                         'div',
@@ -626,14 +585,14 @@ function Home() {
 }
 
 function Page() {
-        var _useState9 = useState(React.createElement(
+        var _useState7 = useState(React.createElement(
                 'div',
                 null,
                 'ANAC'
         )),
-            _useState10 = _slicedToArray(_useState9, 2),
-            container = _useState10[0],
-            setContainer = _useState10[1];
+            _useState8 = _slicedToArray(_useState7, 2),
+            container = _useState8[0],
+            setContainer = _useState8[1];
 
         useEffect(function () {
                 function checkAuthState() {

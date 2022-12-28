@@ -30,6 +30,7 @@ import { MdNotificationsActive } from "react-icons/md";
 import Button from 'react-bootstrap/Button';
 import Divider from "@mui/material/Divider";
 import { Chip } from "@mui/material";
+import { useSpring, animated } from "react-spring";
 
 var readNotifs = [];
 
@@ -700,10 +701,57 @@ function useOpen(init_val) {
         return useState(init_val);
 }
 
+function RingingBell(_ref8) {
+        var icon = _ref8.icon;
+
+        var _useState5 = useState(false),
+            _useState6 = _slicedToArray(_useState5, 2),
+            reverse = _useState6[0],
+            set = _useState6[1];
+
+        var _useState7 = useState(0),
+            _useState8 = _slicedToArray(_useState7, 2),
+            to_delay = _useState8[0],
+            setD = _useState8[1];
+
+        // Define the animation
+
+
+        var ringingAnimation = useSpring({
+                from: { transform: 'scale(1)' },
+                to: { transform: 'scale(1.3)' },
+                config: { duration: 200 },
+                // pause: to_delay === 3,
+                reset: true,
+                loop: true,
+                reverse: reverse,
+                onRest: function onRest() {
+                        set(!reverse);
+                }
+        });
+
+        // Use the useEffect hook to run the animation repeatedly
+        // useEffect(() => {
+        //   const interval = setInterval(() => {
+        //     ringingAnimation.start();
+        //   }, 1000);
+        //   return () => clearInterval(interval);
+        // }, []);
+
+        return React.createElement(
+                animated.div,
+                { style: Object.assign({
+                                width: 'fit-content',
+                                height: 'fit-content'
+                        }, ringingAnimation) },
+                icon
+        );
+}
+
 export default function Notifications() {
 
-        var StyledBadge = styled(Badge)(function (_ref8) {
-                var theme = _ref8.theme;
+        var StyledBadge = styled(Badge)(function (_ref9) {
+                var theme = _ref9.theme;
                 return {
                         '& .MuiBadge-badge': {
                                 right: 7,
@@ -716,15 +764,15 @@ export default function Notifications() {
 
         var count = isThereUpdate();
 
-        var notifButton = count ? React.createElement(
-                IconButton,
-                { "aria-label": "notification", style: { width: 36, height: 36 } },
-                React.createElement(
-                        StyledBadge,
-                        { badgeContent: count, color: "primary" },
-                        React.createElement(MdNotificationsActive, { color: "#cd0606", size: 30 })
-                )
-        ) : React.createElement(
+        var notifButton = count ? React.createElement(RingingBell, { icon: React.createElement(
+                        IconButton,
+                        { "aria-label": "notification", style: { width: 36, height: 36 } },
+                        React.createElement(
+                                StyledBadge,
+                                { badgeContent: count, color: "primary" },
+                                React.createElement(MdNotificationsActive, { color: "#cd0606", size: 30 })
+                        )
+                ) }) : React.createElement(
                 IconButton,
                 { "aria-label": "notification", style: { width: 36, height: 36 } },
                 React.createElement(
@@ -738,29 +786,46 @@ export default function Notifications() {
         var unreadReviewNotifs = useUnreadReviewNotif();
         var readReviewNotifs = useReadReviewNotif();
 
-        var renderingComponent = count ? React.createElement(
-                List,
-                { id: 'notifRenderingComponent' },
-                operationNotifs,
-                unreadReviewNotifs,
-                React.createElement(
-                        Divider,
-                        { textAlign: "left" },
-                        " LU "
-                ),
-                readReviewNotifs
-        ) : React.createElement(
-                "div",
-                { id: 'notifRenderingComponent', className: "d-flex justify-content-center align-items-center" },
-                "Vide \uD83D\uDE22"
-        );
+        var renderingComponent = void 0;
+
+        if (count) {
+                renderingComponent = React.createElement(
+                        List,
+                        { id: 'notifRenderingComponent' },
+                        operationNotifs,
+                        unreadReviewNotifs,
+                        React.createElement(
+                                Divider,
+                                { textAlign: "left" },
+                                " LU "
+                        ),
+                        readReviewNotifs
+                );
+        } else if (readReviewNotifs.length) {
+                renderingComponent = React.createElement(
+                        List,
+                        { id: 'notifRenderingComponent' },
+                        React.createElement(
+                                Divider,
+                                { textAlign: "left" },
+                                " LU "
+                        ),
+                        readReviewNotifs
+                );
+        } else {
+                renderingComponent = React.createElement(
+                        "div",
+                        { id: 'notifRenderingComponent', className: "d-flex justify-content-center align-items-center" },
+                        "Vide \uD83D\uDE22"
+                );
+        }
 
         // const [isVisible, observe, disconect] = useOnScreen(document.querySelector('#root'))
 
-        var _useState5 = useState(false),
-            _useState6 = _slicedToArray(_useState5, 2),
-            isOpen = _useState6[0],
-            setOpenState = _useState6[1];
+        var _useState9 = useState(false),
+            _useState10 = _slicedToArray(_useState9, 2),
+            isOpen = _useState10[0],
+            setOpenState = _useState10[1];
 
         useEffect(function () {
                 // Global_State.EventsManager.on('observe_notif_panel', () => { const ref = document.getElementById('notifRenderingComponent');  console.log(ref); observe(ref) })

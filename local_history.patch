@@ -1,0 +1,23 @@
+Index: src/js/jsx/files_package/files.jsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/js/jsx/files_package/files.jsx b/src/js/jsx/files_package/files.jsx
+--- a/src/js/jsx/files_package/files.jsx	
++++ b/src/js/jsx/files_package/files.jsx	(date 1672158013210)
+@@ -197,12 +197,12 @@
+                                 () =>
+                                 {
+                                         t.push(node.id)
+-                                        setIsOpen(true)
++                                        // setIsOpen(true)
+                                 },
+                                 () =>
+                                 {
+                                         t.splice(expanded.indexOf(node.id.toString()), 1)
+-                                        setIsOpen(false)
++                                        // setIsOpen(false)
+                                 },
+                         ]
+ 
