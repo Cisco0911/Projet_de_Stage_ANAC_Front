@@ -1,6 +1,6 @@
 /* eslint-disable import/first */
 
-import React, {useState, useEffect, useRef, useReducer} from 'react';
+import React, {useState, useEffect, useRef, useReducer, useMemo} from 'react';
 import useGetData, {getFromDataBase} from "./data";
 import ReactDOM from 'react-dom/client';
 import toast from "react-hot-toast";
@@ -58,6 +58,7 @@ import EventEmitter from 'eventemitter3';
 import zIndex from "@mui/material/styles/zIndex";
 
 import useCustomCheckBox  from './custom_checkBox/custom_check'
+import {TiThumbsDown, TiThumbsOk} from "react-icons/ti";
 
 
 
@@ -74,10 +75,20 @@ function Lol({lal}) {
 
     const [o, setO] = useState(true)
 
-        const checkBox_package = useCustomCheckBox()
+        let [iconOK, iconNO] =
+        [
+                <TiThumbsOk size={24} color={'red'} />,
+                <TiThumbsDown size={24} color={'green'} />
+        ]
+
+        if (!o)
+        {
+                iconOK = <span> p </span>
+        }
 
     return (
-        <div style={
+        <div onClick={ event => { setO(!o) } }
+        style={
                 {
                         width: '100vh',
                         height: '100vh',
@@ -85,8 +96,9 @@ function Lol({lal}) {
                         alignItems: "center",
                         justifyContent: "center"
                 }
-        } >
-                <checkBox_package.CheckBox2_switch  />
+        }
+        >
+                {iconOK}
         </div>
     );
 }
@@ -195,7 +207,7 @@ function Header()
 
                                         <Stack className='justify-content-sm-end justify-content-center m-2' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
 
-                                                <Notifications/>
+                                                {useMemo( () => <Notifications/>, [] )}
 
                                                 <QuickSettings />
 

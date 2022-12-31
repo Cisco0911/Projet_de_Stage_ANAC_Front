@@ -1,8 +1,4 @@
-import _regeneratorRuntime from "babel-runtime/regenerator";
-
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /* eslint-disable import/first */
 
@@ -20,16 +16,16 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import Divider from "@mui/material/Divider";
+import PublishedWithChangesTwoToneIcon from '@mui/icons-material/PublishedWithChangesTwoTone';
 
 import toast from "react-hot-toast";
 
 import { IoMdNotifications } from "react-icons/io";
-import { MdNotificationsActive } from "react-icons/md";
+import { MdNotificationsActive, MdOutlineDoNotDisturbOnTotalSilence } from "react-icons/md";
+import { FaEye } from "react-icons/fa";
+import { TiThumbsOk, TiThumbsDown } from "react-icons/ti";
 
-import Button from 'react-bootstrap/Button';
-import Divider from "@mui/material/Divider";
-import { Chip } from "@mui/material";
 import { useSpring, animated } from "react-spring";
 
 var readNotifs = [];
@@ -68,32 +64,210 @@ var isThereUpdate = function isThereUpdate() {
 
         var countNew = 0;
 
-        countNew = countNew + Global_State.authUser.operation_notifications.length + Global_State.authUser.unread_notifications.length;
+        countNew = countNew + Global_State.authUser.asking_permission_notifications.length + Global_State.authUser.unread_review_notifications.length;
 
         return countNew;
 };
 
-function useOperationNotif() {
-        var _this = this;
+function AskingPermitComponent(_ref) {
+        var ap_notif = _ref.ap_notif,
+            dispatch = _ref.dispatch;
 
-        var operationNotif = useMemo(function () {
-                return JSON.parse(JSON.stringify(Global_State.authUser.operation_notifications));
+        // console.log(ap_notif)
+        var approved = ap_notif.approved;
+        var iconOK = React.createElement(TiThumbsOk, { size: 24, color: 'red' }),
+            iconNO = React.createElement(TiThumbsDown, { size: 24, color: 'green' });
+        // let icon
+        // switch (ap_notif.state)
+        // {
+        //         case 'loading':
+        //                 icon = <span className="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+        //                 break;
+        //
+        //         case 'dealt':
+        //                 icon = <CheckCircleOutlineIcon className='mr-1' color='success'  />
+        //                 break;
+        //
+        //         default:
+        //                 icon = null
+        //                 break;
+        // }
+
+        if (approved !== null) {
+                if (approved) {
+                        switch (ap_notif.state) {
+                                case 'loading':
+                                        iconOK = React.createElement("span", { className: "spinner-border spinner-border-sm mr-1", role: "status", "aria-hidden": "true" });
+                                        break;
+
+                                case 'dealt':
+                                        iconOK = React.createElement(PublishedWithChangesTwoToneIcon, { color: "success" });
+                                        break;
+
+                                default:
+                                        iconOK = null;
+                                        break;
+                        }
+                } else {
+                        switch (ap_notif.state) {
+                                case 'loading':
+                                        iconNO = React.createElement("span", { className: "spinner-border spinner-border-sm mr-1", role: "status", "aria-hidden": "true" });
+                                        break;
+
+                                case 'dealt':
+                                        iconNO = React.createElement(PublishedWithChangesTwoToneIcon, { color: "success" });
+                                        break;
+
+                                default:
+                                        iconNO = null;
+                                        break;
+                        }
+                }
+        }
+
+        // 4/;:
+
+        var type_objet = void 0;
+        switch (ap_notif.data.model) {
+                case 'App\\Models\\Audit':
+                        type_objet = "l'audit";
+                        break;
+                case 'App\\Models\\checkList':
+                        type_objet = 'la checkList';
+                        break;
+                case 'App\\Models\\DossierPreuve':
+                        type_objet = 'le dossier de preuve';
+                        break;
+                case 'App\\Models\\Nc':
+                        type_objet = 'le dossier de non-conformité';
+                        break;
+                case 'App\\Models\\NonConformite':
+                        type_objet = 'la FNC';
+                        break;
+                case 'App\\Models\\DossierSimple':
+                        type_objet = 'le dossier';
+                        break;
+                case 'App\\Models\\Fichier':
+                        type_objet = 'le fichier';
+                        break;
+                default:
+                        return undefined;
+
+        }
+
+        var node = Global_State.getNodeDataById("" + Global_State.parseModelToFrontType(ap_notif.data.model) + ap_notif.data.node_id);
+
+        return React.createElement(
+                ListItem,
+                { key: ap_notif.id, onClick: function onClick(e) {
+                                e.preventDefault();e.stopPropagation();
+                        } },
+                React.createElement(
+                        Card,
+                        { sx: { minWidth: 150, maxWidth: 390 }, variant: "outlined" },
+                        React.createElement(
+                                CardContent,
+                                { className: "d-flex", style: { padding: 4, paddingBottom: 0 } },
+                                React.createElement(
+                                        "div",
+                                        { style: { width: "max-content", fontSize: 12 } },
+                                        " ",
+                                        React.createElement(
+                                                "b",
+                                                null,
+                                                "Demande d'autorisation,"
+                                        ),
+                                        " par M. ",
+                                        ap_notif.data.full_name,
+                                        " pour ",
+                                        React.createElement(
+                                                "b",
+                                                { style: { color: "#d22121" } },
+                                                ap_notif.data.operation === 'deletion' ? 'supprimer' : 'modifier'
+                                        ),
+                                        " ",
+                                        type_objet,
+                                        " : ",
+                                        React.createElement(
+                                                "b",
+                                                { style: { whiteSpace: "nowrap" } },
+                                                ap_notif.data.node_name
+                                        )
+                                )
+                        ),
+                        React.createElement(
+                                CardActions,
+                                { className: "justify-content-end", style: { padding: 0 } },
+                                React.createElement(
+                                        Stack,
+                                        { direction: 'row', spacing: 1 },
+                                        React.createElement(
+                                                IconButton,
+                                                { title: 'ACCORDER', disabled: approved !== null, variant: "danger",
+                                                        onClick: function onClick(event) {
+                                                                event.preventDefault();
+                                                                event.stopPropagation();
+
+                                                                console.log('Approvedddddddddddd', ap_notif.data.operation, ap_notif.state, approved);
+                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: true });
+
+                                                                var queryBody = new FormData();
+                                                                queryBody.append('demand_id', ap_notif.id);
+                                                                queryBody.append('approved', '1');
+
+                                                                http.post('authorization_response', queryBody).then(function (res) {
+                                                                        console.log(res);
+                                                                        dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true });
+                                                                }).catch(function (err) {
+                                                                        return console.log(err);
+                                                                });
+                                                        }
+                                                },
+                                                iconOK
+                                        ),
+                                        React.createElement(
+                                                IconButton,
+                                                { title: 'CONSULTER', variant: "light", onClick: function onClick() {
+                                                                Global_State.EventsManager.emit('setSelectedNode', { id: node.id, section_id: node.section_id });
+                                                        } },
+                                                React.createElement(FaEye, { size: 24, color: 'blue' })
+                                        ),
+                                        React.createElement(
+                                                IconButton,
+                                                { title: 'REFUSER', disabled: approved !== null, variant: "light",
+                                                        onClick: function onClick(event) {
+                                                                event.preventDefault();
+                                                                event.stopPropagation();
+
+                                                                console.log("Rejectedddddddddddddd");
+                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: false });
+                                                        }
+                                                },
+                                                iconNO
+                                        )
+                                )
+                        )
+                )
+        );
+}
+
+function useAskingPermitNotif() {
+        var _useState = useState(JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications))),
+            _useState2 = _slicedToArray(_useState, 2),
+            askingPermitNotif = _useState2[0],
+            update = _useState2[1];
+
+        useEffect(function () {
+                if (!(JSON.stringify(askingPermitNotif) === JSON.stringify(Global_State.authUser.asking_permission_notifications))) update(JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)));
         }, [Global_State.authUser]);
-        // [
-        //     {
-        //         'id': 1,
-        //         'node_type': 'Dossier',
-        //         'operable': { 'name': 'Le dossier de test' },
-        //         'from': { 'id': 1 }
-        //     }
-        // ]
 
         var reducer = function reducer(state, action) {
                 switch (action.type) {
-                        case "setState":
+                        case "update_state":
                                 return state.map(function (notif) {
                                         if (notif.id === action.id) {
-                                                return Object.assign({}, notif, { state: action.newState, toggled: action.toggled });
+                                                console.log('newStaaaaaaaaaaaate', notif.state);
+                                                return Object.assign({}, notif, { state: action.newState, approved: action.approved });
                                         } else {
                                                 return notif;
                                         }
@@ -111,10 +285,10 @@ function useOperationNotif() {
 
         // initData is always up to date
         var initData = useMemo(function () {
-                return operationNotif.map(function (notif) {
-                        return Object.assign({}, notif, { state: 'attente', toggled: undefined });
+                return askingPermitNotif.map(function (notif) {
+                        return Object.assign({}, notif, { state: 'attente', approved: null });
                 });
-        }, [operationNotif]);
+        }, [askingPermitNotif]);
 
         var _useReducer = useReducer(reducer, initData),
             _useReducer2 = _slicedToArray(_useReducer, 2),
@@ -125,317 +299,24 @@ function useOperationNotif() {
                 dispatch({ type: 'add', newState: initData });
         }, [initData]);
 
-        useEffect(function () {
-                Global_State.EventsManager.on('updateNotif', function (id) {
-                        console.log('updateNotif');
-                        dispatch({ type: 'setState', id: id, newState: 'dealt', toggled: true });
-                        setTimeout(function () {
-                                dispatch({ type: 'delete', id: id });
-                        }, 1000);
+        // let askingPermitNotifComponents = []
+        //
+        // // const [test, setTest] = useState(true)
+        //
+        // notifsState.map(
+        //         ap_notif =>
+        //         {
+        //                 askingPermitNotifComponents.push( <AskingPermitComponent key={ap_notif.id} ap_notif={ap_notif} dispatch={dispatch} /> )
+        //         }
+        // )
+
+        var askingPermitNotifComponents = useMemo(function () {
+                return notifsState.map(function (ap_notif) {
+                        return React.createElement(AskingPermitComponent, { key: ap_notif.id, ap_notif: ap_notif, dispatch: dispatch });
                 });
-                return function () {
-                        Global_State.EventsManager.off('updateNotif');
-                };
-        }, []);
+        }, [notifsState]);
 
-        var operationNotifComponents = [];
-
-        var _useState = useState(true),
-            _useState2 = _slicedToArray(_useState, 2),
-            test = _useState2[0],
-            setTest = _useState2[1];
-
-        notifsState.map(function (op_notif) {
-                // console.log(op_notif)
-                var icon = void 0;
-                switch (op_notif.state) {
-                        case 'loading':
-                                icon = React.createElement("span", { className: "spinner-border spinner-border-sm mr-1", role: "status", "aria-hidden": "true" });
-                                break;
-
-                        case 'dealt':
-                                icon = React.createElement(CheckCircleOutlineIcon, { className: "mr-1", color: "success" });
-                                break;
-
-                        default:
-                                icon = null;
-                                break;
-                }
-
-                operationNotifComponents.push(React.createElement(
-                        ListItem,
-                        { key: op_notif.id },
-                        React.createElement(
-                                Card,
-                                { sx: { minWidth: 150, maxWidth: 390 }, variant: "outlined" },
-                                React.createElement(
-                                        CardContent,
-                                        { className: "d-flex p-2" },
-                                        React.createElement(
-                                                "div",
-                                                { style: { width: "max-content", fontSize: 12 }, onClick: function onClick() {
-                                                                setTest(function (t) {
-                                                                        return !t;
-                                                                });
-                                                        } },
-                                                "Confirmer la suppression de ",
-                                                test + '',
-                                                "  : ",
-                                                op_notif.node_type,
-                                                React.createElement(
-                                                        "b",
-                                                        null,
-                                                        React.createElement("br", null),
-                                                        op_notif.operable.name
-                                                )
-                                        )
-                                ),
-                                React.createElement(
-                                        CardActions,
-                                        null,
-                                        React.createElement(
-                                                Stack,
-                                                { direction: 'row', spacing: 2 },
-                                                React.createElement(
-                                                        Button,
-                                                        { className: "m-10", variant: "danger", onClick: function onClick() {
-                                                                        dispatch({ type: 'setState', id: op_notif.id, newState: 'loading', toggled: true });
-                                                                        console.log(op_notif.state);
-
-                                                                        var remove = function () {
-                                                                                var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee() {
-                                                                                        return _regeneratorRuntime.wrap(function _callee$(_context) {
-                                                                                                while (1) {
-                                                                                                        switch (_context.prev = _context.next) {
-                                                                                                                case 0:
-                                                                                                                        _context.t0 = op_notif.front_type;
-                                                                                                                        _context.next = _context.t0 === 'audit' ? 3 : _context.t0 === 'checkList' ? 6 : _context.t0 === 'dp' ? 7 : _context.t0 === 'nonC' ? 8 : _context.t0 === 'fnc' ? 9 : _context.t0 === 'ds' ? 12 : _context.t0 === 'f' ? 15 : 18;
-                                                                                                                        break;
-
-                                                                                                                case 3:
-                                                                                                                        _context.next = 5;
-                                                                                                                        return http.delete("del_audit?id=" + op_notif.operable.id + "&initiator=" + op_notif.from.id).then(function (res) {
-                                                                                                                                console.log(res);
-
-                                                                                                                                var msg = new FormData();
-                                                                                                                                msg.append('object', 'confirmed');
-                                                                                                                                msg.append('value', "Suppression confirm\xE9 par " + Global_State.authUser.name.substring(0, 1) + ". " + Global_State.authUser.second_name);
-                                                                                                                                msg.append('from', JSON.stringify(Global_State.authUser));
-                                                                                                                                msg.append('to', op_notif.from.id);
-                                                                                                                                msg.append('attachment', JSON.stringify({ 'operable': { 'id': op_notif.operable.id, 'name': op_notif.operable.name } }));
-
-                                                                                                                                http.post('notify_response', msg).then(function (res) {
-                                                                                                                                        console.log('notify', res);
-                                                                                                                                });
-
-                                                                                                                                if (res.data === 'attente') toast('En attente de confirmation', {
-                                                                                                                                        icon: 'ℹ️'
-                                                                                                                                });
-                                                                                                                        }).catch(function (err) {
-                                                                                                                                console.log(err);toast.error("error on this one, Audit: " + op_notif.operable.name);
-                                                                                                                        });
-
-                                                                                                                case 5:
-                                                                                                                        return _context.abrupt("break", 19);
-
-                                                                                                                case 6:
-                                                                                                                        return _context.abrupt("break", 19);
-
-                                                                                                                case 7:
-                                                                                                                        return _context.abrupt("break", 19);
-
-                                                                                                                case 8:
-                                                                                                                        return _context.abrupt("break", 19);
-
-                                                                                                                case 9:
-                                                                                                                        _context.next = 11;
-                                                                                                                        return http.delete("del_fnc?id=" + op_notif.operable.id + "&initiator=" + op_notif.from.id).then(function (res) {
-                                                                                                                                console.log(res);
-
-                                                                                                                                var msg = new FormData();
-                                                                                                                                msg.append('object', 'confirmed');
-                                                                                                                                msg.append('value', "Suppression confirm\xE9 par " + Global_State.authUser.name.substring(0, 1) + ". " + Global_State.authUser.second_name);
-                                                                                                                                msg.append('from', JSON.stringify(Global_State.authUser));
-                                                                                                                                msg.append('to', op_notif.from.id);
-                                                                                                                                msg.append('attachment', JSON.stringify({ 'operable': { 'name': op_notif.operable.name } }));
-
-                                                                                                                                http.post('notify_response', msg).then(function (res) {
-                                                                                                                                        console.log('notify', res);
-                                                                                                                                });
-
-                                                                                                                                if (res.data === 'attente') toast('En attente de confirmation', {
-                                                                                                                                        icon: 'ℹ️'
-                                                                                                                                });
-                                                                                                                        }).catch(function (err) {
-                                                                                                                                console.log(err);toast.error("error on this one, FNC: " + op_notif.operable.name);
-                                                                                                                        });
-
-                                                                                                                case 11:
-                                                                                                                        return _context.abrupt("break", 19);
-
-                                                                                                                case 12:
-                                                                                                                        _context.next = 14;
-                                                                                                                        return http.delete("del_folder?id=" + op_notif.operable.id + "&initiator=" + op_notif.from.id).then(function (res) {
-                                                                                                                                console.log(res);
-
-                                                                                                                                var msg = new FormData();
-                                                                                                                                msg.append('object', 'confirmed');
-                                                                                                                                msg.append('value', "Suppression confirm\xE9 par " + Global_State.authUser.name.substring(0, 1) + ". " + Global_State.authUser.second_name);
-                                                                                                                                msg.append('from', JSON.stringify(Global_State.authUser));
-                                                                                                                                msg.append('to', op_notif.from.id);
-                                                                                                                                msg.append('attachment', JSON.stringify({ 'operable': { 'id': op_notif.operable.id, 'name': op_notif.operable.name } }));
-
-                                                                                                                                http.post('notify_response', msg).then(function (res) {
-                                                                                                                                        console.log('notify', res);
-                                                                                                                                });
-
-                                                                                                                                if (res.data === 'attente') toast('En attente de confirmation', {
-                                                                                                                                        icon: 'ℹ️'
-                                                                                                                                });
-                                                                                                                        }).catch(function (err) {
-                                                                                                                                console.log(err);toast.error("error on this one, Dossier: " + op_notif.operable.name);
-                                                                                                                        });
-
-                                                                                                                case 14:
-                                                                                                                        return _context.abrupt("break", 19);
-
-                                                                                                                case 15:
-                                                                                                                        _context.next = 17;
-                                                                                                                        return http.delete("del_file?id=" + op_notif.operable.id + "&initiator=" + op_notif.from.id).then(function (res) {
-                                                                                                                                console.log(res);
-
-                                                                                                                                var msg = new FormData();
-                                                                                                                                msg.append('object', 'confirmed');
-                                                                                                                                msg.append('value', "Suppression confirm\xE9 par " + Global_State.authUser.name.substring(0, 1) + ". " + Global_State.authUser.second_name);
-                                                                                                                                msg.append('from', JSON.stringify(Global_State.authUser));
-                                                                                                                                msg.append('to', op_notif.from.id);
-                                                                                                                                msg.append('attachment', JSON.stringify({ 'operable': { 'id': op_notif.operable.id, 'name': op_notif.operable.name } }));
-
-                                                                                                                                http.post('notify_response', msg).then(function (res) {
-                                                                                                                                        console.log('notify', res);
-                                                                                                                                });
-
-                                                                                                                                if (res.data === 'attente') toast('En attente de confirmation', {
-                                                                                                                                        icon: 'ℹ️'
-                                                                                                                                });
-                                                                                                                        }).catch(function (err) {
-                                                                                                                                console.log(err);toast.error("error on this one, Fichier: " + op_notif.operable.name);
-                                                                                                                        });
-
-                                                                                                                case 17:
-                                                                                                                        return _context.abrupt("break", 19);
-
-                                                                                                                case 18:
-                                                                                                                        return _context.abrupt("break", 19);
-
-                                                                                                                case 19:
-                                                                                                                case "end":
-                                                                                                                        return _context.stop();
-                                                                                                        }
-                                                                                                }
-                                                                                        }, _callee, _this);
-                                                                                }));
-
-                                                                                return function remove() {
-                                                                                        return _ref.apply(this, arguments);
-                                                                                };
-                                                                        }();
-
-                                                                        remove();
-
-                                                                        // console.log(selectedRow[0].id.substring(2))
-                                                                        // toast.promise(
-                                                                        //     remove(),
-                                                                        //     {
-                                                                        //         loading: 'Suppressing... ' + op_notif.operable.name,
-                                                                        //         success: 'Suppression effective',
-                                                                        //         error: 'err'
-                                                                        //     },
-                                                                        //     {
-                                                                        //         id: 'NodeRemovalResponse',
-                                                                        //         position: "top-right",
-                                                                        //     }
-
-                                                                        // )
-                                                                } },
-                                                        op_notif.toggled ? icon : null,
-                                                        "Supprimer"
-                                                ),
-                                                React.createElement(
-                                                        Button,
-                                                        { className: "m-10", variant: "light", onClick: function onClick() {
-                                                                        Global_State.EventsManager.emit('setSelectedNode', { id: "" + op_notif.front_type + op_notif.operable.id, section_id: op_notif.operable.section_id });
-                                                                } },
-                                                        "Consulter"
-                                                ),
-                                                React.createElement(
-                                                        Button,
-                                                        { className: "m-10", variant: "light", onClick: function onClick() {
-                                                                        dispatch({ type: 'setState', id: op_notif.id, newState: 'loading' });
-
-                                                                        var msg = new FormData();
-                                                                        msg.append('object', 'rejected');
-                                                                        msg.append('value', "Suppression rejet\xE9 par " + Global_State.authUser.name.substring(0, 1) + ". " + Global_State.authUser.second_name);
-                                                                        msg.append('from', JSON.stringify(Global_State.authUser));
-                                                                        msg.append('to', op_notif.from.id);
-                                                                        msg.append('attachment', JSON.stringify({ 'operable': { 'id': op_notif.operable.id, 'name': op_notif.operable.name } }));
-
-                                                                        var notify = function () {
-                                                                                var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
-                                                                                        return _regeneratorRuntime.wrap(function _callee2$(_context2) {
-                                                                                                while (1) {
-                                                                                                        switch (_context2.prev = _context2.next) {
-                                                                                                                case 0:
-                                                                                                                        _context2.next = 2;
-                                                                                                                        return http.post('notify_response', msg).then(function (res) {
-                                                                                                                                Global_State.EventsManager.emit('updateAuthUserInfo');
-                                                                                                                                dispatch({ type: 'setState', id: op_notif.id, newState: 'dealt', toggled: false });
-                                                                                                                                setTimeout(function () {
-                                                                                                                                        dispatch({ type: 'delete', id: op_notif.id });
-                                                                                                                                }, 1000);
-                                                                                                                        }).catch(function (err) {
-                                                                                                                                console.log(err);throw err;
-                                                                                                                        });
-
-                                                                                                                case 2:
-                                                                                                                case "end":
-                                                                                                                        return _context2.stop();
-                                                                                                        }
-                                                                                                }
-                                                                                        }, _callee2, _this);
-                                                                                }));
-
-                                                                                return function notify() {
-                                                                                        return _ref2.apply(this, arguments);
-                                                                                };
-                                                                        }();
-                                                                        notify();
-
-                                                                        // toast.promise(
-
-                                                                        //      notify(),
-                                                                        //     {
-                                                                        //         loading: 'Notifying... ' + op_notif.operable.name,
-                                                                        //         success: 'Fin operation',
-                                                                        //         error: 'err'
-                                                                        //     },
-                                                                        //     {
-                                                                        //         id: 'NodeRemovalResponse',
-                                                                        //         position: "top-right",
-                                                                        //     }
-
-                                                                        // )
-                                                                } },
-                                                        op_notif.toggled ? null : icon,
-                                                        "Refuser"
-                                                )
-                                        )
-                                )
-                        )
-                ));
-        });
-
-        return operationNotifComponents;
+        return askingPermitNotifComponents;
 }
 
 function useOnScreen(root) {
@@ -444,9 +325,9 @@ function useOnScreen(root) {
             isIntersecting = _useState4[0],
             setIntersecting = _useState4[1];
 
-        var observer = new IntersectionObserver(function (_ref3) {
-                var _ref4 = _slicedToArray(_ref3, 1),
-                    entry = _ref4[0];
+        var observer = new IntersectionObserver(function (_ref2) {
+                var _ref3 = _slicedToArray(_ref2, 1),
+                    entry = _ref3[0];
 
                 return setIntersecting(entry.isIntersecting);
         }, {
@@ -469,8 +350,8 @@ function useOnScreen(root) {
 }
 
 function useUnreadReviewNotif() {
-        var StyledBadge = styled(Badge)(function (_ref5) {
-                var theme = _ref5.theme;
+        var StyledBadge = styled(Badge)(function (_ref4) {
+                var theme = _ref4.theme;
                 return {
                         '& .MuiBadge-badge': {
                                 right: 10,
@@ -483,7 +364,7 @@ function useUnreadReviewNotif() {
         });
 
         var unreadReviewNotif = useMemo(function () {
-                return JSON.parse(JSON.stringify(Global_State.authUser.unread_notifications));
+                return JSON.parse(JSON.stringify(Global_State.authUser.unread_review_notifications));
         }, [Global_State.authUser]);
 
         // let unreadReviewNotifComponents = []
@@ -585,8 +466,8 @@ function useUnreadReviewNotif() {
 }
 
 function useReadReviewNotif() {
-        var StyledBadge = styled(Badge)(function (_ref6) {
-                var theme = _ref6.theme;
+        var StyledBadge = styled(Badge)(function (_ref5) {
+                var theme = _ref5.theme;
                 return {
                         '& .MuiBadge-badge': {
                                 right: 10,
@@ -604,8 +485,8 @@ function useReadReviewNotif() {
 
         // let readReviewNotifComponents = []
 
-        var ReadReviewNotifComponent = function ReadReviewNotifComponent(_ref7) {
-                var notif = _ref7.notif;
+        var ReadReviewNotifComponent = function ReadReviewNotifComponent(_ref6) {
+                var notif = _ref6.notif;
 
                 // useEffect(
                 //         () =>
@@ -701,8 +582,8 @@ function useOpen(init_val) {
         return useState(init_val);
 }
 
-function RingingBell(_ref8) {
-        var icon = _ref8.icon;
+function RingingBell(_ref7) {
+        var icon = _ref7.icon;
 
         var _useState5 = useState(false),
             _useState6 = _slicedToArray(_useState5, 2),
@@ -750,8 +631,8 @@ function RingingBell(_ref8) {
 
 export default function Notifications() {
 
-        var StyledBadge = styled(Badge)(function (_ref9) {
-                var theme = _ref9.theme;
+        var StyledBadge = styled(Badge)(function (_ref8) {
+                var theme = _ref8.theme;
                 return {
                         '& .MuiBadge-badge': {
                                 right: 7,
@@ -782,7 +663,7 @@ export default function Notifications() {
                 )
         );
 
-        var operationNotifs = useOperationNotif();
+        var askingPermitNotifs = useAskingPermitNotif();
         var unreadReviewNotifs = useUnreadReviewNotif();
         var readReviewNotifs = useReadReviewNotif();
 
@@ -792,7 +673,7 @@ export default function Notifications() {
                 renderingComponent = React.createElement(
                         List,
                         { id: 'notifRenderingComponent' },
-                        operationNotifs,
+                        askingPermitNotifs,
                         unreadReviewNotifs,
                         React.createElement(
                                 Divider,
@@ -849,6 +730,8 @@ export default function Notifications() {
                                 notif_ids.append('notif_ids[]', notif_id);
                         });
 
+                        readNotifs = [];
+
                         http.post("markAsRead", notif_ids).then(function (res) {
                                 console.log(res);
                         }).catch(function (err) {
@@ -859,5 +742,7 @@ export default function Notifications() {
 
         return useMemo(function () {
                 return React.createElement(Global_State.CustomDropDown, { id: 'notifPanel', icon: notifButton, content: renderingComponent });
-        }, []);
+        }, [renderingComponent])
+        // <Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />
+        ;
 }

@@ -1655,7 +1655,7 @@ export default function FileTable({set})
 
                                                                 const remove = async () =>
                                                                 {
-                                                                        await Promise.all(
+                                                                        return  Promise.all(
                                                                                 selectedRow.map(
                                                                                         async row =>
                                                                                         {
@@ -1815,7 +1815,7 @@ export default function FileTable({set})
                                                                 if( !Global_State.isEditorMode )
                                                                 {
                                                                         toast.promise(
-                                                                                remove(),
+                                                                        remove(),
                                                                                 {
                                                                                         loading: 'Suppressing...',
                                                                                         success: 'Processus achevé',
@@ -1823,9 +1823,10 @@ export default function FileTable({set})
                                                                                 },
                                                                                 {
                                                                                         id: 'Suppressing',
-                                                                                        duration: Infinity
+                                                                                        // duration: Infinity
                                                                                 }
-                                                                        ).then( res => { setTimeout( () => { toast.dismiss('Suppressing') }, 800 ) } )
+                                                                        )
+                                                                        // .then( res => { setTimeout( () => { toast.dismiss('Suppressing') }, 800 ) } )
                                                                 }
                                                                 else localRemove()
 
@@ -1876,7 +1877,7 @@ export default function FileTable({set})
                         const [data, iconSize] = [props.data, props.iconSize]
                         if (data.global_type === "folder") {
                                 return (
-                                <FcFolder size={iconSize}  />
+                                        <FcFolder style={ { pointerEvents: "none" } } size={iconSize}  />
                                 )
                         }
                         else
@@ -1989,38 +1990,47 @@ export default function FileTable({set})
                 }
 
                 const NameFormater = (props) => {
-                        const div = useRef()
+                        const name_ref = useRef()
 
                         const nameComponent = (
-                        <div id = {props.data.id} ref = {div} className='d-flex justify-content-center align-items-center' style={{ height: '100%', width: '100%', zIndex: -1000, pointerEvents: "none" }} {...props} >
-                                <TypeIcon iconSize={30} {...props} />
-                                <span
-                                style={
-                                        {
-                                                MozUserSelect: 'none',
-                                                msUserSelect: 'none',
-                                                WebkitUserSelect: 'none',
-                                                userSelect: 'none',
-                                                marginLeft: 10,
-                                                fontSize: 15,
-                                                fontWeight: 'bold'
-                                        }}  >{props.data.name}</span>
-                        </div>
+                                <div id = {props.data.id} ref={name_ref} data-tag="allowRowEvents" className='d-flex justify-content-center align-items-center' style={{ height: '100%',/* minWidth: 'fit-content',*/ maxWidth: 400, zIndex: -1000 }} {...props} >
+                                        <span data-tag="allowRowEvents" style={ { minWidth: 30, minHeight: 30 } } >
+                                                <TypeIcon iconSize={30} {...props} />
+                                        </span>
+                                        <span title={props.data.name} data-tag="allowRowEvents"
+                                              style={
+                                                      {
+                                                              MozUserSelect: 'none',
+                                                              msUserSelect: 'none',
+                                                              WebkitUserSelect: 'none',
+                                                              userSelect: 'none',
+                                                              marginLeft: 10,
+                                                              fontSize: 15,
+                                                              fontWeight: 'bold',
+                                                              whiteSpace: 'nowrap',
+                                                              overflow: 'hidden',
+                                                              textOverflow: 'ellipsis',
+                                                      }
+                                              }
+                                        >
+                                                {props.data.name}
+                                        </span>
+                                </div>
                         )
 
                         useEffect(
-                        () =>
-                        {
+                                () =>
+                                {
 
-                                var pDoc = document.getElementById(`${props.data.id}`);
+                                        var pDoc = document.getElementById(`${props.data.id}`);
 
-                                var parent = pDoc.parentNode
+                                        var parent = pDoc.parentNode
 
-                                parent.classList.add("h-100")
-                                parent.style.height = '100%'
+                                        parent.classList.add("h-100")
+                                        parent.style.height = '100%'
 
 
-                        }
+                                }
                         )
 
                         return(
@@ -2431,26 +2441,23 @@ export default function FileTable({set})
 
                                 if(!Global_State.isEditorMode)
                                 {
-                                        const update = async () =>
-                                        {
-
-                                                await http.post(`${route}`, query)
-                                                .then( res => {
-                                                        console.log(res)
-                                                } )
-                                                .catch(err => { console.log(err); throw err })
-                                        }
 
                                         // console.log(selectedRow[0].id.substring(2))
                                         toast.promise(
-                                        update(),
-                                        {
-                                                loading: 'Validation...',
-                                                success: 'Validation achevé',
-                                                error: 'err'
-                                        }
-
+                                                http.post(`${route}`, query),
+                                                {
+                                                        loading: 'Validation...',
+                                                        success: 'Validation achevé',
+                                                        error: 'err'
+                                                },
+                                                {
+                                                        id: `${route}${data.id}`
+                                                }
                                         )
+                                        .then( res => {
+                                                console.log(res)
+                                        } )
+                                        .catch(err => { console.log(err); throw err })
                                 }
                                 else
                                 {
@@ -2496,7 +2503,7 @@ export default function FileTable({set})
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
                                         review_date: data.review_date === undefined ? '' : <ReviewDateComponent data={data} />,
-                                        valid_badge: <ValidBadge data={data} />
+                                        valid_badge: data.is_validated ? <ValidBadge data={data} /> : Global_State.authUser.right_lvl === 2 ? <ValidBadge data={data} /> : <div data-tag="allowRowEvents" />,
 
                                 }
                         )
@@ -2566,9 +2573,10 @@ export default function FileTable({set})
                 [
                         {
                                 name: '',
-                                selector: row => row.valid_badge,
+                                button: true,
+                                cell: row => row.valid_badge,
                                 sortable: false,
-                                width: "11%"
+                                width: "40px"
                         },
                         {
                                 name: 'NOM',
@@ -2669,7 +2677,8 @@ export default function FileTable({set})
         // }
 
 
-        const formattedDatas = useMemo(() => dataFormater(node), [node, selectedRow])
+        const formattedDatas = useMemo(() => dataFormater(node), [node])
+        // const formattedDatas = useDataFormater(node)
 
         const reducer = (state, action) => {
                 switch (action.type) {
@@ -3070,46 +3079,47 @@ export default function FileTable({set})
                 </div>
                 <ActionsMenu />
                 <DataTable
-                columns={columns}
-                data={filtered_datas}
+                        columns={columns}
+                        data={filtered_datas}
 
-                selectableRows
-                selectableRowsVisibleOnly
-                selectableRowsHighlight
-                // selectableRowsComponent={Checkbox}
-                // selectableRowsComponentProps={selectableRowsComponentProps}
-                selectableRowSelected={ (row) => { justChecking.current = true; /* console.log('selectableRowSelected'); */ return row.isSelected }}
-                onSelectedRowsChange={ ({selectedCount, selectedRows}) => { if(filtered_datas.length > 0)handleChange(selectedCount, selectedRows) } }
-                clearSelectedRows={Global_State.toggleCleared}
-                onRowDoubleClicked = { onRowDoubleClicked }
-                onRowClicked = { handleClick }
-                // onContextMenu={(event) => { console.log(event) }}
+                        selectableRows
+                        selectableRowsVisibleOnly
+                        selectableRowsHighlight
+                        // selectableRowsComponent={Checkbox}
+                        // selectableRowsComponentProps={selectableRowsComponentProps}
+                        selectableRowSelected={ (row) => { justChecking.current = true; /* console.log('selectableRowSelected'); */ return row.isSelected }}
+                        onSelectedRowsChange={ ({selectedCount, selectedRows}) => { if(filtered_datas.length > 0)handleChange(selectedCount, selectedRows) } }
+                        clearSelectedRows={Global_State.toggleCleared}
+                        onRowDoubleClicked = { onRowDoubleClicked }
+                        onRowClicked = { handleClick }
+                        // onContextMenu={(event) => { console.log(event) }}
 
-                paginationRowsPerPageOptions = {[15, 25, 50, 100, 200]}
-                pagination = {true}
-                paginationComponentOptions =
-                {
+                        paginationRowsPerPageOptions = {[15, 25, 50, 100, 200]}
+                        paginationPerPage={15}
+                        pagination = {true}
+                        paginationComponentOptions =
                         {
-                                rowsPerPageText: 'element par page:',
-                                rangeSeparatorText: 'de',
-                                noRowsPerPage: false,
-                                selectAllRowsItem: true,
-                                selectAllRowsItemText: 'Tout'
+                                {
+                                        rowsPerPageText: 'element par page:',
+                                        rangeSeparatorText: 'de',
+                                        noRowsPerPage: false,
+                                        selectAllRowsItem: true,
+                                        selectAllRowsItemText: 'Tout'
+                                }
                         }
-                }
-                theme = "default"
-                conditionalRowStyles={rowsStyles}
-                fixedHeader = {true}
-                fixedHeaderScrollHeight = "100vh"
-                pointerOnHover = {true}
-                highlightOnHover = {true}
-                persistTableHead = {true}
-                noHeader
-                subHeader
-                subHeaderComponent = { <SubHeaderComponent set = {setFilter} filter={filter} node = {node}  /> }
-                noDataComponent = {<div style={{textAlign: "center", marginTop: 100}} > Vide 😢 </div>}
-                sortIcon = {<FaSort size={10} />}
-                defaultSortFieldId = {1}
+                        theme = "default"
+                        conditionalRowStyles={rowsStyles}
+                        fixedHeader = {true}
+                        fixedHeaderScrollHeight = "100vh"
+                        pointerOnHover = {true}
+                        highlightOnHover = {true}
+                        persistTableHead = {true}
+                        noHeader
+                        subHeader
+                        subHeaderComponent = { <SubHeaderComponent set = {setFilter} filter={filter} node = {node}  /> }
+                        noDataComponent = {<div style={{textAlign: "center", marginTop: 100}} > Vide 😢 </div>}
+                        sortIcon = {<FaSort size={10} />}
+                        defaultSortFieldId = {1}
                 />
         </animated.div>
         )

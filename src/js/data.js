@@ -25,9 +25,10 @@ import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
 
 import toast from "react-hot-toast";
-import { Box, Popper } from "@mui/material";
+import { Box, Grow, Popper } from "@mui/material";
 import { Queue } from "@mui/icons-material";
 import { useSpring, animated } from "react-spring";
+import { Collapse } from "react-bootstrap";
 
 window.Pusher = require('pusher-js');
 
@@ -638,26 +639,16 @@ export default function useGetData(TheDatas) {
                                 });
 
                                 echosHandler('updateAuthUserInfo');
-                        } else if (data.type === "NodeRemovalResponse") {
-                                if (data.msg.object === 'rejected') {
-                                        toast.error(data.msg.value + ": " + data.msg.attachment.operable.name, {
-                                                id: 'NodeRemovalResponse'
-                                                // duration: Infinity,
-                                        });
-                                } else {
-                                        var operation = data.msg.attachment;
-                                        console.log(operation);
-                                        toast.success(data.msg.value + ": " + data.msg.attachment.operable.name, {
-                                                id: 'NodeRemovalResponse'
-                                                // duration: Infinity,
-                                        });
-                                        // http.delete(`del_folder?id=${data.msg.attachment.id};approved=${true}`)
-                                        // toast.success(data.msg.value,
-                                        //   {
-                                        //     position: "top-right",
-                                        //   }
-                                        // )
-                                }
+                        } else if (data.type === "Information") {
+                                console.log('Informationnnnnnnnnnnnnn!!!!!', data);
+                                // toast(
+                                //         <div>
+                                //                 Objet:
+                                //         </div>,
+                                //         {
+                                //                 icon: 'p'
+                                //         }
+                                // );
                         } else if (data.type === 'FncReviewNotification') {
                                 console.log(data);
 
@@ -1737,7 +1728,7 @@ export default function useGetData(TheDatas) {
 
                                         console.log('enter notif update');
 
-                                        authUser.operation_notifications.forEach(function (notif) {
+                                        authUser.asking_permission_notifications.forEach(function (notif) {
                                                 console.log(notif.operable_id, _data.node.id, notif.operable_id === _data.node.id);
                                                 if (notif.operable_id === _data.node.id) {
                                                         console.log('notif update');
@@ -1787,7 +1778,6 @@ export default function useGetData(TheDatas) {
                                         };
 
                                         var _newState = JSON.parse(JSON.stringify(state));
-                                        var finalState = JSON.parse(JSON.stringify(_newState));
 
                                         var _loop3 = function _loop3(node) {
                                                 var updatedNode = create_new_node(node);
@@ -1810,7 +1800,7 @@ export default function useGetData(TheDatas) {
                                                         return node;
                                                 });
 
-                                                finalState = update_path(updatedNode, JSON.parse(JSON.stringify(_newState)));
+                                                _newState = update_path(updatedNode, JSON.parse(JSON.stringify(_newState)));
                                         };
 
                                         var _iteratorNormalCompletion27 = true;
@@ -1840,9 +1830,9 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
-                                        console.log('finalState', finalState);
+                                        console.log('finalState', _newState);
 
-                                        return JSON.parse(JSON.stringify(finalState));
+                                        return JSON.parse(JSON.stringify(_newState));
                                 }
 
                         default:
@@ -2328,9 +2318,14 @@ export default function useGetData(TheDatas) {
                         document.addEventListener("click", handleClickOutside);
                         return function () {
                                 // Unbind the event listener on clean up
+                                console.log('byeeeeeeeeeeeeeeeeeeeee');
                                 document.removeEventListener("click", handleClickOutside);
                         };
                 }, []);
+
+                useEffect(function () {
+                        console.log('byeeeeeeeeeeeeeeeeeeeee', open);
+                });
 
                 // const popperAnimation = useSpring({
                 //         from: { transform: 'translate3d(0, -20px, 0)'},
@@ -2343,29 +2338,39 @@ export default function useGetData(TheDatas) {
 
                 return React.createElement(
                         "div",
-                        { onMouseEnter: handleEnter, onMouseLeave: handleLeave },
-                        icon,
+                        { id: id, onMouseEnter: handleEnter, onMouseLeave: handleLeave },
                         React.createElement(
-                                Popper,
-                                { id: drop_id,
-                                        style: {
-                                                zIndex: 999,
-                                                borderRadius: '0.25rem',
-                                                fontSize: '14px',
-                                                border: 'none',
-                                                boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
-                                                overflow: 'hidden',
-                                                padding: '0.5rem',
-                                                maxHeight: window.innerHeight / 100 * 80,
-                                                backgroundColor: "white"
-                                        },
-                                        open: open,
-                                        anchorEl: anchorEl
+                                "div",
+                                null,
+                                icon
+                        ),
+                        React.createElement(
+                                Collapse,
+                                {
+                                        "in": open
                                 },
                                 React.createElement(
-                                        Box,
-                                        null,
-                                        content
+                                        Popper,
+                                        { id: drop_id + "_pop",
+                                                style: {
+                                                        zIndex: 999,
+                                                        borderRadius: '0.25rem',
+                                                        fontSize: '14px',
+                                                        border: 'none',
+                                                        boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
+                                                        overflow: 'hidden',
+                                                        padding: '0.5rem',
+                                                        maxHeight: window.innerHeight / 100 * 80,
+                                                        backgroundColor: "white"
+                                                },
+                                                open: open,
+                                                anchorEl: anchorEl
+                                        },
+                                        React.createElement(
+                                                Box,
+                                                null,
+                                                content
+                                        )
                                 )
                         )
                 );
@@ -2547,6 +2552,77 @@ export default function useGetData(TheDatas) {
                 } else return obj;
         }
 
+        function compareObjects(obj1, obj2) {
+                // Si l'un des objets n'existe pas, retourner false
+                if (!obj1 || !obj2) return false;
+
+                // Si les objets sont de types différents, retourner false
+                if (obj1.constructor !== obj2.constructor) return false;
+
+                // Si les objets sont des Maps
+                if (obj1.constructor === Map) {
+                        // Si les Maps ont un nombre différent d'entrées, retourner false
+                        if (obj1.size !== obj2.size) return false;
+                        // Pour chaque entrée de la Map, comparer la clé et la valeur avec celles de l'autre Map
+                        var _iteratorNormalCompletion34 = true;
+                        var _didIteratorError34 = false;
+                        var _iteratorError34 = undefined;
+
+                        try {
+                                for (var _iterator34 = obj1[Symbol.iterator](), _step34; !(_iteratorNormalCompletion34 = (_step34 = _iterator34.next()).done); _iteratorNormalCompletion34 = true) {
+                                        var _ref4 = _step34.value;
+
+                                        var _ref5 = _slicedToArray(_ref4, 2);
+
+                                        var key = _ref5[0];
+                                        var value = _ref5[1];
+
+                                        if (!obj2.has(key) || !compareObjects(value, obj2.get(key))) return false;
+                                }
+                        } catch (err) {
+                                _didIteratorError34 = true;
+                                _iteratorError34 = err;
+                        } finally {
+                                try {
+                                        if (!_iteratorNormalCompletion34 && _iterator34.return) {
+                                                _iterator34.return();
+                                        }
+                                } finally {
+                                        if (_didIteratorError34) {
+                                                throw _iteratorError34;
+                                        }
+                                }
+                        }
+
+                        return true;
+                }
+
+                // Si les objets sont des tableaux
+                if (obj1.constructor === Array) {
+                        // Si les tableaux ont une taille différente, retourner false
+                        if (obj1.length !== obj2.length) return false;
+                        // Pour chaque élément du tableau, comparer avec celui de l'autre tableau
+                        for (var i = 0; i < obj1.length; i++) {
+                                if (!compareObjects(obj1[i], obj2[i])) return false;
+                        }
+                        return true;
+                }
+
+                // Si les objets sont des objets JSON
+                if (obj1.constructor === Object) {
+                        // Si les objets JSON ont un nombre différent de propriétés, retourner false
+                        if (Object.keys(obj1).length !== Object.keys(obj2).length) return false;
+                        // Pour chaque propriété de l'objet, comparer avec celle de l'autre objet
+                        for (var _key in obj1) {
+                                if (!(_key in obj2) || !compareObjects(obj1[_key], obj2[_key])) return false;
+                        }
+                        return true;
+                }
+
+                // Si les objets sont de types différents, retourner false
+                return obj1 === obj2;
+        }
+
         // function useOutsideAlerter(ref) {
         //   useEffect(() => {
         //     /**
@@ -2617,6 +2693,7 @@ export default function useGetData(TheDatas) {
                 getType: getType,
                 getNewPath: getNewPath,
                 copyObject: copyObject,
+                compareObjects: compareObjects,
                 modalManager: modalManager,
                 spinnerManager: spinnerManager,
                 selectedSectionId: selectedSectionId,

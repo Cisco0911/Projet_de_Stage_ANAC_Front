@@ -6,7 +6,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 /* eslint-disable import/first */
 
-import React, { useState, useEffect, useRef, useReducer } from 'react';
+import React, { useState, useEffect, useRef, useReducer, useMemo } from 'react';
 import useGetData, { getFromDataBase } from "./data";
 import ReactDOM from 'react-dom/client';
 import toast from "react-hot-toast";
@@ -64,6 +64,7 @@ import EventEmitter from 'eventemitter3';
 import zIndex from "@mui/material/styles/zIndex";
 
 import useCustomCheckBox from './custom_checkBox/custom_check';
+import { TiThumbsDown, TiThumbsOk } from "react-icons/ti";
 
 export var test = "Success";
 
@@ -77,18 +78,32 @@ function Lol(_ref) {
             o = _useState2[0],
             setO = _useState2[1];
 
-        var checkBox_package = useCustomCheckBox();
+        var iconOK = React.createElement(TiThumbsOk, { size: 24, color: 'red' }),
+            iconNO = React.createElement(TiThumbsDown, { size: 24, color: 'green' });
+
+
+        if (!o) {
+                iconOK = React.createElement(
+                        'span',
+                        null,
+                        ' p '
+                );
+        }
 
         return React.createElement(
                 'div',
-                { style: {
+                { onClick: function onClick(event) {
+                                setO(!o);
+                        },
+                        style: {
                                 width: '100vh',
                                 height: '100vh',
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center"
-                        } },
-                React.createElement(checkBox_package.CheckBox2_switch, null)
+                        }
+                },
+                iconOK
         );
 }
 
@@ -177,7 +192,9 @@ function Header() {
                                         React.createElement(
                                                 Stack,
                                                 { className: 'justify-content-sm-end justify-content-center m-2', direction: 'row', spacing: 1, alignItems: 'center', justifyContent: 'flex-end' },
-                                                React.createElement(Notifications, null),
+                                                useMemo(function () {
+                                                        return React.createElement(Notifications, null);
+                                                }, []),
                                                 React.createElement(QuickSettings, null),
                                                 React.createElement(Global_State.CustomDropDown, { id: 'userPanel', icon: dropTogglerContentUser, content: dropMenuItemsUser })
                                         ),

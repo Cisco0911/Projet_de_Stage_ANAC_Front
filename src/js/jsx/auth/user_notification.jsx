@@ -14,16 +14,16 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import Divider from "@mui/material/Divider";
+import PublishedWithChangesTwoToneIcon from '@mui/icons-material/PublishedWithChangesTwoTone';
 
 import toast from "react-hot-toast";
 
 import {IoMdNotifications} from "react-icons/io";
-import {MdNotificationsActive} from "react-icons/md";
+import {MdNotificationsActive, MdOutlineDoNotDisturbOnTotalSilence} from "react-icons/md";
+import {FaEye} from "react-icons/fa";
+import {TiThumbsOk, TiThumbsDown} from "react-icons/ti";
 
-import Button from 'react-bootstrap/Button';
-import Divider from "@mui/material/Divider";
-import {Chip} from "@mui/material";
 import {useSpring, animated} from "react-spring";
 
 
@@ -44,36 +44,206 @@ const isThereUpdate = () =>
 
     let countNew = 0
 
-    countNew = countNew + Global_State.authUser.operation_notifications.length + Global_State.authUser.unread_notifications.length
+    countNew = countNew + Global_State.authUser.asking_permission_notifications.length + Global_State.authUser.unread_review_notifications.length
 
 
     return countNew 
 
 }
 
-function useOperationNotif()
+function AskingPermitComponent({ap_notif, dispatch})
 {
-        const operationNotif = useMemo( () => JSON.parse(JSON.stringify(Global_State.authUser.operation_notifications)),  [Global_State.authUser])
-        // [
-        //     {
-        //         'id': 1,
-        //         'node_type': 'Dossier',
-        //         'operable': { 'name': 'Le dossier de test' },
-        //         'from': { 'id': 1 }
-        //     }
-        // ]
+        // console.log(ap_notif)
+        const approved = ap_notif.approved
+        let [iconOK, iconNO] =
+        [
+                <TiThumbsOk size={24} color={'red'} />,
+                <TiThumbsDown size={24} color={'green'} />
+        ]
+        // let icon
+        // switch (ap_notif.state)
+        // {
+        //         case 'loading':
+        //                 icon = <span className="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+        //                 break;
+        //
+        //         case 'dealt':
+        //                 icon = <CheckCircleOutlineIcon className='mr-1' color='success'  />
+        //                 break;
+        //
+        //         default:
+        //                 icon = null
+        //                 break;
+        // }
 
-        const reducer = (state, action) => {
+        if (approved !== null)
+        {
+                if (approved)
+                {
+                        switch (ap_notif.state)
+                        {
+                                case 'loading':
+                                        iconOK = <span className="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+                                        break;
+
+                                case 'dealt':
+                                        iconOK = <PublishedWithChangesTwoToneIcon color='success'  />
+                                        break;
+
+                                default:
+                                        iconOK = null
+                                        break;
+                        }
+                }
+                else
+                {
+                        switch (ap_notif.state)
+                        {
+                                case 'loading':
+                                        iconNO = <span className="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+                                        break;
+
+                                case 'dealt':
+                                        iconNO = <PublishedWithChangesTwoToneIcon color='success'  />
+                                        break;
+
+                                default:
+                                        iconNO = null
+                                        break;
+                        }
+                }
+        }
+
+        // 4/;:
+
+        let type_objet
+        switch (ap_notif.data.model)
+        {
+                case 'App\\Models\\Audit':
+                        type_objet = "l'audit"
+                        break
+                case 'App\\Models\\checkList':
+                        type_objet = 'la checkList'
+                        break
+                case 'App\\Models\\DossierPreuve':
+                        type_objet = 'le dossier de preuve'
+                        break
+                case 'App\\Models\\Nc':
+                        type_objet = 'le dossier de non-conformité'
+                        break
+                case 'App\\Models\\NonConformite':
+                        type_objet = 'la FNC'
+                        break
+                case 'App\\Models\\DossierSimple':
+                        type_objet = 'le dossier'
+                        break
+                case 'App\\Models\\Fichier':
+                        type_objet = 'le fichier'
+                        break
+                default:
+                        return undefined
+
+        }
+
+        const node = Global_State.getNodeDataById( `${Global_State.parseModelToFrontType(ap_notif.data.model)}${ap_notif.data.node_id}` )
+
+        return (
+                <ListItem key={ap_notif.id} onClick={ e => { e.preventDefault(); e.stopPropagation() } } >
+                        <Card sx = {{ minWidth: 150, maxWidth: 390 }} variant="outlined" >
+                        <CardContent className={`d-flex`} style={{ padding: 4, paddingBottom: 0 }} >
+                                <div style={{ width: "max-content", fontSize: 12 }}  > {/*onClick={() => {  setTest(t => !t)}}*/}
+                                        <b>Demande d'autorisation,</b> par M. {ap_notif.data.full_name} pour <b style={{ color: "#d22121" }} >{ap_notif.data.operation === 'deletion' ? 'supprimer' : 'modifier'}</b> {type_objet} : <b style={{ whiteSpace: "nowrap" }} >{ap_notif.data.node_name}</b>
+                                </div>
+                        </CardContent>
+                        <CardActions className={`justify-content-end`} style={{ padding: 0 }} >
+
+                                <Stack direction={'row'} spacing = {1} >
+
+                                        <IconButton title={'ACCORDER'} disabled={approved !== null} variant="danger"
+                                                onClick={
+                                                        (event) =>
+                                                        {
+                                                                event.preventDefault()
+                                                                event.stopPropagation()
+
+                                                                console.log('Approvedddddddddddd', ap_notif.data.operation, ap_notif.state, approved)
+                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: true})
+
+                                                                const queryBody = new FormData()
+                                                                queryBody.append('demand_id', ap_notif.id)
+                                                                queryBody.append('approved', '1')
+
+                                                                http.post('authorization_response', queryBody)
+                                                                .then(
+                                                                        res =>
+                                                                        {
+                                                                                console.log(res)
+                                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true})
+                                                                        }
+                                                                )
+                                                                .catch( err => console.log(err) )
+                                                        }
+                                                }
+                                        >
+                                                {/*{ clicked.current ? (approved.current ? icon : <ThumbUpAltTwoToneIcon color={'error'} />) : <ThumbUpAltTwoToneIcon color={'error'} /> }*/}
+                                                {iconOK}
+                                        </IconButton>
+                                        <IconButton title={'CONSULTER'} variant="light" onClick={() => { Global_State.EventsManager.emit('setSelectedNode', {id: node.id, section_id: node.section_id} ); }}>
+                                                <FaEye size={24} color={'blue'} />
+                                        </IconButton>
+                                        <IconButton title={'REFUSER'} disabled={approved !== null} variant="light"
+                                                onClick={
+                                                        (event) =>
+                                                        {
+                                                                event.preventDefault()
+                                                                event.stopPropagation()
+
+                                                                console.log("Rejectedddddddddddddd")
+                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: false})
+                                                        }
+                                                }
+                                        >
+                                                {/*{ clicked.current ? (approved.current ? <DoDisturbOnTwoToneIcon color={'success'} /> : icon) : <DoDisturbOnTwoToneIcon color={'success'} /> }*/}
+                                                {iconNO}
+                                        </IconButton>
+
+                                </Stack>
+
+                        </CardActions>
+                </Card>
+                </ListItem>
+        )
+}
+
+function useAskingPermitNotif()
+{
+        const [askingPermitNotif, update] = useState( JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)) )
+
+        useEffect(
+        () =>
+        {
+                if ( !( JSON.stringify(askingPermitNotif) === JSON.stringify(Global_State.authUser.asking_permission_notifications) ) ) update( JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)) )
+        }, [Global_State.authUser]
+        )
+
+        const reducer = (state, action) =>
+        {
                 switch (action.type) {
-                        case "setState":
-                                return state.map((notif) => {
-                                        if (notif.id === action.id) {
-                                                return { ...notif, state: action.newState, toggled: action.toggled };
+                        case "update_state":
+                                return state.map(
+                                        (notif) =>
+                                        {
+                                                if (notif.id === action.id)
+                                                {
+                                                        console.log('newStaaaaaaaaaaaate', notif.state)
+                                                        return { ...notif, state: action.newState, approved: action.approved };
+                                                }
+                                                else
+                                                {
+                                                        return notif;
+                                                }
                                         }
-                                        else {
-                                                return notif;
-                                        }
-                                });
+                                );
                         case 'delete':
                                 return state.filter(notif => ( notif.id !== action.id ) )
                         case 'add':
@@ -84,7 +254,7 @@ function useOperationNotif()
         };
 
         // initData is always up to date
-        const initData = useMemo( () => operationNotif.map(notif => ({...notif, state: 'attente', toggled: undefined}) ) ,  [operationNotif] )
+        const initData = useMemo( () => askingPermitNotif.map(notif => ({...notif, state: 'attente', approved: null}) ) ,  [askingPermitNotif] )
 
         const [notifsState, dispatch] = useReducer(reducer,  initData);
 
@@ -95,263 +265,27 @@ function useOperationNotif()
         }, [initData]
         )
 
+        // let askingPermitNotifComponents = []
+        //
+        // // const [test, setTest] = useState(true)
+        //
+        // notifsState.map(
+        //         ap_notif =>
+        //         {
+        //                 askingPermitNotifComponents.push( <AskingPermitComponent key={ap_notif.id} ap_notif={ap_notif} dispatch={dispatch} /> )
+        //         }
+        // )
 
-
-        useEffect(
-        () =>
-        {
-                Global_State.EventsManager.on('updateNotif', id =>
-                {
-                        console.log('updateNotif');
-                        dispatch({ type: 'setState', id: id, newState: 'dealt', toggled: true})
-                        setTimeout(() => {
-                                dispatch({ type: 'delete', id: id})
-                        }, 1000);
-                })
-                return () =>
-                {
-                        Global_State.EventsManager.off('updateNotif');
-                }
-        },
-        []
+        const askingPermitNotifComponents = useMemo(
+                () =>
+                (
+                        notifsState.map(
+                        ap_notif =>( <AskingPermitComponent key={ap_notif.id} ap_notif={ap_notif} dispatch={dispatch} /> )
+                        )
+                ), [notifsState]
         )
 
-
-        let operationNotifComponents = []
-
-        const [test, setTest] = useState(true)
-
-        notifsState.map(
-        op_notif =>
-        {
-                // console.log(op_notif)
-                let icon
-                switch (op_notif.state) {
-                        case 'loading':
-                                icon = <span className="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
-                                break;
-
-                        case 'dealt':
-                                icon = <CheckCircleOutlineIcon className='mr-1' color='success'  />
-                                break;
-
-                        default:
-                                icon = null
-                                break;
-                }
-
-                operationNotifComponents.push(
-                <ListItem key={op_notif.id} >
-                        <Card sx = {{ minWidth: 150, maxWidth: 390 }} variant="outlined" >
-                                <CardContent className={`d-flex p-2`} >
-                                        <div style={{ width: "max-content", fontSize: 12 }} onClick={() => {  setTest(t => !t)}} >
-                                                Confirmer la suppression de {test + ''}  : {op_notif.node_type}<b><br/>{op_notif.operable.name}</b>
-                                        </div>
-                                </CardContent>
-                                <CardActions>
-
-                                        <Stack direction={'row'} spacing = {2} >
-
-                                                <Button className='m-10'  variant="danger" onClick={() =>
-                                                {
-                                                        dispatch({ type: 'setState', id: op_notif.id, newState: 'loading', toggled: true})
-                                                        console.log(op_notif.state)
-
-                                                        const remove = async () =>
-                                                        {
-                                                                switch (op_notif.front_type) {
-                                                                        case 'audit':
-
-                                                                                await http.delete(`del_audit?id=${op_notif.operable.id}&initiator=${op_notif.from.id}`)
-                                                                                .then( res => {
-                                                                                        console.log(res);
-
-                                                                                        const msg = new FormData;
-                                                                                        msg.append('object', 'confirmed')
-                                                                                        msg.append('value', `Suppression confirmé par ${Global_State.authUser.name.substring(0, 1)}. ${Global_State.authUser.second_name}`)
-                                                                                        msg.append('from', JSON.stringify(Global_State.authUser))
-                                                                                        msg.append('to', op_notif.from.id)
-                                                                                        msg.append('attachment', JSON.stringify({'operable': { 'id': op_notif.operable.id, 'name': op_notif.operable.name } }))
-
-                                                                                        http.post('notify_response', msg)
-                                                                                        .then(res => {console.log('notify',res)})
-
-
-                                                                                        if(res.data === 'attente') toast('En attente de confirmation',
-                                                                                        {
-                                                                                                icon: 'ℹ️'
-                                                                                        })
-
-                                                                                } )
-                                                                                .catch(err => { console.log(err); toast.error("error on this one, Audit: " + op_notif.operable.name) })
-
-                                                                                break;
-                                                                        case 'checkList':
-                                                                                break;
-                                                                        case 'dp':
-                                                                                break;
-                                                                        case 'nonC':
-                                                                                break;
-                                                                        case 'fnc':
-
-                                                                                await http.delete(`del_fnc?id=${op_notif.operable.id}&initiator=${op_notif.from.id}`)
-                                                                                .then( res => {
-                                                                                        console.log(res);
-
-                                                                                        const msg = new FormData;
-                                                                                        msg.append('object', 'confirmed')
-                                                                                        msg.append('value', `Suppression confirmé par ${Global_State.authUser.name.substring(0, 1)}. ${Global_State.authUser.second_name}`)
-                                                                                        msg.append('from', JSON.stringify(Global_State.authUser))
-                                                                                        msg.append('to', op_notif.from.id)
-                                                                                        msg.append('attachment', JSON.stringify({'operable': { 'name': op_notif.operable.name } }))
-
-                                                                                        http.post('notify_response', msg)
-                                                                                        .then(res => {console.log('notify',res)})
-
-                                                                                        if(res.data === 'attente') toast('En attente de confirmation',
-                                                                                        {
-                                                                                                icon: 'ℹ️'
-                                                                                        })
-
-                                                                                } )
-                                                                                .catch(err => { console.log(err); toast.error("error on this one, FNC: " + op_notif.operable.name) })
-
-                                                                                break;
-                                                                        case 'ds':
-
-                                                                                await http.delete(`del_folder?id=${op_notif.operable.id}&initiator=${op_notif.from.id}`)
-                                                                                .then( res => {
-                                                                                        console.log(res);
-
-                                                                                        const msg = new FormData;
-                                                                                        msg.append('object', 'confirmed')
-                                                                                        msg.append('value', `Suppression confirmé par ${Global_State.authUser.name.substring(0, 1)}. ${Global_State.authUser.second_name}`)
-                                                                                        msg.append('from', JSON.stringify(Global_State.authUser))
-                                                                                        msg.append('to', op_notif.from.id)
-                                                                                        msg.append('attachment', JSON.stringify({'operable': { 'id': op_notif.operable.id, 'name': op_notif.operable.name } }))
-
-                                                                                        http.post('notify_response', msg)
-                                                                                        .then(res => {console.log('notify',res)})
-
-
-                                                                                        if(res.data === 'attente') toast('En attente de confirmation',
-                                                                                        {
-                                                                                                icon: 'ℹ️'
-                                                                                        })
-
-                                                                                } )
-                                                                                .catch(err => { console.log(err); toast.error("error on this one, Dossier: " + op_notif.operable.name) })
-
-                                                                                break;
-                                                                        case 'f':
-                                                                                // console.log(nodeIdentity[0])
-
-                                                                                await http.delete(`del_file?id=${op_notif.operable.id}&initiator=${op_notif.from.id}`)
-                                                                                .then( res => {
-                                                                                        console.log(res);
-
-                                                                                        const msg = new FormData;
-                                                                                        msg.append('object', 'confirmed')
-                                                                                        msg.append('value', `Suppression confirmé par ${Global_State.authUser.name.substring(0, 1)}. ${Global_State.authUser.second_name}`)
-                                                                                        msg.append('from', JSON.stringify(Global_State.authUser))
-                                                                                        msg.append('to', op_notif.from.id)
-                                                                                        msg.append('attachment', JSON.stringify({'operable': { 'id': op_notif.operable.id, 'name': op_notif.operable.name } }))
-
-                                                                                        http.post('notify_response', msg)
-                                                                                        .then(res => {console.log('notify',res)})
-
-
-                                                                                        if(res.data === 'attente') toast('En attente de confirmation',
-                                                                                        {
-                                                                                                icon: 'ℹ️'
-                                                                                        })
-
-                                                                                } )
-                                                                                .catch(err => { console.log(err); toast.error("error on this one, Fichier: " + op_notif.operable.name) })
-
-                                                                                break;
-
-                                                                        default:
-                                                                                break;
-                                                                }
-                                                        }
-
-                                                        remove()
-
-                                                        // console.log(selectedRow[0].id.substring(2))
-                                                        // toast.promise(
-                                                        //     remove(),
-                                                        //     {
-                                                        //         loading: 'Suppressing... ' + op_notif.operable.name,
-                                                        //         success: 'Suppression effective',
-                                                        //         error: 'err'
-                                                        //     },
-                                                        //     {
-                                                        //         id: 'NodeRemovalResponse',
-                                                        //         position: "top-right",
-                                                        //     }
-
-                                                        // )
-
-                                                }
-                                                }>
-                                                        {op_notif.toggled ? icon : null}Supprimer
-                                                </Button>
-                                                <Button className='m-10'  variant="light" onClick={() => { Global_State.EventsManager.emit('setSelectedNode', {id: `${op_notif.front_type}${op_notif.operable.id}`, section_id: op_notif.operable.section_id} ); }}>
-                                                        Consulter
-                                                </Button>
-                                                <Button className='m-10'  variant="light" onClick={() =>
-                                                {
-                                                        dispatch({ type: 'setState', id: op_notif.id, newState: 'loading'})
-
-                                                        const msg = new FormData;
-                                                        msg.append('object', 'rejected')
-                                                        msg.append('value', `Suppression rejeté par ${Global_State.authUser.name.substring(0, 1)}. ${Global_State.authUser.second_name}`)
-                                                        msg.append('from', JSON.stringify(Global_State.authUser))
-                                                        msg.append('to', op_notif.from.id)
-                                                        msg.append('attachment', JSON.stringify({'operable': { 'id': op_notif.operable.id, 'name': op_notif.operable.name } }))
-
-                                                        const notify = async () => { await http.post('notify_response', msg)
-                                                        .then( res => {
-                                                                Global_State.EventsManager.emit('updateAuthUserInfo');
-                                                                dispatch({ type: 'setState', id: op_notif.id, newState: 'dealt', toggled: false})
-                                                                setTimeout(() => {
-                                                                        dispatch({ type: 'delete', id: op_notif.id})
-                                                                }, 1000);
-                                                        } )
-                                                        .catch(err => { console.log(err); throw err }) }
-                                                        notify()
-
-                                                        // toast.promise(
-
-                                                        //      notify(),
-                                                        //     {
-                                                        //         loading: 'Notifying... ' + op_notif.operable.name,
-                                                        //         success: 'Fin operation',
-                                                        //         error: 'err'
-                                                        //     },
-                                                        //     {
-                                                        //         id: 'NodeRemovalResponse',
-                                                        //         position: "top-right",
-                                                        //     }
-
-                                                        // )
-
-                                                }
-                                                }>
-                                                        {op_notif.toggled ? null : icon}Refuser
-                                                </Button>
-
-                                        </Stack>
-
-                                </CardActions>
-                        </Card>
-                </ListItem>
-                )
-        }
-        )
-
-        return operationNotifComponents
+        return askingPermitNotifComponents
 }
 
 function useOnScreen(root) {
@@ -395,7 +329,7 @@ function useUnreadReviewNotif()
                 },
         }));
 
-        const unreadReviewNotif = useMemo( () => JSON.parse(JSON.stringify(Global_State.authUser.unread_notifications)),  [Global_State.authUser])
+        const unreadReviewNotif = useMemo( () => JSON.parse(JSON.stringify(Global_State.authUser.unread_review_notifications)),  [Global_State.authUser])
 
         // let unreadReviewNotifComponents = []
 
@@ -663,7 +597,7 @@ export default function Notifications()
         )
 
 
-        const operationNotifs = useOperationNotif()
+        const askingPermitNotifs = useAskingPermitNotif()
         const unreadReviewNotifs = useUnreadReviewNotif()
         const readReviewNotifs = useReadReviewNotif()
 
@@ -674,7 +608,7 @@ export default function Notifications()
         if (count)
         {
                 renderingComponent = <List id={'notifRenderingComponent'} >
-                        {operationNotifs}
+                        {askingPermitNotifs}
                         {unreadReviewNotifs}
                         <Divider textAlign="left"> LU </Divider>
                         {readReviewNotifs}
@@ -731,6 +665,8 @@ export default function Notifications()
                                 notif_ids.append('notif_ids[]', notif_id)
                         });
 
+                        readNotifs = []
+
                         http.post(`markAsRead`, notif_ids)
                         .then( res => { console.log(res) } )
                         .catch(err => { console.log(err) })
@@ -743,8 +679,9 @@ export default function Notifications()
         return (
                 useMemo(
                         () => ( <Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} /> ),
-                        []
+                        [renderingComponent]
                 )
+                // <Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />
         )
 
 }

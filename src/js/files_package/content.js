@@ -2251,8 +2251,7 @@ export default function FileTable(_ref) {
                                                                                                 while (1) {
                                                                                                         switch (_context6.prev = _context6.next) {
                                                                                                                 case 0:
-                                                                                                                        _context6.next = 2;
-                                                                                                                        return Promise.all(selectedRow.map(function () {
+                                                                                                                        return _context6.abrupt('return', Promise.all(selectedRow.map(function () {
                                                                                                                                 var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5(row) {
                                                                                                                                         var nodeIdentity;
                                                                                                                                         return _regeneratorRuntime.wrap(function _callee5$(_context5) {
@@ -2355,9 +2354,9 @@ export default function FileTable(_ref) {
 
                                                                                                                         // return 0;
 
-                                                                                                                        ));
+                                                                                                                        )));
 
-                                                                                                                case 2:
+                                                                                                                case 1:
                                                                                                                 case 'end':
                                                                                                                         return _context6.stop();
                                                                                                         }
@@ -2422,13 +2421,10 @@ export default function FileTable(_ref) {
                                                                                         success: 'Processus achevé',
                                                                                         error: 'err'
                                                                                 }, {
-                                                                                        id: 'Suppressing',
-                                                                                        duration: Infinity
-                                                                                }).then(function (res) {
-                                                                                        setTimeout(function () {
-                                                                                                toast.dismiss('Suppressing');
-                                                                                        }, 800);
+                                                                                        id: 'Suppressing'
+                                                                                        // duration: Infinity
                                                                                 });
+                                                                                // .then( res => { setTimeout( () => { toast.dismiss('Suppressing') }, 800 ) } )
                                                                         } else localRemove();
                                                                 } },
                                                         'Supprimer'
@@ -2548,7 +2544,7 @@ export default function FileTable(_ref) {
                             iconSize = _ref9[1];
 
                         if (data.global_type === "folder") {
-                                return React.createElement(FcFolder, { size: iconSize });
+                                return React.createElement(FcFolder, { style: { pointerEvents: "none" }, size: iconSize });
                         } else {
                                 // <BsCardImage size={iconSize} />
                                 switch (getTypeExt(data.ext)) {
@@ -2636,15 +2632,19 @@ export default function FileTable(_ref) {
                 }
 
                 var NameFormater = function NameFormater(props) {
-                        var div = useRef();
+                        var name_ref = useRef();
 
                         var nameComponent = React.createElement(
                                 'div',
-                                Object.assign({ id: props.data.id, ref: div, className: 'd-flex justify-content-center align-items-center', style: { height: '100%', width: '100%', zIndex: -1000, pointerEvents: "none" } }, props),
-                                React.createElement(TypeIcon, Object.assign({ iconSize: 30 }, props)),
+                                Object.assign({ id: props.data.id, ref: name_ref, 'data-tag': 'allowRowEvents', className: 'd-flex justify-content-center align-items-center', style: { height: '100%', /* minWidth: 'fit-content',*/maxWidth: 400, zIndex: -1000 } }, props),
                                 React.createElement(
                                         'span',
-                                        {
+                                        { 'data-tag': 'allowRowEvents', style: { minWidth: 30, minHeight: 30 } },
+                                        React.createElement(TypeIcon, Object.assign({ iconSize: 30 }, props))
+                                ),
+                                React.createElement(
+                                        'span',
+                                        { title: props.data.name, 'data-tag': 'allowRowEvents',
                                                 style: {
                                                         MozUserSelect: 'none',
                                                         msUserSelect: 'none',
@@ -2652,8 +2652,12 @@ export default function FileTable(_ref) {
                                                         userSelect: 'none',
                                                         marginLeft: 10,
                                                         fontSize: 15,
-                                                        fontWeight: 'bold'
-                                                } },
+                                                        fontWeight: 'bold',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis'
+                                                }
+                                        },
                                         props.data.name
                                 )
                         );
@@ -3049,8 +3053,6 @@ export default function FileTable(_ref) {
                             check = _useState20[1];
 
                         function handleClick(e) {
-                                var _this4 = this;
-
                                 e.preventDefault();
                                 e.stopPropagation();
 
@@ -3094,37 +3096,18 @@ export default function FileTable(_ref) {
                                 }
 
                                 if (!Global_State.isEditorMode) {
-                                        var update = function () {
-                                                var _ref18 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee9() {
-                                                        return _regeneratorRuntime.wrap(function _callee9$(_context9) {
-                                                                while (1) {
-                                                                        switch (_context9.prev = _context9.next) {
-                                                                                case 0:
-                                                                                        _context9.next = 2;
-                                                                                        return http.post('' + route, query).then(function (res) {
-                                                                                                console.log(res);
-                                                                                        }).catch(function (err) {
-                                                                                                console.log(err);throw err;
-                                                                                        });
-
-                                                                                case 2:
-                                                                                case 'end':
-                                                                                        return _context9.stop();
-                                                                        }
-                                                                }
-                                                        }, _callee9, _this4);
-                                                }));
-
-                                                return function update() {
-                                                        return _ref18.apply(this, arguments);
-                                                };
-                                        }();
 
                                         // console.log(selectedRow[0].id.substring(2))
-                                        toast.promise(update(), {
+                                        toast.promise(http.post('' + route, query), {
                                                 loading: 'Validation...',
                                                 success: 'Validation achevé',
                                                 error: 'err'
+                                        }, {
+                                                id: '' + route + data.id
+                                        }).then(function (res) {
+                                                console.log(res);
+                                        }).catch(function (err) {
+                                                console.log(err);throw err;
                                         });
                                 } else {
                                         // Global_State.editor.folder.update(query)
@@ -3180,7 +3163,7 @@ export default function FileTable(_ref) {
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
                                         review_date: data.review_date === undefined ? '' : React.createElement(ReviewDateComponent, { data: data }),
-                                        valid_badge: React.createElement(ValidBadge, { data: data })
+                                        valid_badge: data.is_validated ? React.createElement(ValidBadge, { data: data }) : Global_State.authUser.right_lvl === 2 ? React.createElement(ValidBadge, { data: data }) : React.createElement('div', { 'data-tag': 'allowRowEvents' })
 
                                 });
                         }
@@ -3206,12 +3189,12 @@ export default function FileTable(_ref) {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref19 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref19[0],
-                            listB = _ref19[1];
-                        var _ref20 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref20[0],
-                            b = _ref20[1];
+                        var _ref18 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref18[0],
+                            listB = _ref18[1];
+                        var _ref19 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref19[0],
+                            b = _ref19[1];
 
 
                         if (a > b) {
@@ -3260,11 +3243,12 @@ export default function FileTable(_ref) {
         var columns = useMemo(function () {
                 var columns_of_the_type = [{
                         name: '',
-                        selector: function selector(row) {
+                        button: true,
+                        cell: function cell(row) {
                                 return row.valid_badge;
                         },
                         sortable: false,
-                        width: "11%"
+                        width: "40px"
                 }, {
                         name: 'NOM',
                         selector: function selector(row) {
@@ -3354,7 +3338,8 @@ export default function FileTable(_ref) {
 
         var formattedDatas = useMemo(function () {
                 return dataFormater(node);
-        }, [node, selectedRow]);
+        }, [node]);
+        // const formattedDatas = useDataFormater(node)
 
         var reducer = function reducer(state, action) {
                 switch (action.type) {
@@ -3440,17 +3425,17 @@ export default function FileTable(_ref) {
         }, [selectedRow]);
 
         var onRowDoubleClicked = function () {
-                var _ref21 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee10(row, event) {
+                var _ref20 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee9(row, event) {
                         var tree_row, full_row_data, parent_node, doubleClickEvent;
-                        return _regeneratorRuntime.wrap(function _callee10$(_context10) {
+                        return _regeneratorRuntime.wrap(function _callee9$(_context9) {
                                 while (1) {
-                                        switch (_context10.prev = _context10.next) {
+                                        switch (_context9.prev = _context9.next) {
                                                 case 0:
                                                         console.log('db_cliked_row', row);
                                                         tree_row = document.getElementById('treeRow-' + row.id);
 
                                                         if (tree_row) {
-                                                                _context10.next = 15;
+                                                                _context9.next = 15;
                                                                 break;
                                                         }
 
@@ -3460,23 +3445,23 @@ export default function FileTable(_ref) {
                                                         console.log('checkpoint 1.5', full_row_data);
 
                                                         if (!(full_row_data.global_type === 'folder')) {
-                                                                _context10.next = 14;
+                                                                _context9.next = 14;
                                                                 break;
                                                         }
 
                                                         console.log('checkpoint 2', full_row_data);
 
                                                         parent_node = Global_State.getNodeDataById(full_row_data.parentId);
-                                                        _context10.next = 11;
+                                                        _context9.next = 11;
                                                         return onRowDoubleClicked(parent_node, '');
 
                                                 case 11:
                                                         tree_row = document.getElementById('treeRow-' + row.id);
-                                                        _context10.next = 15;
+                                                        _context9.next = 15;
                                                         break;
 
                                                 case 14:
-                                                        return _context10.abrupt('return');
+                                                        return _context9.abrupt('return');
 
                                                 case 15:
 
@@ -3499,14 +3484,14 @@ export default function FileTable(_ref) {
 
                                                 case 19:
                                                 case 'end':
-                                                        return _context10.stop();
+                                                        return _context9.stop();
                                         }
                                 }
-                        }, _callee10, _this);
+                        }, _callee9, _this);
                 }));
 
                 return function onRowDoubleClicked(_x5, _x6) {
-                        return _ref21.apply(this, arguments);
+                        return _ref20.apply(this, arguments);
                 };
         }();
 
@@ -3548,15 +3533,15 @@ export default function FileTable(_ref) {
                 }
         }];
 
-        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref22) {
-                var set = _ref22.set,
-                    filter = _ref22.filter,
-                    node = _ref22.node;
+        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref21) {
+                var set = _ref21.set,
+                    filter = _ref21.filter,
+                    node = _ref21.node;
 
 
-                var FilterComponent = useCallback(function FilterComponent(_ref23) {
-                        var set = _ref23.set,
-                            filter = _ref23.filter;
+                var FilterComponent = useCallback(function FilterComponent(_ref22) {
+                        var set = _ref22.set,
+                            filter = _ref22.filter;
 
                         switch (filter.tag) {
                                 case 'la Date de creation':
@@ -3783,9 +3768,9 @@ export default function FileTable(_ref) {
                         , selectableRowSelected: function selectableRowSelected(row) {
                                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                         },
-                        onSelectedRowsChange: function onSelectedRowsChange(_ref24) {
-                                var selectedCount = _ref24.selectedCount,
-                                    selectedRows = _ref24.selectedRows;
+                        onSelectedRowsChange: function onSelectedRowsChange(_ref23) {
+                                var selectedCount = _ref23.selectedCount,
+                                    selectedRows = _ref23.selectedRows;
                                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                         },
                         clearSelectedRows: Global_State.toggleCleared,
@@ -3794,6 +3779,7 @@ export default function FileTable(_ref) {
                         // onContextMenu={(event) => { console.log(event) }}
 
                         , paginationRowsPerPageOptions: [15, 25, 50, 100, 200],
+                        paginationPerPage: 15,
                         pagination: true,
                         paginationComponentOptions: {
                                 rowsPerPageText: 'element par page:',
