@@ -1,5 +1,7 @@
 import _regeneratorRuntime from 'babel-runtime/regenerator';
 
+var _this2 = this;
+
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
@@ -9,7 +11,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 import React, { useState, useEffect, useRef, useReducer, useMemo } from 'react';
 import useGetData, { getFromDataBase } from "./data";
 import ReactDOM from 'react-dom/client';
-import toast from "react-hot-toast";
 
 import useGetFiles from './files_package/files';
 import Global_research from "./files_package/global_research";
@@ -17,54 +18,55 @@ import Login from "./auth/login";
 import { http } from "./data";
 import Notifications from "./auth/user_notification";
 import QuickSettings from "./auth/quick_settings";
-// import FileTable from "./files_package/content";
-// import {FileIcon, defaultStyles} from 'react-file-icon';
 
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
-import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Overlay from 'react-bootstrap/Overlay';
-import Popover from 'react-bootstrap/Popover';
 
-import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
-import MailIcon from '@mui/icons-material/Mail';
 import { styled, Theme, createTheme, ThemeProvider } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 
 import { AiOutlineMenuUnfold } from "react-icons/ai";
 import { GiOverhead } from "react-icons/gi";
-import { IoMdNotifications } from "react-icons/io";
+import { TiThumbsDown, TiThumbsOk } from "react-icons/ti";
 import { MdNotificationsActive, MdOutlineArrowDropDownCircle } from "react-icons/md";
 
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
-// import './files.js';
-import EventEmitter from 'eventemitter3';
-import zIndex from "@mui/material/styles/zIndex";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useRouteError, redirect, useNavigate } from "react-router-dom";
 
-import useCustomCheckBox from './custom_checkBox/custom_check';
-import { TiThumbsDown, TiThumbsOk } from "react-icons/ti";
+export default function ErrorPage() {
+        var error = useRouteError();
+        console.error(error);
+
+        return React.createElement(
+                'div',
+                { id: 'error-page' },
+                React.createElement(
+                        'h1',
+                        null,
+                        'Oops!'
+                ),
+                React.createElement(
+                        'p',
+                        null,
+                        'Sorry, an unexpected error has occurred.'
+                ),
+                React.createElement(
+                        'p',
+                        null,
+                        React.createElement(
+                                'i',
+                                null,
+                                error.statusText || error.message
+                        )
+                )
+        );
+}
 
 export var test = "Success";
 
@@ -107,15 +109,41 @@ function Lol(_ref) {
         );
 }
 
-/* <li>
-    <a  href="activities.html">
-        <i className="nav-link-icon ti-pulse"></i>
-        <span className="nav-link-label">Activities</span>
-        <span className="badge badge-warning">New</span>
-    </a>
-</li>*/
+function Presentation() {
+
+        return React.createElement(
+                React.Fragment,
+                null,
+                React.createElement(
+                        'div',
+                        { className: 'd-none d-sm-flex flex-column justify-content-center align-items-center', style: { width: "100%", height: "100%", padding: 90 } },
+                        React.createElement('img', { className: 'mb-2', alt: 'ANAC', src: 'anac logo.jpeg' }),
+                        React.createElement(
+                                'b',
+                                { className: 'd-block', style: { textAlign: 'center', fontSize: 35, color: "#9c0505" } },
+                                ' GESTIONNAIRE DE FICHIERS',
+                                React.createElement('br', null),
+                                'DNAA/ANAC/TOGO'
+                        )
+                ),
+                React.createElement(
+                        'div',
+                        { className: 'd-flex d-sm-none flex-column justify-content-center align-items-center', style: { width: "100%", height: "100%" } },
+                        React.createElement('img', { width: 200, height: 200, className: 'mb-2', alt: 'ANAC', src: window.location.origin + '/anac logo.jpeg' }),
+                        React.createElement(
+                                'b',
+                                { className: 'd-block', style: { textAlign: 'center', color: "#9c0505" } },
+                                ' AGENCE NATIONALE',
+                                React.createElement('br', null),
+                                'DE L\'AVIATION CIVILE DU TOGO'
+                        )
+                )
+        );
+}
 
 function Header() {
+
+        var navigate = useNavigate();
 
         var dropMenuItemsUser = React.createElement(
                 React.Fragment,
@@ -133,7 +161,24 @@ function Header() {
                 React.createElement('div', { className: 'dropdown-divider' }),
                 React.createElement(
                         'a',
-                        { className: 'list-group-item text-danger' },
+                        { className: 'list-group-item text-danger', onClick: function onClick(event) {
+                                        event.preventDefault();event.stopPropagation();
+
+                                        var queryBody = new FormData();
+
+                                        toast.promise(http.post('/logout', queryBody), {
+                                                loading: "Déconnexion...",
+                                                success: "Vous etes déconnecté !!",
+                                                error: "Erreur de déconnexion"
+                                        }).then(function (res) {
+                                                console.log(res);
+                                                setTimeout(function () {
+                                                        navigate("/login");
+                                                }, 1000);
+                                        }).catch(function (err) {
+                                                console.log(err);
+                                        });
+                                } },
                         'Sign Out!'
                 )
         );
@@ -194,8 +239,10 @@ function Header() {
                                                 { className: 'justify-content-sm-end justify-content-center m-2', direction: 'row', spacing: 1, alignItems: 'center', justifyContent: 'flex-end' },
                                                 useMemo(function () {
                                                         return React.createElement(Notifications, null);
-                                                }, []),
-                                                React.createElement(QuickSettings, null),
+                                                }, [Global_State.authUser.asking_permission_notifications]),
+                                                useMemo(function () {
+                                                        return React.createElement(QuickSettings, null);
+                                                }, [Global_State.isEditorMode]),
                                                 React.createElement(Global_State.CustomDropDown, { id: 'userPanel', icon: dropTogglerContentUser, content: dropMenuItemsUser })
                                         ),
                                         React.createElement(Global_research, { display: 'd-flex d-sm-none' })
@@ -205,7 +252,7 @@ function Header() {
         );
 }
 
-function File_section() {
+function Sections_side_bar() {
         var _this = this;
 
         var sections = [];
@@ -247,8 +294,8 @@ function File_section() {
                                                         { className: 'logo' },
                                                         React.createElement(
                                                                 'a',
-                                                                { href: 'index.html' },
-                                                                React.createElement('img', { src: './style/assets/media/image/logo.png', alt: 'logo' })
+                                                                { href: '/' },
+                                                                React.createElement('img', { width: 100, height: 100, src: window.location.origin + '/Favicon_anac.png', alt: 'logo' })
                                                         )
                                                 ),
                                                 React.createElement(
@@ -310,7 +357,7 @@ function File_section() {
         );
 }
 
-function Home() {
+function File_home() {
 
         document.onkeydown = function (e) {
                 if (e.ctrlKey && e.key === 'f') return false;
@@ -349,7 +396,7 @@ function Home() {
 
                 var files = useGetFiles(React.createElement(Global_research, { display: 'd-none d-sm-flex' }));
 
-                var leftSideBar = React.createElement(File_section, null);
+                var leftSideBar = React.createElement(Sections_side_bar, null);
 
                 var _useState5 = useState(false),
                     _useState6 = _slicedToArray(_useState5, 2),
@@ -594,39 +641,6 @@ function Home() {
 
         console.log("render");
 
-        return React.createElement(
-                React.Fragment,
-                null,
-                container
-        );
-}
-
-function Page() {
-        var _useState7 = useState(React.createElement(
-                'div',
-                null,
-                'ANAC'
-        )),
-            _useState8 = _slicedToArray(_useState7, 2),
-            container = _useState8[0],
-            setContainer = _useState8[1];
-
-        useEffect(function () {
-                function checkAuthState() {
-                        http.get('user').then(function (res) {
-                                console.log(res);
-                                if (res.data === '') setContainer(React.createElement(Login, { redirectTo: function redirectTo() {
-                                                setContainer(React.createElement(Page, null));
-                                        } }));else setContainer(React.createElement(Home, null));
-                        }).catch(function (err) {
-                                console.log(err);
-                        });
-                }
-                checkAuthState();
-        }, []);
-
-        console.log("render");
-
         var theme = createTheme({
                 typography: {
                         fontFamily: '"Josefin Sans", sans-serif',
@@ -646,5 +660,102 @@ function Page() {
         );
 }
 
+function Page() {
+
+        // const [container, setContainer] = useState(<Presentation/>)
+        var container = React.createElement(Presentation, null);
+
+        var navigate = useNavigate();
+
+        // useEffect(() => {
+        //         function checkAuthState()
+        //         {
+        //                 http.get('user').then(res =>
+        //                 {
+        //                         console.log(res)
+        //                         // if(res.data === '') redirect("/login")
+        //                         // else redirect("/files")
+        //
+        //                         if(res.data === '') setContainer(<Login redirectTo = {() => {setContainer(<Page/>)}} />)
+        //                         else setContainer(<File_home/>)
+        //                 }
+        //                 )
+        //                 .catch( err => { console.log(err) })
+        //
+        //         }
+        //         checkAuthState()
+        // }, [])
+
+        useEffect(function () {
+                setTimeout(function () {
+                        navigate("/files");
+                }, 3000);
+        }, []);
+
+        console.log("render");
+
+        return container;
+}
+
+var loader = function () {
+        var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
+                var user;
+                return _regeneratorRuntime.wrap(function _callee3$(_context3) {
+                        while (1) {
+                                switch (_context3.prev = _context3.next) {
+                                        case 0:
+                                                user = void 0;
+                                                _context3.next = 3;
+                                                return http.get('user').then(function (res) {
+                                                        console.log(res);
+                                                        user = res.data;
+                                                }).catch(function (err) {
+                                                        console.log(err);
+                                                });
+
+                                        case 3:
+
+                                                console.log(user);
+
+                                                if (!(user === '')) {
+                                                        _context3.next = 8;
+                                                        break;
+                                                }
+
+                                                return _context3.abrupt('return', redirect("/login"));
+
+                                        case 8:
+                                                return _context3.abrupt('return', "ok");
+
+                                        case 9:
+                                        case 'end':
+                                                return _context3.stop();
+                                }
+                        }
+                }, _callee3, _this2);
+        }));
+
+        return function loader() {
+                return _ref5.apply(this, arguments);
+        };
+}();
+
+var router = createBrowserRouter([{
+        path: "/",
+        element: React.createElement(Page, null),
+        errorElement: React.createElement(ErrorPage, null)
+}, {
+        path: "/login",
+        element: React.createElement(Login, null)
+}, {
+        path: "/files",
+        element: React.createElement(File_home, null),
+        loader: loader
+}]);
+
 var root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(Page, null));
+root.render(React.createElement(
+        React.StrictMode,
+        null,
+        React.createElement(RouterProvider, { router: router })
+));

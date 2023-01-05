@@ -693,6 +693,17 @@ export default function FileTable(_ref) {
                                                                 _context4.next = 68;
                                                                 return http.post('move_folder', queryData).then(function (res) {
                                                                         console.log(res);
+                                                                        switch (res.data.statue) {
+                                                                                case 'success':
+                                                                                        toast('Dossier deplac\xE9 avec succ\xE8s', { type: 'success' });
+                                                                                        break;
+                                                                                case 'error':
+                                                                                        toast('Erreur survenue: ' + res.data.data.msg, { type: 'error' });
+                                                                                        break;
+                                                                                case 'info':
+                                                                                        toast('Info: ' + res.data.data.msg, { icon: "📢", style: { fontWeight: 'bold' } });
+                                                                                        break;
+                                                                        }
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
@@ -720,6 +731,17 @@ export default function FileTable(_ref) {
                                                                 _context4.next = 77;
                                                                 return http.post('move_file', queryData).then(function (res) {
                                                                         console.log(res);
+                                                                        switch (res.data.statue) {
+                                                                                case 'success':
+                                                                                        toast('Fichier deplac\xE9 avec succ\xE8s', { type: 'success' });
+                                                                                        break;
+                                                                                case 'error':
+                                                                                        toast('Erreur survenue: ' + res.data.data.msg, { type: 'error' });
+                                                                                        break;
+                                                                                case 'info':
+                                                                                        toast('Info: ' + res.data.data.msg, { icon: "📢", style: { fontWeight: 'bold' } });
+                                                                                        break;
+                                                                        }
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
@@ -857,6 +879,17 @@ export default function FileTable(_ref) {
                                                                 _context4.next = 123;
                                                                 return http.post('copy_folder', _queryData).then(function (res) {
                                                                         console.log(res);
+                                                                        switch (res.data.statue) {
+                                                                                case 'success':
+                                                                                        toast('Dossier copi\xE9 avec succ\xE8s', { type: 'success' });
+                                                                                        break;
+                                                                                case 'error':
+                                                                                        toast('Erreur survenue: ' + res.data.data.msg, { type: 'error' });
+                                                                                        break;
+                                                                                case 'info':
+                                                                                        toast('Info: ' + res.data.data.msg, { icon: "📢", style: { fontWeight: 'bold' } });
+                                                                                        break;
+                                                                        }
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
@@ -884,6 +917,17 @@ export default function FileTable(_ref) {
                                                                 _context4.next = 132;
                                                                 return http.post('copy_file', _queryData).then(function (res) {
                                                                         console.log(res);
+                                                                        switch (res.data.statue) {
+                                                                                case 'success':
+                                                                                        toast('Fichier copi\xE9 avec succ\xE8s', { type: 'success' });
+                                                                                        break;
+                                                                                case 'error':
+                                                                                        toast('Erreur survenue: ' + res.data.data.msg, { type: 'error' });
+                                                                                        break;
+                                                                                case 'info':
+                                                                                        toast('Info: ' + res.data.data.msg, { icon: "📢", style: { fontWeight: 'bold' } });
+                                                                                        break;
+                                                                        }
                                                                 }).catch(function (err) {
                                                                         console.log(err);throw err;
                                                                 });
@@ -954,7 +998,7 @@ export default function FileTable(_ref) {
                                                 toast.promise(paste_here(node), {
                                                         loading: 'Pasting...',
                                                         success: 'Processus achevé',
-                                                        error: 'err'
+                                                        error: 'Une erreur est survenue'
                                                 }, {
                                                         id: 'Pasting',
                                                         duration: Infinity
@@ -1196,16 +1240,6 @@ export default function FileTable(_ref) {
                                                                                                 icon: "info"
                                                                                         });
                                                                                         Global_State.modalManager.close_modal();
-                                                                                        break;
-                                                                                }
-                                                                        case 1:
-                                                                                {
-                                                                                        swal({
-                                                                                                title: "ERROR!",
-                                                                                                text: res.data.data.msg,
-                                                                                                icon: "error"
-                                                                                        });
-                                                                                        Global_State.modalManager.setContent(React.createElement(Audit_form, null));
                                                                                         break;
                                                                                 }
                                                                         default:
@@ -1475,16 +1509,6 @@ export default function FileTable(_ref) {
                                                                                                 icon: "info"
                                                                                         });
                                                                                         Global_State.modalManager.close_modal();
-                                                                                        break;
-                                                                                }
-                                                                        case 1:
-                                                                                {
-                                                                                        swal({
-                                                                                                title: "ERROR!",
-                                                                                                text: res.data.data.msg,
-                                                                                                icon: "error"
-                                                                                        });
-                                                                                        Global_State.modalManager.setContent(React.createElement(Folder_form, null));
                                                                                         break;
                                                                                 }
                                                                         default:
@@ -1978,21 +2002,12 @@ export default function FileTable(_ref) {
                                                                         Global_State.modalManager.close_modal();
                                                                 }
                                                         } else {
-                                                                if (res.data.data.list) {
-                                                                        swal({
-                                                                                title: "FIN!",
-                                                                                text: res.data.data.msg + '\n' + JSON.stringify(res.data.data.list),
-                                                                                icon: "error"
-                                                                        });
-                                                                        Global_State.modalManager.close_modal();
-                                                                } else {
-                                                                        swal({
-                                                                                title: "ERREUR!",
-                                                                                text: res.data.data.msg,
-                                                                                icon: "error"
-                                                                        });
-                                                                        Global_State.modalManager.setContent(React.createElement(Fs_form, null));
-                                                                }
+                                                                swal({
+                                                                        title: "ERREUR!",
+                                                                        text: res.data.data.msg,
+                                                                        icon: "error"
+                                                                });
+                                                                Global_State.modalManager.setContent(React.createElement(Fs_form, null));
                                                         }
                                                 })
 
@@ -2941,37 +2956,44 @@ export default function FileTable(_ref) {
                                                 }));
 
                                                 if (!Global_State.isEditorMode) {
-                                                        var update = function () {
-                                                                var _ref16 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee8() {
-                                                                        return _regeneratorRuntime.wrap(function _callee8$(_context8) {
-                                                                                while (1) {
-                                                                                        switch (_context8.prev = _context8.next) {
-                                                                                                case 0:
-                                                                                                        _context8.next = 2;
-                                                                                                        return http.post('update_fnc', query).then(function (res) {
-                                                                                                                console.log(res);
-                                                                                                        }).catch(function (err) {
-                                                                                                                console.log(err);throw err;
-                                                                                                        });
-
-                                                                                                case 2:
-                                                                                                case 'end':
-                                                                                                        return _context8.stop();
-                                                                                        }
-                                                                                }
-                                                                        }, _callee8, _this);
-                                                                }));
-
-                                                                return function update() {
-                                                                        return _ref16.apply(this, arguments);
-                                                                };
-                                                        }();
+                                                        // const update = async () =>
+                                                        // {
+                                                        //
+                                                        //         await http.post('update_fnc', query)
+                                                        //         .then( res => {
+                                                        //                 console.log(res)
+                                                        //         } )
+                                                        //         .catch(err => { console.log(err); throw err })
+                                                        // }
 
                                                         // console.log(selectedRow[0].id.substring(2))
-                                                        toast.promise(update(), {
+                                                        toast.promise(http.post('update_fnc', query), {
                                                                 loading: 'Loading...',
                                                                 success: 'Processus achevé',
-                                                                error: 'err'
+                                                                error: 'Erreur'
+                                                        }, {
+                                                                id: 'review_date_' + data.id,
+                                                                duration: Infinity
+                                                        }).then(function (res) {
+                                                                console.log(res);
+                                                                switch (res.data.statue) {
+                                                                        case 'success':
+                                                                                toast('La date de r\xE9vision a \xE9t\xE9 mise \xE1 jour !!', { type: 'success' });
+                                                                                break;
+                                                                        case 'error':
+                                                                                toast('Erreur survenue: ' + res.data.data.msg, { type: 'error' });
+                                                                                break;
+                                                                        case 'info':
+                                                                                toast('Info: ' + res.data.data.msg, { icon: "📢", style: { fontWeight: 'bold' } });
+                                                                                break;
+                                                                }
+                                                                setTimeout(function () {
+                                                                        toast.dismiss('review_date_' + data.id);
+                                                                }, 600);
+                                                        }).catch(function (err) {
+                                                                console.log(err);setTimeout(function () {
+                                                                        toast.dismiss('review_date_' + data.id);
+                                                                }, 600);
                                                         });
                                                 } else {
                                                         Global_State.editor.fnc.update(query);
@@ -3044,8 +3066,8 @@ export default function FileTable(_ref) {
                         );
                 };
 
-                var ValidBadge = function ValidBadge(_ref17) {
-                        var data = _ref17.data;
+                var ValidBadge = function ValidBadge(_ref16) {
+                        var data = _ref16.data;
 
                         var _useState19 = useState(false),
                             _useState20 = _slicedToArray(_useState19, 2),
@@ -3073,41 +3095,62 @@ export default function FileTable(_ref) {
                                 var route = void 0;
 
                                 switch (model) {
-                                        case 'App\\Models\\Section':
-                                                break;
                                         case 'App\\Models\\Audit':
+                                                route = 'update_audit';
                                                 break;
                                         case 'App\\Models\\checkList':
+                                                route = 'update_checkList';
                                                 break;
                                         case 'App\\Models\\DossierPreuve':
+                                                route = 'update_dp';
                                                 break;
                                         case 'App\\Models\\Nc':
+                                                route = 'update_nc';
                                                 break;
                                         case 'App\\Models\\NonConformite':
+                                                route = 'update_fnc';
                                                 break;
                                         case 'App\\Models\\DossierSimple':
                                                 route = 'update_folder';
                                                 break;
                                         case 'App\\Models\\Fichier':
+                                                route = 'update_file';
                                                 break;
                                         default:
                                                 return null;
 
                                 }
 
-                                if (!Global_State.isEditorMode) {
+                                if ( /*!Global_State.isEditorMode*/true) {
 
                                         // console.log(selectedRow[0].id.substring(2))
                                         toast.promise(http.post('' + route, query), {
-                                                loading: 'Validation...',
-                                                success: 'Validation achevé',
+                                                loading: 'Loading...',
+                                                success: 'Proccesus achevé',
                                                 error: 'err'
                                         }, {
-                                                id: '' + route + data.id
+                                                id: '' + route + data.id,
+                                                duration: Infinity
                                         }).then(function (res) {
                                                 console.log(res);
+                                                switch (res.data.statue) {
+                                                        case 'success':
+                                                                toast('L\'element a \xE9t\xE9 ' + (res.data.data.is_validated ? "validé" : "dévalidé"), { type: 'success' });
+                                                                break;
+                                                        case 'error':
+                                                                toast('Erreur survenue: ' + res.data.data.msg, { type: 'error' });
+                                                                break;
+                                                        case 'info':
+                                                                toast('Info: ' + res.data.data.msg, { icon: "📢", style: { fontWeight: 'bold' } });
+                                                                break;
+                                                }
+                                                setTimeout(function () {
+                                                        toast.dismiss('' + route + data.id);
+                                                }, 600);
                                         }).catch(function (err) {
-                                                console.log(err);throw err;
+                                                console.log(err);setTimeout(function () {
+                                                        toast.dismiss('' + route + data.id);
+                                                }, 600);
                                         });
                                 } else {
                                         // Global_State.editor.folder.update(query)
@@ -3189,12 +3232,12 @@ export default function FileTable(_ref) {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref18 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref18[0],
-                            listB = _ref18[1];
-                        var _ref19 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref19[0],
-                            b = _ref19[1];
+                        var _ref17 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref17[0],
+                            listB = _ref17[1];
+                        var _ref18 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref18[0],
+                            b = _ref18[1];
 
 
                         if (a > b) {
@@ -3425,17 +3468,17 @@ export default function FileTable(_ref) {
         }, [selectedRow]);
 
         var onRowDoubleClicked = function () {
-                var _ref20 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee9(row, event) {
+                var _ref19 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee8(row, event) {
                         var tree_row, full_row_data, parent_node, doubleClickEvent;
-                        return _regeneratorRuntime.wrap(function _callee9$(_context9) {
+                        return _regeneratorRuntime.wrap(function _callee8$(_context8) {
                                 while (1) {
-                                        switch (_context9.prev = _context9.next) {
+                                        switch (_context8.prev = _context8.next) {
                                                 case 0:
                                                         console.log('db_cliked_row', row);
                                                         tree_row = document.getElementById('treeRow-' + row.id);
 
                                                         if (tree_row) {
-                                                                _context9.next = 15;
+                                                                _context8.next = 15;
                                                                 break;
                                                         }
 
@@ -3445,23 +3488,23 @@ export default function FileTable(_ref) {
                                                         console.log('checkpoint 1.5', full_row_data);
 
                                                         if (!(full_row_data.global_type === 'folder')) {
-                                                                _context9.next = 14;
+                                                                _context8.next = 14;
                                                                 break;
                                                         }
 
                                                         console.log('checkpoint 2', full_row_data);
 
                                                         parent_node = Global_State.getNodeDataById(full_row_data.parentId);
-                                                        _context9.next = 11;
+                                                        _context8.next = 11;
                                                         return onRowDoubleClicked(parent_node, '');
 
                                                 case 11:
                                                         tree_row = document.getElementById('treeRow-' + row.id);
-                                                        _context9.next = 15;
+                                                        _context8.next = 15;
                                                         break;
 
                                                 case 14:
-                                                        return _context9.abrupt('return');
+                                                        return _context8.abrupt('return');
 
                                                 case 15:
 
@@ -3484,14 +3527,14 @@ export default function FileTable(_ref) {
 
                                                 case 19:
                                                 case 'end':
-                                                        return _context9.stop();
+                                                        return _context8.stop();
                                         }
                                 }
-                        }, _callee9, _this);
+                        }, _callee8, _this);
                 }));
 
                 return function onRowDoubleClicked(_x5, _x6) {
-                        return _ref20.apply(this, arguments);
+                        return _ref19.apply(this, arguments);
                 };
         }();
 
@@ -3533,15 +3576,15 @@ export default function FileTable(_ref) {
                 }
         }];
 
-        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref21) {
-                var set = _ref21.set,
-                    filter = _ref21.filter,
-                    node = _ref21.node;
+        var SubHeaderComponent = useCallback(function SubHeaderComponent(_ref20) {
+                var set = _ref20.set,
+                    filter = _ref20.filter,
+                    node = _ref20.node;
 
 
-                var FilterComponent = useCallback(function FilterComponent(_ref22) {
-                        var set = _ref22.set,
-                            filter = _ref22.filter;
+                var FilterComponent = useCallback(function FilterComponent(_ref21) {
+                        var set = _ref21.set,
+                            filter = _ref21.filter;
 
                         switch (filter.tag) {
                                 case 'la Date de creation':
@@ -3768,9 +3811,9 @@ export default function FileTable(_ref) {
                         , selectableRowSelected: function selectableRowSelected(row) {
                                 justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                         },
-                        onSelectedRowsChange: function onSelectedRowsChange(_ref23) {
-                                var selectedCount = _ref23.selectedCount,
-                                    selectedRows = _ref23.selectedRows;
+                        onSelectedRowsChange: function onSelectedRowsChange(_ref22) {
+                                var selectedCount = _ref22.selectedCount,
+                                    selectedRows = _ref22.selectedRows;
                                 if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                         },
                         clearSelectedRows: Global_State.toggleCleared,

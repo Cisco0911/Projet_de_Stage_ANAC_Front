@@ -3,7 +3,6 @@
 import React, {useState, useEffect, useRef, useReducer, useMemo} from 'react';
 import useGetData, {getFromDataBase} from "./data";
 import ReactDOM from 'react-dom/client';
-import toast from "react-hot-toast";
 
 import useGetFiles from './files_package/files';
 import Global_research from "./files_package/global_research";
@@ -11,57 +10,46 @@ import Login from "./auth/login";
 import { http } from "./data";
 import Notifications from "./auth/user_notification";
 import QuickSettings from "./auth/quick_settings";
-// import FileTable from "./files_package/content";
-// import {FileIcon, defaultStyles} from 'react-file-icon';
 
-import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
-import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Overlay from 'react-bootstrap/Overlay';
-import Popover from 'react-bootstrap/Popover';
 
-import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
-import MailIcon from '@mui/icons-material/Mail';
 import { styled, Theme, createTheme, ThemeProvider } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 
 import { AiOutlineMenuUnfold } from "react-icons/ai";
 import { GiOverhead } from "react-icons/gi";
-import { IoMdNotifications } from "react-icons/io";
+import {TiThumbsDown, TiThumbsOk} from "react-icons/ti";
 import { MdNotificationsActive, MdOutlineArrowDropDownCircle } from "react-icons/md";
 
-import {Toaster} from "react-hot-toast";
+import toast, {Toaster} from "react-hot-toast";
 
-// import './files.js';
-import EventEmitter from 'eventemitter3';
-import zIndex from "@mui/material/styles/zIndex";
-
-import useCustomCheckBox  from './custom_checkBox/custom_check'
-import {TiThumbsDown, TiThumbsOk} from "react-icons/ti";
-
+import {
+        createBrowserRouter,
+        RouterProvider,
+} from "react-router-dom";
+import { useRouteError, redirect, useNavigate } from "react-router-dom";
 
 
+
+export default function ErrorPage() {
+        const error = useRouteError();
+        console.error(error);
+
+        return (
+        <div id="error-page">
+                <h1>Oops!</h1>
+                <p>Sorry, an unexpected error has occurred.</p>
+                <p>
+                        <i>{error.statusText || error.message}</i>
+                </p>
+        </div>
+        );
+}
 
 
 export const test = "Success"
@@ -73,7 +61,7 @@ export let Global_State = {};
 
 function Lol({lal}) {
 
-    const [o, setO] = useState(true)
+        const [o, setO] = useState(true)
 
         let [iconOK, iconNO] =
         [
@@ -86,35 +74,46 @@ function Lol({lal}) {
                 iconOK = <span> p </span>
         }
 
-    return (
+        return (
         <div onClick={ event => { setO(!o) } }
-        style={
-                {
-                        width: '100vh',
-                        height: '100vh',
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                }
-        }
+             style={
+                     {
+                             width: '100vh',
+                             height: '100vh',
+                             display: "flex",
+                             alignItems: "center",
+                             justifyContent: "center"
+                     }
+             }
         >
                 {iconOK}
         </div>
-    );
+        );
 }
 
-/* <li>
-    <a  href="activities.html">
-        <i className="nav-link-icon ti-pulse"></i>
-        <span className="nav-link-label">Activities</span>
-        <span className="badge badge-warning">New</span>
-    </a>
-</li>*/
 
-
-
-function Header() 
+function Presentation()
 {
+
+        return(
+                <React.Fragment>
+                        <div className={`d-none d-sm-flex flex-column justify-content-center align-items-center`} style={{ width: "100%", height: "100%", padding: 90 }} >
+                                <img className={`mb-2`} alt={`ANAC`} src = {`anac logo.jpeg`} />
+                                <b className={`d-block`} style={{ textAlign: 'center', fontSize: 35, color: "#9c0505" }} > GESTIONNAIRE DE FICHIERS<br/>DNAA/ANAC/TOGO</b>
+                        </div>
+                        <div className={`d-flex d-sm-none flex-column justify-content-center align-items-center`} style={{ width: "100%", height: "100%" }} >
+                                <img width={200} height={200} className={`mb-2`} alt={`ANAC`} src={`${window.location.origin}/anac logo.jpeg`} />
+                                <b className={`d-block`} style={{ textAlign: 'center', color: "#9c0505" }} > AGENCE NATIONALE<br/>DE L'AVIATION CIVILE DU TOGO</b>
+                        </div>
+                </React.Fragment>
+        )
+}
+
+
+function Header()
+{
+
+        const navigate = useNavigate()
 
         const dropMenuItemsUser = (
         <React.Fragment>
@@ -123,7 +122,31 @@ function Header()
                         <h5 className="mb-0">{`${Global_State.authUser.name} ${Global_State.authUser.second_name}`}</h5>
                 </div>
                 <div className="dropdown-divider"/>
-                <a className="list-group-item text-danger" >Sign Out!</a>
+                <a className="list-group-item text-danger" onClick={
+                        event =>
+                        {
+                                event.preventDefault(); event.stopPropagation()
+
+                                const queryBody = new FormData()
+
+                                toast.promise(
+                                http.post('/logout', queryBody),
+                                        {
+                                                loading: "Déconnexion...",
+                                                success: "Vous etes déconnecté !!",
+                                                error: "Erreur de déconnexion"
+                                        }
+                                )
+                                .then(
+                                        res =>
+                                        {
+                                                console.log(res)
+                                                setTimeout( () => { navigate("/login") }, 1000 )
+                                        }
+                                )
+                                .catch(err => {console.log(err)})
+                        }
+                } >Sign Out!</a>
         </React.Fragment>
         )
         const dropTogglerContentUser = (
@@ -141,7 +164,7 @@ function Header()
 
 
         return (
-                <Navbar /* bg="light"  */ expand="sm" style={{padding: 0}}>
+        <Navbar /* bg="light"  */ expand="sm" style={{padding: 0}}>
                 <Container fluid style={{ justifyContent: 'end', alignItems: 'start', paddingRight: '15px', }} >
                         {/* <Navbar.Brand href="#">Navbar scroll</Navbar.Brand> */}
                         <Navbar.Toggle className='p-0  justify-content-start align-items-start d-flex d-sm-none' aria-controls={`offcanvasNavbar-expand-${'sm'}`} children = {<GiOverhead size={40} />}
@@ -159,57 +182,13 @@ function Header()
                         className = 'container-fluid d-flex flex-row justify-content-end'
                         style={{/* width: '100%' */ height: 105, padding: 0}}
                         >
-                                {/* <Nav
-                className="me-auto my-2 my-lg-0"
-                style={{ maxHeight: '100px' }}
-                navbarScroll
-            >
-                <Nav.Link href="#action1">Home</Nav.Link>
-                <Nav.Link href="#action2">Link</Nav.Link>
-                <NavDropdown title="Link" id="navbarScrollingDropdown">
-                <NavDropdown.Item href="#action3">Action</NavDropdown.Item>
-                <NavDropdown.Item href="#action4">
-                    Another action
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item href="#action5">
-                    Something else here
-                </NavDropdown.Item>
-                </NavDropdown>
-                <Nav.Link href="#" disabled>
-                Link
-                </Nav.Link>
-            </Nav>
-            <Form className="d-flex">
-                <Form.Control
-                type="search"
-                placeholder="Search"
-                className="me-2"
-                aria-label="Search"
-                />
-                <Button variant="outline-success">Search</Button>
-            </Form> */}
-
-                                {/*<Col md = {5} >*/}
-                                {/*    <Form className="d-flex">*/}
-                                {/*        <Form.Control*/}
-                                {/*        type="search"*/}
-                                {/*        placeholder="Search"*/}
-                                {/*        className="me-2"*/}
-                                {/*        aria-label="Search"*/}
-                                {/*        value={pre.current}*/}
-                                {/*        />*/}
-                                {/*        <Button onClick={() => { console.log('handleClick'); Global_State.EventsManager.emit('increase')}} className='justify-content-center' variant="outline-primary" >Search</Button>*/}
-                                {/*    </Form>*/}
-                                {/*</Col>*/}
-
                                 <div className={ 'd-flex justify-content-start flex-column container-fluid p-0' } >
 
                                         <Stack className='justify-content-sm-end justify-content-center m-2' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
 
-                                                {useMemo( () => <Notifications/>, [] )}
+                                                {useMemo( () => <Notifications/>, [Global_State.authUser.asking_permission_notifications] )}
 
-                                                <QuickSettings />
+                                                {useMemo( () => <QuickSettings />, [Global_State.isEditorMode] )}
 
                                                 <Global_State.CustomDropDown id = 'userPanel' icon={dropTogglerContentUser} content={dropMenuItemsUser} />
 
@@ -226,84 +205,84 @@ function Header()
 }
 
 
-function File_section()
+function Sections_side_bar()
 {
-    let sections = []
-    // console.log(Global_State.sections)
-    Global_State.sections.forEach(
-        (section) => 
+        let sections = []
+        // console.log(Global_State.sections)
+        Global_State.sections.forEach(
+        (section) =>
         {
-            sections.push( section )
+                sections.push( section )
         }
-    )
+        )
 
-    return (
+        return (
         <div style={{width: 'auto', height: 'auto' }}>
-          <Navbar key={'xl'} expand={'xl'} style = {{padding: '0 30px'}} >
-            <Container fluid style={{ justifyContent: 'start', alignItems: 'start' }} >
-                {/* <Navbar.Brand href="#">Navbar Offcanvas</Navbar.Brand> */}
-                <Navbar.Toggle className='p-0 d-flex justify-content-center align-items-start' aria-controls={`offcanvasNavbar-expand-${'xl'}`} children = {<AiOutlineMenuUnfold size={50} />} 
-                style={{ 
-                    width: 50, 
-                    height: 50, 
-                    color: 'rgb(0 0 0)', 
-                    border: 'none', 
-                    }} 
-                />
-                <Navbar.Offcanvas
-                id={`offcanvasNavbar-expand-${'xl'}`}
-                aria-labelledby={`offcanvasNavbarLabel-expand-${'xl'}`}
-                placement="start"
-                style={{width: 110 }}
-                >
-                    <div className="navigation bg-dark" >
-                    <div className="logo">
-                        <a href="index.html">
-                            <img src="./style/assets/media/image/logo.png" alt="logo"/>
-                        </a>
-                    </div>
-                    <ul>
-                        {
-                            sections.map(
-                                (section, idx) =>
-                                {
-                                    // console.log(sections)
-                                    return (
-                                        <li key={ section.id } className= { sections.length - 1 === idx ? "flex-grow-1" : "" } style = {{marginBottom: 10}} onClick = { async () => { 
-                                            await Global_State.setSectionId(section.id) 
-                                            Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.current.get(section.id) )
-                                            } } > 
-    
-                                            <a  className= { Global_State.selectedSectionId === section.id ? "active" : "" } >
-                                                <i className="nav-link-icon ti-file"></i>
-                                                <span className="nav-link-label">{ section.name }</span>
-                                            </a>
-                                        </li>
-                                    )
-                                }
-                            )
-                        }
-    
-    
-                        <li>
-                            <a  href="settings.html">
-                                <i className="nav-link-icon ti-settings"></i>
-                                <span className="nav-link-label">Settings</span>
-                            </a>
-                        </li>
-                    </ul>
-                    </div>
-                </Navbar.Offcanvas>
-            </Container>
-          </Navbar>
-      </div>
+                <Navbar key={'xl'} expand={'xl'} style = {{padding: '0 30px'}} >
+                        <Container fluid style={{ justifyContent: 'start', alignItems: 'start' }} >
+                                {/* <Navbar.Brand href="#">Navbar Offcanvas</Navbar.Brand> */}
+                                <Navbar.Toggle className='p-0 d-flex justify-content-center align-items-start' aria-controls={`offcanvasNavbar-expand-${'xl'}`} children = {<AiOutlineMenuUnfold size={50} />}
+                                               style={{
+                                                       width: 50,
+                                                       height: 50,
+                                                       color: 'rgb(0 0 0)',
+                                                       border: 'none',
+                                               }}
+                                />
+                                <Navbar.Offcanvas
+                                id={`offcanvasNavbar-expand-${'xl'}`}
+                                aria-labelledby={`offcanvasNavbarLabel-expand-${'xl'}`}
+                                placement="start"
+                                style={{width: 110 }}
+                                >
+                                        <div className="navigation bg-dark" >
+                                                <div className="logo">
+                                                        <a href="/">
+                                                                <img width={100} height={100} src={`${window.location.origin}/Favicon_anac.png`} alt="logo"/>
+                                                        </a>
+                                                </div>
+                                                <ul>
+                                                        {
+                                                                sections.map(
+                                                                (section, idx) =>
+                                                                {
+                                                                        // console.log(sections)
+                                                                        return (
+                                                                        <li key={ section.id } className= { sections.length - 1 === idx ? "flex-grow-1" : "" } style = {{marginBottom: 10}} onClick = { async () => {
+                                                                                await Global_State.setSectionId(section.id)
+                                                                                Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.current.get(section.id) )
+                                                                        } } >
+
+                                                                                <a  className= { Global_State.selectedSectionId === section.id ? "active" : "" } >
+                                                                                        <i className="nav-link-icon ti-file"></i>
+                                                                                        <span className="nav-link-label">{ section.name }</span>
+                                                                                </a>
+                                                                        </li>
+                                                                        )
+                                                                }
+                                                                )
+                                                        }
+
+
+                                                        <li>
+                                                                <a  href="settings.html">
+                                                                        <i className="nav-link-icon ti-settings"></i>
+                                                                        <span className="nav-link-label">Settings</span>
+                                                                </a>
+                                                        </li>
+                                                </ul>
+                                        </div>
+                                </Navbar.Offcanvas>
+                        </Container>
+                </Navbar>
+        </div>
         );
 
 }
 
 
 
-function Home()
+function File_home()
 {
 
         document.onkeydown = function (e) {
@@ -321,7 +300,7 @@ function Home()
 
         // console.log(Data_Base)
 
-        const container  = Data_Base === null ? <div className="preloader"> <div className="preloader-icon"></div> </div> : <Load datas ={JSON.parse(JSON.stringify(Data_Base))} />
+        const container  = Data_Base === null ? <div className="preloader"> <div className="preloader-icon" /> </div> : <Load datas ={JSON.parse(JSON.stringify(Data_Base))} />
 
         function Load({datas})
         {
@@ -333,7 +312,7 @@ function Home()
 
                 const files = useGetFiles(<Global_research display={'d-none d-sm-flex'} />)
 
-                const leftSideBar = <File_section/>;
+                const leftSideBar = <Sections_side_bar/>;
 
                 const [ hide, setHide ] = useState(false)
 
@@ -496,13 +475,24 @@ function Home()
 
         console.log("render")
 
+        const theme = createTheme({
+                typography: {
+                        fontFamily: '"Josefin Sans", sans-serif',
+                        userDropButton:
+                        {
+                                '&:hover':
+                                {
+                                        color: '#6c757d',
+                                },
+                        },
 
-
+                },
+        });
 
         return(
-        <React.Fragment>
+        <ThemeProvider theme={theme}>
                 {container}
-        </React.Fragment>
+        </ThemeProvider>
         )
 }
 
@@ -511,59 +501,80 @@ function Home()
 function Page()
 {
 
-        const [container, setContainer] = useState(
-        <div>
-            ANAC
-        </div>
-        )
+        // const [container, setContainer] = useState(<Presentation/>)
+        const container = <Presentation />
 
+        const navigate = useNavigate()
+
+        // useEffect(() => {
+        //         function checkAuthState()
+        //         {
+        //                 http.get('user').then(res =>
+        //                 {
+        //                         console.log(res)
+        //                         // if(res.data === '') redirect("/login")
+        //                         // else redirect("/files")
+        //
+        //                         if(res.data === '') setContainer(<Login redirectTo = {() => {setContainer(<Page/>)}} />)
+        //                         else setContainer(<File_home/>)
+        //                 }
+        //                 )
+        //                 .catch( err => { console.log(err) })
+        //
+        //         }
+        //         checkAuthState()
+        // }, [])
 
         useEffect(() => {
-            function checkAuthState()
-            {
-                http.get('user').then(res =>
-                    {
-                        console.log(res)
-                        if(res.data === '') setContainer(<Login redirectTo = {() => {setContainer(<Page/>)}} />) 
-                        else setContainer(<Home/>)
-                    }
-                    )
-                    .catch( err => { console.log(err) })
-            
-            }
-            checkAuthState()
+                setTimeout( () => { navigate("/files") }, 3000 )
         }, [])
 
         console.log("render")
 
-        
-        const theme = createTheme({
-            typography: {
-                fontFamily: '"Josefin Sans", sans-serif',
-                userDropButton:
-                {
-                    '&:hover': 
-                    {
-                      color: '#6c757d',
-                    },
-                },
-                
-            },
-          });
-        
-    
         return(
-            <ThemeProvider theme={theme}>
-                {container}
-            </ThemeProvider>
-            )
-        
-    
+        container
+        )
 
 }
 
+const loader = async () => {
+        let user
+        await http.get('user')
+        .then(
+                res =>
+                {
+                        console.log(res)
+                        user = res.data
+                }
+        )
+        .catch( err => { console.log(err) })
 
+        console.log(user)
 
+        if(user === '') return redirect("/login")
+        else return "ok"
+};
+
+const router = createBrowserRouter([
+        {
+                path: "/",
+                element: <Page />,
+                errorElement: <ErrorPage />,
+        },
+        {
+                path: "/login",
+                element: <Login />,
+        },
+        {
+                path: "/files",
+                element: <File_home />,
+                loader: loader
+        },
+]);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<Page />);
+root.render(
+<React.StrictMode>
+        <RouterProvider router={router} />
+</React.StrictMode>
+);

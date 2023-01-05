@@ -1,5 +1,7 @@
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 /* eslint-disable import/first */
 
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
@@ -27,6 +29,8 @@ import { FaEye } from "react-icons/fa";
 import { TiThumbsOk, TiThumbsDown } from "react-icons/ti";
 
 import { useSpring, animated } from "react-spring";
+import { Collapse } from "react-bootstrap";
+import { Box, Popper } from "@mui/material";
 
 var readNotifs = [];
 
@@ -217,7 +221,15 @@ function AskingPermitComponent(_ref) {
 
                                                                 http.post('authorization_response', queryBody).then(function (res) {
                                                                         console.log(res);
-                                                                        dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true });
+                                                                        if (res.data.statue === 'success') {
+                                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true });
+
+                                                                                setTimeout(function () {
+                                                                                        Global_State.EventsManager.emit('updateAuthUserInfo');
+                                                                                }, 1000);
+                                                                        } else {
+                                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'attente', approved: null });
+                                                                        }
                                                                 }).catch(function (err) {
                                                                         return console.log(err);
                                                                 });
@@ -241,6 +253,25 @@ function AskingPermitComponent(_ref) {
 
                                                                 console.log("Rejectedddddddddddddd");
                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: false });
+
+                                                                var queryBody = new FormData();
+                                                                queryBody.append('demand_id', ap_notif.id);
+                                                                queryBody.append('approved', '0');
+
+                                                                http.post('authorization_response', queryBody).then(function (res) {
+                                                                        console.log(res);
+                                                                        if (res.data.statue === 'success') {
+                                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: false });
+
+                                                                                setTimeout(function () {
+                                                                                        Global_State.EventsManager.emit('updateAuthUserInfo');
+                                                                                }, 1000);
+                                                                        } else {
+                                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'attente', approved: null });
+                                                                        }
+                                                                }).catch(function (err) {
+                                                                        return console.log(err);
+                                                                });
                                                         }
                                                 },
                                                 iconNO
@@ -251,15 +282,7 @@ function AskingPermitComponent(_ref) {
         );
 }
 
-function useAskingPermitNotif() {
-        var _useState = useState(JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications))),
-            _useState2 = _slicedToArray(_useState, 2),
-            askingPermitNotif = _useState2[0],
-            update = _useState2[1];
-
-        useEffect(function () {
-                if (!(JSON.stringify(askingPermitNotif) === JSON.stringify(Global_State.authUser.asking_permission_notifications))) update(JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)));
-        }, [Global_State.authUser]);
+function useAskingPermitNotif(asking_permission_notifications) {
 
         var reducer = function reducer(state, action) {
                 switch (action.type) {
@@ -273,9 +296,9 @@ function useAskingPermitNotif() {
                                         }
                                 });
                         case 'delete':
-                                return state.filter(function (notif) {
+                                return [].concat(_toConsumableArray(state.filter(function (notif) {
                                         return notif.id !== action.id;
-                                });
+                                })));
                         case 'add':
                                 return action.newState;
                         default:
@@ -285,10 +308,10 @@ function useAskingPermitNotif() {
 
         // initData is always up to date
         var initData = useMemo(function () {
-                return askingPermitNotif.map(function (notif) {
+                return asking_permission_notifications.map(function (notif) {
                         return Object.assign({}, notif, { state: 'attente', approved: null });
                 });
-        }, [askingPermitNotif]);
+        }, [asking_permission_notifications]);
 
         var _useReducer = useReducer(reducer, initData),
             _useReducer2 = _slicedToArray(_useReducer, 2),
@@ -298,17 +321,6 @@ function useAskingPermitNotif() {
         useEffect(function () {
                 dispatch({ type: 'add', newState: initData });
         }, [initData]);
-
-        // let askingPermitNotifComponents = []
-        //
-        // // const [test, setTest] = useState(true)
-        //
-        // notifsState.map(
-        //         ap_notif =>
-        //         {
-        //                 askingPermitNotifComponents.push( <AskingPermitComponent key={ap_notif.id} ap_notif={ap_notif} dispatch={dispatch} /> )
-        //         }
-        // )
 
         var askingPermitNotifComponents = useMemo(function () {
                 return notifsState.map(function (ap_notif) {
@@ -320,10 +332,10 @@ function useAskingPermitNotif() {
 }
 
 function useOnScreen(root) {
-        var _useState3 = useState(false),
-            _useState4 = _slicedToArray(_useState3, 2),
-            isIntersecting = _useState4[0],
-            setIntersecting = _useState4[1];
+        var _useState = useState(false),
+            _useState2 = _slicedToArray(_useState, 2),
+            isIntersecting = _useState2[0],
+            setIntersecting = _useState2[1];
 
         var observer = new IntersectionObserver(function (_ref2) {
                 var _ref3 = _slicedToArray(_ref2, 1),
@@ -585,15 +597,15 @@ function useOpen(init_val) {
 function RingingBell(_ref7) {
         var icon = _ref7.icon;
 
-        var _useState5 = useState(false),
-            _useState6 = _slicedToArray(_useState5, 2),
-            reverse = _useState6[0],
-            set = _useState6[1];
+        var _useState3 = useState(false),
+            _useState4 = _slicedToArray(_useState3, 2),
+            reverse = _useState4[0],
+            set = _useState4[1];
 
-        var _useState7 = useState(0),
-            _useState8 = _slicedToArray(_useState7, 2),
-            to_delay = _useState8[0],
-            setD = _useState8[1];
+        var _useState5 = useState(0),
+            _useState6 = _slicedToArray(_useState5, 2),
+            to_delay = _useState6[0],
+            setD = _useState6[1];
 
         // Define the animation
 
@@ -630,6 +642,7 @@ function RingingBell(_ref7) {
 }
 
 export default function Notifications() {
+        var id = 'notifPanel';
 
         var StyledBadge = styled(Badge)(function (_ref8) {
                 var theme = _ref8.theme;
@@ -663,7 +676,24 @@ export default function Notifications() {
                 )
         );
 
-        var askingPermitNotifs = useAskingPermitNotif();
+        var _useState7 = useState(JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications))),
+            _useState8 = _slicedToArray(_useState7, 2),
+            askingPermitNotif = _useState8[0],
+            update = _useState8[1];
+
+        useEffect(function () {
+                console.log('check_update_asking_permit_notifs');
+                if (!(JSON.stringify(askingPermitNotif) === JSON.stringify(Global_State.authUser.asking_permission_notifications))) {
+                        console.log('update_asking_permit_notifs');
+                        update(JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)));
+                }
+        }, [Global_State.authUser.asking_permission_notifications]);
+
+        useEffect(function () {
+                console.log('rerendring_notiffffffffffffffffffffffffffs');
+        });
+
+        var askingPermitNotifs = useAskingPermitNotif(askingPermitNotif);
         var unreadReviewNotifs = useUnreadReviewNotif();
         var readReviewNotifs = useReadReviewNotif();
 
@@ -720,6 +750,10 @@ export default function Notifications() {
                 };
         }, []);
 
+        // const [anchorEl, setAnchorEl] = useState(null);
+        //
+        // const isOpen = Boolean(anchorEl)
+
         useEffect(function () {
                 console.log(isOpen, "notifPanel");
                 if (readNotifs.length !== 0 && !isOpen) {
@@ -739,6 +773,70 @@ export default function Notifications() {
                         });
                 }
         }, [isOpen]);
+
+        // const handleEnter = (event) => {
+        //         setAnchorEl(event.currentTarget);
+        // };
+        //
+        // const handleLeave = () => {
+        //         setAnchorEl(null);
+        // };
+        //
+        // const open = Boolean(anchorEl);
+        // const drop_id = open ? id : undefined;
+        //
+        // useEffect(() => {
+        //         /**
+        //          * Alert if clicked on outside of element
+        //          */
+        //         function handleClickOutside(event) {
+        //                 // console.log('outside')
+        //                 const dropdown = document.getElementById(id)
+        //                 if (dropdown && !dropdown.contains(event.target)) {
+        //                         // console.log('outside')
+        //                         handleLeave()
+        //                 }
+        //         }
+        //         // Bind the event listener
+        //         document.addEventListener("click", handleClickOutside);
+        //         return () => {
+        //                 // Unbind the event listener on clean up
+        //                 console.log('byeeeeeeeeeeeeeeeeeeeee')
+        //                 document.removeEventListener("click", handleClickOutside);
+        //
+        //         };
+        //
+        // }, [])
+
+        // return (
+        // <div id={id} onMouseEnter={handleEnter} onMouseLeave={handleLeave} >
+        //         <div>{notifButton}</div>
+        //         <Collapse
+        //         in={isOpen}
+        //         >
+        //                 <Popper id={`${drop_id}_pop`}
+        //                         style={{
+        //                                 zIndex: 999,
+        //                                 borderRadius: '0.25rem',
+        //                                 fontSize: '14px',
+        //                                 border: 'none',
+        //                                 boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
+        //                                 overflow: 'hidden',
+        //                                 padding: '0.5rem',
+        //                                 maxHeight: ( (window.innerHeight/100)*80 ),
+        //                                 backgroundColor: "white",
+        //                         }}
+        //                         open={isOpen}
+        //                         anchorEl={anchorEl}
+        //                 >
+        //                         <Box>
+        //                                 {renderingComponent}
+        //                         </Box>
+        //                 </Popper>
+        //         </Collapse>
+        // </div>
+        // );
+
 
         return useMemo(function () {
                 return React.createElement(Global_State.CustomDropDown, { id: 'notifPanel', icon: notifButton, content: renderingComponent });

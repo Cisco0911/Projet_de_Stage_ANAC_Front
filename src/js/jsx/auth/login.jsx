@@ -15,145 +15,179 @@ import Row from 'react-bootstrap/Row';
 import { Formik } from 'formik';
 import * as yup from 'yup'
 
+import { useNavigate } from "react-router-dom";
 
 
 
 
 
-function useLogin(submittedInfo, redirect) 
+
+// function useLogin(submittedInfo)
+// {
+//
+//         const navigate = useNavigate()
+//
+//         http.get('/sanctum/csrf-cookie')
+//         .then(response => {
+//                 console.log(response)
+//
+//                 let queryBody = new FormData()
+//
+//                 queryBody.append("num_inspector",  submittedInfo.num_inspector)
+//                 queryBody.append("password", submittedInfo.pwd)
+//
+//                 // console.log(queryBody)
+//
+//                 http.post('/login', queryBody)
+//                 .then(
+//                 res =>
+//                 {
+//                         console.log(res)
+//
+//                         navigate("/files")
+//
+//                 })
+//                 .catch(err => {console.log(err)})
+//
+//
+//
+//         })
+//         .catch(err => {console.log(err)})
+//
+// }
+
+
+export default function Login()
 {
-    http.get('/sanctum/csrf-cookie')
-    .then(response => {
-        console.log(response)
 
-        let queryBody = new FormData()
+        const navigate = useNavigate()
 
-        queryBody.append("num_inspector",  submittedInfo.num_inspector)
-        queryBody.append("password", submittedInfo.pwd)
+        const msg_err = "Valeur de champ invalide"
 
-        // console.log(queryBody)
+        useEffect(
+                () =>
+                {
+                        http.get('/sanctum/csrf-cookie')
+                        .then(response => {
+                                console.log(response)
+                        })
+                        .catch(err => {console.log(err)})
+                }, []
+        )
 
-        http.post('/login', queryBody)
-        .then(
-            res => 
-            {
-                console.log(res)
-                // http.get('user').then(res => {console.log(res)})
-                redirect()
+        const handleSubmit = (submittedInfo) =>
+        {
+                console.log(submittedInfo)
 
-            })
-        .catch(err => {console.log(err)})
+                let queryBody = new FormData()
 
+                queryBody.append("num_inspector",  submittedInfo.num_inspector)
+                queryBody.append("password", submittedInfo.pwd)
 
+                // console.log(queryBody)
 
-    })
-    .catch(err => {console.log(err)})
-    
-}
+                http.post('/login', queryBody)
+                .then(
+                res =>
+                {
+                        console.log(res)
 
+                        navigate("/files")
 
-export default function Login({redirectTo})
-{
+                })
+                .catch(err => {console.log(err)})
 
+        };
 
-    const msg_err = "Valeur de champ invalide"
-
-    const useHandleSubmit = (submittedInfo) => {
-
-        const response = useLogin(submittedInfo, redirectTo)
-
-        console.log(submittedInfo)
-    };
-
-    const validationRules = yup.object().shape({
-        num_inspector: yup.string().required(),
-        pwd: yup.string().required(),
-      });
+        const validationRules = yup.object().shape({
+                num_inspector: yup.string().required(),
+                pwd: yup.string().required(),
+        });
 
 
-    return (
+        return (
         <Container
         style = {
-            {
-            width: 400,
-            justifyContent: 'center',
-            position: 'relative',
-            alignItems: 'center',
-            }
+                {
+                        width: 400,
+                        justifyContent: 'center',
+                        position: 'relative',
+                        alignItems: 'center',
+                }
         }
         >
-            <Formik 
-            validationSchema={validationRules}
-            onSubmit={ useHandleSubmit }
-            initialValues={{
-                num_inspector: '',
-                pwd: '',
-            }}
-            >
-                {
-                    (
+                <Formik
+                validationSchema={validationRules}
+                onSubmit={ handleSubmit }
+                initialValues={{
+                        num_inspector: '',
+                        pwd: '',
+                }}
+                >
                         {
-                            handleSubmit,
-                            handleChange,
-                            handleBlur,
-                            values,
-                            touched,
-                            isValid,
-                            errors,
-                        }
-                    ) => 
-                    (
-                        <Form value = {undefined} onSubmit={handleSubmit} >
-                            <Form.Group className="mb-3" >
-                                <Form.Label>Numero Inspecteur</Form.Label>
-                                <Form.Control 
-                                name="num_inspector"
-                                value={values.num_inspector}
-                                onChange={handleChange} 
-                                type="text" 
-                                placeholder="..."
-                                isInvalid={!!errors.num_inspector}
-                                    />
-                                <Form.Control.Feedback type="invalid">
-                                    {msg_err}
-                                </Form.Control.Feedback>
-                            </Form.Group>
-                            <Form.Group className="mb-3" >
-                                <Form.Label>Mot de passe</Form.Label>
-                                <Form.Control 
-                                name="pwd"
-                                value={values.pwd}
-                                onChange={handleChange} 
-                                type="text" 
-                                placeholder="..."
-                                isInvalid={!!errors.pwd}
-                                    />
-                                <Form.Control.Feedback type="invalid">
-                                    {msg_err}
-                                </Form.Control.Feedback>
-                            </Form.Group>
-                            <div
-                                style = {
-                                    {
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    position: 'relative',
-                                    alignItems: 'center',
-                                    }
+                                (
+                                {
+                                        handleSubmit,
+                                        handleChange,
+                                        handleBlur,
+                                        values,
+                                        touched,
+                                        isValid,
+                                        errors,
                                 }
-                                >
-                                <Button variant="primary" type="submit">
-                                    Connexion
-                                </Button>
-                            </div>
-                        </Form>
-                    )
-                }
+                                ) =>
+                                (
+                                <Form value = {undefined} onSubmit={handleSubmit} >
+                                        <Form.Group className="mb-3" >
+                                                <Form.Label>Numero Inspecteur</Form.Label>
+                                                <Form.Control
+                                                name="num_inspector"
+                                                value={values.num_inspector}
+                                                onChange={handleChange}
+                                                type="text"
+                                                placeholder="..."
+                                                isInvalid={!!errors.num_inspector}
+                                                />
+                                                <Form.Control.Feedback type="invalid">
+                                                        {msg_err}
+                                                </Form.Control.Feedback>
+                                        </Form.Group>
+                                        <Form.Group className="mb-3" >
+                                                <Form.Label>Mot de passe</Form.Label>
+                                                <Form.Control
+                                                name="pwd"
+                                                value={values.pwd}
+                                                onChange={handleChange}
+                                                type="text"
+                                                placeholder="..."
+                                                isInvalid={!!errors.pwd}
+                                                />
+                                                <Form.Control.Feedback type="invalid">
+                                                        {msg_err}
+                                                </Form.Control.Feedback>
+                                        </Form.Group>
+                                        <div
+                                        style = {
+                                                {
+                                                        display: 'flex',
+                                                        justifyContent: 'center',
+                                                        position: 'relative',
+                                                        alignItems: 'center',
+                                                }
+                                        }
+                                        >
+                                                <Button variant="primary" type="submit">
+                                                        Connexion
+                                                </Button>
+                                        </div>
+                                </Form>
+                                )
+                        }
 
-            </Formik>
+                </Formik>
         </Container>
-    
-    )
+
+        )
 
 
 }

@@ -406,7 +406,24 @@ export default function FileTable({set})
                                                         else
                                                         {
                                                                 await http.post('move_folder', queryData)
-                                                                .then( res => { console.log(res) } )
+                                                                .then(
+                                                                        res =>
+                                                                        {
+                                                                                console.log(res)
+                                                                                switch (res.data.statue)
+                                                                                {
+                                                                                        case 'success':
+                                                                                                toast(`Dossier deplacé avec succès`, {type: 'success'})
+                                                                                                break
+                                                                                        case 'error':
+                                                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                                                                break
+                                                                                        case 'info':
+                                                                                                toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                                                                                break
+                                                                                }
+                                                                        }
+                                                                )
                                                                 .catch( err => { console.log(err); throw err} )
                                                         }
                                                 }
@@ -420,7 +437,24 @@ export default function FileTable({set})
                                                         else
                                                         {
                                                                 await http.post('move_file', queryData)
-                                                                .then( res => { console.log(res) } )
+                                                                .then(
+                                                                        res =>
+                                                                        {
+                                                                                console.log(res)
+                                                                                switch (res.data.statue)
+                                                                                {
+                                                                                        case 'success':
+                                                                                                toast(`Fichier deplacé avec succès`, {type: 'success'})
+                                                                                                break
+                                                                                        case 'error':
+                                                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                                                                break
+                                                                                        case 'info':
+                                                                                                toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                                                                                break
+                                                                                }
+                                                                        }
+                                                                )
                                                                 .catch( err => { console.log(err); throw err} )
                                                         }
                                                 }
@@ -486,7 +520,24 @@ export default function FileTable({set})
                                                         else
                                                         {
                                                                 await http.post('copy_folder', queryData)
-                                                                .then( res => { console.log(res) } )
+                                                                .then(
+                                                                        res =>
+                                                                        {
+                                                                                console.log(res)
+                                                                                switch (res.data.statue)
+                                                                                {
+                                                                                        case 'success':
+                                                                                                toast(`Dossier copié avec succès`, {type: 'success'})
+                                                                                                break
+                                                                                        case 'error':
+                                                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                                                                break
+                                                                                        case 'info':
+                                                                                                toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                                                                                break
+                                                                                }
+                                                                        }
+                                                                )
                                                                 .catch( err => { console.log(err); throw err} )
                                                         }
                                                 }
@@ -500,7 +551,24 @@ export default function FileTable({set})
                                                         else
                                                         {
                                                                 await http.post('copy_file', queryData)
-                                                                .then( res => { console.log(res) } )
+                                                                .then(
+                                                                        res =>
+                                                                        {
+                                                                                console.log(res)
+                                                                                switch (res.data.statue)
+                                                                                {
+                                                                                        case 'success':
+                                                                                                toast(`Fichier copié avec succès`, {type: 'success'})
+                                                                                                break
+                                                                                        case 'error':
+                                                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                                                                break
+                                                                                        case 'info':
+                                                                                                toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                                                                                break
+                                                                                }
+                                                                        }
+                                                                )
                                                                 .catch( err => { console.log(err); throw err} )
                                                         }
                                                 }
@@ -528,7 +596,7 @@ export default function FileTable({set})
                                                                         {
                                                                                 loading: 'Pasting...',
                                                                                 success: 'Processus achevé',
-                                                                                error: 'err',
+                                                                                error: 'Une erreur est survenue',
                                                                         },
                                                                         {
                                                                                 id: 'Pasting',
@@ -732,16 +800,6 @@ export default function FileTable({set})
                                                                                         icon: "info",
                                                                                 });
                                                                                 Global_State.modalManager.close_modal()
-                                                                                break
-                                                                        }
-                                                                        case 1:
-                                                                        {
-                                                                                swal({
-                                                                                        title: "ERROR!",
-                                                                                        text: res.data.data.msg,
-                                                                                        icon: "error",
-                                                                                });
-                                                                                Global_State.modalManager.setContent(<Audit_form/>)
                                                                                 break
                                                                         }
                                                                         default:
@@ -972,16 +1030,6 @@ export default function FileTable({set})
                                                                                         icon: "info",
                                                                                 });
                                                                                 Global_State.modalManager.close_modal()
-                                                                                break
-                                                                        }
-                                                                        case 1:
-                                                                        {
-                                                                                swal({
-                                                                                        title: "ERROR!",
-                                                                                        text: res.data.data.msg,
-                                                                                        icon: "error",
-                                                                                });
-                                                                                Global_State.modalManager.setContent(<Folder_form/>)
                                                                                 break
                                                                         }
                                                                         default:
@@ -1434,24 +1482,12 @@ export default function FileTable({set})
                                                         }
                                                         else
                                                         {
-                                                                if (res.data.data.list)
-                                                                {
-                                                                        swal({
-                                                                                title: "FIN!",
-                                                                                text: `${res.data.data.msg}\n` + JSON.stringify(res.data.data.list),
-                                                                                icon: "error",
-                                                                        });
-                                                                        Global_State.modalManager.close_modal()
-                                                                }
-                                                                else
-                                                                {
-                                                                        swal({
-                                                                                title: "ERREUR!",
-                                                                                text: res.data.data.msg,
-                                                                                icon: "error",
-                                                                        });
-                                                                        Global_State.modalManager.setContent(<Fs_form/>)
-                                                                }
+                                                                swal({
+                                                                        title: "ERREUR!",
+                                                                        text: res.data.data.msg,
+                                                                        icon: "error",
+                                                                });
+                                                                Global_State.modalManager.setContent(<Fs_form/>)
                                                         }
                                                 })
 
@@ -2301,26 +2337,50 @@ export default function FileTable({set})
 
                                                 if(!Global_State.isEditorMode)
                                                 {
-                                                        const update = async () =>
-                                                        {
-
-                                                                await http.post('update_fnc', query)
-                                                                .then( res => {
-                                                                        console.log(res)
-                                                                } )
-                                                                .catch(err => { console.log(err); throw err })
-                                                        }
+                                                        // const update = async () =>
+                                                        // {
+                                                        //
+                                                        //         await http.post('update_fnc', query)
+                                                        //         .then( res => {
+                                                        //                 console.log(res)
+                                                        //         } )
+                                                        //         .catch(err => { console.log(err); throw err })
+                                                        // }
 
                                                         // console.log(selectedRow[0].id.substring(2))
                                                         toast.promise(
-                                                        update(),
-                                                        {
-                                                                loading: 'Loading...',
-                                                                success: 'Processus achevé',
-                                                                error: 'err'
-                                                        }
+                                                                http.post('update_fnc', query),
+                                                                {
+                                                                        loading: 'Loading...',
+                                                                        success: 'Processus achevé',
+                                                                        error: 'Erreur'
+                                                                },
+                                                                {
+                                                                        id: `review_date_${data.id}`,
+                                                                        duration: Infinity
+                                                                }
 
                                                         )
+                                                        .then(
+                                                        res =>
+                                                        {
+                                                                console.log(res)
+                                                                switch (res.data.statue)
+                                                                {
+                                                                        case 'success':
+                                                                                toast(`La date de révision a été mise á jour !!`, {type: 'success'})
+                                                                                break
+                                                                        case 'error':
+                                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                                                break
+                                                                        case 'info':
+                                                                                toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                                                                break
+                                                                }
+                                                                setTimeout( () => { toast.dismiss(`review_date_${data.id}`) }, 600 )
+                                                        }
+                                                        )
+                                                        .catch(err => { console.log(err); setTimeout( () => { toast.dismiss(`review_date_${data.id}`) }, 600 ) })
                                                 }
                                                 else
                                                 {
@@ -2417,47 +2477,68 @@ export default function FileTable({set})
 
                                 switch (model)
                                 {
-                                        case 'App\\Models\\Section':
-                                                break
                                         case 'App\\Models\\Audit':
+                                                route = 'update_audit'
                                                 break
                                         case 'App\\Models\\checkList':
+                                                route = 'update_checkList'
                                                 break
                                         case 'App\\Models\\DossierPreuve':
+                                                route = 'update_dp'
                                                 break
                                         case 'App\\Models\\Nc':
+                                                route = 'update_nc'
                                                 break
                                         case 'App\\Models\\NonConformite':
+                                                route = 'update_fnc'
                                                 break
                                         case 'App\\Models\\DossierSimple':
                                                 route = 'update_folder'
                                                 break
                                         case 'App\\Models\\Fichier':
+                                                route = 'update_file'
                                                 break
                                         default:
                                                 return null
 
                                 }
 
-                                if(!Global_State.isEditorMode)
+                                if(/*!Global_State.isEditorMode*/ true)
                                 {
 
                                         // console.log(selectedRow[0].id.substring(2))
                                         toast.promise(
                                                 http.post(`${route}`, query),
                                                 {
-                                                        loading: 'Validation...',
-                                                        success: 'Validation achevé',
+                                                        loading: 'Loading...',
+                                                        success: 'Proccesus achevé',
                                                         error: 'err'
                                                 },
                                                 {
-                                                        id: `${route}${data.id}`
+                                                        id: `${route}${data.id}`,
+                                                        duration: Infinity
                                                 }
                                         )
-                                        .then( res => {
-                                                console.log(res)
-                                        } )
-                                        .catch(err => { console.log(err); throw err })
+                                        .then(
+                                                res =>
+                                                {
+                                                        console.log(res)
+                                                        switch (res.data.statue)
+                                                        {
+                                                                case 'success':
+                                                                        toast(`L'element a été ${res.data.data.is_validated ? "validé" : "dévalidé"}`, {type: 'success'})
+                                                                        break
+                                                                case 'error':
+                                                                        toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                                        break
+                                                                case 'info':
+                                                                        toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                                                        break
+                                                        }
+                                                        setTimeout( () => { toast.dismiss(`${route}${data.id}`) }, 600 )
+                                                }
+                                        )
+                                        .catch(err => { console.log(err); setTimeout( () => { toast.dismiss(`${route}${data.id}`) }, 600 ) })
                                 }
                                 else
                                 {

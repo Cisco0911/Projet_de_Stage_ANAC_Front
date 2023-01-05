@@ -25,6 +25,8 @@ import {FaEye} from "react-icons/fa";
 import {TiThumbsOk, TiThumbsDown} from "react-icons/ti";
 
 import {useSpring, animated} from "react-spring";
+import {Collapse} from "react-bootstrap";
+import {Box, Popper} from "@mui/material";
 
 
 let readNotifs = []
@@ -178,7 +180,16 @@ function AskingPermitComponent({ap_notif, dispatch})
                                                                         res =>
                                                                         {
                                                                                 console.log(res)
-                                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true})
+                                                                                if (res.data.statue === 'success')
+                                                                                {
+                                                                                        dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true})
+
+                                                                                        setTimeout( () => { Global_State.EventsManager.emit('updateAuthUserInfo') }, 1000 )
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                        dispatch({ type: 'update_state', id: ap_notif.id, newState: 'attente', approved: null})
+                                                                                }
                                                                         }
                                                                 )
                                                                 .catch( err => console.log(err) )
@@ -200,6 +211,29 @@ function AskingPermitComponent({ap_notif, dispatch})
 
                                                                 console.log("Rejectedddddddddddddd")
                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: false})
+
+                                                                const queryBody = new FormData()
+                                                                queryBody.append('demand_id', ap_notif.id)
+                                                                queryBody.append('approved', '0')
+
+                                                                http.post('authorization_response', queryBody)
+                                                                .then(
+                                                                res =>
+                                                                {
+                                                                        console.log(res)
+                                                                        if (res.data.statue === 'success')
+                                                                        {
+                                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: false})
+
+                                                                                setTimeout( () => { Global_State.EventsManager.emit('updateAuthUserInfo') }, 1000 )
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                                dispatch({ type: 'update_state', id: ap_notif.id, newState: 'attente', approved: null})
+                                                                        }
+                                                                }
+                                                                )
+                                                                .catch( err => console.log(err) )
                                                         }
                                                 }
                                         >
@@ -215,16 +249,8 @@ function AskingPermitComponent({ap_notif, dispatch})
         )
 }
 
-function useAskingPermitNotif()
+function useAskingPermitNotif(asking_permission_notifications)
 {
-        const [askingPermitNotif, update] = useState( JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)) )
-
-        useEffect(
-        () =>
-        {
-                if ( !( JSON.stringify(askingPermitNotif) === JSON.stringify(Global_State.authUser.asking_permission_notifications) ) ) update( JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)) )
-        }, [Global_State.authUser]
-        )
 
         const reducer = (state, action) =>
         {
@@ -245,7 +271,7 @@ function useAskingPermitNotif()
                                         }
                                 );
                         case 'delete':
-                                return state.filter(notif => ( notif.id !== action.id ) )
+                                return [...state.filter(notif => ( notif.id !== action.id ) )]
                         case 'add':
                                 return action.newState
                         default:
@@ -254,7 +280,7 @@ function useAskingPermitNotif()
         };
 
         // initData is always up to date
-        const initData = useMemo( () => askingPermitNotif.map(notif => ({...notif, state: 'attente', approved: null}) ) ,  [askingPermitNotif] )
+        const initData = useMemo( () => asking_permission_notifications.map(notif => ({...notif, state: 'attente', approved: null}) ) ,  [asking_permission_notifications] )
 
         const [notifsState, dispatch] = useReducer(reducer,  initData);
 
@@ -264,17 +290,6 @@ function useAskingPermitNotif()
                 dispatch({type: 'add', newState: initData})
         }, [initData]
         )
-
-        // let askingPermitNotifComponents = []
-        //
-        // // const [test, setTest] = useState(true)
-        //
-        // notifsState.map(
-        //         ap_notif =>
-        //         {
-        //                 askingPermitNotifComponents.push( <AskingPermitComponent key={ap_notif.id} ap_notif={ap_notif} dispatch={dispatch} /> )
-        //         }
-        // )
 
         const askingPermitNotifComponents = useMemo(
                 () =>
@@ -566,6 +581,7 @@ function RingingBell({icon})
 
 export default function Notifications()
 {
+        const id = 'notifPanel'
 
         const StyledBadge = styled(Badge)(({ theme }) => ({
                 '& .MuiBadge-badge': {
@@ -596,8 +612,30 @@ export default function Notifications()
                 </IconButton>
         )
 
+        const [askingPermitNotif, update] = useState( JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)) )
 
-        const askingPermitNotifs = useAskingPermitNotif()
+        useEffect(
+                () =>
+                {
+                        console.log('check_update_asking_permit_notifs')
+                        if ( !( JSON.stringify(askingPermitNotif) === JSON.stringify(Global_State.authUser.asking_permission_notifications) ) )
+                        {
+                                console.log('update_asking_permit_notifs')
+                                update( JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)) )
+                        }
+                }, [Global_State.authUser.asking_permission_notifications]
+        )
+
+
+        useEffect(
+                () =>
+                {
+                        console.log('rerendring_notiffffffffffffffffffffffffffs')
+                }
+        )
+
+
+        const askingPermitNotifs = useAskingPermitNotif(askingPermitNotif)
         const unreadReviewNotifs = useUnreadReviewNotif()
         const readReviewNotifs = useReadReviewNotif()
 
@@ -651,6 +689,9 @@ export default function Notifications()
                 }, []
         )
 
+        // const [anchorEl, setAnchorEl] = useState(null);
+        //
+        // const isOpen = Boolean(anchorEl)
 
         useEffect(
         () =>
@@ -674,6 +715,69 @@ export default function Notifications()
 
         }, [isOpen]
         )
+
+        // const handleEnter = (event) => {
+        //         setAnchorEl(event.currentTarget);
+        // };
+        //
+        // const handleLeave = () => {
+        //         setAnchorEl(null);
+        // };
+        //
+        // const open = Boolean(anchorEl);
+        // const drop_id = open ? id : undefined;
+        //
+        // useEffect(() => {
+        //         /**
+        //          * Alert if clicked on outside of element
+        //          */
+        //         function handleClickOutside(event) {
+        //                 // console.log('outside')
+        //                 const dropdown = document.getElementById(id)
+        //                 if (dropdown && !dropdown.contains(event.target)) {
+        //                         // console.log('outside')
+        //                         handleLeave()
+        //                 }
+        //         }
+        //         // Bind the event listener
+        //         document.addEventListener("click", handleClickOutside);
+        //         return () => {
+        //                 // Unbind the event listener on clean up
+        //                 console.log('byeeeeeeeeeeeeeeeeeeeee')
+        //                 document.removeEventListener("click", handleClickOutside);
+        //
+        //         };
+        //
+        // }, [])
+
+        // return (
+        // <div id={id} onMouseEnter={handleEnter} onMouseLeave={handleLeave} >
+        //         <div>{notifButton}</div>
+        //         <Collapse
+        //         in={isOpen}
+        //         >
+        //                 <Popper id={`${drop_id}_pop`}
+        //                         style={{
+        //                                 zIndex: 999,
+        //                                 borderRadius: '0.25rem',
+        //                                 fontSize: '14px',
+        //                                 border: 'none',
+        //                                 boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
+        //                                 overflow: 'hidden',
+        //                                 padding: '0.5rem',
+        //                                 maxHeight: ( (window.innerHeight/100)*80 ),
+        //                                 backgroundColor: "white",
+        //                         }}
+        //                         open={isOpen}
+        //                         anchorEl={anchorEl}
+        //                 >
+        //                         <Box>
+        //                                 {renderingComponent}
+        //                         </Box>
+        //                 </Popper>
+        //         </Collapse>
+        // </div>
+        // );
 
 
         return (

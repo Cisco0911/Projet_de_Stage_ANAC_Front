@@ -350,7 +350,7 @@ export default function useGetData(TheDatas) {
 
                                                                                                 _context2.next = 9;
                                                                                                 return http.post('getDatasByIds', ids).then(function (res) {
-                                                                                                        console.log('getDatasByIds', res);
+                                                                                                        console.log('getDatasByIds_add', res);
 
                                                                                                         setImmediate(function () {
                                                                                                                 dispatch({ type: 'add', data: Object.assign({}, data, { 'node': res.data }) });
@@ -393,7 +393,7 @@ export default function useGetData(TheDatas) {
                                                                                                 });
                                                                                                 _context2.next = 23;
                                                                                                 return http.post('getDatasByIds', _ids).then(function (res) {
-                                                                                                        console.log(res);
+                                                                                                        console.log('getDatasByIds_update', res);
 
                                                                                                         setImmediate(function () {
                                                                                                                 dispatch({ type: 'update', data: Object.assign({}, data, { 'node': res.data }) });
@@ -557,98 +557,124 @@ export default function useGetData(TheDatas) {
                 });
 
                 echo.private("user." + authUser.id).notification(function (data) {
-                        if (data.type === 'NodeRemovalNotification') {
+                        if (data.type === 'AskPermission') {
                                 console.log(data);
-                                toast(function (t) {
-                                        return React.createElement(
-                                                "div",
-                                                { style: { width: 'auto' } },
-                                                React.createElement(
-                                                        "div",
-                                                        { style: { textAlign: 'center', margin: 10 } },
-                                                        "Confirmer la suppression de  : ",
-                                                        data.node_type,
-                                                        " ",
-                                                        React.createElement(
-                                                                "b",
-                                                                null,
-                                                                data.node.operable.name
-                                                        )
-                                                ),
-                                                React.createElement(
-                                                        "div",
-                                                        {
-                                                                style: {
-                                                                        display: 'flex',
-                                                                        justifyContent: 'center',
-                                                                        position: 'relative',
-                                                                        alignItems: 'center'
-                                                                }
-                                                        },
-                                                        React.createElement(
-                                                                Button,
-                                                                { style: { width: 85, height: 35, alignItems: 'center', justifyContent: 'center', margin: 10 }, variant: "danger", onClick: function onClick() {
-                                                                                var msg = new FormData();
-                                                                                msg.append('object', 'confirmed');
-                                                                                msg.append('value', "Suppression confirm\xE9 par " + authUser.name.substring(0, 1) + ". " + authUser.second_name);
-                                                                                msg.append('from', JSON.stringify(authUser));
-                                                                                msg.append('to', data.user.id);
-                                                                                msg.append('attachment', JSON.stringify(data.node));
-
-                                                                                http.post('notify_response', msg);
-
-                                                                                toast.dismiss(t.id);
-                                                                        } },
-                                                                "Supprimer"
-                                                        ),
-                                                        React.createElement(
-                                                                Button,
-                                                                { style: { width: 85, height: 35, alignItems: 'center', justifyContent: 'center', margin: 10 }, variant: "light", onClick: function onClick() {
-                                                                                EventsManager.emit('setSelectedNode', { id: "" + data.node.front_type + data.node.operable.id, section_id: data.node.operable.section_id });toast.dismiss(t.id);
-                                                                        } },
-                                                                "Consulter"
-                                                        ),
-                                                        React.createElement(
-                                                                Button,
-                                                                { style: { width: 85, height: 35, alignItems: 'center', justifyContent: 'center', margin: 10 }, variant: "light", onClick: function onClick() {
-                                                                                var msg = new FormData();
-                                                                                msg.append('object', 'rejected');
-                                                                                msg.append('value', "Suppression rejet\xE9 par " + authUser.name.substring(0, 1) + ". " + authUser.second_name);
-                                                                                msg.append('from', JSON.stringify(authUser));
-                                                                                msg.append('to', data.user.id);
-                                                                                msg.append('attachment', JSON.stringify(data.node));
-
-                                                                                http.post('notify_response', msg);
-
-                                                                                toast.dismiss(t.id);
-                                                                        } },
-                                                                "Refuser"
-                                                        )
-                                                )
-                                        );
-                                }, {
-                                        id: 'NodeRemovalNotification',
-                                        position: "top-right",
-                                        style: {
-                                                // width: '1700px',
-                                                border: '1px solid #713200',
-                                                padding: '16px',
-                                                color: '#713200'
-                                        },
-                                        duration: 5000
-                                });
 
                                 echosHandler('updateAuthUserInfo');
+
+                                // toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                toast("Info: L'inspecteur " + data.name + " a fait une demande de permission de votre part \xE1 l'instant !", {
+                                        id: data.from_id,
+                                        icon: "📢",
+                                        style: { fontWeight: 'bold' },
+                                        duration: 5000
+                                });
                         } else if (data.type === "Information") {
                                 console.log('Informationnnnnnnnnnnnnn!!!!!', data);
-                                // toast(
-                                //         <div>
-                                //                 Objet:
-                                //         </div>,
-                                //         {
-                                //                 icon: 'p'
-                                //         }
-                                // );
+
+                                var attachment = JSON.parse(data.attachment);
+                                var attachment_items = [];
+
+                                for (var key in attachment) {
+                                        attachment_items.push(React.createElement(
+                                                React.Fragment,
+                                                { key: key },
+                                                React.createElement(
+                                                        "b",
+                                                        null,
+                                                        key,
+                                                        ":"
+                                                ),
+                                                " ",
+                                                attachment[key],
+                                                " ",
+                                                React.createElement("br", null)
+                                        ));
+                                }
+
+                                toast(React.createElement(
+                                        "div",
+                                        null,
+                                        React.createElement(
+                                                "b",
+                                                {
+                                                        style: {
+                                                                width: '100%',
+                                                                display: 'inline-block',
+                                                                textAlign: 'center',
+                                                                textDecoration: 'underline'
+                                                        }
+                                                },
+                                                "\uFFE3\u3078\uFFE3--- ",
+                                                React.createElement(
+                                                        "span",
+                                                        { style: { transform: "rotateY(180deg)", display: "inline-block" } },
+                                                        "\uD83D\uDCE2"
+                                                ),
+                                                " INFORMATION ",
+                                                React.createElement(
+                                                        "span",
+                                                        { style: { display: "inline-block" } },
+                                                        "\uD83D\uDCE2"
+                                                ),
+                                                " ---\uFFE3\u3078\uFFE3"
+                                        ),
+                                        " ",
+                                        React.createElement("br", null),
+                                        " ",
+                                        React.createElement("br", null),
+                                        React.createElement(
+                                                "b",
+                                                null,
+                                                "Destinateur:"
+                                        ),
+                                        " ",
+                                        data.user_from,
+                                        " \uD83D\uDC48(\uFF9F\u30EE\uFF9F\uD83D\uDC48) ",
+                                        React.createElement("br", null),
+                                        React.createElement(
+                                                "b",
+                                                null,
+                                                "Objet:"
+                                        ),
+                                        " ",
+                                        data.object,
+                                        " ",
+                                        React.createElement("br", null),
+                                        React.createElement(
+                                                "b",
+                                                null,
+                                                "Message:"
+                                        ),
+                                        "\xA0",
+                                        React.createElement(
+                                                "span",
+                                                {
+                                                        style: {
+                                                                color: 'blue'
+                                                        }
+                                                },
+                                                data.msg
+                                        ),
+                                        React.createElement("br", null),
+                                        React.createElement(
+                                                "div",
+                                                { className: "info_attachment" },
+                                                attachment_items
+                                        ),
+                                        React.createElement(
+                                                Button,
+                                                { className: "d-block mt-2", style: { width: '100%' }, variant: "light", onClick: function onClick() {
+                                                                toast.dismiss(data.id);
+                                                        } },
+                                                "Dismiss"
+                                        )
+                                ), {
+                                        id: data.id,
+                                        // icon: 'p',
+                                        // type: 'success',
+                                        duration: Infinity
+                                });
                         } else if (data.type === 'FncReviewNotification') {
                                 console.log(data);
 
@@ -680,9 +706,10 @@ export default function useGetData(TheDatas) {
 
                                 toast("" + data.msg, {
                                         id: 'FncReviewNotification',
-                                        icon: '🙌',
-                                        duration: Infinity
+                                        icon: '🙌'
                                 });
+
+                                echosHandler('updateAuthUserInfo');
                         }
                 });
 
@@ -1419,7 +1446,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator19 = audits[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
                                 var audit = _step19.value;
 
-                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined, audit.is_validated, audit.validator_id));
                         }
 
                         // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
@@ -1446,7 +1473,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator20 = checkLists[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
                                 var checkList = _step20.value;
 
-                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined, checkList.is_validated, checkList.validator_id));
                         }
 
                         // dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19)
@@ -1473,7 +1500,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator21 = dps[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
                                 var dp = _step21.value;
 
-                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined, dp.is_validated, dp.validator_id));
                         }
 
                         // nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19)
@@ -1500,7 +1527,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator22 = nonCs[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
                                 var nonC = _step22.value;
 
-                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined, nonC.is_validated, nonC.validator_id));
                         }
 
                         // fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19)
@@ -1527,7 +1554,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator23 = fncs[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
                                 var fnc = _step23.value;
 
-                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined));
+                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined, fnc.is_validated, fnc.validator_id));
                         }
 
                         // f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19)
@@ -1554,7 +1581,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator24 = fs[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
                                 var f = _step24.value;
 
-                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url));
+                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url, f.is_validated, f.validator_id));
                         }
 
                         // d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19)

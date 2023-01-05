@@ -285,7 +285,7 @@ export default function useGetData(TheDatas)
                                                         await http.post('getDatasByIds', ids)
                                                         .then( res =>
                                                         {
-                                                                console.log('getDatasByIds', res)
+                                                                console.log('getDatasByIds_add', res)
 
                                                                 setImmediate( () => { dispatch({type: 'add', data: {...data, 'node': res.data}}) } )
                                                         }
@@ -314,7 +314,7 @@ export default function useGetData(TheDatas)
                                                         await http.post('getDatasByIds', ids)
                                                         .then( res =>
                                                         {
-                                                                console.log(res)
+                                                                console.log('getDatasByIds_update', res)
 
                                                                 setImmediate( () => { dispatch({type: 'update', data: {...data, 'node': res.data}}) } )
                                                         }
@@ -490,88 +490,80 @@ export default function useGetData(TheDatas)
                         )
 
                         echo.private(`user.${authUser.id}`).notification((data) => {
-                                if(data.type === 'NodeRemovalNotification')
+                                if(data.type === 'AskPermission')
                                 {
                                         console.log(data)
-                                        toast((t) => (
-                                                        <div style={{ width: 'auto' }} >
-                                                                <div style={{textAlign: 'center', margin: 10 }} >
-                                                                        Confirmer la suppression de  : {data.node_type} <b>{data.node.operable.name}</b>
-                                                                </div>
-                                                                <div
-                                                                        style = {
-                                                                                {
-                                                                                        display: 'flex',
-                                                                                        justifyContent: 'center',
-                                                                                        position: 'relative',
-                                                                                        alignItems: 'center',
-                                                                                }
-                                                                        }
-                                                                >
-                                                                        <Button style={{ width: 85, height: 35, alignItems: 'center', justifyContent: 'center', margin: 10 }}  variant="danger" onClick={() =>
-                                                                        {
-                                                                                const msg = new FormData;
-                                                                                msg.append('object', 'confirmed')
-                                                                                msg.append('value', `Suppression confirmé par ${authUser.name.substring(0, 1)}. ${authUser.second_name}`)
-                                                                                msg.append('from', JSON.stringify(authUser))
-                                                                                msg.append('to', data.user.id)
-                                                                                msg.append('attachment', JSON.stringify(data.node))
 
-                                                                                http.post('notify_response', msg)
+                                        echosHandler('updateAuthUserInfo')
 
-                                                                                toast.dismiss(t.id)
-                                                                        }
-                                                                        }>
-                                                                                Supprimer
-                                                                        </Button>
-                                                                        <Button style={{ width: 85, height: 35, alignItems: 'center', justifyContent: 'center', margin: 10 }}  variant="light" onClick={() => { EventsManager.emit('setSelectedNode', {id: `${data.node.front_type}${data.node.operable.id}`, section_id: data.node.operable.section_id} ); toast.dismiss(t.id) }}>
-                                                                                Consulter
-                                                                        </Button>
-                                                                        <Button style={{ width: 85, height: 35, alignItems: 'center', justifyContent: 'center', margin: 10 }}  variant="light" onClick={() =>
-                                                                        {
-                                                                                const msg = new FormData;
-                                                                                msg.append('object', 'rejected')
-                                                                                msg.append('value', `Suppression rejeté par ${authUser.name.substring(0, 1)}. ${authUser.second_name}`)
-                                                                                msg.append('from', JSON.stringify(authUser))
-                                                                                msg.append('to', data.user.id)
-                                                                                msg.append('attachment', JSON.stringify(data.node))
-
-                                                                                http.post('notify_response', msg)
-
-                                                                                toast.dismiss(t.id)
-                                                                        }
-                                                                        }>
-                                                                                Refuser
-                                                                        </Button>
-                                                                </div>
-                                                        </div>
-                                                ),
+                                        // toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                        toast(`Info: L'inspecteur ${data.name} a fait une demande de permission de votre part á l'instant !`,
                                                 {
-                                                        id: 'NodeRemovalNotification',
-                                                        position: "top-right",
-                                                        style: {
-                                                                // width: '1700px',
-                                                                border: '1px solid #713200',
-                                                                padding: '16px',
-                                                                color: '#713200',
-                                                        },
+                                                        id: data.from_id,
+                                                        icon: "📢",
+                                                        style: { fontWeight: 'bold' },
                                                         duration: 5000,
                                                 }
                                         );
-
-                                        echosHandler('updateAuthUserInfo')
                                 }
                                 else if (data.type === "Information")
                                 {
                                         console.log('Informationnnnnnnnnnnnnn!!!!!', data)
-                                        // toast(
-                                        //         <div>
-                                        //                 Objet:
-                                        //         </div>,
-                                        //         {
-                                        //                 icon: 'p'
-                                        //         }
-                                        // );
+
+                                        const attachment = JSON.parse(data.attachment)
+                                        const attachment_items = []
+
+                                        for (const key in attachment)
+                                        {
+                                                attachment_items.push(
+                                                        <React.Fragment key={key}>
+                                                                <b>{key}:</b> {attachment[key]} <br/>
+                                                        </React.Fragment>
+                                                )
+                                        }
+
+                                        toast(
+                                                <div>
+                                                        <b
+                                                                style={
+                                                                        {
+                                                                                width: '100%',
+                                                                                display: 'inline-block',
+                                                                                textAlign: 'center',
+                                                                                textDecoration: 'underline'
+                                                                        }
+                                                                }
+                                                        >
+                                                                ￣へ￣--- <span style={{ transform: "rotateY(180deg)", display: "inline-block", }} >📢</span> INFORMATION <span style={{ display: "inline-block", }} >📢</span> ---￣へ￣
+                                                        </b> <br/> <br/>
+                                                        <b>Destinateur:</b> {data.user_from} 👈(ﾟヮﾟ👈) <br/>
+                                                        <b>Objet:</b> {data.object} <br/>
+                                                        <b>Message:</b>&nbsp;
+                                                        <span
+                                                                style={
+                                                                        {
+                                                                                color: 'blue'
+                                                                        }
+                                                                }
+                                                        >
+                                                                {data.msg}
+                                                        </span>
+                                                        <br/>
+                                                        <div className={`info_attachment`} >
+                                                                {attachment_items}
+                                                        </div>
+                                                        <Button className='d-block mt-2' style={{ width: '100%' }} variant="light" onClick={() => { toast.dismiss(data.id) }}>
+                                                                Dismiss
+                                                        </Button>
+
+                                                </div>,
+                                                {
+                                                        id: data.id,
+                                                        // icon: 'p',
+                                                        // type: 'success',
+                                                        duration: Infinity
+                                                }
+                                        );
 
                                 }
                                 else if (data.type === 'FncReviewNotification')
@@ -608,9 +600,10 @@ export default function useGetData(TheDatas)
                                                 {
                                                         id: 'FncReviewNotification',
                                                         icon: '🙌',
-                                                        duration: Infinity,
                                                 }
                                         )
+
+                                        echosHandler('updateAuthUserInfo')
                                 }
 
                         });
@@ -998,6 +991,8 @@ export default function useGetData(TheDatas)
                                         audit.section_id,
                                         undefined,
                                         undefined,
+                                        audit.is_validated,
+                                        audit.validator_id
                                 )
                         )
                 }
@@ -1025,6 +1020,8 @@ export default function useGetData(TheDatas)
                                         checkList.section_id,
                                         undefined,
                                         undefined,
+                                        checkList.is_validated,
+                                        checkList.validator_id
                                 )
                         )
                 }
@@ -1052,6 +1049,8 @@ export default function useGetData(TheDatas)
                                         dp.section_id,
                                         undefined,
                                         undefined,
+                                        dp.is_validated,
+                                        dp.validator_id
                                 )
                         )
                 }
@@ -1079,6 +1078,8 @@ export default function useGetData(TheDatas)
                                         nonC.section_id,
                                         undefined,
                                         undefined,
+                                        nonC.is_validated,
+                                        nonC.validator_id
                                 )
                         )
                 }
@@ -1106,6 +1107,8 @@ export default function useGetData(TheDatas)
                                         fnc.section_id,
                                         undefined,
                                         undefined,
+                                        fnc.is_validated,
+                                        fnc.validator_id
                                 )
                         )
                 }
@@ -1132,7 +1135,9 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         f.section_id,
                                         f.size,
-                                        f.url
+                                        f.url,
+                                        f.is_validated,
+                                        f.validator_id
                                 )
                         )
                 }
