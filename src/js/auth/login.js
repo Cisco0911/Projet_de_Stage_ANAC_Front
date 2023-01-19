@@ -23,7 +23,7 @@ import { RiLockPasswordFill, RiMapPinUserFill } from "react-icons/ri";
 import { FaUserTie, FaUserSecret } from "react-icons/fa";
 
 export var http = axios.create({
-        baseURL: 'https://api.anac-togo-file-manager.com',
+        baseURL: 'http://localhost:80',
         headers: {},
         withCredentials: true
 });

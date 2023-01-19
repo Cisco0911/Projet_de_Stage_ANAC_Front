@@ -23,7 +23,7 @@ import {FaUserTie, FaUserSecret} from "react-icons/fa"
 
 
 export const http = axios.create({
-        baseURL: 'https://api.anac-togo-file-manager.com',
+        baseURL: 'http://localhost:80',
         headers: {
 
         },
