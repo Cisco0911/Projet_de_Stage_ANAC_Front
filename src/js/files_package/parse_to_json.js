@@ -47,14 +47,14 @@ var createdNodeIds = [];
 var echosHandler = void 0;
 
 var listeners = function listeners() {
-  Global_State.EventsManager.once('updateData', function () {
+  window.Global_State.EventsManager.once('updateData', function () {
     echosHandler('updateData');
   });
 };
 
 export default function parseToJson(value) {
 
-  // console.log('valllllllllllllluuuuuuuuuuuuuuuuuuuuuuuuuuuuuue', value)
+  console.log('valllllllllllllluuuuuuuuuuuuuuuuuuuuuuuuuuuuuue', value);
   var nodesData = { data: value };
 
   echosHandler = function echosHandler(tag) {
@@ -73,10 +73,10 @@ export default function parseToJson(value) {
   //   useEffect(
   //     () =>
   //     {
-  //         Global_State.EventsManager.on('updateData', () => { startUpdate() } )
-  //         return () => 
+  //         window.Global_State.EventsManager.on('updateData', () => { startUpdate() } )
+  //         return () =>
   //         {
-  //             Global_State.EventsManager.off('updateData');
+  //             window.Global_State.EventsManager.off('updateData');
   //         }
   //     },
   //     []
@@ -328,6 +328,8 @@ export default function parseToJson(value) {
           node.children = [];
 
           makeChildrenV2(node);
+
+          console.log('makeJsonTree', node);
 
           return Object.assign({}, JSON.parse(JSON.stringify(node)));
         }

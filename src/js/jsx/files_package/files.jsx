@@ -6,20 +6,22 @@ import useBack from "./nodeBackend";
 import FileTable from "./content";
 import FileDetails from "./files_details";
 import "./file_style.css";
-import { Global_State } from "../main";
 
 import { useSpring, animated } from 'react-spring';
 
 
-import { FcOpenedFolder, FcFolder } from "react-icons/fc";
+import { FcOpenedFolder, FcFolder, FcTodoList, FcMultipleCameras} from "react-icons/fc";
+import { GiArchiveResearch, GiTreeRoots } from "react-icons/gi";
 
 import TreeView from '@mui/lab/TreeView';
-// import TreeViewContext from '@mui/lab/TreeView/TreeViewContext';
 import TreeItem, { treeItemClasses } from '@mui/lab/TreeItem';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
+import PolicyTwoToneIcon from '@mui/icons-material/PolicyTwoTone';
+import GppBadTwoToneIcon from '@mui/icons-material/GppBadTwoTone';
+import RuleFolderTwoToneIcon from '@mui/icons-material/RuleFolderTwoTone';
 
 export default function useGetFiles(Global_research) {
 
@@ -31,7 +33,7 @@ export default function useGetFiles(Global_research) {
                                 if(e.ctrlKey && e.key === 'f')
                                 {
                                         console.log('find node')
-                                        Global_State.setOverlay_props( t => (
+                                        window.Global_State.setOverlay_props( t => (
                                                 {
                                                         ...t,
                                                         style:
@@ -62,35 +64,86 @@ export default function useGetFiles(Global_research) {
                                 }
                                 else if (e.ctrlKey && e.key.length === 1)
                                 {
-                                        // console.log(e)
-                                        const component = document.getElementById(`ctrl_${e.key}`)
-                                        if (component) component.click()
+                                        console.log(e)
+
+                                        window.Global_State.EventsManager.emit("shortcut", `ctrl_${e.key}`)
+
+                                        // const component = document.getElementById(`ctrl_${e.key}`)
+                                        // if (component)
+                                        // {
+                                        //         console.log(component)
+                                        //         component.click()
+                                        // }
                                 }
                         }
 
                         // console.log('Global_research', Global_research)
 
                         document.addEventListener('keydown', handleKeyDown);
+                        window.Global_State.EventsManager.on('show_on_screen',
+                        async (data) =>
+                        {
+                                console.log(data);
+                                await window.Global_State.setSectionId(data.section_id);
+                                const parent_id = window.Global_State.getNodeDataById(data.id).parentId
+                                await window.Global_State.backend.setCurrentSelectedFolder(parent_id)
+
+                                setTimeout(
+                                () =>
+                                {
+                                        console.log("scroooooooooooooooooooooooooooool")
+                                        // const row = document.getElementById(`row-${data.id}`)
+                                        // row.click()
+                                        // const parent = document.querySelector(".content_xl_size_content")
+                                        //
+                                        // parent.scrollTop = row.offsetTop
+
+                                        window.Global_State.EventsManager.emit("select_row", data.id)
+
+                                }, 500)
+                        })
 
                         return(
                                 () =>
                                 {
                                         document.removeEventListener('keydown', handleKeyDown)
+                                        window.Global_State.EventsManager.off('show_on_screen');
                                 }
                         )
 
                 }, []
         )
 
-        Global_State['backend'] = useBack()
+        window.Global_State['backend'] = useBack()
 
-        const dataTable = useMemo(() => (<FileTable  />), [Global_State.backend.selectedNode.model])
+        window.Global_State.get_auditFamily_icon = (type) =>
+        {
+                switch (type)
+                {
+                        case "root":
+                                return <GiTreeRoots size={30} color={"brown"} />
+                        case "audit":
+                                return <PolicyTwoToneIcon color={"secondary"} style={{ fontSize: 30, pointerEvents: "none" }} />
+                        case "checkList":
+                                return <FcTodoList size={30} style={ { pointerEvents: "none" } } />
+                        case "dp":
+                                return <GiArchiveResearch size={30} color={"#35c1f1"} style={ { pointerEvents: "none" } } />
+                        case "nonC":
+                                return <RuleFolderTwoToneIcon color={"error"} style={{ fontSize: 30, pointerEvents: "none" }} />
+                        case "fnc":
+                                return <GppBadTwoToneIcon color={"error"} style={{ fontSize: 30, pointerEvents: "none" }} />
+                        default:
+                                return null
+                }
+        }
+
+        const dataTable = useMemo(() => (<FileTable  />), [window.Global_State.backend.selectedNode.model])
 
         return (
         {
-                fileTree: Global_State.hasSection ? <FileTree data = {Global_State.backend.data} /> : <div/>,
-                fileTable: Global_State.hasSection ? dataTable : <div/> ,
-                fileDetails: Global_State.hasSection ? <FileDetails/> : <div/>,
+                fileTree: window.Global_State.hasSection ? <FileTree data = {window.Global_State.backend.data} /> : <div/>,
+                fileTable: window.Global_State.hasSection ? dataTable : <div/> ,
+                fileDetails: window.Global_State.hasSection ? <FileDetails/> : <div/>,
         }
         )
 
@@ -105,29 +158,7 @@ function FileTree({data}) {
 
         const tree = useRef()
 
-        const [expanded, setExpanded] = useState(['0'])
-
-        // return (
-        //         <div style={{ height: "100%", width: "100%" }} >
-        //           <div>
-        //             <button onClick={ () => {tree.current.scrollToId(7); tree.current.selectById(7)} }>
-        //               add
-        //             </button>
-        //           </div>
-        //           <div id = 'tree' >
-        //             <Tree
-        //               ref={tree}
-        //               indent={20}
-        //               onToggle={backend.onToggle}
-        //               data={backend.data}
-        //               rowHeight = {40}
-        //               width = {500}
-        //             >
-        //               {Node}
-        //             </Tree>
-        //           </div>
-        //         </div>
-        // )
+        const expanded = window.Global_State.expanded
 
         function TransitionComponent(props) {
                 const style = useSpring({
@@ -205,23 +236,23 @@ function FileTree({data}) {
 
                         console.log(expanded);
 
-                        setExpanded( [...expanded] )
+                        window.Global_State.EventsManager.emit("setExpanded", expanded)
                 }
 
                 const handleClick = e =>
                 {
                         if(e) e.stopPropagation();
-                        Global_State.backend.setCurrentSelectedFolder(node.id)
+                        window.Global_State.backend.setCurrentSelectedFolder(node.id)
                 }
 
 
                 useEffect(
                 () =>
                 {
-                        Global_State.EventsManager.on(`toggle${node.id}`, e => { console.log(`toggle${node.id}`); handleDbClick(e) })
+                        window.Global_State.EventsManager.on(`toggle${node.id}`, e => { console.log(`toggle${node.id}`); handleDbClick(e) })
                         return () =>
                         {
-                                Global_State.EventsManager.off(`toggle${node.id}`);
+                                window.Global_State.EventsManager.off(`toggle${node.id}`);
                         }
                 },
                 []
@@ -230,7 +261,7 @@ function FileTree({data}) {
                 return (
                 <div id={`treeRow-${node.id}`} onClick={ handleClick } onDoubleClick = { handleDbClick } >
                         <span className = 'mr-1'  >
-                                {isOpen ? <FcOpenedFolder size={28} />:<FcFolder size={28} />}
+                                { window.Global_State.get_auditFamily_icon(node.type) || (isOpen ? <FcOpenedFolder size={30} />:<FcFolder size={30} />) }
                         </span>
                         {node.name}
                 </div>
@@ -239,23 +270,23 @@ function FileTree({data}) {
 
 
         const RenderTree = useCallback(
-        function RenderTree({node})
-        {
-                // console.log(tree.current.expanded)
+                function RenderTree({node})
+                {
+                        // console.log(tree.current.expanded)
 
-                return (
-                <StyledTreeItem key={node.id} nodeId={node.id.toString()} label={useMemo( () => <Label node = {node} />, [] )}
-                                expandIcon = {<ChevronRightIcon onClick = { e => { Global_State.EventsManager.emit(`toggle${node.id}`, e) } } />}
-                                collapseIcon = {<ExpandMoreIcon onClick = { e => { Global_State.EventsManager.emit(`toggle${node.id}`, e) } } />}
-                >
-                        {
-                                Array.isArray(node.children) ?
-                                node.children.filter( node => ( node.global_type === 'folder' ) ).map((node) => <RenderTree key={node.id} node = {node} /> )
-                                : null
-                        }
-                </StyledTreeItem>
-                );
-        },[]
+                        return (
+                        <StyledTreeItem key={node.id} nodeId={node.id.toString()} label={<Label node = {node} />}
+                                        expandIcon = {<ChevronRightIcon onClick = { e => { window.Global_State.EventsManager.emit(`toggle${node.id}`, e) } } />}
+                                        collapseIcon = {<ExpandMoreIcon onClick = { e => { window.Global_State.EventsManager.emit(`toggle${node.id}`, e) } } />}
+                        >
+                                {
+                                        Array.isArray(node.children) ?
+                                        node.children.filter( node => ( node.global_type === 'folder' ) ).map((node) => <RenderTree key={node.id} node = {node} /> )
+                                        : null
+                                }
+                        </StyledTreeItem>
+                        );
+                },[data]
         )
 
 
@@ -264,7 +295,7 @@ function FileTree({data}) {
         //         event.preventDefault()
         //         event.stopPropagation()
         //         console.log( 'foooooooooooooooooooooooooooooooocuuuuuuuuuuuuuuuuuuuuuus', event )
-        //         // Global_State.backend.setCurrentSelectedFolder(nodeId)
+        //         // window.Global_State.backend.setCurrentSelectedFolder(nodeId)
         //
         //         // setExpanded( [nodeId] )
         // }
@@ -279,19 +310,21 @@ function FileTree({data}) {
         )
 
         return (
-        <TreeView
-        id = 'muiTree'
-        aria-label="file system navigator"
-        defaultCollapseIcon={<ExpandMoreIcon />}
-        defaultExpanded={['0']}
-        defaultExpandIcon={<ChevronRightIcon />}
-        sx={{ height: 'max-content', flexGrow: 1, width: 'max-content', overflowY: 'auto' }}
-        expanded={expanded}
-        multiSelect
-        ref={tree}
-        >
-                <RenderTree node = {data} />
-        </TreeView>
+                <div className="file_tree_container" >
+                        <TreeView
+                        id = 'muiTree'
+                        aria-label="file system navigator"
+                        defaultCollapseIcon={<ExpandMoreIcon />}
+                        defaultExpanded={['0']}
+                        defaultExpandIcon={<ChevronRightIcon />}
+                        sx={{ height: 'max-content', flexGrow: 1, width: 'max-content', overflowY: 'auto' }}
+                        expanded={expanded}
+                        multiSelect
+                        ref={tree}
+                        >
+                                <RenderTree node = {data} />
+                        </TreeView>
+                </div>
         );
 }
 

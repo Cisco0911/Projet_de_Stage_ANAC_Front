@@ -27943,7 +27943,7 @@ function () {
       w.globals.collapsedSeriesIndices = [];
     }
     /**
-     * Allows users to update Options after the chart has rendered.
+     * Allows services to update Options after the chart has rendered.
      *
      * @param {object} options - A new config object can be passed which will be merged with the existing config object
      * @param {boolean} redraw - should redraw from beginning or should use existing paths and redraw from there
@@ -28047,7 +28047,7 @@ function () {
       });
     }
     /**
-     * Allows users to update Series after the chart has rendered.
+     * Allows services to update Series after the chart has rendered.
      *
      * @param {array} series - New series which will override the existing
      */
@@ -28062,7 +28062,7 @@ function () {
       return this._updateSeries(newSeries, animate, overwriteInitialSeries);
     }
     /**
-     * Allows users to append a new series after the chart has rendered.
+     * Allows services to append a new series after the chart has rendered.
      *
      * @param {array} newSerie - New serie which will be appended to the existing series
      */
@@ -28166,7 +28166,7 @@ function () {
       });
     }
     /**
-     * Allows users to append Data to series.
+     * Allows services to append Data to series.
      *
      * @param {array} newData - New data in the same format as series
      */
@@ -28569,7 +28569,7 @@ function () {
       }
     }
     /**
-     * This static method allows users to call chart methods without necessarily from the
+     * This static method allows services to call chart methods without necessarily from the
      * instance of the chart in case user has assigned chartID to the targetted chart.
      * The chartID is used for mapping the instance stored in Apex._chartInstances global variable
      *

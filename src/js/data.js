@@ -14,9 +14,8 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 
 import parseToJson from "./files_package/parse_to_json";
 import useEditor from './editor';
-import { Global_State } from "./main";
+import { http } from "./auth/login";
 
-import axios from "axios";
 import Echo from 'laravel-echo';
 import EventEmitter from 'eventemitter3';
 
@@ -31,12 +30,6 @@ import { useSpring, animated } from "react-spring";
 import { Collapse } from "react-bootstrap";
 
 window.Pusher = require('pusher-js');
-
-export var http = axios.create({
-        baseURL: 'http://localhost:80',
-        headers: {},
-        withCredentials: true
-});
 
 var EventsManager = new EventEmitter();
 
@@ -61,12 +54,12 @@ var options = {
         }
 };
 
-var echo = new Echo(options);
+// const echo = new Echo(options);
 
-var echosHandler = void 0;
+// let echosHandler
 
 // echo.channel(`nodeUpdate`).listen( 'NodeUpdateEvent', (data) => {
-//   if (data.operation === 'add') 
+//   if (data.operation === 'add')
 //   {
 //     console.log('emitting echo')
 //     console.log(data)
@@ -293,7 +286,7 @@ export default function useGetData(TheDatas) {
         var handling_node_events = useRef(false);
         var node_events_queue = useRef([]);
 
-        echosHandler = useCallback(function () {
+        var echosHandler = function () {
                 var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3(tag) {
                         var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
@@ -330,11 +323,13 @@ export default function useGetData(TheDatas) {
                                                                         while (1) {
                                                                                 switch (_context2.prev = _context2.next) {
                                                                                         case 0:
-                                                                                                // console.log('start', node_events_queue.current)
                                                                                                 data = node_events_queue.current.shift();
 
+                                                                                                console.log('start', data, node_events_queue.current);
+                                                                                                // return
+
                                                                                                 if (!(data.operation === 'add')) {
-                                                                                                        _context2.next = 11;
+                                                                                                        _context2.next = 12;
                                                                                                         break;
                                                                                                 }
 
@@ -348,7 +343,7 @@ export default function useGetData(TheDatas) {
                                                                                                 });
                                                                                                 console.log(ids.get('ids[]'));
 
-                                                                                                _context2.next = 9;
+                                                                                                _context2.next = 10;
                                                                                                 return http.post('getDatasByIds', ids).then(function (res) {
                                                                                                         console.log('getDatasByIds_add', res);
 
@@ -359,13 +354,13 @@ export default function useGetData(TheDatas) {
                                                                                                         console.log(err);
                                                                                                 });
 
-                                                                                        case 9:
-                                                                                                _context2.next = 23;
+                                                                                        case 10:
+                                                                                                _context2.next = 24;
                                                                                                 break;
 
-                                                                                        case 11:
+                                                                                        case 12:
                                                                                                 if (!(data.operation === 'delete')) {
-                                                                                                        _context2.next = 16;
+                                                                                                        _context2.next = 17;
                                                                                                         break;
                                                                                                 }
 
@@ -373,12 +368,12 @@ export default function useGetData(TheDatas) {
                                                                                                 setImmediate(function () {
                                                                                                         dispatch({ type: 'delete', data: data });
                                                                                                 });
-                                                                                                _context2.next = 23;
+                                                                                                _context2.next = 24;
                                                                                                 break;
 
-                                                                                        case 16:
+                                                                                        case 17:
                                                                                                 if (!(data.operation === 'update')) {
-                                                                                                        _context2.next = 23;
+                                                                                                        _context2.next = 24;
                                                                                                         break;
                                                                                                 }
 
@@ -391,7 +386,7 @@ export default function useGetData(TheDatas) {
                                                                                                         console.log(element);
                                                                                                         _ids.append('ids[]', element);
                                                                                                 });
-                                                                                                _context2.next = 23;
+                                                                                                _context2.next = 24;
                                                                                                 return http.post('getDatasByIds', _ids).then(function (res) {
                                                                                                         console.log('getDatasByIds_update', res);
 
@@ -402,7 +397,7 @@ export default function useGetData(TheDatas) {
                                                                                                         console.log(err);
                                                                                                 });
 
-                                                                                        case 23:
+                                                                                        case 24:
                                                                                         case "end":
                                                                                                 return _context2.stop();
                                                                                 }
@@ -436,10 +431,10 @@ export default function useGetData(TheDatas) {
                         }, _callee3, _this2);
                 }));
 
-                return function (_x2) {
+                return function echosHandler(_x2) {
                         return _ref2.apply(this, arguments);
                 };
-        }(), []);
+        }();
 
         // const handle_node_events = () =>
         // {
@@ -542,14 +537,50 @@ export default function useGetData(TheDatas) {
         //         handling_node_events.current = false
         // }
 
+        var _useState5 = useState(["0"]),
+            _useState6 = _slicedToArray(_useState5, 2),
+            expanded = _useState6[0],
+            setExpanded = _useState6[1];
 
         useEffect(function () {
+                var echo = new Echo(options);
 
-                echo.channel("nodeUpdate").listen('NodeUpdateEvent', function (data) {
-                        node_events_queue.current.push(data);
-                        console.log('NodeUpdateEvent');
-                        if (!handling_node_events.current) echosHandler('handle_node_events');
-                });
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
+
+                try {
+                        for (var _iterator = authUser.services[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                                var service = _step.value;
+
+                                echo.private("nodeUpdate.1").listen('NodeUpdateEvent', function (data) {
+                                        node_events_queue.current.push(data);
+                                        console.log('NodeUpdateEvent', node_events_queue.current, data);
+                                        if (!handling_node_events.current) echosHandler('handle_node_events');
+                                });
+                        }
+
+                        // echo.private(`nodeUpdate.1`).listen( 'NodeUpdateEvent', (data) =>
+                        // {
+                        //         node_events_queue.current.push(data)
+                        //         console.log('NodeUpdateEvent', node_events_queue.current, data)
+                        //         if (!handling_node_events.current) echosHandler('handle_node_events')
+                        // }
+                        // );
+                } catch (err) {
+                        _didIteratorError = true;
+                        _iteratorError = err;
+                } finally {
+                        try {
+                                if (!_iteratorNormalCompletion && _iterator.return) {
+                                        _iterator.return();
+                                }
+                        } finally {
+                                if (_didIteratorError) {
+                                        throw _iteratorError;
+                                }
+                        }
+                }
 
                 echo.private("user." + authUser.id).listen('AuthUserUpdate', function () {
                         console.log('AuthUserUpdate');
@@ -717,13 +748,20 @@ export default function useGetData(TheDatas) {
                         echosHandler('updateAuthUserInfo');
                 });
 
-                // EventsManager.on('nodeUpdate', data => { dispatch({ type: 'update', data }) })
+                // EventsManager.on('updateOK', (data) => { setO(data) })
+
+                // EventsManager.on('update_open_state', data => { dispatch({ type: 'update_open_state', data }) })
+                EventsManager.on('setExpanded', function (new_expanded) {
+                        setExpanded([].concat(_toConsumableArray(new_expanded)));
+                });
 
                 // EventsManager.on('updateData', () => { console.log('emit working') })
 
                 return function () {
+                        echo.disconnect();
                         EventsManager.off('updateAuthUserInfo');
-                        // EventsManager.off('nodeUpdate')
+                        // EventsManager.off('updateOK')
+                        EventsManager.off('setExpanded');
                 };
         }, []);
 
@@ -739,48 +777,48 @@ export default function useGetData(TheDatas) {
         // console.log(TheDatas)
 
         var haveRightToSee = function haveRightToSee(elementServices, authServices) {
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
+                var _iteratorNormalCompletion2 = true;
+                var _didIteratorError2 = false;
+                var _iteratorError2 = undefined;
 
                 try {
-                        for (var _iterator = authServices[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                                var authService = _step.value;
-                                var _iteratorNormalCompletion2 = true;
-                                var _didIteratorError2 = false;
-                                var _iteratorError2 = undefined;
+                        for (var _iterator2 = authServices[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                                var authService = _step2.value;
+                                var _iteratorNormalCompletion3 = true;
+                                var _didIteratorError3 = false;
+                                var _iteratorError3 = undefined;
 
                                 try {
-                                        for (var _iterator2 = elementServices[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                                                var elementService = _step2.value;
+                                        for (var _iterator3 = elementServices[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                                                var elementService = _step3.value;
                                                 if (elementService.id === authService.id) return true;
                                         }
                                 } catch (err) {
-                                        _didIteratorError2 = true;
-                                        _iteratorError2 = err;
+                                        _didIteratorError3 = true;
+                                        _iteratorError3 = err;
                                 } finally {
                                         try {
-                                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                                                        _iterator2.return();
+                                                if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                                        _iterator3.return();
                                                 }
                                         } finally {
-                                                if (_didIteratorError2) {
-                                                        throw _iteratorError2;
+                                                if (_didIteratorError3) {
+                                                        throw _iteratorError3;
                                                 }
                                         }
                                 }
                         }
                 } catch (err) {
-                        _didIteratorError = true;
-                        _iteratorError = err;
+                        _didIteratorError2 = true;
+                        _iteratorError2 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion && _iterator.return) {
-                                        _iterator.return();
+                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                        _iterator2.return();
                                 }
                         } finally {
-                                if (_didIteratorError) {
-                                        throw _iteratorError;
+                                if (_didIteratorError2) {
+                                        throw _iteratorError2;
                                 }
                         }
                 }
@@ -876,27 +914,27 @@ export default function useGetData(TheDatas) {
                 }
 
                 if (!to_update) {
-                        var _iteratorNormalCompletion3 = true;
-                        var _didIteratorError3 = false;
-                        var _iteratorError3 = undefined;
+                        var _iteratorNormalCompletion4 = true;
+                        var _didIteratorError4 = false;
+                        var _iteratorError4 = undefined;
 
                         try {
-                                for (var _iterator3 = all_nodes[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                                        var node = _step3.value;
+                                for (var _iterator4 = all_nodes[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                                        var node = _step4.value;
 
                                         if (node.id === new_node.id) return node.path;
                                 }
                         } catch (err) {
-                                _didIteratorError3 = true;
-                                _iteratorError3 = err;
+                                _didIteratorError4 = true;
+                                _iteratorError4 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                                                _iterator3.return();
+                                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                                                _iterator4.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError3) {
-                                                throw _iteratorError3;
+                                        if (_didIteratorError4) {
+                                                throw _iteratorError4;
                                         }
                                 }
                         }
@@ -919,46 +957,15 @@ export default function useGetData(TheDatas) {
                                 {
                                         var audit = void 0;
 
-                                        var _iteratorNormalCompletion4 = true;
-                                        var _didIteratorError4 = false;
-                                        var _iteratorError4 = undefined;
-
-                                        try {
-                                                for (var _iterator4 = all_nodes[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                                                        var _node = _step4.value;
-
-                                                        if (_node.id === new_node.parentId) audit = JSON.parse(JSON.stringify(_node));
-                                                }
-                                        } catch (err) {
-                                                _didIteratorError4 = true;
-                                                _iteratorError4 = err;
-                                        } finally {
-                                                try {
-                                                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                                                                _iterator4.return();
-                                                        }
-                                                } finally {
-                                                        if (_didIteratorError4) {
-                                                                throw _iteratorError4;
-                                                        }
-                                                }
-                                        }
-
-                                        return getNewPath(audit, all_nodes) + "\\" + new_node.name;
-                                }
-                        case 'dp':
-                                {
-                                        var _audit = void 0;
-
                                         var _iteratorNormalCompletion5 = true;
                                         var _didIteratorError5 = false;
                                         var _iteratorError5 = undefined;
 
                                         try {
                                                 for (var _iterator5 = all_nodes[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                                                        var _node2 = _step5.value;
+                                                        var _node = _step5.value;
 
-                                                        if (_node2.id === new_node.parentId) _audit = JSON.parse(JSON.stringify(_node2));
+                                                        if (_node.id === new_node.parentId) audit = JSON.parse(JSON.stringify(_node));
                                                 }
                                         } catch (err) {
                                                 _didIteratorError5 = true;
@@ -975,11 +982,11 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
-                                        return getNewPath(_audit, all_nodes) + "\\" + new_node.name;
+                                        return getNewPath(audit, all_nodes) + "\\" + new_node.name;
                                 }
-                        case 'nonC':
+                        case 'dp':
                                 {
-                                        var _audit2 = void 0;
+                                        var _audit = void 0;
 
                                         var _iteratorNormalCompletion6 = true;
                                         var _didIteratorError6 = false;
@@ -987,9 +994,9 @@ export default function useGetData(TheDatas) {
 
                                         try {
                                                 for (var _iterator6 = all_nodes[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                                                        var _node3 = _step6.value;
+                                                        var _node2 = _step6.value;
 
-                                                        if (_node3.id === new_node.parentId) _audit2 = JSON.parse(JSON.stringify(_node3));
+                                                        if (_node2.id === new_node.parentId) _audit = JSON.parse(JSON.stringify(_node2));
                                                 }
                                         } catch (err) {
                                                 _didIteratorError6 = true;
@@ -1006,11 +1013,11 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
-                                        return getNewPath(_audit2, all_nodes) + "\\" + new_node.name;
+                                        return getNewPath(_audit, all_nodes) + "\\" + new_node.name;
                                 }
-                        case 'fnc':
+                        case 'nonC':
                                 {
-                                        var nc = void 0;
+                                        var _audit2 = void 0;
 
                                         var _iteratorNormalCompletion7 = true;
                                         var _didIteratorError7 = false;
@@ -1018,9 +1025,9 @@ export default function useGetData(TheDatas) {
 
                                         try {
                                                 for (var _iterator7 = all_nodes[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-                                                        var _node4 = _step7.value;
+                                                        var _node3 = _step7.value;
 
-                                                        if (_node4.id === new_node.parentId) nc = JSON.parse(JSON.stringify(_node4));
+                                                        if (_node3.id === new_node.parentId) _audit2 = JSON.parse(JSON.stringify(_node3));
                                                 }
                                         } catch (err) {
                                                 _didIteratorError7 = true;
@@ -1037,11 +1044,11 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
-                                        return getNewPath(nc, all_nodes) + "\\" + new_node.name;
+                                        return getNewPath(_audit2, all_nodes) + "\\" + new_node.name;
                                 }
-                        case 'ds':
+                        case 'fnc':
                                 {
-                                        var parent = void 0;
+                                        var nc = void 0;
 
                                         var _iteratorNormalCompletion8 = true;
                                         var _didIteratorError8 = false;
@@ -1049,16 +1056,10 @@ export default function useGetData(TheDatas) {
 
                                         try {
                                                 for (var _iterator8 = all_nodes[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                                                        var _node5 = _step8.value;
+                                                        var _node4 = _step8.value;
 
-                                                        if (_node5.id === new_node.parentId) {
-                                                                if (_node5.type === 'root') parent = { type: 'root', section_id: new_node.section_id };else parent = JSON.parse(JSON.stringify(_node5));
-
-                                                                break;
-                                                        }
+                                                        if (_node4.id === new_node.parentId) nc = JSON.parse(JSON.stringify(_node4));
                                                 }
-                                                // if (new_node.name === "Levius") console.log("Levius***************", all_nodes, parent, new_node)
-                                                // console.log('paaaaaaaaaaaaaath', new_node)
                                         } catch (err) {
                                                 _didIteratorError8 = true;
                                                 _iteratorError8 = err;
@@ -1074,11 +1075,11 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
-                                        return getNewPath(parent, all_nodes) + "\\" + new_node.name;
+                                        return getNewPath(nc, all_nodes) + "\\" + new_node.name;
                                 }
-                        case 'f':
+                        case 'ds':
                                 {
-                                        var _parent = void 0;
+                                        var parent = void 0;
 
                                         var _iteratorNormalCompletion9 = true;
                                         var _didIteratorError9 = false;
@@ -1086,14 +1087,16 @@ export default function useGetData(TheDatas) {
 
                                         try {
                                                 for (var _iterator9 = all_nodes[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                                                        var _node6 = _step9.value;
+                                                        var _node5 = _step9.value;
 
-                                                        if (_node6.id === new_node.parentId) {
-                                                                if (_node6.type === 'root') _parent = { type: 'root', section_id: new_node.section_id };else _parent = JSON.parse(JSON.stringify(_node6));
+                                                        if (_node5.id === new_node.parentId) {
+                                                                if (_node5.type === 'root') parent = { type: 'root', section_id: new_node.section_id };else parent = JSON.parse(JSON.stringify(_node5));
 
                                                                 break;
                                                         }
                                                 }
+                                                // if (new_node.name === "Levius") console.log("Levius***************", all_nodes, parent, new_node)
+                                                // console.log('paaaaaaaaaaaaaath', new_node)
                                         } catch (err) {
                                                 _didIteratorError9 = true;
                                                 _iteratorError9 = err;
@@ -1109,6 +1112,41 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
+                                        return getNewPath(parent, all_nodes) + "\\" + new_node.name;
+                                }
+                        case 'f':
+                                {
+                                        var _parent = void 0;
+
+                                        var _iteratorNormalCompletion10 = true;
+                                        var _didIteratorError10 = false;
+                                        var _iteratorError10 = undefined;
+
+                                        try {
+                                                for (var _iterator10 = all_nodes[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                                                        var _node6 = _step10.value;
+
+                                                        if (_node6.id === new_node.parentId) {
+                                                                if (_node6.type === 'root') _parent = { type: 'root', section_id: new_node.section_id };else _parent = JSON.parse(JSON.stringify(_node6));
+
+                                                                break;
+                                                        }
+                                                }
+                                        } catch (err) {
+                                                _didIteratorError10 = true;
+                                                _iteratorError10 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                                                                _iterator10.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError10) {
+                                                                throw _iteratorError10;
+                                                        }
+                                                }
+                                        }
+
                                         return getNewPath(_parent, all_nodes) + "\\" + new_node.name;
                                 }
                         default:
@@ -1116,6 +1154,31 @@ export default function useGetData(TheDatas) {
                                         return new_node.name + ":";
                                 }
                 }
+        };
+
+        var update_path = function update_path(node, current_state) {
+                var up_to_date_node = JSON.parse(JSON.stringify(node));
+
+                up_to_date_node.path = getNewPath(up_to_date_node, current_state, true);
+
+                console.log('current_state', current_state);
+
+                var new_state = JSON.parse(JSON.stringify(current_state)).map(function (current_node) {
+                        if (current_node.id === up_to_date_node.id) return up_to_date_node;
+                        return current_node;
+                });
+
+                console.log('new_state', new_state);
+
+                var final_state = JSON.parse(JSON.stringify(new_state));
+
+                new_state.forEach(function (new_node) {
+                        if (new_node.parentId === up_to_date_node.id) {
+                                final_state = update_path(new_node, final_state);
+                        }
+                });
+
+                return final_state;
         };
 
         var dataFormater = function dataFormater() {
@@ -1163,27 +1226,27 @@ export default function useGetData(TheDatas) {
                 });
 
                 var getPath = function getPath(id, node_type) {
-                        var _iteratorNormalCompletion10 = true;
-                        var _didIteratorError10 = false;
-                        var _iteratorError10 = undefined;
+                        var _iteratorNormalCompletion11 = true;
+                        var _didIteratorError11 = false;
+                        var _iteratorError11 = undefined;
 
                         try {
-                                for (var _iterator10 = allDataAsNodeData[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-                                        var node = _step10.value;
+                                for (var _iterator11 = allDataAsNodeData[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                                        var node = _step11.value;
 
                                         if (node.id === id + node_type) return node.path;
                                 }
                         } catch (err) {
-                                _didIteratorError10 = true;
-                                _iteratorError10 = err;
+                                _didIteratorError11 = true;
+                                _iteratorError11 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
-                                                _iterator10.return();
+                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                                                _iterator11.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError10) {
-                                                throw _iteratorError10;
+                                        if (_didIteratorError11) {
+                                                throw _iteratorError11;
                                         }
                                 }
                         }
@@ -1193,47 +1256,16 @@ export default function useGetData(TheDatas) {
                                         {
                                                 var audit = void 0;
 
-                                                var _iteratorNormalCompletion11 = true;
-                                                var _didIteratorError11 = false;
-                                                var _iteratorError11 = undefined;
-
-                                                try {
-                                                        for (var _iterator11 = Data_Base.data.audits[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-                                                                var auditElement = _step11.value;
-
-                                                                // console.log('paath audit ', id, '  ', auditElement.id)
-                                                                if (auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement));
-                                                        }
-                                                } catch (err) {
-                                                        _didIteratorError11 = true;
-                                                        _iteratorError11 = err;
-                                                } finally {
-                                                        try {
-                                                                if (!_iteratorNormalCompletion11 && _iterator11.return) {
-                                                                        _iterator11.return();
-                                                                }
-                                                        } finally {
-                                                                if (_didIteratorError11) {
-                                                                        throw _iteratorError11;
-                                                                }
-                                                        }
-                                                }
-
-                                                return getPath(audit.section_id, '') + "\\" + audit.name;
-                                        }
-                                case 'checkList':
-                                        {
-                                                var checkList = void 0;
-
                                                 var _iteratorNormalCompletion12 = true;
                                                 var _didIteratorError12 = false;
                                                 var _iteratorError12 = undefined;
 
                                                 try {
-                                                        for (var _iterator12 = Data_Base.data.checkLists[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-                                                                var checkListElement = _step12.value;
+                                                        for (var _iterator12 = Data_Base.data.audits[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+                                                                var auditElement = _step12.value;
 
-                                                                if (checkListElement.id === id) checkList = JSON.parse(JSON.stringify(checkListElement));
+                                                                // console.log('paath audit ', id, '  ', auditElement.id)
+                                                                if (auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError12 = true;
@@ -1250,21 +1282,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(checkList.audit_id, 'audit') + "\\" + checkList.name;
+                                                return getPath(audit.section_id, '') + "\\" + audit.name;
                                         }
-                                case 'dp':
+                                case 'checkList':
                                         {
-                                                var dp = void 0;
+                                                var checkList = void 0;
 
                                                 var _iteratorNormalCompletion13 = true;
                                                 var _didIteratorError13 = false;
                                                 var _iteratorError13 = undefined;
 
                                                 try {
-                                                        for (var _iterator13 = Data_Base.data.dps[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-                                                                var dpElement = _step13.value;
+                                                        for (var _iterator13 = Data_Base.data.checkLists[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+                                                                var checkListElement = _step13.value;
 
-                                                                if (dpElement.id === id) dp = JSON.parse(JSON.stringify(dpElement));
+                                                                if (checkListElement.id === id) checkList = JSON.parse(JSON.stringify(checkListElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError13 = true;
@@ -1281,21 +1313,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(dp.audit_id, 'audit') + "\\" + dp.name;
+                                                return getPath(checkList.audit_id, 'audit') + "\\" + checkList.name;
                                         }
-                                case 'nonC':
+                                case 'dp':
                                         {
-                                                var nc = void 0;
+                                                var dp = void 0;
 
                                                 var _iteratorNormalCompletion14 = true;
                                                 var _didIteratorError14 = false;
                                                 var _iteratorError14 = undefined;
 
                                                 try {
-                                                        for (var _iterator14 = Data_Base.data.nonCs[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-                                                                var ncElement = _step14.value;
+                                                        for (var _iterator14 = Data_Base.data.dps[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+                                                                var dpElement = _step14.value;
 
-                                                                if (ncElement.id === id) nc = JSON.parse(JSON.stringify(ncElement));
+                                                                if (dpElement.id === id) dp = JSON.parse(JSON.stringify(dpElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError14 = true;
@@ -1312,21 +1344,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(nc.audit_id, 'audit') + "\\" + nc.name;
+                                                return getPath(dp.audit_id, 'audit') + "\\" + dp.name;
                                         }
-                                case 'fnc':
+                                case 'nonC':
                                         {
-                                                var fnc = void 0;
+                                                var nc = void 0;
 
                                                 var _iteratorNormalCompletion15 = true;
                                                 var _didIteratorError15 = false;
                                                 var _iteratorError15 = undefined;
 
                                                 try {
-                                                        for (var _iterator15 = Data_Base.data.fncs[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-                                                                var fncElement = _step15.value;
+                                                        for (var _iterator15 = Data_Base.data.nonCs[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+                                                                var ncElement = _step15.value;
 
-                                                                if (fncElement.id === id) fnc = JSON.parse(JSON.stringify(fncElement));
+                                                                if (ncElement.id === id) nc = JSON.parse(JSON.stringify(ncElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError15 = true;
@@ -1343,21 +1375,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(fnc.nc_id, 'nonC') + "\\" + fnc.name;
+                                                return getPath(nc.audit_id, 'audit') + "\\" + nc.name;
                                         }
-                                case 'ds':
+                                case 'fnc':
                                         {
-                                                var folder = void 0;
+                                                var fnc = void 0;
 
                                                 var _iteratorNormalCompletion16 = true;
                                                 var _didIteratorError16 = false;
                                                 var _iteratorError16 = undefined;
 
                                                 try {
-                                                        for (var _iterator16 = Data_Base.data.ds[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-                                                                var _ds = _step16.value;
+                                                        for (var _iterator16 = Data_Base.data.fncs[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+                                                                var fncElement = _step16.value;
 
-                                                                if (_ds.id === id) folder = JSON.parse(JSON.stringify(_ds));
+                                                                if (fncElement.id === id) fnc = JSON.parse(JSON.stringify(fncElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError16 = true;
@@ -1374,21 +1406,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(folder.parent_id, folder.parent_type) + "\\" + folder.name;
+                                                return getPath(fnc.nc_id, 'nonC') + "\\" + fnc.name;
                                         }
-                                case 'f':
+                                case 'ds':
                                         {
-                                                var file = void 0;
+                                                var folder = void 0;
 
                                                 var _iteratorNormalCompletion17 = true;
                                                 var _didIteratorError17 = false;
                                                 var _iteratorError17 = undefined;
 
                                                 try {
-                                                        for (var _iterator17 = Data_Base.data.fs[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-                                                                var f = _step17.value;
+                                                        for (var _iterator17 = Data_Base.data.ds[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+                                                                var _ds = _step17.value;
 
-                                                                if (f.id === id) file = JSON.parse(JSON.stringify(f));
+                                                                if (_ds.id === id) folder = JSON.parse(JSON.stringify(_ds));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError17 = true;
@@ -1405,19 +1437,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(file.parent_id, file.parent_type) + "\\" + file.name;
+                                                return getPath(folder.parent_id, folder.parent_type) + "\\" + folder.name;
                                         }
-                                default:
+                                case 'f':
                                         {
+                                                var file = void 0;
+
                                                 var _iteratorNormalCompletion18 = true;
                                                 var _didIteratorError18 = false;
                                                 var _iteratorError18 = undefined;
 
                                                 try {
-                                                        for (var _iterator18 = Data_Base.data.sections[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-                                                                var section = _step18.value;
+                                                        for (var _iterator18 = Data_Base.data.fs[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+                                                                var f = _step18.value;
 
-                                                                if (section.id === id) return section.name + ":";
+                                                                if (f.id === id) file = JSON.parse(JSON.stringify(f));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError18 = true;
@@ -1433,50 +1467,52 @@ export default function useGetData(TheDatas) {
                                                                 }
                                                         }
                                                 }
+
+                                                return getPath(file.parent_id, file.parent_type) + "\\" + file.name;
+                                        }
+                                default:
+                                        {
+                                                var _iteratorNormalCompletion19 = true;
+                                                var _didIteratorError19 = false;
+                                                var _iteratorError19 = undefined;
+
+                                                try {
+                                                        for (var _iterator19 = Data_Base.data.sections[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+                                                                var section = _step19.value;
+
+                                                                if (section.id === id) return section.name + ":";
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError19 = true;
+                                                        _iteratorError19 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion19 && _iterator19.return) {
+                                                                        _iterator19.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError19) {
+                                                                        throw _iteratorError19;
+                                                                }
+                                                        }
+                                                }
                                         }
                         }
                 };
 
                 // audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19)
-                var _iteratorNormalCompletion19 = true;
-                var _didIteratorError19 = false;
-                var _iteratorError19 = undefined;
-
-                try {
-                        for (var _iterator19 = audits[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-                                var audit = _step19.value;
-
-                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined, audit.is_validated, audit.validator_id));
-                        }
-
-                        // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
-                } catch (err) {
-                        _didIteratorError19 = true;
-                        _iteratorError19 = err;
-                } finally {
-                        try {
-                                if (!_iteratorNormalCompletion19 && _iterator19.return) {
-                                        _iterator19.return();
-                                }
-                        } finally {
-                                if (_didIteratorError19) {
-                                        throw _iteratorError19;
-                                }
-                        }
-                }
-
                 var _iteratorNormalCompletion20 = true;
                 var _didIteratorError20 = false;
                 var _iteratorError20 = undefined;
 
                 try {
-                        for (var _iterator20 = checkLists[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-                                var checkList = _step20.value;
+                        for (var _iterator20 = audits[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+                                var audit = _step20.value;
 
-                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined, checkList.is_validated, checkList.validator_id));
+                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined, audit.is_validated, audit.validator_id));
                         }
 
-                        // dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19)
+                        // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError20 = true;
                         _iteratorError20 = err;
@@ -1497,13 +1533,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError21 = undefined;
 
                 try {
-                        for (var _iterator21 = dps[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
-                                var dp = _step21.value;
+                        for (var _iterator21 = checkLists[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+                                var checkList = _step21.value;
 
-                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined, dp.is_validated, dp.validator_id));
+                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined, checkList.is_validated, checkList.validator_id));
                         }
 
-                        // nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19)
+                        // dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError21 = true;
                         _iteratorError21 = err;
@@ -1524,13 +1560,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError22 = undefined;
 
                 try {
-                        for (var _iterator22 = nonCs[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
-                                var nonC = _step22.value;
+                        for (var _iterator22 = dps[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
+                                var dp = _step22.value;
 
-                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined, nonC.is_validated, nonC.validator_id));
+                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined, dp.is_validated, dp.validator_id));
                         }
 
-                        // fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19)
+                        // nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError22 = true;
                         _iteratorError22 = err;
@@ -1551,13 +1587,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError23 = undefined;
 
                 try {
-                        for (var _iterator23 = fncs[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
-                                var fnc = _step23.value;
+                        for (var _iterator23 = nonCs[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
+                                var nonC = _step23.value;
 
-                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined, fnc.is_validated, fnc.validator_id));
+                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined, nonC.is_validated, nonC.validator_id));
                         }
 
-                        // f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19)
+                        // fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError23 = true;
                         _iteratorError23 = err;
@@ -1578,13 +1614,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError24 = undefined;
 
                 try {
-                        for (var _iterator24 = fs[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
-                                var f = _step24.value;
+                        for (var _iterator24 = fncs[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
+                                var fnc = _step24.value;
 
-                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url, f.is_validated, f.validator_id));
+                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined, fnc.is_validated, fnc.validator_id));
                         }
 
-                        // d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19)
+                        // f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError24 = true;
                         _iteratorError24 = err;
@@ -1605,13 +1641,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError25 = undefined;
 
                 try {
-                        for (var _iterator25 = ds[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
-                                var d = _step25.value;
+                        for (var _iterator25 = fs[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
+                                var f = _step25.value;
 
-                                allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19), undefined, d.section_id, undefined, undefined, d.is_validated, d.validator_id));
+                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url, f.is_validated, f.validator_id));
                         }
 
-                        // console.log("DataFormater", allDataAsNodeData)
+                        // d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError25 = true;
                         _iteratorError25 = err;
@@ -1627,26 +1663,25 @@ export default function useGetData(TheDatas) {
                         }
                 }
 
-                var structuredData = new Map();
-
-                var _loop2 = function _loop2(section) {
-                        structuredData.set(section.id, allDataAsNodeData.filter(function (nodeData) {
-                                /*console.log(nodeData.section_id, section.id)*/;return nodeData.section_id === section.id || nodeData.section_id === -1;
-                        }).map(function (nodeData) {
-                                return nodeData;
-                        }));
-                };
-
                 var _iteratorNormalCompletion26 = true;
                 var _didIteratorError26 = false;
                 var _iteratorError26 = undefined;
 
                 try {
-                        for (var _iterator26 = Data_Base.data.sections[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
-                                var section = _step26.value;
+                        for (var _iterator26 = ds[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
+                                var d = _step26.value;
 
-                                _loop2(section);
+                                allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19), undefined, d.section_id, undefined, undefined, d.is_validated, d.validator_id));
                         }
+
+                        // console.log("DataFormater", allDataAsNodeData)
+
+                        // const structuredData = new Map()
+
+                        // for(let section of Data_Base.data.sections)
+                        // {
+                        //         structuredData.set(section.id, allDataAsNodeData.filter((nodeData) => { /*console.log(nodeData.section_id, section.id)*/; return nodeData.section_id === section.id || nodeData.section_id === -1 }).map((nodeData) => { return nodeData } ) )
+                        // }
 
                         // console.log(structuredData.get(1))
 
@@ -1779,34 +1814,9 @@ export default function useGetData(TheDatas) {
                                         var _data2 = action.data;
                                         console.log('broadcast.........', _data2);
 
-                                        var update_path = function update_path(node, current_state) {
-                                                var up_to_date_node = JSON.parse(JSON.stringify(node));
-
-                                                up_to_date_node.path = getNewPath(up_to_date_node, current_state, true);
-
-                                                console.log('current_state', current_state);
-
-                                                var new_state = JSON.parse(JSON.stringify(current_state)).map(function (current_node) {
-                                                        if (current_node.id === up_to_date_node.id) return up_to_date_node;
-                                                        return current_node;
-                                                });
-
-                                                console.log('new_state', new_state);
-
-                                                var final_state = JSON.parse(JSON.stringify(new_state));
-
-                                                new_state.forEach(function (new_node) {
-                                                        if (new_node.parentId === up_to_date_node.id) {
-                                                                final_state = update_path(new_node, final_state);
-                                                        }
-                                                });
-
-                                                return final_state;
-                                        };
-
                                         var _newState = JSON.parse(JSON.stringify(state));
 
-                                        var _loop3 = function _loop3(node) {
+                                        var _loop2 = function _loop2(node) {
                                                 var updatedNode = create_new_node(node);
 
                                                 console.log('updatedNode', updatedNode);
@@ -1838,7 +1848,7 @@ export default function useGetData(TheDatas) {
                                                 for (var _iterator27 = _data2.node[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
                                                         var node = _step27.value;
 
-                                                        _loop3(node);
+                                                        _loop2(node);
                                                 }
 
                                                 // EventsManager.emit('updateData')
@@ -1861,6 +1871,18 @@ export default function useGetData(TheDatas) {
 
                                         return JSON.parse(JSON.stringify(_newState));
                                 }
+                        // case "update_open_state":
+                        // {
+                        //         state = copyObject(state).map(
+                        //          node =>
+                        //          {
+                        //                  if (node.id === action.data.id) return {...node, isOpen: action.data.new_state}
+                        //                  return node
+                        //          }
+                        //         )
+                        //
+                        //         return state
+                        // }
 
                         default:
                                 break;
@@ -1880,9 +1902,9 @@ export default function useGetData(TheDatas) {
         //   }, [FetchedNodesData]
         // )
 
-        Global_State['isEditorMode'] = isEditorMode;
-        Global_State['dataBaseData'] = FetchedNodesData;
-        Global_State['EventsManager'] = EventsManager;
+        window.Global_State['isEditorMode'] = isEditorMode;
+        window.Global_State['dataBaseData'] = FetchedNodesData;
+        window.Global_State['EventsManager'] = EventsManager;
 
         var editor = useEditor(FetchedNodesData);
 
@@ -1920,7 +1942,7 @@ export default function useGetData(TheDatas) {
         var structuredData = useMemo(function () {
                 var map = new Map();
 
-                var _loop4 = function _loop4(section) {
+                var _loop3 = function _loop3(section) {
                         map.set(section.id, dataToUse.filter(function (nodeData) {
                                 /*console.log(nodeData.section_id, section.id);*/return nodeData.section_id === section.id || nodeData.section_id === -1;
                         }).map(function (nodeData) {
@@ -1936,7 +1958,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator28 = Data_Base.data.sections[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
                                 var section = _step28.value;
 
-                                _loop4(section);
+                                _loop3(section);
                         }
                 } catch (err) {
                         _didIteratorError28 = true;
@@ -1957,10 +1979,10 @@ export default function useGetData(TheDatas) {
         }, [dataToUse]);
         console.log('structuredData', structuredData);
 
-        var _useState5 = useState(Data_Base.data.sections.length === 0 ? 0 : Data_Base.data.sections[0].id),
-            _useState6 = _slicedToArray(_useState5, 2),
-            selectedSectionId = _useState6[0],
-            setSectionId = _useState6[1];
+        var _useState7 = useState(Data_Base.data.sections.length === 0 ? 0 : Data_Base.data.sections[0].id),
+            _useState8 = _slicedToArray(_useState7, 2),
+            selectedSectionId = _useState8[0],
+            setSectionId = _useState8[1];
 
         // console.log('selectedSectionId',selectedSectionId)
 
@@ -1975,10 +1997,10 @@ export default function useGetData(TheDatas) {
         // console.log(displayingSection)
 
 
-        var _useState7 = useState(false),
-            _useState8 = _slicedToArray(_useState7, 2),
-            toggleCleared = _useState8[0],
-            setToggleCleared = _useState8[1];
+        var _useState9 = useState(false),
+            _useState10 = _slicedToArray(_useState9, 2),
+            toggleCleared = _useState10[0],
+            setToggleCleared = _useState10[1];
 
         var clearSelected = function clearSelected(setSelectedRows) {
                 setToggleCleared(!toggleCleared);EventsManager.emit('clearSelected');
@@ -2139,21 +2161,30 @@ export default function useGetData(TheDatas) {
                 }
         }
 
+        var getNodeSection = function getNodeSection(id) {
+                var node = dataToUse.find(function (node) {
+                        return node.id === id;
+                });
+
+                if (node) return node.section_id;
+                return undefined;
+        };
+
         var getCurrentSection = function getCurrentSection() {
                 // console.log(sections.get(selectedSectionId))
                 return sections.get(selectedSectionId);
         };
 
         function useModalManager() {
-                var _useState9 = useState(React.createElement("div", null)),
-                    _useState10 = _slicedToArray(_useState9, 2),
-                    content = _useState10[0],
-                    setContent = _useState10[1];
-
-                var _useState11 = useState(false),
+                var _useState11 = useState(React.createElement("div", null)),
                     _useState12 = _slicedToArray(_useState11, 2),
-                    show = _useState12[0],
-                    setShow = _useState12[1];
+                    content = _useState12[0],
+                    setContent = _useState12[1];
+
+                var _useState13 = useState(false),
+                    _useState14 = _slicedToArray(_useState13, 2),
+                    show = _useState14[0],
+                    setShow = _useState14[1];
 
                 var modal_title = useRef("");
                 var can_close = useRef(true);
@@ -2188,10 +2219,10 @@ export default function useGetData(TheDatas) {
                         )
                 );
 
-                var _useState13 = useState(React.createElement("div", null)),
-                    _useState14 = _slicedToArray(_useState13, 2),
-                    container = _useState14[0],
-                    setModalOpening = _useState14[1];
+                var _useState15 = useState(React.createElement("div", null)),
+                    _useState16 = _slicedToArray(_useState15, 2),
+                    container = _useState16[0],
+                    setModalOpening = _useState16[1];
 
                 return {
                         modal: modal,
@@ -2209,10 +2240,10 @@ export default function useGetData(TheDatas) {
         var modalManager = useModalManager();
 
         function useShowSpinner() {
-                var _useState15 = useState(false),
-                    _useState16 = _slicedToArray(_useState15, 2),
-                    show = _useState16[0],
-                    setShow = _useState16[1];
+                var _useState17 = useState(false),
+                    _useState18 = _slicedToArray(_useState17, 2),
+                    show = _useState18[0],
+                    setShow = _useState18[1];
 
                 var spinner = React.createElement(
                         "div",
@@ -2307,10 +2338,10 @@ export default function useGetData(TheDatas) {
                     _ref3$f = _ref3.f,
                     f = _ref3$f === undefined ? undefined : _ref3$f;
 
-                var _useState17 = useState(null),
-                    _useState18 = _slicedToArray(_useState17, 2),
-                    anchorEl = _useState18[0],
-                    setAnchorEl = _useState18[1];
+                var _useState19 = useState(null),
+                    _useState20 = _slicedToArray(_useState19, 2),
+                    anchorEl = _useState20[0],
+                    setAnchorEl = _useState20[1];
 
                 var handleEnter = function handleEnter(event) {
                         setAnchorEl(event.currentTarget);
@@ -2365,7 +2396,9 @@ export default function useGetData(TheDatas) {
 
                 return React.createElement(
                         "div",
-                        { id: id, onMouseEnter: handleEnter, onMouseLeave: handleLeave },
+                        { id: id, tabIndex: 0, onClick: function onClick(e) {
+                                        e.preventDefault();e.stopPropagation();
+                                }, onMouseEnter: handleEnter, onMouseLeave: handleLeave, onFocus: handleEnter },
                         React.createElement(
                                 "div",
                                 null,
@@ -2380,15 +2413,19 @@ export default function useGetData(TheDatas) {
                                         Popper,
                                         { id: drop_id + "_pop",
                                                 style: {
-                                                        zIndex: 999,
+                                                        zIndex: 1900,
                                                         borderRadius: '0.25rem',
                                                         fontSize: '14px',
                                                         border: 'none',
                                                         boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
                                                         overflow: 'hidden',
                                                         padding: '0.5rem',
-                                                        maxHeight: window.innerHeight / 100 * 80,
+                                                        maxHeight: "80%",
+                                                        maxWidth: "95%",
                                                         backgroundColor: "white"
+                                                },
+                                                onClick: function onClick(e) {
+                                                        e.preventDefault();e.stopPropagation();
                                                 },
                                                 open: open,
                                                 anchorEl: anchorEl
@@ -2669,23 +2706,21 @@ export default function useGetData(TheDatas) {
         //   }, [ref]);
         // }
 
-        var _useState19 = useState({
+        var _useState21 = useState({
                 style: {
                         display: 'none',
                         position: 'fixed',
-                        top: '0',
-                        left: '0',
                         zIndex: '1040',
-                        width: '100vw',
-                        height: '100vh',
+                        width: '100%',
+                        height: '100%',
                         overflow: 'auto',
                         backgroundColor: '#00000000'
                         // pointerEvents: 'none',
                         // opacity: 0.5,
                 } }),
-            _useState20 = _slicedToArray(_useState19, 2),
-            Overlay_props = _useState20[0],
-            setOverlay_props = _useState20[1];
+            _useState22 = _slicedToArray(_useState21, 2),
+            Overlay_props = _useState22[0],
+            setOverlay_props = _useState22[1];
 
         var Overlay_component = React.createElement("div", Object.assign({}, Overlay_props, { onClick: function onClick(e) {
                         e.stopPropagation();
@@ -2698,7 +2733,7 @@ export default function useGetData(TheDatas) {
                         });
                 } }));
 
-        return Object.assign({}, Global_State, {
+        return Object.assign({}, window.Global_State, {
                 // EventsManager,
                 // isEditorMode,
                 authUser: Data_Base.authUser,
@@ -2718,7 +2753,9 @@ export default function useGetData(TheDatas) {
                 getNodeDataById: getNodeData,
                 getChildrenById: getChildrenFrom,
                 getType: getType,
+                getNodeSection: getNodeSection,
                 getNewPath: getNewPath,
+                update_path: update_path,
                 copyObject: copyObject,
                 compareObjects: compareObjects,
                 modalManager: modalManager,
@@ -2726,7 +2763,7 @@ export default function useGetData(TheDatas) {
                 selectedSectionId: selectedSectionId,
                 setSectionId: setSectionId,
                 sections: sections,
-                FetchedNodesData: structuredData,
+                structuredData: structuredData,
                 // setFnd,
                 selectedNodeIdsInSections: selectedNodeIdsInSections,
                 getCurrentSection: getCurrentSection,
@@ -2736,29 +2773,7 @@ export default function useGetData(TheDatas) {
                 clearSelected: clearSelected,
                 CustomDropDown: CustomDropDown,
                 Overlay_component: Overlay_component,
-                setOverlay_props: setOverlay_props
+                setOverlay_props: setOverlay_props,
+                expanded: expanded
         });
 }
-
-// makeNodeData(1, "node1", "folder", true, -1, "", true),
-//     makeNodeData(2, "node2", "folder", true, 1, "", true),
-//     makeNodeData(3, "node3", "file", false, 7, "", false, "pdf"),//
-//     makeNodeData(4, "node4", "folder", false, 1, "", false),
-//     makeNodeData(5, "node5", "file", false, 1, "", false, "jpg"),//
-//     makeNodeData(6, "node6", "file", false, 2, "", false, "mp4"),//
-//     makeNodeData(7, "node7", "folder", false, 9, "", true),
-//     makeNodeData(8, "nodxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe8", "file", false, 9, "", false, "pptx"),//
-//     makeNodeData(9, "node9", "folder", false, 2, "", true),
-//     makeNodeData(10, "node10", "file", false, 2, "", false, "xlsx"),//
-//     makeNodeData(11, "node11", "folder", false, 1, "", true),
-//     makeNodeData(12, "node2", "folder", false, 1, "", true),
-//     makeNodeData(13, "node2", "folder", false, 1, "", true),
-//     makeNodeData(14, "node2", "folder", false, 1, "", true),
-//     makeNodeData(15, "node2", "folder", false, 1, "", true),
-//     makeNodeData(16, "node2", "folder", false, 1, "", true),
-//     makeNodeData(17, "node2", "folder", false, 1, "", true),
-//     makeNodeData(18, "node2", "folder", false, 1, "", true),
-//     makeNodeData(19, "node2", "folder", false, 1, "", true),
-//     makeNodeData(20, "node2", "folder", false, 1, "", true),
-//     makeNodeData(21, "node2", "folder", false, 1, "", true),
-//     makeNodeData(22, "node2", "folder", true, 1, "", true),

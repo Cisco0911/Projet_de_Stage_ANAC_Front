@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useReducer } from 'react';
 
-import { Global_State } from "../main";
-import { http } from "../data";
+import { http } from "./login";
 
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
@@ -68,14 +67,14 @@ export default function QuickSettings() {
 
         var settingButton = React.createElement(
                 IconButton,
-                { "aria-label": "settings", style: { width: 36, height: 36, overflowWrap: 'break-word' } },
+                { 'aria-label': 'settings', style: { width: 36, height: 36, overflowWrap: 'break-word' } },
                 React.createElement(AiTwotoneSetting, { size: 30 })
         );
 
         var handleChange = function handleChange(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                Global_State.changeMode();
+                window.Global_State.changeMode();
         };
 
         var renderingComponent = React.createElement(
@@ -88,19 +87,19 @@ export default function QuickSettings() {
                         { key: 'mode éditeur' },
                         React.createElement(
                                 Stack,
-                                { direction: "row", spacing: 1, alignItems: "center" },
-                                React.createElement(AntSwitch, { id: 'switchRef', checked: Global_State.isEditorMode, onClick: handleChange }),
+                                { direction: 'row', spacing: 1, alignItems: 'center' },
+                                React.createElement(AntSwitch, { id: 'switchRef', checked: window.Global_State.isEditorMode, onClick: handleChange }),
                                 React.createElement(
-                                        "label",
+                                        'label',
                                         { style: { width: 'max-content', cursor: 'pointer' }, htmlFor: 'switchRef', onClick: handleChange },
-                                        " ",
-                                        (Global_State.editorMode ? 'désactiver' : 'activer') + " le mode \xE9diteur",
-                                        " "
+                                        ' ',
+                                        (window.Global_State.editorMode ? 'désactiver' : 'activer') + ' le mode \xE9diteur',
+                                        ' '
                                 )
                         ),
                         React.createElement(Divider, null)
                 )
         );
 
-        return React.createElement(Global_State.CustomDropDown, { id: 'settingPanel', icon: settingButton, content: renderingComponent });
+        return React.createElement(window.Global_State.CustomDropDown, { id: 'settingPanel', icon: settingButton, content: renderingComponent });
 }

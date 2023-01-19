@@ -2,8 +2,7 @@
 
 import React, {useEffect, useMemo, useReducer, useRef, useState} from 'react';
 
-import {Global_State} from "../main";
-import {http} from "../data";
+import {http} from "./login";
 
 import Badge from '@mui/material/Badge';
 import {styled} from '@mui/material/styles';
@@ -46,10 +45,10 @@ const isThereUpdate = () =>
 
     let countNew = 0
 
-    countNew = countNew + Global_State.authUser.asking_permission_notifications.length + Global_State.authUser.unread_review_notifications.length
+    countNew = countNew + window.Global_State.authUser.asking_permission_notifications.length + window.Global_State.authUser.unread_review_notifications.length
 
 
-    return countNew 
+    return countNew
 
 }
 
@@ -147,7 +146,7 @@ function AskingPermitComponent({ap_notif, dispatch})
 
         }
 
-        const node = Global_State.getNodeDataById( `${Global_State.parseModelToFrontType(ap_notif.data.model)}${ap_notif.data.node_id}` )
+        const node = window.Global_State.getNodeDataById( `${window.Global_State.parseModelToFrontType(ap_notif.data.model)}${ap_notif.data.node_id}` )
 
         return (
                 <ListItem key={ap_notif.id} onClick={ e => { e.preventDefault(); e.stopPropagation() } } >
@@ -184,7 +183,7 @@ function AskingPermitComponent({ap_notif, dispatch})
                                                                                 {
                                                                                         dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true})
 
-                                                                                        setTimeout( () => { Global_State.EventsManager.emit('updateAuthUserInfo') }, 1000 )
+                                                                                        setTimeout( () => { window.Global_State.EventsManager.emit('updateAuthUserInfo') }, 1000 )
                                                                                 }
                                                                                 else
                                                                                 {
@@ -199,7 +198,7 @@ function AskingPermitComponent({ap_notif, dispatch})
                                                 {/*{ clicked.current ? (approved.current ? icon : <ThumbUpAltTwoToneIcon color={'error'} />) : <ThumbUpAltTwoToneIcon color={'error'} /> }*/}
                                                 {iconOK}
                                         </IconButton>
-                                        <IconButton title={'CONSULTER'} variant="light" onClick={() => { Global_State.EventsManager.emit('setSelectedNode', {id: node.id, section_id: node.section_id} ); }}>
+                                        <IconButton title={'CONSULTER'} variant="light" onClick={() => { window.Global_State.EventsManager.emit('show_on_screen', {id: node.id, section_id: node.section_id} ); }}>
                                                 <FaEye size={24} color={'blue'} />
                                         </IconButton>
                                         <IconButton title={'REFUSER'} disabled={approved !== null} variant="light"
@@ -225,7 +224,7 @@ function AskingPermitComponent({ap_notif, dispatch})
                                                                         {
                                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: false})
 
-                                                                                setTimeout( () => { Global_State.EventsManager.emit('updateAuthUserInfo') }, 1000 )
+                                                                                setTimeout( () => { window.Global_State.EventsManager.emit('updateAuthUserInfo') }, 1000 )
                                                                         }
                                                                         else
                                                                         {
@@ -344,7 +343,7 @@ function useUnreadReviewNotif()
                 },
         }));
 
-        const unreadReviewNotif = useMemo( () => JSON.parse(JSON.stringify(Global_State.authUser.unread_review_notifications)),  [Global_State.authUser])
+        const unreadReviewNotif = useMemo( () => JSON.parse(JSON.stringify(window.Global_State.authUser.unread_review_notifications)),  [window.Global_State.authUser])
 
         // let unreadReviewNotifComponents = []
 
@@ -452,7 +451,7 @@ function useReadReviewNotif()
                 },
         }));
 
-        const readReviewNotifs = useMemo( () => JSON.parse(JSON.stringify(Global_State.authUser.read_notifications)),  [Global_State.authUser])
+        const readReviewNotifs = useMemo( () => JSON.parse(JSON.stringify(window.Global_State.authUser.read_notifications)),  [window.Global_State.authUser])
 
         // let readReviewNotifComponents = []
 
@@ -612,18 +611,18 @@ export default function Notifications()
                 </IconButton>
         )
 
-        const [askingPermitNotif, update] = useState( JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)) )
+        const [askingPermitNotif, update] = useState( JSON.parse(JSON.stringify(window.Global_State.authUser.asking_permission_notifications)) )
 
         useEffect(
                 () =>
                 {
                         console.log('check_update_asking_permit_notifs')
-                        if ( !( JSON.stringify(askingPermitNotif) === JSON.stringify(Global_State.authUser.asking_permission_notifications) ) )
+                        if ( !( JSON.stringify(askingPermitNotif) === JSON.stringify(window.Global_State.authUser.asking_permission_notifications) ) )
                         {
                                 console.log('update_asking_permit_notifs')
-                                update( JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)) )
+                                update( JSON.parse(JSON.stringify(window.Global_State.authUser.asking_permission_notifications)) )
                         }
-                }, [Global_State.authUser.asking_permission_notifications]
+                }, [window.Global_State.authUser.asking_permission_notifications]
         )
 
 
@@ -673,16 +672,16 @@ export default function Notifications()
         useEffect(
                 () =>
                 {
-                        // Global_State.EventsManager.on('observe_notif_panel', () => { const ref = document.getElementById('notifRenderingComponent');  console.log(ref); observe(ref) })
-                        // Global_State.EventsManager.on('unobserve_notif_panel', disconect)
-                        Global_State.EventsManager.on('setOpenState', setOpenState)
+                        // window.Global_State.EventsManager.on('observe_notif_panel', () => { const ref = document.getElementById('notifRenderingComponent');  console.log(ref); observe(ref) })
+                        // window.Global_State.EventsManager.on('unobserve_notif_panel', disconect)
+                        window.Global_State.EventsManager.on('setOpenState', setOpenState)
 
                         return(
                                 () =>
                                 {
-                                        // Global_State.EventsManager.off('observe_notif_panel')
-                                        // Global_State.EventsManager.off('unobserve_notif_panel')
-                                        Global_State.EventsManager.off('setOpenState')
+                                        // window.Global_State.EventsManager.off('observe_notif_panel')
+                                        // window.Global_State.EventsManager.off('unobserve_notif_panel')
+                                        window.Global_State.EventsManager.off('setOpenState')
                                 }
                         )
 
@@ -782,10 +781,10 @@ export default function Notifications()
 
         return (
                 useMemo(
-                        () => ( <Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} /> ),
+                        () => ( <window.Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} /> ),
                         [renderingComponent]
                 )
-                // <Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />
+                // <window.Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />
         )
 
 }

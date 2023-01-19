@@ -2,8 +2,7 @@
 
 import React, {useState, useEffect, useRef, useMemo, useReducer} from 'react';
 
-import { Global_State } from "../main";
-import { http } from "../data";
+import { http } from "./login";
 
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
@@ -91,7 +90,7 @@ export default function QuickSettings()
         {
                 e.preventDefault()
                 e.stopPropagation()
-                Global_State.changeMode()
+                window.Global_State.changeMode()
         }
 
         const renderingComponent =
@@ -99,8 +98,8 @@ export default function QuickSettings()
         <List sx = {{ minWidth: 250, maxWidth: 390 }} onClick={ e => {e.preventDefault(); e.stopPropagation()} } >
                 <ListItem key={'mode éditeur'} >
                         <Stack direction="row" spacing={1} alignItems="center">
-                                <AntSwitch id={'switchRef'} checked={Global_State.isEditorMode} onClick={handleChange}  />
-                                <label style={{ width: 'max-content', cursor: 'pointer' }} htmlFor={'switchRef'} onClick={handleChange} > { `${ Global_State.editorMode ? 'désactiver' : 'activer' } le mode éditeur` } </label>
+                                <AntSwitch id={'switchRef'} checked={window.Global_State.isEditorMode} onClick={handleChange}  />
+                                <label style={{ width: 'max-content', cursor: 'pointer' }} htmlFor={'switchRef'} onClick={handleChange} > { `${ window.Global_State.editorMode ? 'désactiver' : 'activer' } le mode éditeur` } </label>
                         </Stack>
                         <Divider />
                 </ListItem>
@@ -108,6 +107,6 @@ export default function QuickSettings()
         )
 
 
-        return <Global_State.CustomDropDown id = {'settingPanel'} icon = {settingButton} content = {renderingComponent} />
+        return <window.Global_State.CustomDropDown id = {'settingPanel'} icon = {settingButton} content = {renderingComponent} />
 
 }

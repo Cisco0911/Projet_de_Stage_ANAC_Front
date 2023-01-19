@@ -15,7 +15,8 @@ import ReactDOM from 'react-dom/client';
 import useGetFiles from './files_package/files';
 import Global_research from "./files_package/global_research";
 import Login from "./auth/login";
-import { http } from "./data";
+import Create_account from "./auth/create_account";
+import { http } from "./auth/login";
 import Notifications from "./auth/user_notification";
 import QuickSettings from "./auth/quick_settings";
 
@@ -28,16 +29,21 @@ import { styled, Theme, createTheme, ThemeProvider } from '@mui/material/styles'
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import ManageAccountsTwoToneIcon from '@mui/icons-material/ManageAccountsTwoTone';
+import IconButton from "@mui/material/IconButton";
 
-import { AiOutlineMenuUnfold } from "react-icons/ai";
-import { GiOverhead } from "react-icons/gi";
-import { TiThumbsDown, TiThumbsOk } from "react-icons/ti";
+import { HiOutlineMenuAlt2 } from "react-icons/hi";
+import { GiPalmTree } from "react-icons/gi";
+import { AiOutlineCloseSquare } from "react-icons/ai";
 import { MdNotificationsActive, MdOutlineArrowDropDownCircle } from "react-icons/md";
 
 import toast, { Toaster } from "react-hot-toast";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useRouteError, redirect, useNavigate } from "react-router-dom";
+import { Box, Button, Popper, SwipeableDrawer, Tooltip } from "@mui/material";
+import { Collapse, Fade, Offcanvas } from "react-bootstrap";
+import Administrator_home from "./administrator/administrator_home";
 
 export default function ErrorPage() {
         var error = useRouteError();
@@ -70,7 +76,16 @@ export default function ErrorPage() {
 
 export var test = "Success";
 
-export var Global_State = {};
+window.Global_State = {};
+// Object.defineProperty(window, 'Global_State', {
+//         get: function() {
+//                 return Global_State;
+//         },
+//         set: function(value) {
+//                 console.log('La valeur de myData a été modifiée : ' + value);
+//         }
+// });
+
 
 function Lol(_ref) {
         var lal = _ref.lal;
@@ -80,32 +95,32 @@ function Lol(_ref) {
             o = _useState2[0],
             setO = _useState2[1];
 
-        var iconOK = React.createElement(TiThumbsOk, { size: 24, color: 'red' }),
-            iconNO = React.createElement(TiThumbsDown, { size: 24, color: 'green' });
+        var iconOK = "OK",
+            iconNO = "NO";
 
+
+        var ico = iconOK;
 
         if (!o) {
-                iconOK = React.createElement(
-                        'span',
-                        null,
-                        ' p '
-                );
+                ico = iconNO;
         }
+
+        console.log("Lolllllll rerender");
 
         return React.createElement(
                 'div',
                 { onClick: function onClick(event) {
-                                setO(!o);
+                                window.Global_State.EventsManager.emit("updateOK", window.Global_State.o + "OK");
                         },
                         style: {
-                                width: '100vh',
-                                height: '100vh',
+                                width: '100%',
+                                height: '100%',
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center"
                         }
                 },
-                iconOK
+                window.Global_State.o
         );
 }
 
@@ -151,11 +166,11 @@ function Header() {
                 React.createElement(
                         'div',
                         { className: ' d-flex flex-column justify-content-center align-items-center py-4', 'data-background-image': './style/assets/media/image/user/man_avatar3.jpg', style: { background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100 } },
-                        React.createElement(Avatar, { alt: Global_State.authUser.name + ' ' + Global_State.authUser.second_name, src: './style/assets/media/image/user/man_avatar3.jpg' }),
+                        React.createElement(Avatar, { alt: window.Global_State.authUser.name + ' ' + window.Global_State.authUser.second_name, src: './style/assets/media/image/user/man_avatar3.jpg' }),
                         React.createElement(
                                 'h5',
                                 { className: 'mb-0' },
-                                Global_State.authUser.name + ' ' + Global_State.authUser.second_name
+                                window.Global_State.authUser.name + ' ' + window.Global_State.authUser.second_name
                         )
                 ),
                 React.createElement('div', { className: 'dropdown-divider' }),
@@ -195,7 +210,7 @@ function Header() {
                                         'span',
                                         { className: 'm-5' },
                                         ' ',
-                                        Global_State.authUser.name + ' ' + Global_State.authUser.second_name,
+                                        window.Global_State.authUser.name + ' ' + window.Global_State.authUser.second_name,
                                         ' '
                                 ),
                                 React.createElement(
@@ -209,45 +224,27 @@ function Header() {
         );
 
         return React.createElement(
-                Navbar /* bg="light"  */,
-                { expand: 'sm', style: { padding: 0 } },
+                React.Fragment,
+                null,
                 React.createElement(
-                        Container,
-                        { fluid: true, style: { justifyContent: 'end', alignItems: 'start', paddingRight: '15px' } },
-                        React.createElement(Navbar.Toggle, { className: 'p-0  justify-content-start align-items-start d-flex d-sm-none', 'aria-controls': 'offcanvasNavbar-expand-' + 'sm', children: React.createElement(GiOverhead, { size: 40 }),
+                        'div',
+                        { className: 'd-sm-flex justify-content-start flex-sm-column container-fluid p-0',
                                 style: {
-                                        width: 60,
-                                        color: 'rgb(0 0 0)',
-                                        transform: 'rotateY(180deg)',
-                                        paddingLeft: 17,
-                                        border: 'none'
-                                } }),
+                                        minWidth: 280
+                                }
+                        },
                         React.createElement(
-                                Navbar.Offcanvas,
-                                {
-                                        id: 'offcanvasNavbar-expand-' + 'sm',
-                                        'aria-labelledby': 'offcanvasNavbarLabel-expand-' + 'sm',
-                                        placement: 'top',
-                                        className: 'container-fluid d-flex flex-row justify-content-end',
-                                        style: { /* width: '100%' */height: 105, padding: 0 }
-                                },
-                                React.createElement(
-                                        'div',
-                                        { className: 'd-flex justify-content-start flex-column container-fluid p-0' },
-                                        React.createElement(
-                                                Stack,
-                                                { className: 'justify-content-sm-end justify-content-center m-2', direction: 'row', spacing: 1, alignItems: 'center', justifyContent: 'flex-end' },
-                                                useMemo(function () {
-                                                        return React.createElement(Notifications, null);
-                                                }, [Global_State.authUser.asking_permission_notifications]),
-                                                useMemo(function () {
-                                                        return React.createElement(QuickSettings, null);
-                                                }, [Global_State.isEditorMode]),
-                                                React.createElement(Global_State.CustomDropDown, { id: 'userPanel', icon: dropTogglerContentUser, content: dropMenuItemsUser })
-                                        ),
-                                        React.createElement(Global_research, { display: 'd-flex d-sm-none' })
-                                )
-                        )
+                                Stack,
+                                { className: 'justify-content-sm-end justify-content-center m-2', direction: 'row', spacing: 1, alignItems: 'center', justifyContent: 'flex-end' },
+                                useMemo(function () {
+                                        return React.createElement(Notifications, null);
+                                }, [window.Global_State.authUser.asking_permission_notifications]),
+                                useMemo(function () {
+                                        return React.createElement(QuickSettings, null);
+                                }, [window.Global_State.isEditorMode]),
+                                React.createElement(window.Global_State.CustomDropDown, { id: 'userPanel', icon: dropTogglerContentUser, content: dropMenuItemsUser })
+                        ),
+                        React.createElement(Global_research, { display: 'd-flex d-sm-none' })
                 )
         );
 }
@@ -256,99 +253,574 @@ function Sections_side_bar() {
         var _this = this;
 
         var sections = [];
-        // console.log(Global_State.sections)
-        Global_State.sections.forEach(function (section) {
+        // console.log(window.Global_State.sections)
+        window.Global_State.sections.forEach(function (section) {
                 sections.push(section);
         });
 
         return React.createElement(
                 'div',
-                { style: { width: 'auto', height: 'auto' } },
+                { className: 'navigation_content full_size_element' },
                 React.createElement(
-                        Navbar,
-                        { key: 'xl', expand: 'xl', style: { padding: '0 30px' } },
+                        'div',
+                        { className: 'anac_logo' },
                         React.createElement(
-                                Container,
-                                { fluid: true, style: { justifyContent: 'start', alignItems: 'start' } },
-                                React.createElement(Navbar.Toggle, { className: 'p-0 d-flex justify-content-center align-items-start', 'aria-controls': 'offcanvasNavbar-expand-' + 'xl', children: React.createElement(AiOutlineMenuUnfold, { size: 50 }),
-                                        style: {
-                                                width: 50,
-                                                height: 50,
-                                                color: 'rgb(0 0 0)',
-                                                border: 'none'
-                                        }
-                                }),
+                                'a',
+                                { href: '/', className: 'full_size_element' },
+                                React.createElement('img', { className: 'full_size_element', src: window.location.origin + '/Favicon_anac.png', alt: 'logo' })
+                        )
+                ),
+                React.createElement(
+                        'div',
+                        { className: 'sections_div' },
+                        React.createElement(
+                                Stack,
+                                { direction: 'column', spacing: 2, className: 'full_size_element' },
+                                sections.map(function (section, idx) {
+                                        // console.log(sections)
+                                        return React.createElement(
+                                                Tooltip,
+                                                { key: section.id, title: section.name, placement: 'right-start' },
+                                                React.createElement(
+                                                        'span',
+                                                        { className: 'full_size_element' },
+                                                        React.createElement(
+                                                                Button,
+                                                                { className: 'd-flex p-2 full_size_element', tabIndex: -1, variant: '' + (window.Global_State.selectedSectionId === section.id ? "outlined" : "text"),
+                                                                        style: {
+                                                                                borderColor: "blue"
+                                                                        },
+                                                                        disabled: window.Global_State.selectedSectionId === section.id,
+                                                                        onClick: _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee() {
+                                                                                return _regeneratorRuntime.wrap(function _callee$(_context) {
+                                                                                        while (1) {
+                                                                                                switch (_context.prev = _context.next) {
+                                                                                                        case 0:
+                                                                                                                _context.next = 2;
+                                                                                                                return window.Global_State.setSectionId(section.id);
+
+                                                                                                        case 2:
+                                                                                                        case 'end':
+                                                                                                                return _context.stop();
+                                                                                                }
+                                                                                        }
+                                                                                }, _callee, _this);
+                                                                        }))
+                                                                },
+                                                                React.createElement(
+                                                                        'b',
+                                                                        {
+                                                                                style: {
+                                                                                        maxWidth: "100%",
+                                                                                        overflow: "hidden",
+                                                                                        textOverflow: 'ellipsis',
+                                                                                        color: '' + (window.Global_State.selectedSectionId === section.id ? '' : 'blue')
+                                                                                }
+                                                                        },
+                                                                        section.name
+                                                                )
+                                                        )
+                                                )
+                                        );
+                                })
+                        )
+                ),
+                React.createElement(
+                        IconButton,
+                        { size: 'large', color: 'primary', style: { width: "fit-content" } },
+                        React.createElement(ManageAccountsTwoToneIcon, { style: { fontSize: 60, color: "blue" } })
+                )
+        );
+}
+function Responsive_sections_side_bar(_ref3) {
+        var component = _ref3.component,
+            icon = _ref3.icon;
+
+        var _useState3 = useState(false),
+            _useState4 = _slicedToArray(_useState3, 2),
+            show = _useState4[0],
+            setShow = _useState4[1];
+
+        var ref = useRef();
+
+        var open = function open(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("opppppeeeeeeeeeeen");
+                // const element = document.getElementById("section_side_bar_responsive")
+                ref.current.style.height = "95vh";
+
+                setTimeout(function () {
+                        setShow(true);
+                }, 200);
+        },
+            close = function close(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("clossssssssssssssse");
+                // const element = document.getElementById("section_side_bar_responsive")
+                ref.current.style.height = "100%";
+
+                setShow(false);
+        };
+
+        // useEffect(
+        // () => {
+        //         /**
+        //          * Alert if clicked on outside of element
+        //          */
+        //         function handleClickOutside(event) {
+        //                 // console.log('outside')
+        //                 const dropdown = document.getElementById("section_side_bar_responsive")
+        //                 if (dropdown && !dropdown.contains(event.target)) {
+        //                         console.log('outside')
+        //                         close()
+        //                 }
+        //         }
+        //         // Bind the event listener
+        //         document.addEventListener("click", handleClickOutside);
+        //         return () => {
+        //                 // Unbind the event listener on clean up
+        //                 console.log('byeeeeeeeeeeeeeeeeeeeee')
+        //                 document.removeEventListener("click", handleClickOutside);
+        //
+        //         };
+        //
+        // }, [])
+
+        return React.createElement(
+                'div',
+                { id: "section_side_bar_responsive", ref: ref, tabIndex: -1, onClick: open /*onBlur={close}*/ },
+                show ? React.createElement(
+                        'div',
+                        { className: 'full_size_element', tabIndex: -1, style: { animation: "fadeMe 0.3s", position: "relative" }, onClick: function onClick(e) {
+                                        console.log(e);
+                                } },
+                        React.createElement(
+                                'div',
+                                { className: 'custom_close_button', onClick: close },
                                 React.createElement(
-                                        Navbar.Offcanvas,
+                                        IconButton,
+                                        { color: "error" },
+                                        React.createElement(AiOutlineCloseSquare, { size: 20, color: "red" })
+                                )
+                        ),
+                        component
+                ) : icon
+        );
+}
+
+function Responsive_file_tree() {
+
+        var offsetX = useRef(0);
+        var offsetY = useRef(0);
+
+        // const content = useRef(component)
+        //
+        // useEffect(
+        //         () =>
+        //         {
+        //                 content.current = component
+        //                 console.log("component change")
+        //         }, [component]
+        // )
+
+        var on_left = useRef(false);
+
+        var set_initials = function set_initials(e) {
+
+                var element = document.getElementById("file_tree_responsive");
+
+                // X here is the distance between element and the left border
+                var X = element.offsetLeft;
+                var Y = element.offsetTop;
+
+                offsetX.current = e.clientX - X;
+                offsetY.current = e.clientY - Y;
+
+                console.log("Drag startttttttttttt", offsetX, offsetY);
+                console.log("element.offsetLeft", element.offsetLeft);
+        };
+
+        function arrange(distance, max, component_size) {
+                var strict = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+                if (strict) {
+                        if (distance < max / 2) return 0;
+                        if (distance > max / 2) return max - component_size;
+                } else {
+                        if (distance < 0) return 0;
+                        if (distance > max) return max - component_size;
+                }
+
+                return distance;
+        }
+
+        var put_down = function put_down(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // X here is the distance between element and the left border
+                var X = e.clientX - offsetX.current;
+                // X here is the distance between element and the right border
+                var xOpposite = window.innerWidth - X - 48;
+
+                var Y = e.clientY - offsetY.current;
+
+                var newX = arrange(xOpposite, window.innerWidth, 48, true);
+                var newY = arrange(Y, window.innerHeight, 48);
+
+                console.log("New plaaaaaaaaace", xOpposite, newY);
+
+                on_left.current = Boolean(newX);
+
+                var element = document.getElementById("file_tree_responsive");
+
+                element.style.top = newY + 'px';
+                element.style.right = newX + 'px';
+        };
+
+        var _useState5 = useState(false),
+            _useState6 = _slicedToArray(_useState5, 2),
+            open = _useState6[0],
+            setOpen = _useState6[1];
+
+        var handleClick = function handleClick(e) {
+                console.log("Toggle file treeeeeeeeeeeeeeeeee", on_left);
+                setOpen(!open);
+        };
+        var handleClose = function handleClose() {
+                return setOpen(false);
+        };
+
+        return React.createElement(
+                React.Fragment,
+                null,
+                React.createElement(
+                        'div',
+                        { id: "file_tree_responsive", className: 'file_tree_sm_size' },
+                        ' ',
+                        React.createElement(
+                                IconButton,
+                                { onClick: handleClick },
+                                React.createElement(GiPalmTree, { size: 30, color: "brown" })
+                        )
+                ),
+                React.createElement(
+                        Offcanvas,
+                        { show: open, onHide: handleClose, placement: 'end' },
+                        React.createElement(
+                                Offcanvas.Body,
+                                null,
+                                React.createElement(
+                                        'div',
+                                        { className: 'full_size_element' },
+                                        window.files_family.fileTree
+                                )
+                        )
+                )
+        );
+}
+
+function Responsive_header(_ref4) {
+        var component = _ref4.component;
+
+        var _useState7 = useState(false),
+            _useState8 = _slicedToArray(_useState7, 2),
+            open = _useState8[0],
+            setOpen = _useState8[1];
+
+        var ref = useRef();
+
+        var handleOpen = function handleOpen(e) {
+                console.log("Open header");
+
+                ref.current.style.position = "absolute";
+                ref.current.style.top = 0;
+                ref.current.style.right = 0;
+                ref.current.style.zIndex = 1000;
+                // ref.current.style.width = "80%"
+                ref.current.style.height = "fit-content";
+
+                setOpen(true);
+        };
+
+        var handleClose = function handleClose() {
+                console.log("Close header");
+
+                ref.current.style.position = "unset";
+                ref.current.style.top = "unset";
+                ref.current.style.left = "unset";
+                ref.current.style.width = "100%";
+                ref.current.style.height = "100%";
+
+                setOpen(false);
+        };
+
+        return React.createElement(
+                'div',
+                { ref: ref, className: "full_size_element wrapper_xs_size_header" },
+                !open ? React.createElement(
+                        'div',
+                        { className: 'full_size_element d-flex justify-content-start align-items-center', onClick: handleOpen },
+                        React.createElement(
+                                Tooltip,
+                                { title: window.current_location },
+                                React.createElement(
+                                        'b',
                                         {
-                                                id: 'offcanvasNavbar-expand-' + 'xl',
-                                                'aria-labelledby': 'offcanvasNavbarLabel-expand-' + 'xl',
-                                                placement: 'start',
-                                                style: { width: 110 }
+                                                style: {
+                                                        fontSize: 16,
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        whiteSpace: 'nowrap'
+                                                }
                                         },
+                                        window.current_location
+                                )
+                        )
+                ) : React.createElement(
+                        'div',
+                        { className: 'content_header_xs_size',
+                                style: { animation: "fadeMe 0.3s", position: "relative" }
+                        },
+                        React.createElement(
+                                'div',
+                                { className: 'custom_close_button', onClick: handleClose },
+                                React.createElement(
+                                        IconButton,
+                                        { color: "error" },
+                                        React.createElement(AiOutlineCloseSquare, { size: 20, color: "red" })
+                                )
+                        ),
+                        component
+                )
+        );
+
+        // return(
+        //         <div className={"full_size_element wrapper_xs_size_header"} onClick={handleOpen} >
+        //                 <Tooltip title={window.current_location}>
+        //                         <b
+        //                         style={{
+        //                                 fontSize: 16,
+        //                                 overflow: "hidden",
+        //                                 textOverflow: "ellipsis",
+        //                                 whiteSpace: 'nowrap'
+        //                         }}
+        //                         >
+        //                                 {window.current_location}
+        //                         </b>
+        //                 </Tooltip>
+        //
+        //                 <Offcanvas className="content_header_xs_size" show={open} onHide={handleClose} placement="top" >
+        //                         <Offcanvas.Body as={Header_offcanvas_body} >
+        //                         </Offcanvas.Body>
+        //                 </Offcanvas>
+        //         </div>
+        // )
+}
+
+function Load(_ref5) {
+        var datas = _ref5.datas;
+
+        // const initData = d
+        // const [le, setLe] = useState(initData)
+        // console.log("Leeeee", le);
+        window.Global_State = useGetData(JSON.parse(JSON.stringify(datas)));
+        console.log(window.Global_State);
+
+        window.files_family = useGetFiles(React.createElement(Global_research, { display: 'd-none d-sm-flex' }));
+
+        var leftSideBar = React.createElement(Sections_side_bar, null);
+        var header = React.createElement(Header, null);
+
+        var k = React.createElement(Lol, null);
+
+        return React.createElement(
+                'div',
+                { className: 'full_size_element' },
+                React.createElement(
+                        'div',
+                        null,
+                        React.createElement(Toaster, {
+                                toastOptions: {
+                                        // Define default options
+                                        className: '',
+                                        duration: 3000,
+                                        position: 'top-right',
+                                        style: {
+                                                maxWidth: 1920
+                                                // background: 'yellow',
+                                        }
+
+                                        // Default options for specific types
+                                        // success: {
+                                        //     duration: 3000,
+                                        //     theme: {
+                                        //         primary: 'green',
+                                        //         secondary: 'black',
+                                        //     },
+                                        // }
+                                }
+                        })
+                ),
+                window.Global_State.Overlay_component,
+                window.Global_State.modalManager.modal,
+                React.createElement(
+                        'div',
+                        { className: 'full_size_element layout-wrapper d-none d-xl-block' },
+                        React.createElement(
+                                Stack,
+                                { className: 'full_size_element d-flex', direction: 'row', spacing: 0.5, alignItems: 'center', justifyContent: 'flex-end' },
+                                React.createElement(
+                                        'div',
+                                        { className: 'navigation_side_bar d-block' },
+                                        leftSideBar
+                                ),
+                                React.createElement(
+                                        'div',
+                                        { className: 'content_xl_size' },
                                         React.createElement(
                                                 'div',
-                                                { className: 'navigation bg-dark' },
+                                                { className: 'full_size_element d-flex flex-column justify-content-between' },
                                                 React.createElement(
                                                         'div',
-                                                        { className: 'logo' },
+                                                        { className: 'content_xl_size_header' },
                                                         React.createElement(
-                                                                'a',
-                                                                { href: '/' },
-                                                                React.createElement('img', { width: 100, height: 100, src: window.location.origin + '/Favicon_anac.png', alt: 'logo' })
+                                                                Tooltip,
+                                                                { title: window.current_location },
+                                                                React.createElement(
+                                                                        'b',
+                                                                        {
+                                                                                style: {
+                                                                                        fontSize: 16,
+                                                                                        overflow: "hidden",
+                                                                                        textOverflow: "ellipsis",
+                                                                                        whiteSpace: 'nowrap'
+                                                                                }
+                                                                        },
+                                                                        window.current_location
+                                                                )
+                                                        ),
+                                                        React.createElement(
+                                                                'div',
+                                                                { style: { minWidth: 'fit-content', display: 'block' } },
+                                                                header
                                                         )
                                                 ),
                                                 React.createElement(
-                                                        'ul',
-                                                        null,
-                                                        sections.map(function (section, idx) {
-                                                                // console.log(sections)
-                                                                return React.createElement(
-                                                                        'li',
-                                                                        { key: section.id, className: sections.length - 1 === idx ? "flex-grow-1" : "", style: { marginBottom: 10 }, onClick: _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee() {
-                                                                                        return _regeneratorRuntime.wrap(function _callee$(_context) {
-                                                                                                while (1) {
-                                                                                                        switch (_context.prev = _context.next) {
-                                                                                                                case 0:
-                                                                                                                        _context.next = 2;
-                                                                                                                        return Global_State.setSectionId(section.id);
-
-                                                                                                                case 2:
-                                                                                                                        Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.current.get(section.id));
-
-                                                                                                                case 3:
-                                                                                                                case 'end':
-                                                                                                                        return _context.stop();
-                                                                                                        }
-                                                                                                }
-                                                                                        }, _callee, _this);
-                                                                                })) },
-                                                                        React.createElement(
-                                                                                'a',
-                                                                                { className: Global_State.selectedSectionId === section.id ? "active" : "" },
-                                                                                React.createElement('i', { className: 'nav-link-icon ti-file' }),
-                                                                                React.createElement(
-                                                                                        'span',
-                                                                                        { className: 'nav-link-label' },
-                                                                                        section.name
-                                                                                )
-                                                                        )
-                                                                );
-                                                        }),
+                                                        'div',
+                                                        { className: 'content_xl_size_content' },
                                                         React.createElement(
-                                                                'li',
-                                                                null,
+                                                                Stack,
+                                                                { className: 'full_size_element', direction: "row", spacing: 2 },
                                                                 React.createElement(
-                                                                        'a',
-                                                                        { href: 'settings.html' },
-                                                                        React.createElement('i', { className: 'nav-link-icon ti-settings' }),
-                                                                        React.createElement(
-                                                                                'span',
-                                                                                { className: 'nav-link-label' },
-                                                                                'Settings'
-                                                                        )
+                                                                        'div',
+                                                                        { className: 'file_tree_xl_size' },
+                                                                        window.files_family.fileTree
+                                                                ),
+                                                                React.createElement(
+                                                                        'div',
+                                                                        { className: 'file_table_xl_size' },
+                                                                        window.files_family.fileTable
                                                                 )
                                                         )
+                                                )
+                                        )
+                                )
+                        )
+                ),
+                React.createElement(
+                        'div',
+                        { className: 'full_size_element layout-wrapper d-none d-xl-none d-sm-block' },
+                        React.createElement(
+                                'div',
+                                { className: 'full_size_element' },
+                                React.createElement(
+                                        'div',
+                                        { className: 'content_sm_size p-2' },
+                                        React.createElement(
+                                                'div',
+                                                {
+                                                        style: {
+                                                                width: "100%",
+                                                                height: "8%",
+                                                                backgroundColor: "#f6f8fc",
+                                                                display: "flex",
+                                                                justifyContent: "space-between"
+                                                        }
+                                                },
+                                                React.createElement(Responsive_sections_side_bar, { component: leftSideBar, icon: React.createElement(HiOutlineMenuAlt2, { color: "blue", size: 45 }) }),
+                                                React.createElement(
+                                                        'div',
+                                                        { className: "full_size_element content_sm_size_header" },
+                                                        React.createElement(
+                                                                Tooltip,
+                                                                { title: window.current_location },
+                                                                React.createElement(
+                                                                        'b',
+                                                                        {
+                                                                                style: {
+                                                                                        fontSize: 16,
+                                                                                        overflow: "hidden",
+                                                                                        textOverflow: "ellipsis",
+                                                                                        whiteSpace: 'nowrap'
+                                                                                }
+                                                                        },
+                                                                        window.current_location
+                                                                )
+                                                        ),
+                                                        React.createElement(
+                                                                'div',
+                                                                { style: { minWidth: 'fit-content', display: 'block' } },
+                                                                header
+                                                        )
+                                                )
+                                        ),
+                                        React.createElement(
+                                                'div',
+                                                { className: 'content_xl_size_content' },
+                                                React.createElement(Responsive_file_tree, null),
+                                                React.createElement(
+                                                        'div',
+                                                        { className: 'full_size_element' },
+                                                        window.files_family.fileTable
+                                                )
+                                        )
+                                )
+                        )
+                ),
+                React.createElement(
+                        'div',
+                        { className: 'full_size_element layout-wrapper d-block d-sm-none' },
+                        React.createElement(
+                                'div',
+                                { className: 'full_size_element' },
+                                React.createElement(
+                                        'div',
+                                        { className: 'content_sm_size p-2' },
+                                        React.createElement(
+                                                'div',
+                                                {
+                                                        style: {
+                                                                width: "100%",
+                                                                height: "8%",
+                                                                backgroundColor: "#f6f8fc",
+                                                                display: "flex",
+                                                                justifyContent: "space-between"
+                                                        }
+                                                },
+                                                React.createElement(Responsive_sections_side_bar, { component: leftSideBar, icon: React.createElement(HiOutlineMenuAlt2, { color: "blue", size: 45 }) }),
+                                                React.createElement(Responsive_header, { component: header })
+                                        ),
+                                        React.createElement(
+                                                'div',
+                                                { className: 'content_xl_size_content' },
+                                                React.createElement(Responsive_file_tree, null),
+                                                React.createElement(
+                                                        'div',
+                                                        { className: 'full_size_element' },
+                                                        window.files_family.fileTable
                                                 )
                                         )
                                 )
@@ -362,20 +834,19 @@ function File_home() {
         document.onkeydown = function (e) {
                 if (e.ctrlKey && e.key === 'f') return false;
                 if (e.ctrlKey && e.key === 'd') return false;
+                if (e.ctrlKey && e.key === 'r') return false;
         };
 
-        var _useState3 = useState(null),
-            _useState4 = _slicedToArray(_useState3, 2),
-            Data_Base = _useState4[0],
-            setData_base = _useState4[1];
+        var _useState9 = useState(null),
+            _useState10 = _slicedToArray(_useState9, 2),
+            Data_Base = _useState10[0],
+            setData_base = _useState10[1];
 
         // useEffect(()=>(
         //     console.log("Daaa a change !!!", Data_Base)
         // ), [Data_Base])
 
         // console.log("da", Data_Base);
-
-        // console.log(Data_Base)
 
         var container = Data_Base === null ? React.createElement(
                 'div',
@@ -385,231 +856,9 @@ function File_home() {
                 ' '
         ) : React.createElement(Load, { datas: JSON.parse(JSON.stringify(Data_Base)) });
 
-        function Load(_ref3) {
-                var datas = _ref3.datas;
-
-                // const initData = d
-                // const [le, setLe] = useState(initData)
-                // console.log("Leeeee", le);
-                Global_State = useGetData(JSON.parse(JSON.stringify(datas)));
-                console.log(Global_State);
-
-                var files = useGetFiles(React.createElement(Global_research, { display: 'd-none d-sm-flex' }));
-
-                var leftSideBar = React.createElement(Sections_side_bar, null);
-
-                var _useState5 = useState(false),
-                    _useState6 = _slicedToArray(_useState5, 2),
-                    hide = _useState6[0],
-                    setHide = _useState6[1];
-
-                var overlaySideBar = React.createElement(
-                        'div',
-                        { className: 'd-xl-none', hidden: hide, style: { width: '100%', height: '100%', backgroundColor: 'red', position: 'absolute', zIndex: 999 } },
-                        React.createElement('div', null),
-                        leftSideBar
-                );
-
-                return React.createElement(
-                        'div',
-                        null,
-                        React.createElement(
-                                'div',
-                                null,
-                                React.createElement(Toaster
-                                // containerStyle={{ maxWidth: Infinity, }}
-                                , { toastOptions: {
-                                                // Define default options
-                                                className: '',
-                                                duration: 3000,
-                                                position: 'top-right',
-                                                style: {
-                                                        maxWidth: 1920
-                                                        // background: 'yellow',
-                                                }
-
-                                                // Default options for specific types
-                                                // success: {
-                                                //     duration: 3000,
-                                                //     theme: {
-                                                //         primary: 'green',
-                                                //         secondary: 'black',
-                                                //     },
-                                                // }
-                                        }
-                                })
-                        ),
-                        Global_State.Overlay_component,
-                        Global_State.modalManager.modal,
-                        React.createElement(
-                                'div',
-                                { className: 'layout-wrapper' },
-                                React.createElement(
-                                        Stack,
-                                        { direction: 'row', spacing: 0.5, alignItems: 'center', justifyContent: 'flex-end' },
-                                        React.createElement(
-                                                Col,
-                                                { xl: 1, className: 'd-none d-xl-block' },
-                                                leftSideBar
-                                        ),
-                                        React.createElement(
-                                                Col,
-                                                { xl: 11 },
-                                                React.createElement(
-                                                        Row,
-                                                        { sm: 1, style: {
-                                                                        position: 'sticky',
-                                                                        top: 0,
-                                                                        // width: '100%',
-                                                                        backgroundColor: 'white',
-                                                                        whiteSpace: 'normal',
-                                                                        zIndex: 999
-                                                                }
-                                                        },
-                                                        React.createElement(
-                                                                Row,
-                                                                null,
-                                                                React.createElement('div', { style: { marginTop: 20, width: '100%', display: 'block' } })
-                                                        ),
-                                                        React.createElement(
-                                                                Row,
-                                                                { sm: 12 },
-                                                                React.createElement(
-                                                                        'div',
-                                                                        { style: { width: '100%', display: 'block' } },
-                                                                        React.createElement(
-                                                                                Row,
-                                                                                null,
-                                                                                React.createElement(
-                                                                                        Col,
-                                                                                        { className: 'd-xl-none', md: 2, xs: 4 },
-                                                                                        leftSideBar
-                                                                                ),
-                                                                                React.createElement(
-                                                                                        Col,
-                                                                                        { className: 'd-flex', md: 10, xs: 8, xl: 12, style: { padding: 0, alignItems: 'center' } },
-                                                                                        React.createElement(
-                                                                                                'div',
-                                                                                                { style: { width: '100%' } },
-                                                                                                React.createElement(Header, null)
-                                                                                        )
-                                                                                )
-                                                                        )
-                                                                )
-                                                        )
-                                                ),
-                                                React.createElement(
-                                                        Row,
-                                                        { sm: 11 },
-                                                        React.createElement(
-                                                                'div',
-                                                                { className: 'content-wrapper', style: { width: '100%' } },
-                                                                React.createElement(
-                                                                        'div',
-                                                                        { className: 'content-body' },
-                                                                        React.createElement(
-                                                                                'div',
-                                                                                { className: 'content', style: { paddingLeft: 0, paddingTop: 30 } },
-                                                                                React.createElement(
-                                                                                        'div',
-                                                                                        { className: 'page-header d-flex justify-content-between' },
-                                                                                        React.createElement(
-                                                                                                'h2',
-                                                                                                null,
-                                                                                                'Files'
-                                                                                        ),
-                                                                                        React.createElement(
-                                                                                                'a',
-                                                                                                { href: '#', className: 'files-toggler' },
-                                                                                                React.createElement('i', { className: 'ti-menu' })
-                                                                                        )
-                                                                                ),
-                                                                                React.createElement(
-                                                                                        'div',
-                                                                                        { className: 'row' },
-                                                                                        React.createElement(
-                                                                                                'div',
-                                                                                                { className: 'col-xl-4 files-sidebar' },
-                                                                                                React.createElement(
-                                                                                                        'div',
-                                                                                                        { className: 'card border-0' },
-                                                                                                        React.createElement(
-                                                                                                                'h6',
-                                                                                                                { className: 'card-title' },
-                                                                                                                'My Folders'
-                                                                                                        ),
-                                                                                                        React.createElement(
-                                                                                                                'div',
-                                                                                                                { className: 'card' },
-                                                                                                                React.createElement(
-                                                                                                                        'div',
-                                                                                                                        { className: 'card-body' },
-                                                                                                                        React.createElement(
-                                                                                                                                'div',
-                                                                                                                                { className: 'card-scroll' },
-                                                                                                                                files.fileTree
-                                                                                                                        )
-                                                                                                                )
-                                                                                                        )
-                                                                                                )
-                                                                                        ),
-                                                                                        files.fileTable
-                                                                                )
-                                                                        ),
-                                                                        React.createElement(
-                                                                                'footer',
-                                                                                { className: 'content-footer d-print-none' },
-                                                                                React.createElement(
-                                                                                        'div',
-                                                                                        null,
-                                                                                        '\xA9 2022 ESSOAZINA - ',
-                                                                                        React.createElement(
-                                                                                                'a',
-                                                                                                { href: 'https://www.anac-togo.tg', target: '_blank' },
-                                                                                                'ANAC'
-                                                                                        )
-                                                                                ),
-                                                                                React.createElement(
-                                                                                        'div',
-                                                                                        null,
-                                                                                        React.createElement(
-                                                                                                'nav',
-                                                                                                { className: 'nav' },
-                                                                                                React.createElement(
-                                                                                                        'a',
-                                                                                                        { href: 'https://themeforest.net/licenses/standard', className: 'nav-link' },
-                                                                                                        'Licenses'
-                                                                                                ),
-                                                                                                React.createElement(
-                                                                                                        'a',
-                                                                                                        { href: '#', className: 'nav-link' },
-                                                                                                        'Change Log'
-                                                                                                ),
-                                                                                                React.createElement(
-                                                                                                        'a',
-                                                                                                        { href: '#', className: 'nav-link' },
-                                                                                                        'Get Help'
-                                                                                                )
-                                                                                        )
-                                                                                )
-                                                                        )
-                                                                ),
-                                                                React.createElement(
-                                                                        'div',
-                                                                        { className: 'sidebar-group d-print-none' },
-                                                                        files.fileDetails
-                                                                )
-                                                        )
-                                                )
-                                        )
-                                )
-                        )
-                );
-        }
-
         useEffect(function () {
                 var FetchData = function () {
-                        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
+                        var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
                                 var Datas;
                                 return _regeneratorRuntime.wrap(function _callee2$(_context2) {
                                         while (1) {
@@ -632,7 +881,7 @@ function File_home() {
                         }));
 
                         return function FetchData() {
-                                return _ref4.apply(this, arguments);
+                                return _ref6.apply(this, arguments);
                         };
                 }();
 
@@ -667,25 +916,6 @@ function Page() {
 
         var navigate = useNavigate();
 
-        // useEffect(() => {
-        //         function checkAuthState()
-        //         {
-        //                 http.get('user').then(res =>
-        //                 {
-        //                         console.log(res)
-        //                         // if(res.data === '') redirect("/login")
-        //                         // else redirect("/files")
-        //
-        //                         if(res.data === '') setContainer(<Login redirectTo = {() => {setContainer(<Page/>)}} />)
-        //                         else setContainer(<File_home/>)
-        //                 }
-        //                 )
-        //                 .catch( err => { console.log(err) })
-        //
-        //         }
-        //         checkAuthState()
-        // }, [])
-
         useEffect(function () {
                 setTimeout(function () {
                         navigate("/files");
@@ -698,7 +928,7 @@ function Page() {
 }
 
 var loader = function () {
-        var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
+        var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
                 var user;
                 return _regeneratorRuntime.wrap(function _callee3$(_context3) {
                         while (1) {
@@ -736,7 +966,7 @@ var loader = function () {
         }));
 
         return function loader() {
-                return _ref5.apply(this, arguments);
+                return _ref7.apply(this, arguments);
         };
 }();
 
@@ -748,14 +978,17 @@ var router = createBrowserRouter([{
         path: "/login",
         element: React.createElement(Login, null)
 }, {
+        path: "/sign_in",
+        element: React.createElement(Create_account, null)
+}, {
         path: "/files",
         element: React.createElement(File_home, null),
+        loader: loader
+}, {
+        path: "/administrator",
+        element: React.createElement(Administrator_home, null),
         loader: loader
 }]);
 
 var root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(
-        React.StrictMode,
-        null,
-        React.createElement(RouterProvider, { router: router })
-));
+root.render(React.createElement(RouterProvider, { router: router }));

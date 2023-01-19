@@ -7,7 +7,8 @@ import ReactDOM from 'react-dom/client';
 import useGetFiles from './files_package/files';
 import Global_research from "./files_package/global_research";
 import Login from "./auth/login";
-import { http } from "./data";
+import Create_account from "./auth/create_account";
+import { http } from "./auth/login";
 import Notifications from "./auth/user_notification";
 import QuickSettings from "./auth/quick_settings";
 
@@ -20,10 +21,12 @@ import { styled, Theme, createTheme, ThemeProvider } from '@mui/material/styles'
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import ManageAccountsTwoToneIcon from '@mui/icons-material/ManageAccountsTwoTone';
+import IconButton from "@mui/material/IconButton";
 
-import { AiOutlineMenuUnfold } from "react-icons/ai";
-import { GiOverhead } from "react-icons/gi";
-import {TiThumbsDown, TiThumbsOk} from "react-icons/ti";
+import { HiOutlineMenuAlt2 } from "react-icons/hi";
+import { GiPalmTree } from "react-icons/gi";
+import { AiOutlineCloseSquare } from "react-icons/ai";
 import { MdNotificationsActive, MdOutlineArrowDropDownCircle } from "react-icons/md";
 
 import toast, {Toaster} from "react-hot-toast";
@@ -33,6 +36,9 @@ import {
         RouterProvider,
 } from "react-router-dom";
 import { useRouteError, redirect, useNavigate } from "react-router-dom";
+import {Box, Button, Popper, SwipeableDrawer, Tooltip} from "@mui/material";
+import {Collapse, Fade, Offcanvas} from "react-bootstrap";
+import Administrator_home from "./administrator/administrator_home";
 
 
 
@@ -55,7 +61,16 @@ export default function ErrorPage() {
 export const test = "Success"
 
 
-export let Global_State = {};
+
+window.Global_State = {}
+// Object.defineProperty(window, 'Global_State', {
+//         get: function() {
+//                 return Global_State;
+//         },
+//         set: function(value) {
+//                 console.log('La valeur de myData a été modifiée : ' + value);
+//         }
+// });
 
 
 
@@ -65,28 +80,32 @@ function Lol({lal}) {
 
         let [iconOK, iconNO] =
         [
-                <TiThumbsOk size={24} color={'red'} />,
-                <TiThumbsDown size={24} color={'green'} />
+                "OK",
+                "NO"
         ]
+
+        let ico = iconOK
 
         if (!o)
         {
-                iconOK = <span> p </span>
+                ico = iconNO
         }
 
+        console.log("Lolllllll rerender")
+
         return (
-        <div onClick={ event => { setO(!o) } }
+        <div onClick={ event => { window.Global_State.EventsManager.emit("updateOK", window.Global_State.o+"OK") } }
              style={
                      {
-                             width: '100vh',
-                             height: '100vh',
+                             width: '100%',
+                             height: '100%',
                              display: "flex",
                              alignItems: "center",
                              justifyContent: "center"
                      }
              }
         >
-                {iconOK}
+                {window.Global_State.o}
         </div>
         );
 }
@@ -118,8 +137,8 @@ function Header()
         const dropMenuItemsUser = (
         <React.Fragment>
                 <div className=" d-flex flex-column justify-content-center align-items-center py-4" data-background-image="./style/assets/media/image/user/man_avatar3.jpg" style={{background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100}} >
-                        <Avatar alt={`${Global_State.authUser.name} ${Global_State.authUser.second_name}`} src="./style/assets/media/image/user/man_avatar3.jpg" />
-                        <h5 className="mb-0">{`${Global_State.authUser.name} ${Global_State.authUser.second_name}`}</h5>
+                        <Avatar alt={`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`} src="./style/assets/media/image/user/man_avatar3.jpg" />
+                        <h5 className="mb-0">{`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`}</h5>
                 </div>
                 <div className="dropdown-divider"/>
                 <a className="list-group-item text-danger" onClick={
@@ -153,7 +172,7 @@ function Header()
         <React.Fragment>
                 <Typography variant='userDropButton' >
                         <Stack className=''  direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
-                                <span className='m-5' > {`${Global_State.authUser.name} ${Global_State.authUser.second_name}`} </span>
+                                <span className='m-5' > {`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`} </span>
 
                                 <Avatar sx={{ bgcolor: 'green' }}>N</Avatar>
                                 <MdOutlineArrowDropDownCircle />
@@ -164,43 +183,27 @@ function Header()
 
 
         return (
-        <Navbar /* bg="light"  */ expand="sm" style={{padding: 0}}>
-                <Container fluid style={{ justifyContent: 'end', alignItems: 'start', paddingRight: '15px', }} >
-                        {/* <Navbar.Brand href="#">Navbar scroll</Navbar.Brand> */}
-                        <Navbar.Toggle className='p-0  justify-content-start align-items-start d-flex d-sm-none' aria-controls={`offcanvasNavbar-expand-${'sm'}`} children = {<GiOverhead size={40} />}
-                                       style={{
-                                               width: 60,
-                                               color: 'rgb(0 0 0)',
-                                               transform: 'rotateY(180deg)',
-                                               paddingLeft: 17,
-                                               border: 'none',
-                                       }} />
-                        <Navbar.Offcanvas
-                        id={`offcanvasNavbar-expand-${'sm'}`}
-                        aria-labelledby={`offcanvasNavbarLabel-expand-${'sm'}`}
-                        placement="top"
-                        className = 'container-fluid d-flex flex-row justify-content-end'
-                        style={{/* width: '100%' */ height: 105, padding: 0}}
+                <React.Fragment>
+                        <div className="d-sm-flex justify-content-start flex-sm-column container-fluid p-0"
+                             style={{
+                                     minWidth: 280
+                             }}
                         >
-                                <div className={ 'd-flex justify-content-start flex-column container-fluid p-0' } >
 
-                                        <Stack className='justify-content-sm-end justify-content-center m-2' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
+                                <Stack className='justify-content-sm-end justify-content-center m-2' direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
 
-                                                {useMemo( () => <Notifications/>, [Global_State.authUser.asking_permission_notifications] )}
+                                        {useMemo( () => <Notifications/>, [window.Global_State.authUser.asking_permission_notifications] )}
 
-                                                {useMemo( () => <QuickSettings />, [Global_State.isEditorMode] )}
+                                        {useMemo( () => <QuickSettings />, [window.Global_State.isEditorMode] )}
 
-                                                <Global_State.CustomDropDown id = 'userPanel' icon={dropTogglerContentUser} content={dropMenuItemsUser} />
+                                        <window.Global_State.CustomDropDown id = 'userPanel' icon={dropTogglerContentUser} content={dropMenuItemsUser} />
 
-                                        </Stack>
+                                </Stack>
 
-                                        <Global_research display={'d-flex d-sm-none'} />
+                                <Global_research display={'d-flex d-sm-none'} />
 
-                                </div>
-
-                        </Navbar.Offcanvas>
-                </Container>
-        </Navbar>
+                        </div>
+                </React.Fragment>
         );
 }
 
@@ -208,8 +211,8 @@ function Header()
 function Sections_side_bar()
 {
         let sections = []
-        // console.log(Global_State.sections)
-        Global_State.sections.forEach(
+        // console.log(window.Global_State.sections)
+        window.Global_State.sections.forEach(
         (section) =>
         {
                 sections.push( section )
@@ -217,70 +220,526 @@ function Sections_side_bar()
         )
 
         return (
-        <div style={{width: 'auto', height: 'auto' }}>
-                <Navbar key={'xl'} expand={'xl'} style = {{padding: '0 30px'}} >
-                        <Container fluid style={{ justifyContent: 'start', alignItems: 'start' }} >
-                                {/* <Navbar.Brand href="#">Navbar Offcanvas</Navbar.Brand> */}
-                                <Navbar.Toggle className='p-0 d-flex justify-content-center align-items-start' aria-controls={`offcanvasNavbar-expand-${'xl'}`} children = {<AiOutlineMenuUnfold size={50} />}
-                                               style={{
-                                                       width: 50,
-                                                       height: 50,
-                                                       color: 'rgb(0 0 0)',
-                                                       border: 'none',
-                                               }}
-                                />
-                                <Navbar.Offcanvas
-                                id={`offcanvasNavbar-expand-${'xl'}`}
-                                aria-labelledby={`offcanvasNavbarLabel-expand-${'xl'}`}
-                                placement="start"
-                                style={{width: 110 }}
-                                >
-                                        <div className="navigation bg-dark" >
-                                                <div className="logo">
-                                                        <a href="/">
-                                                                <img width={100} height={100} src={`${window.location.origin}/Favicon_anac.png`} alt="logo"/>
-                                                        </a>
-                                                </div>
-                                                <ul>
+                <div className="navigation_content full_size_element" >
+                        <div className="anac_logo">
+                                <a href="/" className="full_size_element">
+                                        <img className="full_size_element" src={`${window.location.origin}/Favicon_anac.png`} alt="logo"/>
+                                </a>
+                        </div>
+                        <div className="sections_div" >
+                                <Stack direction={`column`} spacing={2} className="full_size_element">
+                                        {
+                                                sections.map(
+                                                        (section, idx) =>
                                                         {
-                                                                sections.map(
-                                                                (section, idx) =>
-                                                                {
-                                                                        // console.log(sections)
-                                                                        return (
-                                                                        <li key={ section.id } className= { sections.length - 1 === idx ? "flex-grow-1" : "" } style = {{marginBottom: 10}} onClick = { async () => {
-                                                                                await Global_State.setSectionId(section.id)
-                                                                                Global_State.backend.setCurrentSelectedFolder(Global_State.selectedNodeIdsInSections.current.get(section.id) )
-                                                                        } } >
+                                                                // console.log(sections)
+                                                                return (
+                                                                <Tooltip key={ section.id } title={section.name} placement="right-start" >
+                                                                                <span className="full_size_element" >
+                                                                                        <Button className={`d-flex p-2 full_size_element`} tabIndex={-1} variant={`${window.Global_State.selectedSectionId === section.id ? "outlined" : "text"}`}
+                                                                                                style={{
+                                                                                                        borderColor: "blue"
+                                                                                                }}
+                                                                                                disabled={window.Global_State.selectedSectionId === section.id}
+                                                                                                onClick = {
+                                                                                                        async () => {
+                                                                                                                await window.Global_State.setSectionId(section.id)
+                                                                                                                // window.Global_State.backend.setCurrentSelectedFolder(window.Global_State.selectedNodeIdsInSections.current.get(section.id) )
+                                                                                                        }
+                                                                                                }
+                                                                                        >
 
-                                                                                <a  className= { Global_State.selectedSectionId === section.id ? "active" : "" } >
-                                                                                        <i className="nav-link-icon ti-file"></i>
-                                                                                        <span className="nav-link-label">{ section.name }</span>
-                                                                                </a>
-                                                                        </li>
-                                                                        )
-                                                                }
+                                                                                                <b
+                                                                                                style={{
+                                                                                                        maxWidth: "100%",
+                                                                                                        overflow: "hidden",
+                                                                                                        textOverflow: 'ellipsis',
+                                                                                                        color: `${window.Global_State.selectedSectionId === section.id ? '' : 'blue'}`,
+                                                                                                }}
+                                                                                                >
+                                                                                                        { section.name }
+                                                                                                </b>
+                                                                                        </Button>
+                                                                                </span>
+                                                                </Tooltip>
                                                                 )
                                                         }
-
-
-                                                        <li>
-                                                                <a  href="settings.html">
-                                                                        <i className="nav-link-icon ti-settings"></i>
-                                                                        <span className="nav-link-label">Settings</span>
-                                                                </a>
-                                                        </li>
-                                                </ul>
-                                        </div>
-                                </Navbar.Offcanvas>
-                        </Container>
-                </Navbar>
-        </div>
+                                                )
+                                        }
+                                </Stack>
+                        </div>
+                        <IconButton size={`large`} color={`primary`} style={{ width: "fit-content" }} >
+                                <ManageAccountsTwoToneIcon style={{ fontSize: 60, color: "blue" }} />
+                        </IconButton>
+                </div>
         );
+
+}
+function Responsive_sections_side_bar({component, icon})
+{
+        const [show, setShow] = useState(false)
+        const ref = useRef()
+
+        const [ open, close ] =
+        [
+                (e) =>
+                {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        console.log("opppppeeeeeeeeeeen")
+                        // const element = document.getElementById("section_side_bar_responsive")
+                        ref.current.style.height = "95vh"
+
+                        setTimeout( () => { setShow(true) }, 200 )
+                },
+                (e) =>
+                {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        console.log("clossssssssssssssse")
+                        // const element = document.getElementById("section_side_bar_responsive")
+                        ref.current.style.height = "100%"
+
+                        setShow(false)
+                },
+        ]
+
+
+        // useEffect(
+        // () => {
+        //         /**
+        //          * Alert if clicked on outside of element
+        //          */
+        //         function handleClickOutside(event) {
+        //                 // console.log('outside')
+        //                 const dropdown = document.getElementById("section_side_bar_responsive")
+        //                 if (dropdown && !dropdown.contains(event.target)) {
+        //                         console.log('outside')
+        //                         close()
+        //                 }
+        //         }
+        //         // Bind the event listener
+        //         document.addEventListener("click", handleClickOutside);
+        //         return () => {
+        //                 // Unbind the event listener on clean up
+        //                 console.log('byeeeeeeeeeeeeeeeeeeeee')
+        //                 document.removeEventListener("click", handleClickOutside);
+        //
+        //         };
+        //
+        // }, [])
+
+        return (
+                <div id={"section_side_bar_responsive"} ref={ref} tabIndex={-1} onClick={open} /*onBlur={close}*/ >
+                        {
+                                show ?
+                                <div className="full_size_element" tabIndex={-1} style={{ animation: "fadeMe 0.3s", position: "relative" }} onClick={ e => { console.log(e) } }  >
+                                        <div className="custom_close_button" onClick={close} >
+                                                <IconButton color={"error"} >
+                                                        <AiOutlineCloseSquare size={20} color={"red"} />
+                                                </IconButton>
+                                        </div>
+                                        {component}
+                                </div>
+                                : icon
+                        }
+                </div>
+        )
+}
+
+
+function Responsive_file_tree()
+{
+
+
+        const offsetX = useRef(0)
+        const offsetY = useRef(0)
+
+        // const content = useRef(component)
+        //
+        // useEffect(
+        //         () =>
+        //         {
+        //                 content.current = component
+        //                 console.log("component change")
+        //         }, [component]
+        // )
+
+        const on_left = useRef(false)
+
+        const set_initials = (e) =>
+        {
+
+                const element = document.getElementById("file_tree_responsive");
+
+                // X here is the distance between element and the left border
+                const X = element.offsetLeft
+                const Y = element.offsetTop
+
+                offsetX.current = e.clientX - X
+                offsetY.current = e.clientY - Y
+
+                console.log("Drag startttttttttttt", offsetX, offsetY )
+                console.log("element.offsetLeft", element.offsetLeft)
+        }
+
+        function arrange(distance, max, component_size, strict = false)
+        {
+                if (strict)
+                {
+                        if (distance < max/2) return 0
+                        if (distance > max/2) return max - component_size
+                }
+                else
+                {
+                        if (distance < 0) return 0
+                        if (distance > max) return max - component_size
+                }
+
+                return distance
+        }
+
+        const put_down = (e) =>
+        {
+                e.preventDefault()
+                e.stopPropagation()
+
+                // X here is the distance between element and the left border
+                const X = e.clientX - offsetX.current
+                // X here is the distance between element and the right border
+                const xOpposite =  window.innerWidth - X - 48
+
+                const Y = e.clientY - offsetY.current
+
+                const newX = arrange(xOpposite, window.innerWidth, 48, true)
+                const newY = arrange(Y, window.innerHeight, 48)
+
+                console.log("New plaaaaaaaaace", xOpposite, newY)
+
+                on_left.current = Boolean(newX)
+
+                const element = document.getElementById("file_tree_responsive");
+
+                element.style.top = `${newY}px`;
+                element.style.right = `${newX}px`;
+        }
+
+
+
+
+
+        const [open, setOpen] = useState(false);
+
+        const handleClick = e =>
+        {
+                console.log("Toggle file treeeeeeeeeeeeeeeeee", on_left)
+                setOpen( !open)
+        }
+        const handleClose = () => setOpen(false)
+
+
+
+        return(
+                <React.Fragment>
+                        <div id={"file_tree_responsive"} className="file_tree_sm_size"  > {/*draggable="true" onDragStart={set_initials} onDragEnd={put_down}*/}
+                                <IconButton  onClick={handleClick} >
+                                        <GiPalmTree size={30} color={"brown"} />
+                                </IconButton>
+                        </div>
+
+                        <Offcanvas show={open} onHide={handleClose} placement="end" >
+                                <Offcanvas.Body>
+                                        <div className="full_size_element" >
+                                                {window.files_family.fileTree}
+                                        </div>
+                                </Offcanvas.Body>
+                        </Offcanvas>
+                </React.Fragment>
+        )
+}
+
+
+function Responsive_header({component})
+{
+
+        const [open, setOpen] = useState(false);
+        const ref = useRef()
+
+        const handleOpen = e =>
+        {
+                console.log("Open header")
+
+                ref.current.style.position = "absolute"
+                ref.current.style.top = 0
+                ref.current.style.right = 0
+                ref.current.style.zIndex = 1000
+                // ref.current.style.width = "80%"
+                ref.current.style.height = "fit-content"
+
+                setOpen(true)
+        }
+
+        const handleClose = () =>
+        {
+                console.log("Close header")
+
+                ref.current.style.position = "unset"
+                ref.current.style.top = "unset"
+                ref.current.style.left = "unset"
+                ref.current.style.width = "100%"
+                ref.current.style.height = "100%"
+
+                setOpen(false)
+        }
+
+        return(
+                <div ref={ref} className={"full_size_element wrapper_xs_size_header"} >
+                        {
+                                !open ?
+                                <div className="full_size_element d-flex justify-content-start align-items-center" onClick={handleOpen} >
+                                        <Tooltip title={window.current_location}>
+                                                <b
+                                                style={{
+                                                        fontSize: 16,
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        whiteSpace: 'nowrap'
+                                                }}
+                                                >
+                                                        {window.current_location}
+                                                </b>
+                                        </Tooltip>
+                                </div>
+                                :
+                                <div className="content_header_xs_size"
+                                     style={{ animation: "fadeMe 0.3s", position: "relative" }}
+                                >
+                                        <div className="custom_close_button" onClick={handleClose} >
+                                                <IconButton color={"error"} >
+                                                        <AiOutlineCloseSquare size={20} color={"red"} />
+                                                </IconButton>
+                                        </div>
+                                        {component}
+                                </div>
+                        }
+                </div>
+        )
+
+        // return(
+        //         <div className={"full_size_element wrapper_xs_size_header"} onClick={handleOpen} >
+        //                 <Tooltip title={window.current_location}>
+        //                         <b
+        //                         style={{
+        //                                 fontSize: 16,
+        //                                 overflow: "hidden",
+        //                                 textOverflow: "ellipsis",
+        //                                 whiteSpace: 'nowrap'
+        //                         }}
+        //                         >
+        //                                 {window.current_location}
+        //                         </b>
+        //                 </Tooltip>
+        //
+        //                 <Offcanvas className="content_header_xs_size" show={open} onHide={handleClose} placement="top" >
+        //                         <Offcanvas.Body as={Header_offcanvas_body} >
+        //                         </Offcanvas.Body>
+        //                 </Offcanvas>
+        //         </div>
+        // )
 
 }
 
 
+
+function Load({datas})
+{
+        // const initData = d
+        // const [le, setLe] = useState(initData)
+        // console.log("Leeeee", le);
+        window.Global_State = useGetData(JSON.parse(JSON.stringify(datas)))
+        console.log(window.Global_State)
+
+        window.files_family = useGetFiles(<Global_research display={'d-none d-sm-flex'} />)
+
+        const leftSideBar = <Sections_side_bar/>;
+        const header = <Header />
+
+        const k = <Lol />
+
+        return(
+        <div className={`full_size_element`} >
+                <div>
+                        <Toaster
+                        toastOptions={{
+                                // Define default options
+                                className: '',
+                                duration: 3000,
+                                position: 'top-right',
+                                style:
+                                {
+                                        maxWidth: 1920,
+                                        // background: 'yellow',
+                                },
+
+                                // Default options for specific types
+                                // success: {
+                                //     duration: 3000,
+                                //     theme: {
+                                //         primary: 'green',
+                                //         secondary: 'black',
+                                //     },
+                                // }
+                        }}
+                        />
+                </div>
+                {/* {overlaySideBar} */}
+                {window.Global_State.Overlay_component}
+                {window.Global_State.modalManager.modal}
+
+                <div className="full_size_element layout-wrapper d-none d-xl-block">
+                        <Stack className="full_size_element d-flex" direction="row" spacing={0.5} alignItems = 'center' justifyContent='flex-end' >
+
+                                <div className = 'navigation_side_bar d-block' >
+                                        {leftSideBar}
+                                </div>
+
+                                <div className="content_xl_size" >
+
+                                        <div className="full_size_element d-flex flex-column justify-content-between" >
+                                                <div className="content_xl_size_header" >
+                                                        <Tooltip title={window.current_location}>
+                                                                <b
+                                                                style={{
+                                                                        fontSize: 16,
+                                                                        overflow: "hidden",
+                                                                        textOverflow: "ellipsis",
+                                                                        whiteSpace: 'nowrap'
+                                                                }}
+                                                                >
+                                                                        {window.current_location}
+                                                                </b>
+                                                        </Tooltip>
+                                                        <div style={{minWidth: 'fit-content', display: 'block' }} >
+                                                                {header}
+                                                        </div>
+                                                </div>
+
+                                                <div className="content_xl_size_content" >
+
+                                                        <Stack className="full_size_element" direction={"row"} spacing={2} >
+                                                                <div className="file_tree_xl_size" >
+                                                                        { window.files_family.fileTree }
+                                                                </div>
+                                                                <div className="file_table_xl_size" >
+                                                                        { window.files_family.fileTable }
+                                                                </div>
+                                                        </Stack>
+
+                                                        {/*<div className="content-wrapper" style={{ width: '100%' }}>*/}
+                                                        {/*        <div className="sidebar-group d-print-none">*/}
+
+                                                        {/*                { files.fileDetails }*/}
+
+                                                        {/*        </div>*/}
+
+                                                        {/*</div>*/}
+                                                </div>
+                                        </div>
+
+                                </div>
+
+                        </Stack>
+                </div>
+
+                <div className="full_size_element layout-wrapper d-none d-xl-none d-sm-block">
+
+                        <div className="full_size_element" >
+
+                                <div className="content_sm_size p-2" >
+                                        <div
+                                                style={{
+                                                        width: "100%",
+                                                        height: "8%",
+                                                        backgroundColor: "#f6f8fc",
+                                                        display: "flex",
+                                                        justifyContent: "space-between"
+                                                }}
+                                        >
+                                                <Responsive_sections_side_bar component={leftSideBar} icon={<HiOutlineMenuAlt2 color={"blue"} size={45} />} />
+                                                <div className={"full_size_element content_sm_size_header"} >
+                                                        <Tooltip title={window.current_location}>
+                                                                <b
+                                                                style={{
+                                                                        fontSize: 16,
+                                                                        overflow: "hidden",
+                                                                        textOverflow: "ellipsis",
+                                                                        whiteSpace: 'nowrap'
+                                                                }}
+                                                                >
+                                                                        {window.current_location}
+                                                                </b>
+                                                        </Tooltip>
+                                                        <div style={{minWidth: 'fit-content', display: 'block' }} >
+                                                                {header}
+                                                        </div>
+                                                </div>
+                                        </div>
+
+                                        <div className="content_xl_size_content" >
+
+                                                <Responsive_file_tree />
+
+                                                <div className="full_size_element" >
+                                                        {/*{k}*/}
+                                                        { window.files_family.fileTable }
+                                                </div>
+
+                                        </div>
+
+                                </div>
+
+                        </div>
+
+                </div>
+
+                <div className="full_size_element layout-wrapper d-block d-sm-none">
+
+                        <div className="full_size_element" >
+
+                                <div className="content_sm_size p-2" >
+                                        <div
+                                        style={{
+                                                width: "100%",
+                                                height: "8%",
+                                                backgroundColor: "#f6f8fc",
+                                                display: "flex",
+                                                justifyContent: "space-between"
+                                        }}
+                                        >
+                                                <Responsive_sections_side_bar component={leftSideBar} icon={<HiOutlineMenuAlt2 color={"blue"} size={45} />} />
+                                                <Responsive_header component={header} />
+                                        </div>
+
+                                        <div className="content_xl_size_content" >
+
+                                                <Responsive_file_tree />
+
+                                                <div className="full_size_element" >
+                                                        {/*{k}*/}
+                                                        { window.files_family.fileTable }
+                                                </div>
+
+                                        </div>
+
+                                </div>
+
+                        </div>
+
+                </div>
+
+        </div>
+        )
+}
 
 function File_home()
 {
@@ -288,6 +747,7 @@ function File_home()
         document.onkeydown = function (e) {
                 if(e.ctrlKey && e.key === 'f') return false
                 if(e.ctrlKey && e.key === 'd') return false
+                if(e.ctrlKey && e.key === 'r') return false
         }
 
         const [Data_Base, setData_base] = useState(null)
@@ -298,170 +758,7 @@ function File_home()
 
         // console.log("da", Data_Base);
 
-        // console.log(Data_Base)
-
         const container  = Data_Base === null ? <div className="preloader"> <div className="preloader-icon" /> </div> : <Load datas ={JSON.parse(JSON.stringify(Data_Base))} />
-
-        function Load({datas})
-        {
-                // const initData = d
-                // const [le, setLe] = useState(initData)
-                // console.log("Leeeee", le);
-                Global_State = useGetData(JSON.parse(JSON.stringify(datas)))
-                console.log(Global_State)
-
-                const files = useGetFiles(<Global_research display={'d-none d-sm-flex'} />)
-
-                const leftSideBar = <Sections_side_bar/>;
-
-                const [ hide, setHide ] = useState(false)
-
-                const overlaySideBar =
-                <div className='d-xl-none' hidden = {hide} style={{ width: '100%', height: '100%', backgroundColor: 'red', position: 'absolute', zIndex: 999,}} >
-                        <div />
-                        {leftSideBar}
-                </div>
-
-                return(
-                <div>
-                        <div>
-                                <Toaster
-                                // containerStyle={{ maxWidth: Infinity, }}
-                                toastOptions={{
-                                        // Define default options
-                                        className: '',
-                                        duration: 3000,
-                                        position: 'top-right',
-                                        style:
-                                        {
-                                                maxWidth: 1920,
-                                                // background: 'yellow',
-                                        },
-
-                                        // Default options for specific types
-                                        // success: {
-                                        //     duration: 3000,
-                                        //     theme: {
-                                        //         primary: 'green',
-                                        //         secondary: 'black',
-                                        //     },
-                                        // }
-                                }}
-                                />
-                        </div>
-                        {/* {overlaySideBar} */}
-                        {Global_State.Overlay_component}
-                        {Global_State.modalManager.modal}
-
-                        <div className="layout-wrapper">
-
-                                <Stack direction="row" spacing={0.5} alignItems = 'center' justifyContent='flex-end' >
-                                        <Col xl = {1} className = 'd-none d-xl-block' >
-                                                {leftSideBar}
-                                        </Col>
-
-                                        <Col xl = {11} >
-
-                                                <Row sm = {1} style = {
-                                                        {
-                                                                position: 'sticky',
-                                                                top: 0,
-                                                                // width: '100%',
-                                                                backgroundColor: 'white',
-                                                                whiteSpace: 'normal',
-                                                                zIndex: 999,
-                                                        }}
-                                                >
-                                                        <Row>
-                                                                <div style={{ marginTop: 20, width: '100%', display: 'block' }} />
-                                                        </Row>
-                                                        <Row sm = {12} >
-                                                                <div style={{width: '100%', display: 'block' }} >
-                                                                        <Row >
-
-                                                                                <Col className='d-xl-none' md = {2} xs = {4} >
-                                                                                        {leftSideBar}
-                                                                                </Col>
-                                                                                <Col className='d-flex' md = {10} xs = {8} xl = {12} style={{padding: 0, alignItems: 'center'}}>
-                                                                                        <div style={{ width: '100%' }}>
-                                                                                                <Header />
-                                                                                        </div>
-                                                                                </Col>
-
-                                                                        </Row>
-                                                                </div>
-                                                        </Row>
-                                                </Row>
-
-                                                <Row sm = {11} >
-                                                        <div className="content-wrapper" style={{ width: '100%' }}>
-
-                                                                <div className="content-body">
-
-                                                                        <div className="content" style={{ paddingLeft: 0, paddingTop: 30, }} >
-                                                                                <div className="page-header d-flex justify-content-between">
-                                                                                        <h2>Files</h2>
-                                                                                        <a href="#" className="files-toggler">
-                                                                                                <i className="ti-menu"></i>
-                                                                                        </a>
-                                                                                </div>
-
-                                                                                <div className="row">
-                                                                                        <div className="col-xl-4 files-sidebar">
-                                                                                                <div className="card border-0">
-                                                                                                        <h6 className="card-title">My Folders</h6>
-                                                                                                        <div className="card">
-                                                                                                                <div className="card-body">
-                                                                                                                        <div className="card-scroll" >
-                                                                                                                                { files.fileTree }
-                                                                                                                        </div>
-                                                                                                                </div>
-                                                                                                        </div>
-                                                                                                </div>
-                                                                                        </div>
-                                                                                        { files.fileTable }
-                                                                                </div>
-
-
-                                                                        </div>
-
-                                                                        <footer className="content-footer d-print-none">
-                                                                                <div>© 2022 ESSOAZINA - <a href="https://www.anac-togo.tg" target="_blank">ANAC</a></div>
-                                                                                <div>
-                                                                                        <nav className="nav">
-                                                                                                <a href="https://themeforest.net/licenses/standard" className="nav-link">Licenses</a>
-                                                                                                <a href="#" className="nav-link">Change Log</a>
-                                                                                                <a href="#" className="nav-link">Get Help</a>
-                                                                                        </nav>
-                                                                                </div>
-                                                                        </footer>
-
-                                                                </div>
-
-
-
-                                                                <div className="sidebar-group d-print-none">
-
-                                                                        { files.fileDetails }
-
-                                                                </div>
-
-                                                        </div>
-                                                </Row>
-
-                                        </Col>
-
-                                </Stack>
-
-
-
-
-                        </div>
-
-                </div>
-                )
-        }
-
 
         useEffect(() => {
                 async function FetchData()
@@ -506,25 +803,6 @@ function Page()
 
         const navigate = useNavigate()
 
-        // useEffect(() => {
-        //         function checkAuthState()
-        //         {
-        //                 http.get('user').then(res =>
-        //                 {
-        //                         console.log(res)
-        //                         // if(res.data === '') redirect("/login")
-        //                         // else redirect("/files")
-        //
-        //                         if(res.data === '') setContainer(<Login redirectTo = {() => {setContainer(<Page/>)}} />)
-        //                         else setContainer(<File_home/>)
-        //                 }
-        //                 )
-        //                 .catch( err => { console.log(err) })
-        //
-        //         }
-        //         checkAuthState()
-        // }, [])
-
         useEffect(() => {
                 setTimeout( () => { navigate("/files") }, 3000 )
         }, [])
@@ -566,15 +844,22 @@ const router = createBrowserRouter([
                 element: <Login />,
         },
         {
+                path: "/sign_in",
+                element: <Create_account />,
+        },
+        {
                 path: "/files",
                 element: <File_home />,
                 loader: loader
+        },
+        {
+                path: "/administrator",
+                element: <Administrator_home />,
+                loader: loader,
         },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-<React.StrictMode>
         <RouterProvider router={router} />
-</React.StrictMode>
 );

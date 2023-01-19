@@ -6,8 +6,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
-import { Global_State } from "../main";
-import { http } from "../data";
+import { http } from "./login";
 
 import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
@@ -68,7 +67,7 @@ var isThereUpdate = function isThereUpdate() {
 
         var countNew = 0;
 
-        countNew = countNew + Global_State.authUser.asking_permission_notifications.length + Global_State.authUser.unread_review_notifications.length;
+        countNew = countNew + window.Global_State.authUser.asking_permission_notifications.length + window.Global_State.authUser.unread_review_notifications.length;
 
         return countNew;
 };
@@ -101,11 +100,11 @@ function AskingPermitComponent(_ref) {
                 if (approved) {
                         switch (ap_notif.state) {
                                 case 'loading':
-                                        iconOK = React.createElement("span", { className: "spinner-border spinner-border-sm mr-1", role: "status", "aria-hidden": "true" });
+                                        iconOK = React.createElement('span', { className: 'spinner-border spinner-border-sm mr-1', role: 'status', 'aria-hidden': 'true' });
                                         break;
 
                                 case 'dealt':
-                                        iconOK = React.createElement(PublishedWithChangesTwoToneIcon, { color: "success" });
+                                        iconOK = React.createElement(PublishedWithChangesTwoToneIcon, { color: 'success' });
                                         break;
 
                                 default:
@@ -115,11 +114,11 @@ function AskingPermitComponent(_ref) {
                 } else {
                         switch (ap_notif.state) {
                                 case 'loading':
-                                        iconNO = React.createElement("span", { className: "spinner-border spinner-border-sm mr-1", role: "status", "aria-hidden": "true" });
+                                        iconNO = React.createElement('span', { className: 'spinner-border spinner-border-sm mr-1', role: 'status', 'aria-hidden': 'true' });
                                         break;
 
                                 case 'dealt':
-                                        iconNO = React.createElement(PublishedWithChangesTwoToneIcon, { color: "success" });
+                                        iconNO = React.createElement(PublishedWithChangesTwoToneIcon, { color: 'success' });
                                         break;
 
                                 default:
@@ -159,7 +158,7 @@ function AskingPermitComponent(_ref) {
 
         }
 
-        var node = Global_State.getNodeDataById("" + Global_State.parseModelToFrontType(ap_notif.data.model) + ap_notif.data.node_id);
+        var node = window.Global_State.getNodeDataById('' + window.Global_State.parseModelToFrontType(ap_notif.data.model) + ap_notif.data.node_id);
 
         return React.createElement(
                 ListItem,
@@ -168,32 +167,32 @@ function AskingPermitComponent(_ref) {
                         } },
                 React.createElement(
                         Card,
-                        { sx: { minWidth: 150, maxWidth: 390 }, variant: "outlined" },
+                        { sx: { minWidth: 150, maxWidth: 390 }, variant: 'outlined' },
                         React.createElement(
                                 CardContent,
-                                { className: "d-flex", style: { padding: 4, paddingBottom: 0 } },
+                                { className: 'd-flex', style: { padding: 4, paddingBottom: 0 } },
                                 React.createElement(
-                                        "div",
+                                        'div',
                                         { style: { width: "max-content", fontSize: 12 } },
-                                        " ",
+                                        ' ',
                                         React.createElement(
-                                                "b",
+                                                'b',
                                                 null,
-                                                "Demande d'autorisation,"
+                                                'Demande d\'autorisation,'
                                         ),
-                                        " par M. ",
+                                        ' par M. ',
                                         ap_notif.data.full_name,
-                                        " pour ",
+                                        ' pour ',
                                         React.createElement(
-                                                "b",
+                                                'b',
                                                 { style: { color: "#d22121" } },
                                                 ap_notif.data.operation === 'deletion' ? 'supprimer' : 'modifier'
                                         ),
-                                        " ",
+                                        ' ',
                                         type_objet,
-                                        " : ",
+                                        ' : ',
                                         React.createElement(
-                                                "b",
+                                                'b',
                                                 { style: { whiteSpace: "nowrap" } },
                                                 ap_notif.data.node_name
                                         )
@@ -201,13 +200,13 @@ function AskingPermitComponent(_ref) {
                         ),
                         React.createElement(
                                 CardActions,
-                                { className: "justify-content-end", style: { padding: 0 } },
+                                { className: 'justify-content-end', style: { padding: 0 } },
                                 React.createElement(
                                         Stack,
                                         { direction: 'row', spacing: 1 },
                                         React.createElement(
                                                 IconButton,
-                                                { title: 'ACCORDER', disabled: approved !== null, variant: "danger",
+                                                { title: 'ACCORDER', disabled: approved !== null, variant: 'danger',
                                                         onClick: function onClick(event) {
                                                                 event.preventDefault();
                                                                 event.stopPropagation();
@@ -225,7 +224,7 @@ function AskingPermitComponent(_ref) {
                                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true });
 
                                                                                 setTimeout(function () {
-                                                                                        Global_State.EventsManager.emit('updateAuthUserInfo');
+                                                                                        window.Global_State.EventsManager.emit('updateAuthUserInfo');
                                                                                 }, 1000);
                                                                         } else {
                                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'attente', approved: null });
@@ -239,14 +238,14 @@ function AskingPermitComponent(_ref) {
                                         ),
                                         React.createElement(
                                                 IconButton,
-                                                { title: 'CONSULTER', variant: "light", onClick: function onClick() {
-                                                                Global_State.EventsManager.emit('setSelectedNode', { id: node.id, section_id: node.section_id });
+                                                { title: 'CONSULTER', variant: 'light', onClick: function onClick() {
+                                                                window.Global_State.EventsManager.emit('show_on_screen', { id: node.id, section_id: node.section_id });
                                                         } },
                                                 React.createElement(FaEye, { size: 24, color: 'blue' })
                                         ),
                                         React.createElement(
                                                 IconButton,
-                                                { title: 'REFUSER', disabled: approved !== null, variant: "light",
+                                                { title: 'REFUSER', disabled: approved !== null, variant: 'light',
                                                         onClick: function onClick(event) {
                                                                 event.preventDefault();
                                                                 event.stopPropagation();
@@ -264,7 +263,7 @@ function AskingPermitComponent(_ref) {
                                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: false });
 
                                                                                 setTimeout(function () {
-                                                                                        Global_State.EventsManager.emit('updateAuthUserInfo');
+                                                                                        window.Global_State.EventsManager.emit('updateAuthUserInfo');
                                                                                 }, 1000);
                                                                         } else {
                                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'attente', approved: null });
@@ -368,7 +367,7 @@ function useUnreadReviewNotif() {
                         '& .MuiBadge-badge': {
                                 right: 10,
                                 top: 13,
-                                border: "2px solid " + theme.palette.background.paper,
+                                border: '2px solid ' + theme.palette.background.paper,
                                 padding: '0 4px',
                                 fontSize: 10
                         }
@@ -376,8 +375,8 @@ function useUnreadReviewNotif() {
         });
 
         var unreadReviewNotif = useMemo(function () {
-                return JSON.parse(JSON.stringify(Global_State.authUser.unread_review_notifications));
-        }, [Global_State.authUser]);
+                return JSON.parse(JSON.stringify(window.Global_State.authUser.unread_review_notifications));
+        }, [window.Global_State.authUser]);
 
         // let unreadReviewNotifComponents = []
 
@@ -450,22 +449,22 @@ function useUnreadReviewNotif() {
                         },
                         React.createElement(
                                 StyledBadge,
-                                { color: "warning", badgeContent: "new" },
+                                { color: 'warning', badgeContent: "new" },
                                 React.createElement(
                                         Card,
-                                        { sx: { minWidth: 150, maxWidth: 390 }, variant: "outlined" },
+                                        { sx: { minWidth: 150, maxWidth: 390 }, variant: 'outlined' },
                                         React.createElement(
                                                 CardContent,
-                                                { className: "d-flex p-2" },
+                                                { className: 'd-flex p-2' },
                                                 React.createElement(
-                                                        "div",
+                                                        'div',
                                                         { style: { width: "max-content", fontSize: 12 }, onClick: function onClick(e) {} },
                                                         React.createElement(
-                                                                "span",
+                                                                'span',
                                                                 { style: { fontWeight: "bold" } },
-                                                                rv_notif.data.object + ":"
+                                                                rv_notif.data.object + ':'
                                                         ),
-                                                        React.createElement("br", null),
+                                                        React.createElement('br', null),
                                                         rv_notif.data.msg
                                                 )
                                         )
@@ -484,7 +483,7 @@ function useReadReviewNotif() {
                         '& .MuiBadge-badge': {
                                 right: 10,
                                 top: 13,
-                                border: "2px solid " + theme.palette.background.paper,
+                                border: '2px solid ' + theme.palette.background.paper,
                                 padding: '0 4px',
                                 fontSize: 10
                         }
@@ -492,8 +491,8 @@ function useReadReviewNotif() {
         });
 
         var readReviewNotifs = useMemo(function () {
-                return JSON.parse(JSON.stringify(Global_State.authUser.read_notifications));
-        }, [Global_State.authUser]);
+                return JSON.parse(JSON.stringify(window.Global_State.authUser.read_notifications));
+        }, [window.Global_State.authUser]);
 
         // let readReviewNotifComponents = []
 
@@ -538,22 +537,22 @@ function useReadReviewNotif() {
                         },
                         React.createElement(
                                 StyledBadge,
-                                { color: "warning", badgeContent: "new" },
+                                { color: 'warning', badgeContent: "new" },
                                 React.createElement(
                                         Card,
-                                        { sx: { minWidth: 150, maxWidth: 390 }, variant: "outlined" },
+                                        { sx: { minWidth: 150, maxWidth: 390 }, variant: 'outlined' },
                                         React.createElement(
                                                 CardContent,
-                                                { className: "d-flex p-2" },
+                                                { className: 'd-flex p-2' },
                                                 React.createElement(
-                                                        "div",
+                                                        'div',
                                                         { style: { width: "max-content", fontSize: 12 }, onClick: function onClick(e) {} },
                                                         React.createElement(
-                                                                "span",
+                                                                'span',
                                                                 { style: { fontWeight: "bold" } },
-                                                                notif.data.object + ":"
+                                                                notif.data.object + ':'
                                                         ),
-                                                        React.createElement("br", null),
+                                                        React.createElement('br', null),
                                                         notif.data.msg
                                                 )
                                         )
@@ -568,20 +567,20 @@ function useReadReviewNotif() {
                         { key: rv_notif.id },
                         React.createElement(
                                 Card,
-                                { sx: { minWidth: 150, maxWidth: 390 }, variant: "outlined" },
+                                { sx: { minWidth: 150, maxWidth: 390 }, variant: 'outlined' },
                                 React.createElement(
                                         CardContent,
-                                        { className: "d-flex p-2" },
+                                        { className: 'd-flex p-2' },
                                         React.createElement(
-                                                "div",
+                                                'div',
                                                 { style: { width: "max-content", fontSize: 12 }, onClick: function onClick(e) {} },
                                                 React.createElement(
-                                                        "span",
+                                                        'span',
                                                         {
                                                                 style: { fontWeight: "bold" } },
-                                                        rv_notif.data.object + ":"
+                                                        rv_notif.data.object + ':'
                                                 ),
-                                                React.createElement("br", null),
+                                                React.createElement('br', null),
                                                 rv_notif.data.msg
                                         )
                                 )
@@ -650,7 +649,7 @@ export default function Notifications() {
                         '& .MuiBadge-badge': {
                                 right: 7,
                                 top: 10,
-                                border: "2px solid " + theme.palette.background.paper,
+                                border: '2px solid ' + theme.palette.background.paper,
                                 padding: '0 4px'
                         }
                 };
@@ -660,34 +659,34 @@ export default function Notifications() {
 
         var notifButton = count ? React.createElement(RingingBell, { icon: React.createElement(
                         IconButton,
-                        { "aria-label": "notification", style: { width: 36, height: 36 } },
+                        { 'aria-label': 'notification', style: { width: 36, height: 36 } },
                         React.createElement(
                                 StyledBadge,
-                                { badgeContent: count, color: "primary" },
-                                React.createElement(MdNotificationsActive, { color: "#cd0606", size: 30 })
+                                { badgeContent: count, color: 'primary' },
+                                React.createElement(MdNotificationsActive, { color: '#cd0606', size: 30 })
                         )
                 ) }) : React.createElement(
                 IconButton,
-                { "aria-label": "notification", style: { width: 36, height: 36 } },
+                { 'aria-label': 'notification', style: { width: 36, height: 36 } },
                 React.createElement(
                         StyledBadge,
-                        { badgeContent: count, color: "primary" },
-                        React.createElement(IoMdNotifications, { color: "#10088b", size: 30 })
+                        { badgeContent: count, color: 'primary' },
+                        React.createElement(IoMdNotifications, { color: '#10088b', size: 30 })
                 )
         );
 
-        var _useState7 = useState(JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications))),
+        var _useState7 = useState(JSON.parse(JSON.stringify(window.Global_State.authUser.asking_permission_notifications))),
             _useState8 = _slicedToArray(_useState7, 2),
             askingPermitNotif = _useState8[0],
             update = _useState8[1];
 
         useEffect(function () {
                 console.log('check_update_asking_permit_notifs');
-                if (!(JSON.stringify(askingPermitNotif) === JSON.stringify(Global_State.authUser.asking_permission_notifications))) {
+                if (!(JSON.stringify(askingPermitNotif) === JSON.stringify(window.Global_State.authUser.asking_permission_notifications))) {
                         console.log('update_asking_permit_notifs');
-                        update(JSON.parse(JSON.stringify(Global_State.authUser.asking_permission_notifications)));
+                        update(JSON.parse(JSON.stringify(window.Global_State.authUser.asking_permission_notifications)));
                 }
-        }, [Global_State.authUser.asking_permission_notifications]);
+        }, [window.Global_State.authUser.asking_permission_notifications]);
 
         useEffect(function () {
                 console.log('rerendring_notiffffffffffffffffffffffffffs');
@@ -707,8 +706,8 @@ export default function Notifications() {
                         unreadReviewNotifs,
                         React.createElement(
                                 Divider,
-                                { textAlign: "left" },
-                                " LU "
+                                { textAlign: 'left' },
+                                ' LU '
                         ),
                         readReviewNotifs
                 );
@@ -718,16 +717,16 @@ export default function Notifications() {
                         { id: 'notifRenderingComponent' },
                         React.createElement(
                                 Divider,
-                                { textAlign: "left" },
-                                " LU "
+                                { textAlign: 'left' },
+                                ' LU '
                         ),
                         readReviewNotifs
                 );
         } else {
                 renderingComponent = React.createElement(
-                        "div",
-                        { id: 'notifRenderingComponent', className: "d-flex justify-content-center align-items-center" },
-                        "Vide \uD83D\uDE22"
+                        'div',
+                        { id: 'notifRenderingComponent', className: 'd-flex justify-content-center align-items-center' },
+                        'Vide \uD83D\uDE22'
                 );
         }
 
@@ -739,14 +738,14 @@ export default function Notifications() {
             setOpenState = _useState10[1];
 
         useEffect(function () {
-                // Global_State.EventsManager.on('observe_notif_panel', () => { const ref = document.getElementById('notifRenderingComponent');  console.log(ref); observe(ref) })
-                // Global_State.EventsManager.on('unobserve_notif_panel', disconect)
-                Global_State.EventsManager.on('setOpenState', setOpenState);
+                // window.Global_State.EventsManager.on('observe_notif_panel', () => { const ref = document.getElementById('notifRenderingComponent');  console.log(ref); observe(ref) })
+                // window.Global_State.EventsManager.on('unobserve_notif_panel', disconect)
+                window.Global_State.EventsManager.on('setOpenState', setOpenState);
 
                 return function () {
-                        // Global_State.EventsManager.off('observe_notif_panel')
-                        // Global_State.EventsManager.off('unobserve_notif_panel')
-                        Global_State.EventsManager.off('setOpenState');
+                        // window.Global_State.EventsManager.off('observe_notif_panel')
+                        // window.Global_State.EventsManager.off('unobserve_notif_panel')
+                        window.Global_State.EventsManager.off('setOpenState');
                 };
         }, []);
 
@@ -766,7 +765,7 @@ export default function Notifications() {
 
                         readNotifs = [];
 
-                        http.post("markAsRead", notif_ids).then(function (res) {
+                        http.post('markAsRead', notif_ids).then(function (res) {
                                 console.log(res);
                         }).catch(function (err) {
                                 console.log(err);
@@ -839,8 +838,8 @@ export default function Notifications() {
 
 
         return useMemo(function () {
-                return React.createElement(Global_State.CustomDropDown, { id: 'notifPanel', icon: notifButton, content: renderingComponent });
+                return React.createElement(window.Global_State.CustomDropDown, { id: 'notifPanel', icon: notifButton, content: renderingComponent });
         }, [renderingComponent])
-        // <Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />
+        // <window.Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />
         ;
 }

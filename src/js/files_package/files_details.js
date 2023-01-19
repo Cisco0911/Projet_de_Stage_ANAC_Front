@@ -3,7 +3,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 /* eslint-disable import/first */
 
 import React, { useEffect, useState } from 'react';
-import { Global_State } from "../main";
 
 //     node: 
 // {
@@ -20,6 +19,7 @@ import { Global_State } from "../main";
 //  createdAt,
 //  modifiedAt,
 // }
+// }
 
 
 export default function FileDetails() {
@@ -28,17 +28,17 @@ export default function FileDetails() {
             selectedRow = _useState2[0],
             setSelectedRow = _useState2[1];
 
-        Global_State.EventsManager.on('viewDetailEnabled', function (data) {
+        window.Global_State.EventsManager.on('viewDetailEnabled', function (data) {
                 console.log('viewDetailEnabled');setSelectedRow(data);
         });
 
         useEffect(function () {
                 return function () {
-                        Global_State.EventsManager.off('viewDetailEnabled');
+                        window.Global_State.EventsManager.off('viewDetailEnabled');
                 };
         }, []);
 
-        var data = selectedRow !== null ? Global_State.getNodeDataById(selectedRow.id) : null;
+        var data = selectedRow !== null ? window.Global_State.getNodeDataById(selectedRow.id) : null;
 
         var Type = void 0;
 
@@ -130,7 +130,7 @@ export default function FileDetails() {
                                         React.createElement(
                                                 'div',
                                                 { className: 'col-8' },
-                                                data.type === "f" ? Global_State.getType(data.ext) : Type
+                                                data.type === "f" ? window.Global_State.getType(data.ext) : Type
                                         )
                                 ),
                                 data.type === "checkList" || data.type === "dp" || data.type === "nonC" ? React.createElement(
@@ -144,7 +144,7 @@ export default function FileDetails() {
                                         React.createElement(
                                                 'div',
                                                 { className: 'col-8' },
-                                                Global_State.getNodeDataById(data.parentId).name
+                                                window.Global_State.getNodeDataById(data.parentId).name
                                         )
                                 ) : null,
                                 data.type === "f" ? React.createElement(
@@ -158,7 +158,7 @@ export default function FileDetails() {
                                         React.createElement(
                                                 'div',
                                                 { className: 'col-8' },
-                                                Global_State.sizeFormater(data.taille, false)
+                                                window.Global_State.sizeFormater(data.taille, false)
                                         )
                                 ) : null,
                                 data.type === "audit" ? React.createElement(

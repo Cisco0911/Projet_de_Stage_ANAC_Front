@@ -2,8 +2,7 @@
 
 import React, {forwardRef, useCallback, useEffect, useMemo, useReducer, useRef, useState} from 'react';
 
-import {Global_State} from '../main';
-import {http} from "../data";
+import {http} from "../auth/login";
 
 import DataTable from 'react-data-table-component';
 import swal from 'sweetalert';
@@ -16,32 +15,40 @@ import makeAnimated from 'react-select/animated';
 
 import {FaInfoCircle, FaPaste, FaSort} from "react-icons/fa";
 import {FcFolder, FcVideoFile} from "react-icons/fc";
-import {BsFillFileEarmarkPdfFill} from "react-icons/bs";
-import {RiFileWord2Fill} from "react-icons/ri";
+import {BsFillFileEarmarkPdfFill, BsPatchCheckFill} from "react-icons/bs";
+import {RiFileWord2Fill, RiDeleteBin2Fill} from "react-icons/ri";
 import {SiMicrosoftexcel, SiMicrosoftpowerpoint} from "react-icons/si";
 import {AiFillFileUnknown} from "react-icons/ai";
-import {IoArrowUndoOutline, IoArrowUndoSharp} from "react-icons/io5";
+import {IoArrowUpCircleOutline, IoArrowUpCircleSharp, IoAdd} from "react-icons/io5";
+import {IoIosCut} from "react-icons/io"
+import {HiSaveAs} from 'react-icons/hi'
+import {BiRename} from "react-icons/bi";
+import {VscLiveShare, VscCircleLargeOutline} from "react-icons/vsc";
+import {ImDownload2} from "react-icons/im";
+import {MdUndo, MdRedo} from "react-icons/md";
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 
-import {HiSaveAs} from 'react-icons/hi'
-
 import {useFormik} from 'formik';
 import * as yup from 'yup'
 
-import DatePicker from "react-datepicker";
+import DatePicker, {CalendarContainer} from "react-datepicker";
+
 import Stack from "@mui/material/Stack";
-import {IconButton, Tooltip} from "@mui/material";
+import Divider from "@mui/material/Divider";
+import {Box, FormControl, IconButton, InputLabel, MenuItem, Tooltip} from "@mui/material";
+import MuiSelect  from '@mui/material/Select';
+import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
+import CopyAllTwoToneIcon from '@mui/icons-material/CopyAllTwoTone';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 import { useSpring, animated } from 'react-spring';
-import {FormCheck} from "react-bootstrap";
+import {Dropdown, FormCheck} from "react-bootstrap";
 import useCustomCheckBox, {CheckBox1} from "../custom_checkBox/custom_check";
-
-let previousSelected = []
-
 
 
 
@@ -148,15 +155,406 @@ function Files_Dropzone(props) {
 
 // let handleChange
 
+function FilterComponent({set, filter, node})
+{
+        let compenent
 
-export default function FileTable({set})
+        const MyContainer = ({ className, children }) => {
+                return (
+                // <CalendarContainer className={className}
+                //                    style={{
+                //                            border: "thin solid blue"
+                //                    }}
+                // >
+                //         <div style={{ position: "relative" }}>{children}</div>
+                // </CalendarContainer>
+                        <div
+                                style={{
+                                        position: "relative" ,
+                                        border: "thin solid blue",
+                                        borderRadius: "0.3rem",
+                                        backgroundColor: "white",
+                                        display: 'flex'
+                                }}
+                        >
+                                {children}
+                        </div>
+                );
+        };
+
+        switch (filter.tag)
+        {
+                case 'la Date de creation':
+                {
+                        const [startDate, endDate] = filter.element;
+                        compenent = (
+                        <div className="full_size_element" /*style={{ maxWidth: 300 }}*/ >
+                                {/*<label>Chercher selon {filter.tag} :</label>*/}
+                                <DatePicker
+                                        selectsRange={true}
+                                        startDate={startDate}
+                                        endDate={endDate}
+                                        popperClassName = 'reactDatePickerPopper'
+                                        onChange={
+                                                (update) =>
+                                                {
+                                                        // const now = new Date()
+                                                        // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
+                                                        set( t => ({...t, element: update}) );
+                                                }
+                                        }
+                                        isClearable={true}
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        yearDropdownItemNumber={1000}
+                                        yearItemNumber={9}
+                                        dropdownMode="select"
+                                        minDate={new Date("2021/12/31")}
+                                        customInput={ <input className="form-control form-control-sm full_size_element" value={`${startDate} - ${endDate}`}/> }
+                                        calendarContainer={MyContainer}
+                                />
+                        </div>
+
+                        );
+
+                        break
+                }
+                case 'la Date de revision':
+                {
+                        const [startDate, endDate] = filter.element;
+                        compenent = (
+                        <div className="full_size_element" /*style={{ maxWidth: 243 }}*/ >
+                                {/*<label>Chercher selon {filter.tag} :</label>*/}
+                                <DatePicker
+                                        selectsRange={true}
+                                        startDate={startDate}
+                                        endDate={endDate}
+                                        popperClassName = 'reactDatePickerPopper'
+                                        onChange={
+                                                (update) =>
+                                                {
+                                                        // const now = new Date()
+                                                        // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
+                                                        set( t => ({...t, element: update}) );
+                                                }
+                                        }
+                                        isClearable={true}
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        yearDropdownItemNumber={1000}
+                                        yearItemNumber={9}
+                                        dropdownMode="select"
+                                        scrollableYearDropdown
+                                        minDate={new Date("2021/12/31")}
+                                        customInput ={ <input className="form-control form-control-sm full_size_element" value={`${startDate} - ${endDate}`}/> }
+                                        calendarContainer={MyContainer}
+                                />
+                        </div>
+
+                        );
+
+                        break
+                }
+
+                default:
+                        compenent = (
+                        <div className="full_size_element" >
+                                {/*<label>Chercher selon {filter.tag} :</label>*/}
+                                <input onChange={(e) => {set( t => ({...t, element: e.target.value}) )}} value={filter.element} type="search" className="full_size_element form-control form-control-sm" placeholder="" aria-controls="table-files"/>
+                        </div>
+                        )
+
+                        break
+        }
+
+
+
+        const update_tag = event =>
+        {
+                const value = event.target.value
+
+                switch (value)
+                {
+                        case "le Nom":
+                                set({tag: 'le Nom', element: ''})
+                                break
+                        case "la Date de creation":
+                                set({tag: 'la Date de creation', element: [null, null]})
+                                break
+                        case "la Date de revision":
+                                set({tag: 'la Date de revision', element: [null, null]})
+                                break
+                        case "le RA":
+                                set({tag: 'le RA', element: ''})
+                                break
+                }
+        }
+
+        const contain_audit = ( node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name) )
+
+        return(
+                <div id="file_table_filter_component" className="full_size_element" >
+                        <div
+                                style={{
+                                        // width: filter.element.constructor === Array ? "74%" : "86%"
+                                        marginRight: 10,
+                                        width: "100%"
+                                }}
+                        >
+                                {compenent}
+                        </div>
+                        <div
+                                style={{
+                                        // width: "7%"
+                                }}
+                        >
+                                <Tooltip title={"TAG RESEARCH"} placement={`top-start`} >
+                                        <Box  >{/*style={{ maxWidth: 100, padding: 5 }}*/}
+                                                <FormControl size="small" >
+                                                        {/*<InputLabel id="tag_select_label">Tag</InputLabel>*/}
+                                                        <MuiSelect
+                                                        labelId="tag_select_label"
+                                                        id="tag_select"
+                                                        value={filter.tag}
+                                                        // label="Tag"
+                                                        onChange={update_tag}
+                                                        >
+                                                                <MenuItem value={"le Nom"}>Nom</MenuItem>
+                                                                <MenuItem value={"la Date de creation"}>Date de creation</MenuItem>
+                                                                <MenuItem disabled={node.type !== 'nonC'} value={"la Date de revision"}>Date de revision</MenuItem>
+                                                                <MenuItem disabled={!contain_audit} value={"le RA"}>RA</MenuItem>
+                                                        </MuiSelect>
+                                                </FormControl>
+                                        </Box>
+                                </Tooltip>
+                        </div>
+                </div>
+        )
+}
+
+function ClimbTree({node})
 {
 
-        let node = useMemo(() => (Global_State.backend.selectedNode.model), [Global_State.backend.selectedNode.model])
+        const parent = window.Global_State.getNodeDataById(node.parentId)
 
-        const contain_audit = ( node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(Global_State.getCurrentSection().name) )
+        return (
+        <div className={'d-flex flex-row align-items-end'} >
+                {
+                        parent ?
+                        <Tooltip title={`Remonter vers ${parent.name}`} placement={"top-start"}>
+                                <IconButton
+                                onClick={
+                                        (e) =>
+                                        {
+                                                e.preventDefault();
 
-        console.log('contentNooooooooooooode', node, Global_State.backend)
+                                                const tree_row = document.getElementById(`treeRow-${node.id}`)
+
+                                                if (tree_row)
+                                                {
+                                                        const doubleClickEvent = new MouseEvent("dblclick", {
+                                                                view: window,
+                                                                bubbles: true,
+                                                                cancelable: true,
+                                                        });
+                                                        doubleClickEvent.is_opening = false
+
+                                                        tree_row.dispatchEvent(doubleClickEvent);
+                                                }
+
+                                                // console.log('prrrrrrreeeeeeeeeeev', window.Global_State.backend.prev.current)
+
+                                                window.Global_State.backend.setCurrentSelectedFolder(parent.id)
+                                        }
+                                }
+                                >
+                                        <IoArrowUpCircleSharp size={25} color={"black"} />
+                                </IconButton>
+                        </Tooltip>
+                        :
+                        <IconButton disabled={true} >
+                                <IoArrowUpCircleOutline size={25} />
+                        </IconButton>
+                }
+        </div>
+        )
+}
+
+function Prev()
+{
+
+        const prev = [...window.Global_State.backend.prev]
+
+        const prev_id = prev.pop()
+
+        console.log('prrrrrrreeeeeeeeeeev', prev_id, prev)
+
+        return (
+        <div className={'d-flex flex-row align-items-end'} >
+                {
+                        prev_id ?
+                        <Tooltip title={`Retour`} placement={"top-start"}>
+                                <IconButton
+                                onClick={
+                                        (e) =>
+                                        {
+                                                e.preventDefault();
+
+                                                // console.log('prrrrrrreeeeeeeeeeev', window.Global_State.backend.prev.current)
+
+                                                window.Global_State.EventsManager.emit("prev")
+                                        }
+                                }
+                                >
+                                        <ArrowLeftIcon size={25} color={"action"} style={{ color: "black" }} />
+                                </IconButton>
+                        </Tooltip>
+                        :
+                        <IconButton disabled={true} >
+                                <ArrowLeftIcon size={25} />
+                        </IconButton>
+                }
+        </div>
+        )
+}
+
+function Next()
+{
+
+        const next = [...window.Global_State.backend.next]
+
+        const next_id = next.pop()
+
+        return (
+        <div className={'d-flex flex-row align-items-end'} >
+                {
+                        next_id ?
+                        <Tooltip title={`Suivant`} placement={"top-start"}>
+                                <IconButton
+                                onClick={
+                                        (e) =>
+                                        {
+                                                e.preventDefault();
+
+                                                // console.log('prrrrrrreeeeeeeeeeev', window.Global_State.backend.prev.current)
+
+                                                window.Global_State.EventsManager.emit("next")
+                                        }
+                                }
+                                >
+                                        <ArrowRightIcon size={25} color={"action"} style={{ color: "black" }} />
+                                </IconButton>
+                        </Tooltip>
+                        :
+                        <IconButton disabled={true} >
+                                <ArrowRightIcon size={25} />
+                        </IconButton>
+                }
+        </div>
+        )
+}
+
+const SelectComponent = ({updateMethod, options, placeholder}) =>
+{
+        // console.log(servicesList)
+        // console.log(options)
+
+        return(
+        <Select
+        onChange = { updateMethod }
+        options = { options }
+        defaultValue = { options.slice(0, 1) }
+        isMulti = { true }
+        placeholder = { placeholder }
+        closeMenuOnSelect = { false }
+        components = { makeAnimated() }
+        isDisabled = { options.length === 1 }
+
+        />
+        )
+}
+
+const AsyncUsersSelectComponent = ({areFixed, updateMethod, filter, placeholder}) =>
+{
+        const styles = {
+                multiValue: (base, state) => {
+                        return state.data.isFix ? { ...base, backgroundColor: 'gray' } : base;
+                },
+                multiValueLabel: (base, state) => {
+                        return state.data.isFix
+                        ? { ...base, fontWeight: 'bold', color: 'white', paddingRight: 6 }
+                        : base;
+                },
+                multiValueRemove: (base, state) => {
+                        return state.data.isFix ? { ...base, display: 'none' } : base;
+                },
+        };
+
+        const filterUsers = filter;
+
+        const promiseOptions = (inputValue) =>
+        new Promise(
+                (resolve) =>
+                {
+                        http.get('get_users')
+                        .then(
+                        res =>
+                        {
+                                // console.log('userrsssss', res)
+                                const users = res.data.map( user => ( {value: user.id, label: `${user.name} ${user.second_name}`} ) )
+                                resolve(filterUsers(inputValue, users))
+                        }
+                        )
+                }
+        );
+
+        areFixed = [...areFixed].map( fix_el => ({...fix_el, isFix: true}) )
+
+        const [values, setValue] = useState(areFixed)
+
+        const handleChange = (e) =>
+        {
+                const new_val = [...areFixed]
+
+                for (const element of e)
+                {
+                        // if ( !areFixed.find( fix_el => fix_el.value === element.value ) ) new_val.push(element)
+                        if ( !element.isFix ) new_val.push(element)
+                }
+
+                setValue(new_val)
+
+                updateMethod(new_val)
+        }
+
+        return(
+        <AsyncSelect
+        value={values}
+        styles={styles}
+        onChange = { handleChange }
+        loadOptions={promiseOptions}
+        defaultValue = { areFixed }
+        isClearable={values.some( (v) => !v.isFix )}
+        isMulti = { true }
+        placeholder = { placeholder }
+        closeMenuOnSelect = { false }
+        components = { makeAnimated() }
+        // isDisabled = { options.length === 1 }
+
+        />
+        )
+}
+
+export default function FileTable()
+{
+
+        let node = useMemo(() => (window.Global_State.backend.selectedNode.model), [window.Global_State.backend.selectedNode.model])
+
+        // console.log("window.current_location", window.current_location)
+
+        const contain_audit = ( node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name) )
+
+        console.log('contentNooooooooooooode', node, window.Global_State.backend)
 
         const [filter, setFilter] = useState(
                 {
@@ -166,8 +564,6 @@ export default function FileTable({set})
         )
 
         // const [previousSelected, setPreviousSelected] = useState([0])
-
-        previousSelected = useMemo( () => { previousSelected.push(node.parentId); return previousSelected }, [node] )
 
         const [selectedRowNumber, setNumber] = useState(0)
         const [selectedRow, setSelectedRows] = useState([])
@@ -193,28 +589,83 @@ export default function FileTable({set})
         () =>
         {
 
-                Global_State.EventsManager.on('clearSelected', () => { console.log('clearSelected'); setSelectedRows([]); setNumber(0) })
-                Global_State.EventsManager.on('setSelectedNode', async (data) => { console.log(data); await Global_State.setSectionId(data.section_id); Global_State.backend.setCurrentSelectedFolder(data.id) })
+                window.Global_State.EventsManager.on('clearSelected', () => { console.log('clearSelected'); setSelectedRows([]); setNumber(0) })
+                // window.Global_State.EventsManager.once('show_on_screen',
+                // async (data) =>
+                // {
+                //         console.log(data);
+                //         await window.Global_State.setSectionId(data.section_id);
+                //         const parent_id = window.Global_State.getNodeDataById(data.id).parentId
+                //         await window.Global_State.backend.setCurrentSelectedFolder(parent_id)
+                //
+                //         setTimeout(
+                //         () =>
+                //         {
+                //                 console.log("scroooooooooooooooooooooooooooool")
+                //                 const row = document.getElementById(`row-${data.id}`)
+                //                 const parent = document.querySelector(".content_xl_size_content")
+                //
+                //                 parent.scrollTop = row.offsetTop
+                //
+                //         }, 800)
+                // })
+                window.Global_State.EventsManager.on("select_row",
+                (id) =>
+                {
+                        const row = datas.find( row => row.id ===  id)
+
+                        console.log("roooooooooooooooooow", row, datas, id)
+
+                        handleChange(1, [row])
+                }
+                )
                 return () =>
                 {
-                        Global_State.EventsManager.off('clearSelected');
-                        Global_State.EventsManager.off('setSelectedNode');
+                        window.Global_State.EventsManager.off('clearSelected');
+                        window.Global_State.EventsManager.off('select_row');
+                        // window.Global_State.EventsManager.off('show_on_screen');
                 }
         },
-        []
+
         )
 
         const Paste_component = useCallback(
                 function Paste_component()
                 {
                         const action = useRef({})
+                        const ref = useRef()
+
+                        useEffect(
+                        () =>
+                        {
+                                window.Global_State.EventsManager.on("shortcut",
+                                        (value) =>
+                                        {
+                                                console.log("Paste");
+                                                if (value === "ctrl_v")
+                                                {
+
+                                                        if (ref.current) ref.current.click()
+                                                }
+                                        }
+                                )
+
+                                return(
+                                        () =>
+                                        {
+                                                window.Global_State.EventsManager.off("shortcut")
+                                        }
+                                )
+
+                        }, []
+                        )
 
                         async function paste_here(node)
                         {
-                                const concern_nodes = Global_State.copyObject(to_move_or_copy.current)
+                                const concern_nodes = window.Global_State.copyObject(to_move_or_copy.current)
 
                                 const destination_node = JSON.parse( JSON.stringify(node) )
-                                const destination_info = Global_State.identifyNode( destination_node )
+                                const destination_info = window.Global_State.identifyNode( destination_node )
                                 const destination_id = destination_info[0]; const destination_type = destination_info[1]
 
                                 // console.log('arriiiiiiiiiiiiiveeee', to_move_or_copy.current)
@@ -263,12 +714,12 @@ export default function FileTable({set})
                                 {
                                         for (const child_node of node.children)
                                         {
-                                                if (child_node.name === (node_to_copy.onCopy || node_to_copy.name) )
+                                                if (child_node.name === (node_to_copy.ori_name || node_to_copy.name) )
                                                 {
                                                         if (!action.current.saved)
                                                         {
                                                                 // console.log('node_to_copy__________', to_move_or_copy.current)
-                                                                if ( !node_to_copy.onCopy && (parseInt(node_to_copy.id) < 0) && (operation_type === 'move') )
+                                                                if ( !node_to_copy.onCopy && (node_to_copy.type === 'ds') && (parseInt(node_to_copy.id) < 0) && (operation_type === 'move') )
                                                                 {
                                                                         // toast.error(`Selon les données locales, il existe deja un ${node_to_copy.type === 'f' ? 'fichier' : 'dossiser'} de ce nom á la destination:\n${node_to_copy.name}`)
                                                                         toast(
@@ -333,8 +784,8 @@ export default function FileTable({set})
                                                                                 </div>
                                                                                 )
 
-                                                                                Global_State.modalManager.setContent(content)
-                                                                                Global_State.modalManager.open_modal(`Conflit de ${child_node.type === 'f' ? 'fichiers' : 'dossiers'}`, false)
+                                                                                window.Global_State.modalManager.setContent(content)
+                                                                                window.Global_State.modalManager.open_modal(`Conflit de ${child_node.type === 'f' ? 'fichiers' : 'dossiers'}`, false)
 
                                                                         }
                                                                 ).then(
@@ -354,7 +805,7 @@ export default function FileTable({set})
                                         }
                                 }
 
-                                Global_State.modalManager.close_modal()
+                                window.Global_State.modalManager.close_modal()
 
                                 // console.log('taaaaaaaaaaaaaaaaaaaaaaaaaa')
                                 // console.log( 'to_move_or_copy.current1', to_move_or_copy.current )
@@ -399,9 +850,9 @@ export default function FileTable({set})
 
                                                         // console.log('arriiiiiiiiiiiiiveeee')
 
-                                                        if (Global_State.isEditorMode)
+                                                        if (window.Global_State.isEditorMode)
                                                         {
-                                                                Global_State.editor.folder.move(queryData)
+                                                                window.Global_State.editor.folder.move(queryData)
                                                         }
                                                         else
                                                         {
@@ -430,9 +881,9 @@ export default function FileTable({set})
                                                 else if (node_to_move.type === 'f')
                                                 {
 
-                                                        if (Global_State.isEditorMode)
+                                                        if (window.Global_State.isEditorMode)
                                                         {
-                                                                Global_State.editor.files.move(queryData)
+                                                                window.Global_State.editor.files.move(queryData)
                                                         }
                                                         else
                                                         {
@@ -493,12 +944,12 @@ export default function FileTable({set})
                                                 queryData.append('destination_type', destination_type)
                                                 queryData.append('id', node_to_copy.id)
                                                 queryData.append('on_exist', node_to_copy.on_exist ?  node_to_copy.on_exist : '-1')
-                                                queryData.append('section_id', Global_State.selectedSectionId)
+                                                queryData.append('section_id', window.Global_State.selectedSectionId)
 
                                                 let services
                                                 if (node.type === 'root')
                                                 {
-                                                        const section = Global_State.sections.get( Global_State.selectedSectionId )
+                                                        const section = window.Global_State.sections.get( window.Global_State.selectedSectionId )
 
                                                         services = section.services.map( service => ({value: service.id}) )
                                                 }
@@ -513,9 +964,9 @@ export default function FileTable({set})
 
                                                         // console.log('arriiiiiiiiiiiiiveeee')
 
-                                                        if (Global_State.isEditorMode)
+                                                        if (window.Global_State.isEditorMode)
                                                         {
-                                                                Global_State.editor.folder.copy(queryData)
+                                                                window.Global_State.editor.folder.copy(queryData)
                                                         }
                                                         else
                                                         {
@@ -544,9 +995,9 @@ export default function FileTable({set})
                                                 else if (node_to_copy.type === 'f')
                                                 {
 
-                                                        if (Global_State.isEditorMode)
+                                                        if (window.Global_State.isEditorMode)
                                                         {
-                                                                Global_State.editor.files.copy(queryData)
+                                                                window.Global_State.editor.files.copy(queryData)
                                                         }
                                                         else
                                                         {
@@ -580,15 +1031,15 @@ export default function FileTable({set})
                         }
 
                         return (
-                                <IconButton id={`ctrl_v`}
+                                <IconButton id={`ctrl_v`} ref={ref}
                                         disabled={mc_state === 'none'}
-                                        style = {{ marginRight: 20, }}
+                                        // style = {{ marginRight: 20, }}
                                         onClick={
                                                 e =>
                                                 {
                                                         console.log(to_move_or_copy.current, node.id)
 
-                                                        if (Global_State.isEditorMode) paste_here(node)
+                                                        if (window.Global_State.isEditorMode) paste_here(node)
                                                         else
                                                         {
                                                                 toast.promise(
@@ -610,7 +1061,7 @@ export default function FileTable({set})
                                                 }
                                         }
                                 >
-                                        <FaPaste size={25} color={`${mc_state === 'none'? '' : 'blue'}`} />
+                                        <FaPaste size={24} color={`${mc_state === 'none'? '' : 'blue'}`} />
                                 </IconButton>
                         )
 
@@ -622,7 +1073,7 @@ export default function FileTable({set})
                 // filtre de service
                 const canAddToService = (authService) =>
                 {
-                        const services = node.isRoot ? Global_State.getCurrentSection().services : node.services
+                        const services = node.isRoot ? window.Global_State.getCurrentSection().services : node.services
 
                         for(let elementService of services) {
                                 // console.log(authService.id, elementService.id)
@@ -630,105 +1081,11 @@ export default function FileTable({set})
                         }
                         return false
                 }
-                let servicesList = Global_State.authUser.services.filter( (service) => { return canAddToService(service) } ).map((service) => { return service } )
+                let servicesList = window.Global_State.authUser.services.filter( (service) => { return canAddToService(service) } ).map((service) => { return service } )
                 // formatage en options
                 const options_services = servicesList.map( (service) => { return {value: service.id, label: service.name } } )
 
                 // composant de selection de service
-                const SelectComponent = ({updateMethod, options, placeholder}) =>
-                {
-                        // console.log(servicesList)
-                        // console.log(options)
-
-                        return(
-                        <Select
-                        onChange = { updateMethod }
-                        options = { options }
-                        defaultValue = { options.slice(0, 1) }
-                        isMulti = { true }
-                        placeholder = { placeholder }
-                        closeMenuOnSelect = { false }
-                        components = { makeAnimated() }
-                        isDisabled = { options.length === 1 }
-
-                        />
-                        )
-                }
-
-                const AsyncSelectComponent = ({areFixed, updateMethod, defaultOptions, placeholder}) =>
-                {
-                        const styles = {
-                                multiValue: (base, state) => {
-                                        return state.data.isFix ? { ...base, backgroundColor: 'gray' } : base;
-                                },
-                                multiValueLabel: (base, state) => {
-                                        return state.data.isFix
-                                        ? { ...base, fontWeight: 'bold', color: 'white', paddingRight: 6 }
-                                        : base;
-                                },
-                                multiValueRemove: (base, state) => {
-                                        return state.data.isFix ? { ...base, display: 'none' } : base;
-                                },
-                        };
-
-                        const filterUsers = (inputValue, list) => {
-                                return list.filter((i) =>
-                                i.label.toLowerCase().includes(inputValue.toLowerCase())
-                                );
-                        };
-
-                        const promiseOptions = (inputValue) =>
-                        new Promise(
-                                (resolve) =>
-                                {
-                                        http.get('get_users')
-                                        .then(
-                                                res =>
-                                                {
-                                                        // console.log('userrsssss', res)
-                                                        const users = res.data.map( user => ( {value: user.id, label: `${user.name} ${user.second_name}`} ) )
-                                                       resolve(filterUsers(inputValue, users))
-                                                }
-                                        )
-                                }
-                        );
-
-                        areFixed = [...areFixed].map( fix_el => ({...fix_el, isFix: true}) )
-
-                        const [values, setValue] = useState(areFixed)
-
-                        const handleChange = (e) =>
-                        {
-                               const new_val = [...areFixed]
-
-                                for (const element of e)
-                                {
-                                        // if ( !areFixed.find( fix_el => fix_el.value === element.value ) ) new_val.push(element)
-                                        if ( !element.isFix ) new_val.push(element)
-                                }
-
-                                setValue(new_val)
-
-                                updateMethod(new_val)
-                        }
-
-                        return(
-                        <AsyncSelect
-                                value={values}
-                                styles={styles}
-                                onChange = { handleChange }
-                                loadOptions={promiseOptions}
-                                defaultValue = { areFixed }
-                                isClearable={values.some( (v) => !v.isFix )}
-                                isMulti = { true }
-                                placeholder = { placeholder }
-                                closeMenuOnSelect = { false }
-                                components = { makeAnimated() }
-                                // isDisabled = { options.length === 1 }
-
-                        />
-                        )
-                }
 
                 if (thing_to_add === "add_audit") {
 
@@ -757,8 +1114,8 @@ export default function FileTable({set})
                                         )
                                         queryBody.append("services", JSON.stringify(submittedInfo.services))
                                         queryBody.append("inspectors", JSON.stringify(inspector_ids))
-                                        queryBody.append("ra_id", Global_State.authUser.id)
-                                        queryBody.append("section_id", Global_State.selectedSectionId)
+                                        queryBody.append("ra_id", window.Global_State.authUser.id)
+                                        queryBody.append("section_id", window.Global_State.selectedSectionId)
 
 
                                         // console.log("services", queryBody.get("services"))
@@ -766,10 +1123,10 @@ export default function FileTable({set})
 
 
 
-                                        if(!Global_State.isEditorMode)
+                                        if(!window.Global_State.isEditorMode)
                                         {
 
-                                                Global_State.modalManager.setContent(Global_State.spinnerManager.spinner)
+                                                window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner)
 
                                                 http.post('add_audit', queryBody)
 
@@ -785,7 +1142,7 @@ export default function FileTable({set})
                                                                         text: "Audit ajouté avec success !",
                                                                         icon: "success",
                                                                 });
-                                                                Global_State.modalManager.close_modal()
+                                                                window.Global_State.modalManager.close_modal()
                                                         }
                                                         else
                                                         {
@@ -799,7 +1156,7 @@ export default function FileTable({set})
                                                                                         text: "Ce Audit existe deja !",
                                                                                         icon: "info",
                                                                                 });
-                                                                                Global_State.modalManager.close_modal()
+                                                                                window.Global_State.modalManager.close_modal()
                                                                                 break
                                                                         }
                                                                         default:
@@ -809,7 +1166,7 @@ export default function FileTable({set})
                                                                                         text: res.data.data.msg,
                                                                                         icon: "error",
                                                                                 });
-                                                                                Global_State.modalManager.setContent(<Audit_form/>)
+                                                                                window.Global_State.modalManager.setContent(<Audit_form/>)
                                                                                 break
                                                                         }
                                                                 }
@@ -827,16 +1184,16 @@ export default function FileTable({set})
                                                                 text: err.response.data.message + "\n" + msg,
                                                                 icon: "error",
                                                         });
-                                                        Global_State.modalManager.setContent(<Audit_form/>)
+                                                        window.Global_State.modalManager.setContent(<Audit_form/>)
                                                 })
                                         }
                                         else
                                         {
                                                 console.log('editorHandle audit')
 
-                                                Global_State.editor.audit.add(queryBody)
+                                                window.Global_State.editor.audit.add(queryBody)
 
-                                                Global_State.modalManager.close_modal()
+                                                window.Global_State.modalManager.close_modal()
                                         }
 
 
@@ -851,7 +1208,7 @@ export default function FileTable({set})
 
                                 });
 
-                                const ra = { value: parseInt(Global_State.authUser.id), label: `${Global_State.authUser.name} ${Global_State.authUser.second_name}` }
+                                const ra = { value: parseInt(window.Global_State.authUser.id), label: `${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}` }
 
                                 const formik = useFormik(
                                 {
@@ -923,19 +1280,26 @@ export default function FileTable({set})
 
                                         <Form.Group className="mb-3" >
                                                 <Form.Label>Inspecteurs</Form.Label>
-                                                <AsyncSelectComponent
+                                                <AsyncUsersSelectComponent
                                                         updateMethod=
                                                         {
                                                                 (r) =>
                                                                 {
                                                                         console.log('new_val', r)
-                                                                        // const e = Global_State.copyObject(r)
-                                                                        // if (!r.length) r.unshift( { value: parseInt(Global_State.authUser.id), label: `${Global_State.authUser.name} ${Global_State.authUser.second_name}` } );
+                                                                        // const e = window.Global_State.copyObject(r)
+                                                                        // if (!r.length) r.unshift( { value: parseInt(window.Global_State.authUser.id), label: `${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}` } );
                                                                         formik.setFieldValue("inspectors", r)
                                                                 }
                                                         }
                                                         areFixed={ [ra] }
                                                         placeholder={"Sélectionner au moins 1 inspecteur"}
+                                                        filter={
+                                                                (inputValue, list) => {
+                                                                        return list.filter((i) =>
+                                                                        i.label.toLowerCase().includes(inputValue.toLowerCase())
+                                                                        );
+                                                                }
+                                                        }
                                                 />
                                                 <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.inspectors ? "Au moins 1 inspecteur doit être sélectionné" : null}</span>
                                         </Form.Group>
@@ -964,8 +1328,8 @@ export default function FileTable({set})
                                 )
                         }
 
-                        Global_State.modalManager.setContent(<Audit_form/>)
-                        Global_State.modalManager.open_modal("Nouvel Audit")
+                        window.Global_State.modalManager.setContent(<Audit_form/>)
+                        window.Global_State.modalManager.open_modal("Nouvel Audit")
                 }
                 else if (thing_to_add === "add_folder") {
 
@@ -982,14 +1346,14 @@ export default function FileTable({set})
                                         let queryBody = new FormData()
 
 
-                                        const [parent_id, parent_type] = Global_State.identifyNode(node)
+                                        const [parent_id, parent_type] = window.Global_State.identifyNode(node)
 
                                         queryBody.append("services", JSON.stringify(submittedInfo.services))
 
                                         queryBody.append("name", submittedInfo.name)
                                         queryBody.append("parent_id", parent_id)
                                         queryBody.append("parent_type", parent_type)
-                                        queryBody.append("section_id", Global_State.selectedSectionId)
+                                        queryBody.append("section_id", window.Global_State.selectedSectionId)
 
 
                                         console.log("services", queryBody.get("services"))
@@ -998,10 +1362,10 @@ export default function FileTable({set})
                                         console.log("parent_type", parent_type)
 
 
-                                        if(!Global_State.isEditorMode)
+                                        if(!window.Global_State.isEditorMode)
                                         {
 
-                                                Global_State.modalManager.setContent(Global_State.spinnerManager.spinner)
+                                                window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner)
 
                                                 http.post('add_folder', queryBody)
 
@@ -1016,33 +1380,25 @@ export default function FileTable({set})
                                                                         text: "Dossier ajouté avec success !",
                                                                         icon: "success",
                                                                 });
-                                                                Global_State.modalManager.close_modal()
+                                                                window.Global_State.modalManager.close_modal()
+                                                        }
+                                                        else if (res.data.state === 'info')
+                                                        {
+                                                                swal({
+                                                                        title: "Info!",
+                                                                        text: res.data.data.msg,
+                                                                        icon: "info",
+                                                                });
+                                                                window.Global_State.modalManager.setContent(<Folder_form/>)
                                                         }
                                                         else
                                                         {
-                                                                switch (res.data.data.code)
-                                                                {
-                                                                        case 0:
-                                                                        {
-                                                                                swal({
-                                                                                        title: "FIN!",
-                                                                                        text: "Ce Dossier existe deja !",
-                                                                                        icon: "info",
-                                                                                });
-                                                                                Global_State.modalManager.close_modal()
-                                                                                break
-                                                                        }
-                                                                        default:
-                                                                        {
-                                                                                swal({
-                                                                                        title: "ERROR!",
-                                                                                        text: res.data.data.msg,
-                                                                                        icon: "error",
-                                                                                });
-                                                                                Global_State.modalManager.setContent(<Folder_form/>)
-                                                                                break
-                                                                        }
-                                                                }
+                                                                swal({
+                                                                        title: "ERROR!",
+                                                                        text: res.data.data.msg,
+                                                                        icon: "error",
+                                                                });
+                                                                window.Global_State.modalManager.setContent(<Folder_form/>)
                                                         }
                                                 })
 
@@ -1057,16 +1413,16 @@ export default function FileTable({set})
                                                                 icon: "error",
                                                         });
                                                         // console.log(err)
-                                                        Global_State.modalManager.setContent(<Folder_form/>)
+                                                        window.Global_State.modalManager.setContent(<Folder_form/>)
                                                 })
                                         }
                                         else
                                         {
                                                 console.log('editorHandle folder')
                                                 queryBody.set('front_parent_type', node.type)
-                                                Global_State.editor.folder.add(queryBody)
+                                                window.Global_State.editor.folder.add(queryBody)
 
-                                                Global_State.modalManager.close_modal()
+                                                window.Global_State.modalManager.close_modal()
                                         }
 
                                         // console.log(queryBody.get("name"))
@@ -1137,8 +1493,8 @@ export default function FileTable({set})
                                 )
                         }
 
-                        Global_State.modalManager.setContent(<Folder_form/>)
-                        Global_State.modalManager.open_modal("Nouveau Dossier")
+                        window.Global_State.modalManager.setContent(<Folder_form/>)
+                        window.Global_State.modalManager.open_modal("Nouveau Dossier")
                 }
                 else if (thing_to_add === "add_fncs") {
 
@@ -1154,14 +1510,14 @@ export default function FileTable({set})
 
                                         const check_feasibility = (debut, fin, nonC_id) =>
                                         {
-                                                const nonC = Global_State.getNodeDataById(nonC_id)
-                                                const audit = Global_State.getNodeDataById(nonC.parentId)
+                                                const nonC = window.Global_State.getNodeDataById(nonC_id)
+                                                const audit = window.Global_State.getNodeDataById(nonC.parentId)
 
-                                                // const existing_fncs = Global_State.getChildrenById(Global_State.value, nonC_id)
+                                                // const existing_fncs = window.Global_State.getChildrenById(window.Global_State.value, nonC_id)
 
                                                 for (let i = debut; i < fin+1; i++)
                                                 {
-                                                        if ( Global_State.value.find( node => node.path === `${nonC.path}\\FNC-${audit.name}-${i}` ) ) return false
+                                                        if ( window.Global_State.value.find( node => node.path === `${nonC.path}\\FNC-${audit.name}-${i}` ) ) return false
                                                 }
                                                 return true
                                         }
@@ -1186,10 +1542,10 @@ export default function FileTable({set})
                                                 // console.log("debut", queryBody.get("debut"))
                                                 // console.log("fin", queryBody.get("fin"))
 
-                                                if(!Global_State.isEditorMode)
+                                                if(!window.Global_State.isEditorMode)
                                                 {
 
-                                                        Global_State.modalManager.setContent(Global_State.spinnerManager.spinner)
+                                                        window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner)
 
 
                                                         http.post('add_fncs', queryBody)
@@ -1208,7 +1564,7 @@ export default function FileTable({set})
                                                                                         text: "Certains FNC sont existants ou possède le mm chemin !\n" + JSON.stringify(res.data.data.existing_fnc),
                                                                                         icon: "info",
                                                                                 });
-                                                                                Global_State.modalManager.close_modal()
+                                                                                window.Global_State.modalManager.close_modal()
                                                                         }
                                                                         else
                                                                         {
@@ -1217,7 +1573,7 @@ export default function FileTable({set})
                                                                                         text: "Dossier ajouté avec success !",
                                                                                         icon: "success",
                                                                                 });
-                                                                                Global_State.modalManager.close_modal()
+                                                                                window.Global_State.modalManager.close_modal()
                                                                         }
                                                                 }
                                                                 else
@@ -1231,7 +1587,7 @@ export default function FileTable({set})
                                                                                                 text: res.data.data.msg,
                                                                                                 icon: "error",
                                                                                         });
-                                                                                        Global_State.modalManager.setContent(<FNCs_form/>)
+                                                                                        window.Global_State.modalManager.setContent(<FNCs_form/>)
                                                                                         break
                                                                                 }
                                                                                 default:
@@ -1241,7 +1597,7 @@ export default function FileTable({set})
                                                                                                 text: res.data.data.msg,
                                                                                                 icon: "error",
                                                                                         });
-                                                                                        Global_State.modalManager.setContent(<FNCs_form/>)
+                                                                                        window.Global_State.modalManager.setContent(<FNCs_form/>)
                                                                                         break
                                                                                 }
                                                                         }
@@ -1261,7 +1617,7 @@ export default function FileTable({set})
                                                                         text: err.response.data.message + "\n" + msg,
                                                                         icon: "error",
                                                                 });
-                                                                Global_State.modalManager.setContent(<FNCs_form/>)
+                                                                window.Global_State.modalManager.setContent(<FNCs_form/>)
                                                         })
                                                 }
                                                 else
@@ -1269,9 +1625,9 @@ export default function FileTable({set})
                                                         console.log('editorHandle fnc')
 
                                                         queryBody.set('front_parent_type', node.type)
-                                                        Global_State.editor.fnc.add(queryBody)
+                                                        window.Global_State.editor.fnc.add(queryBody)
 
-                                                        Global_State.modalManager.close_modal()
+                                                        window.Global_State.modalManager.close_modal()
                                                 }
 
                                                 // console.log(queryBody.get("name"))
@@ -1285,7 +1641,7 @@ export default function FileTable({set})
                                                         text: 'La plage de génération contient des numéros de FNC existant !',
                                                         icon: "warning",
                                                 });
-                                                Global_State.modalManager.close_modal()
+                                                window.Global_State.modalManager.close_modal()
                                         }
                                 };
 
@@ -1407,8 +1763,8 @@ export default function FileTable({set})
                                 )
                         }
 
-                        Global_State.modalManager.setContent(<FNCs_form/>)
-                        Global_State.modalManager.open_modal("Generation de Non-Conformite")
+                        window.Global_State.modalManager.setContent(<FNCs_form/>)
+                        window.Global_State.modalManager.open_modal("Generation de Non-Conformite")
                 }
                 else if (thing_to_add === "add_files") {
 
@@ -1422,19 +1778,19 @@ export default function FileTable({set})
                                 const handleSubmit = (submittedInfo) => {
                                         console.log(submittedInfo)
 
-                                        Global_State.modalManager.setContent(Global_State.spinnerManager.spinner)
+                                        window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner)
 
                                         let queryBody = new FormData()
 
 
-                                        const [parent_id, parent_type] = Global_State.identifyNode(node)
+                                        const [parent_id, parent_type] = window.Global_State.identifyNode(node)
 
 
                                         queryBody.append("parent_type", parent_type)
                                         queryBody.append("parent_id", parent_id)
                                         submittedInfo.files.map(fileObject => { queryBody.append("fichiers[]", fileObject.file, fileObject.customName ) })
                                         queryBody.append("services", JSON.stringify(submittedInfo.services))
-                                        queryBody.append("section_id", Global_State.selectedSectionId)
+                                        queryBody.append("section_id", window.Global_State.selectedSectionId)
 
 
                                         // console.log("services", queryBody.get("services"))
@@ -1442,10 +1798,10 @@ export default function FileTable({set})
                                         // console.log("debut", queryBody.get("debut"))
                                         console.log("fin", queryBody.get("fichiers[]"))
 
-                                        if(!Global_State.isEditorMode)
+                                        if(!window.Global_State.isEditorMode)
                                         {
 
-                                                Global_State.modalManager.setContent(Global_State.spinnerManager.spinner)
+                                                window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner)
 
 
                                                 http.post('add_files', queryBody, {
@@ -1461,24 +1817,30 @@ export default function FileTable({set})
 
                                                         if (res.data.statue === 'success')
                                                         {
-                                                                if (res.data.data.msg === 'ok')
-                                                                {
-                                                                        swal({
-                                                                                title: "FIN!",
-                                                                                text: "Fichier(s) ajouté avec success !",
-                                                                                icon: "success",
-                                                                        });
-                                                                        Global_State.modalManager.close_modal()
-                                                                }
-                                                                else if (res.data.data.list)
-                                                                {
-                                                                        swal({
-                                                                                title: "FIN!",
-                                                                                text: "Certains fichiers sont existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.data.list),
-                                                                                icon: "info",
-                                                                        });
-                                                                        Global_State.modalManager.close_modal()
-                                                                }
+                                                                swal({
+                                                                        title: "FIN!",
+                                                                        text: "Fichier(s) ajouté avec success !",
+                                                                        icon: "success",
+                                                                });
+                                                                window.Global_State.modalManager.close_modal()
+                                                                // if (res.data.data.msg === 'ok')
+                                                                // {
+                                                                //         swal({
+                                                                //                 title: "FIN!",
+                                                                //                 text: "Fichier(s) ajouté avec success !",
+                                                                //                 icon: "success",
+                                                                //         });
+                                                                //         window.Global_State.modalManager.close_modal()
+                                                                // }
+                                                                // else if (res.data.data.list)
+                                                                // {
+                                                                //         swal({
+                                                                //                 title: "FIN!",
+                                                                //                 text: "Certains fichiers sont existant ou possède le mm chemin, des copies ont été créées !\n" + JSON.stringify(res.data.data.list),
+                                                                //                 icon: "info",
+                                                                //         });
+                                                                //         window.Global_State.modalManager.close_modal()
+                                                                // }
                                                         }
                                                         else
                                                         {
@@ -1487,7 +1849,7 @@ export default function FileTable({set})
                                                                         text: res.data.data.msg,
                                                                         icon: "error",
                                                                 });
-                                                                Global_State.modalManager.setContent(<Fs_form/>)
+                                                                window.Global_State.modalManager.setContent(<Fs_form/>)
                                                         }
                                                 })
 
@@ -1502,7 +1864,7 @@ export default function FileTable({set})
                                                                 text: err.response.data.message + "\n" + msg,
                                                                 icon: "error",
                                                         });
-                                                        Global_State.modalManager.setContent(<Fs_form/>)
+                                                        window.Global_State.modalManager.setContent(<Fs_form/>)
                                                 })
                                         }
                                         else
@@ -1510,9 +1872,9 @@ export default function FileTable({set})
                                                 console.log('editorHandle for files')
                                                 // queryBody.forEach((value, key) => console.log(key, value));
                                                 queryBody.set('front_parent_type', node.type)
-                                                Global_State.editor.files.add(queryBody)
+                                                window.Global_State.editor.files.add(queryBody)
 
-                                                Global_State.modalManager.close_modal()
+                                                window.Global_State.modalManager.close_modal()
                                         }
 
                                         // console.log(queryBody.get("name"))
@@ -1569,8 +1931,8 @@ export default function FileTable({set})
                                 )
                         }
 
-                        Global_State.modalManager.setContent(<Fs_form/>)
-                        Global_State.modalManager.open_modal("Ajouter des Fichiers")
+                        window.Global_State.modalManager.setContent(<Fs_form/>)
+                        window.Global_State.modalManager.open_modal("Ajouter des Fichiers")
                 }
         }
 
@@ -1580,313 +1942,840 @@ export default function FileTable({set})
                 // let label1 =  ?  : node.type === "audit" ? "Nouvelle Non-Conformité" : "Nouveau Fichier de preuve"
                 let buttons = []
 
-                // console.log("kkkkkkkkkkkkk", Global_State.getCurrentSection().name)
+                // console.log("kkkkkkkkkkkkk", window.Global_State.getCurrentSection().name)
 
 
-                const [ id, type ] = Global_State.identifyNode(node)
+                const [ id, type ] = window.Global_State.identifyNode(node)
 
                 if (node.global_type === "folder") buttons.push( [ <option key={"add_folder"} className="dropdown-item" onClick={() => {add("add_folder")}} >Nouveau Dossier</option>, <option key={"add_files"} className="dropdown-item" onClick={() => {add("add_files")}} >Ajouter des fichiers</option> ] )
                 if ( contain_audit ) buttons.push(<option key={"add_audit"} className="dropdown-item" onClick={() => {add("add_audit")}} >Nouvel Audit</option>)
                 if (node.type === "nonC") buttons.push(<option key={"add_fncs"} className="dropdown-item" disabled = { false }  onClick={() => {add("add_fncs")}} >Générer des Non-Conformités</option>)
 
-                return(
-                <div className="d-md-flex justify-content-between">
-                        <ul className="list-inline mb-3">
-                                <li className="list-inline-item mb-0">
-                                        <a className="btn btn-outline-light dropdown-toggle" data-toggle="dropdown">
-                                                Ajouter
-                                        </a>
-                                        <div className="dropdown-menu">
-                                                {buttons}
-                                        </div>
-                                </li>
+
+                function handleCut(e)
+                {
+                        console.log("Couperrrrrrrrrrrrr")
+                        if (selectedRow.length > 0)
+                        {
+                                e.preventDefault()
+                                e.stopPropagation()
+
+                                clearTimeout(clear_clipboard_id.current)
+
+                                clear_clipboard_id.current =
+                                setTimeout(
+                                () => { setMc_state('none'); to_move_or_copy.current = [] }, 2*60000
+                                )
+
+                                to_move_or_copy.current = selectedRow.map(
+                                row =>
                                 {
-                                        selectedRowNumber === 0 ? null :
-                                        <li className="list-inline-item mb-0">
-                                                <a className="btn btn-outline-light dropdown-toggle" data-toggle="dropdown">
-                                                        Plus
-                                                </a>
-                                                <div className="dropdown-menu">
-                                                        {
-                                                                selectedRowNumber === 1 ?
-                                                                <i onClick = {() => { Global_State.EventsManager.emit('viewDetailEnabled', selectedRow[0]); }} className="dropdown-item" data-sidebar-target="#view-detail">Voir les Details</i> : null
-                                                        }
-                                                        <option className="dropdown-item">Partager</option>
-                                                        <option className="dropdown-item">Télécharger</option>
-                                                        <option id={`ctrl_c`} className="dropdown-item"
-                                                                onClick={
-                                                                        e =>
-                                                                        {
-                                                                                if (selectedRow.length > 0)
-                                                                                {
-                                                                                        e.preventDefault()
-                                                                                        e.stopPropagation()
+                                        const node_data = window.Global_State.getNodeDataById(row.id)
 
-                                                                                        clearTimeout(clear_clipboard_id.current)
-
-                                                                                        clear_clipboard_id.current =
-                                                                                        setTimeout(
-                                                                                        () => { setMc_state('none') }, 10*60000
-                                                                                        )
-
-                                                                                        to_move_or_copy.current = selectedRow.map(
-                                                                                                row =>
-                                                                                                {
-                                                                                                        const node_data = Global_State.getNodeDataById(row.id)
-
-                                                                                                        return(
-                                                                                                                {...node_data, id: Global_State.identifyNode(node_data)[0]}
-                                                                                                        )
-                                                                                                }
-                                                                                        )
-
-                                                                                        from_id.current = node.id
-
-                                                                                        setMc_state('copy')
-                                                                                }
-                                                                                }
-                                                                }
-                                                        >Copier vers</option>
-                                                        <option id={`ctrl_x`} className="dropdown-item"
-                                                                onClick={
-                                                                        e =>
-                                                                        {
-                                                                                if (selectedRow.length > 0)
-                                                                                {
-                                                                                        e.preventDefault()
-                                                                                        e.stopPropagation()
-
-                                                                                        clearTimeout(clear_clipboard_id.current)
-
-                                                                                        clear_clipboard_id.current =
-                                                                                        setTimeout(
-                                                                                        () => { setMc_state('none'); to_move_or_copy.current = [] }, 2*60000
-                                                                                        )
-
-                                                                                        to_move_or_copy.current = selectedRow.map(
-                                                                                                row =>
-                                                                                                {
-                                                                                                        const node_data = Global_State.getNodeDataById(row.id)
-
-                                                                                                        return(
-                                                                                                        {...node_data, id: Global_State.identifyNode(node_data)[0]}
-                                                                                                        )
-                                                                                                }
-                                                                                        )
-
-                                                                                        from_id.current = node.id
-
-                                                                                        setMc_state('move')
-                                                                                }
-                                                                        }
-                                                                }
-                                                        >Déplacer vers</option>
-                                                        {
-                                                                selectedRowNumber === 1 ?
-                                                                <option className="dropdown-item">Renommer</option> : null
-                                                        }
-                                                        <option id={'ctrl_d'} className="dropdown-item" onClick = { e =>
-                                                        {
-                                                                // http.delete("")
-
-                                                                const remove = async () =>
-                                                                {
-                                                                        return  Promise.all(
-                                                                                selectedRow.map(
-                                                                                        async row =>
-                                                                                        {
-                                                                                                // console.log(Global_State.identifyNode(row))
-                                                                                                const nodeIdentity = Global_State.identifyNode(row)
-                                                                                                // const [ id, type ] = Global_State.identifyNode(row)
-
-                                                                                                console.log(selectedRow)
-                                                                                                switch (row.type) {
-                                                                                                        case 'audit':
-
-                                                                                                                await http.delete('del_audit?id=' + nodeIdentity[0])
-                                                                                                                .then( res => {
-                                                                                                                        console.log(res);
-                                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                                                                        {
-                                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                                                                        })
-
-                                                                                                                } )
-                                                                                                                .catch(err =>
-                                                                                                                {
-                                                                                                                        console.log(err);
-                                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Audit est deja dans une file d'attente de suppression: ${row.value}`)
-                                                                                                                        else toast.error("error on this one, Audit: " + row.value)
-                                                                                                                })
-
-                                                                                                                break;
-                                                                                                        case 'checkList':
-                                                                                                                break;
-                                                                                                        case 'dp':
-                                                                                                                break;
-                                                                                                        case 'nonC':
-                                                                                                                break;
-                                                                                                        case 'fnc':
-
-                                                                                                                await http.delete('del_fnc?id=' + nodeIdentity[0])
-                                                                                                                .then( res => {
-                                                                                                                        console.log(res);
-                                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                                                                        {
-                                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                                                                        })
-
-                                                                                                                } )
-                                                                                                                .catch(err =>
-                                                                                                                {
-                                                                                                                        console.log(err);
-                                                                                                                        if(err.response.data === 'en attente') toast.error(`Cette FNC est deja dans une file d'attente de suppression: ${row.value}`)
-                                                                                                                        else toast.error("error on this one, FNC: " + row.value)
-                                                                                                                })
-
-                                                                                                                break;
-                                                                                                        case 'ds':
-
-                                                                                                                await http.delete('del_folder?id=' + nodeIdentity[0])
-                                                                                                                .then( res => {
-                                                                                                                        console.log(res);
-                                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                                                                        {
-                                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                                                                        })
-
-                                                                                                                } )
-                                                                                                                .catch(err =>
-                                                                                                                {
-                                                                                                                        console.log(err);
-                                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Dossier est deja dans une file d'attente de suppression: ${row.value}`)
-                                                                                                                        else toast.error("error on this one, Dossier: " + row.value)
-                                                                                                                })
-
-                                                                                                                break;
-                                                                                                        case 'f':
-                                                                                                                // console.log(nodeIdentity[0])
-
-                                                                                                                await http.delete('del_file?id=' + nodeIdentity[0])
-                                                                                                                .then( res => {
-                                                                                                                        console.log(res);
-                                                                                                                        if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                                                                        {
-                                                                                                                                icon: <FaInfoCircle color='#2196F3' size={28} />,
-                                                                                                                        })
-
-                                                                                                                } )
-                                                                                                                .catch(err =>
-                                                                                                                {
-                                                                                                                        console.log(err);
-                                                                                                                        if(err.response.data === 'en attente') toast.error(`Cet Dossier est deja dans une file d'attente de suppression: ${row.value}`)
-                                                                                                                        else toast.error("error on this one, Ficher: " + row.value)
-                                                                                                                })
-
-                                                                                                                break;
-
-                                                                                                        default:
-                                                                                                                break;
-                                                                                                }
-
-                                                                                                // return 0;
-
-                                                                                        }
-                                                                                )
-                                                                        )
-                                                                }
-
-                                                                const localRemove = () =>
-                                                                {
-                                                                        selectedRow.map(
-                                                                        row =>
-                                                                        {
-                                                                                // console.log(Global_State.identifyNode(row))
-                                                                                const nodeIdentity = Global_State.identifyNode(row)
-                                                                                // const [ id, type ] = Global_State.identifyNode(row)
-
-                                                                                console.log(selectedRow)
-                                                                                switch (row.type) {
-                                                                                        case 'audit':
-
-                                                                                                console.log('audit dispatch del')
-                                                                                                Global_State.editor.audit.delete(nodeIdentity[0])
-
-                                                                                                break;
-                                                                                        case 'checkList':
-                                                                                                break;
-                                                                                        case 'dp':
-                                                                                                break;
-                                                                                        case 'nonC':
-                                                                                                break;
-                                                                                        case 'fnc':
-
-                                                                                                console.log('fnc dispatch del')
-                                                                                                Global_State.editor.fnc.delete(nodeIdentity[0])
-
-                                                                                                break;
-                                                                                        case 'ds':
-
-                                                                                                console.log('folder del')
-                                                                                                Global_State.editor.folder.delete(nodeIdentity[0])
-
-                                                                                                break;
-                                                                                        case 'f':
-
-                                                                                                console.log('file dispatch del')
-                                                                                                Global_State.editor.files.delete(nodeIdentity[0])
-
-                                                                                                break;
-
-                                                                                        default:
-                                                                                                break;
-                                                                                }
-
-                                                                        }
-                                                                        )
-
-                                                                }
-
-                                                                // console.log(selectedRow[0].id.substring(2))
-                                                                if( !Global_State.isEditorMode )
-                                                                {
-                                                                        toast.promise(
-                                                                        remove(),
-                                                                                {
-                                                                                        loading: 'Suppressing...',
-                                                                                        success: 'Processus achevé',
-                                                                                        error: 'err'
-                                                                                },
-                                                                                {
-                                                                                        id: 'Suppressing',
-                                                                                        // duration: Infinity
-                                                                                }
-                                                                        )
-                                                                        // .then( res => { setTimeout( () => { toast.dismiss('Suppressing') }, 800 ) } )
-                                                                }
-                                                                else localRemove()
-
-                                                        } } >Supprimer</option>
-                                                </div>
-                                        </li>
+                                        return(
+                                        {...node_data, id: window.Global_State.identifyNode(node_data)[0]}
+                                        )
                                 }
-                                <li className="list-inline-item mb-0">
-                                        <a className="btn btn-outline-light dropdown-toggle" data-toggle="dropdown">
-                                                Tags
-                                        </a>
-                                        <div className="dropdown-menu">
-                                                <option className="dropdown-item" onClick={e => { e.stopPropagation(); setFilter({tag: 'le Nom', element: ''}) }} >Nom</option>
-                                                <option className="dropdown-item" onClick={e => { e.stopPropagation(); setFilter({tag: 'la Date de creation', element: [null, null]}) }} >Date de Creation</option>
-                                                <option className="dropdown-item" onClick={e => { e.stopPropagation(); setFilter({tag: 'la Date de revision', element: [null, null]}) }} disabled={node.type !== 'nonC'} >Date de Revision</option>
-                                                <option className="dropdown-item" onClick={e => { e.stopPropagation(); setFilter({tag: 'le RA', element: ''}) }} disabled={!contain_audit} >RA</option>
+                                )
+
+                                from_id.current = node.id
+
+                                setMc_state('move')
+                        }
+                }
+                function handleCopy(e)
+                {
+                        console.log("Copieeeeeeeeeeeeeee")
+                        if (selectedRow.length > 0)
+                        {
+                                e.preventDefault()
+                                e.stopPropagation()
+
+                                clearTimeout(clear_clipboard_id.current)
+
+                                clear_clipboard_id.current =
+                                setTimeout(
+                                () => { setMc_state('none') }, 10*60000
+                                )
+
+                                to_move_or_copy.current = selectedRow.map(
+                                row =>
+                                {
+                                        const node_data = window.Global_State.getNodeDataById(row.id)
+
+                                        return(
+                                        {...node_data, id: window.Global_State.identifyNode(node_data)[0]}
+                                        )
+                                }
+                                )
+
+                                from_id.current = node.id
+
+                                setMc_state('copy')
+                        }
+                }
+                function handlePaste()
+                {
+
+                }
+                function handleRename(e)
+                {
+                        e.preventDefault()
+                        e.stopPropagation()
+
+                        const node = selectedRow[0]
+
+                        if (node)
+                        {
+                                if ( (node.type === "f") || (node.type === "ds") )
+                                {
+                                        swal("Nouveau nom:", {
+                                                content: "input",
+                                        })
+                                        .then((value) => {
+                                                if (value === '') swal(`Vous devez fournir un nom`);
+                                                else if ( /^(checkList|Dossier Preuve|Nc|FNC-(AI|AE)-(AGA|ANS)-\d+-\d+-\d+|(AI|AE)-(AGA|ANS)-\d+-\d+)$/.test(value) )
+                                                {
+                                                        swal(`Les noms "checkList", "Dossier Preuve", "Nc", d'audit et de fnc sont reservés !!`);
+                                                }
+                                                else if ( /^(?=.*[\\/:*?"<>|])/.test(value) )
+                                                {
+                                                        swal(`Les charactères suivantes sont prohibées: \\/:*?"<>|`);
+                                                }
+                                                else if ( /^\s|\s$/.test(value) )
+                                                {
+                                                        swal("Evitez les espaces au début ou á la fin des noms !!");
+                                                }
+                                                else
+                                                {
+                                                        const [id, model] = window.Global_State.identifyNode(node)
+                                                        // window.Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
+
+                                                        const query = new FormData;
+                                                        query.append('id', id)
+                                                        query.append('update_object', 'name')
+                                                        query.append('new_value', value.toString())
+
+                                                        let route
+
+                                                        switch (model)
+                                                        {
+                                                                case 'App\\Models\\DossierSimple':
+                                                                        route = 'update_folder'
+                                                                        break
+                                                                case 'App\\Models\\Fichier':
+                                                                        route = 'update_file'
+                                                                        break
+                                                                default:
+                                                                        return null
+
+                                                        }
+
+                                                        // console.log(selectedRow[0].id.substring(2))
+                                                        toast.promise(
+                                                        http.post(`${route}`, query),
+                                                        {
+                                                                loading: 'Loading...',
+                                                                success: 'Proccesus achevé',
+                                                                error: 'err'
+                                                        },
+                                                        {
+                                                                id: `rename_${route}${node.id}`,
+                                                                duration: Infinity
+                                                        }
+                                                        )
+                                                        .then(
+                                                        res => {
+                                                                console.log(res)
+                                                                switch (res.data.statue) {
+                                                                        case 'success':
+                                                                                toast(`L'element a été renommé`, {type: 'success'})
+                                                                                break
+                                                                        case 'error':
+                                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                                                break
+                                                                        case 'info':
+                                                                                toast(`Info: ${res.data.data.msg}`, {
+                                                                                        icon: "📢",
+                                                                                        style: {fontWeight: 'bold'}
+                                                                                })
+                                                                                break
+                                                                }
+                                                                setTimeout(() => {
+                                                                        toast.dismiss(`rename_${route}${node.id}`)
+                                                                }, 600)
+                                                        }
+                                                        )
+                                                        .catch(err => {
+                                                                console.log(err);
+                                                                setTimeout(() => {
+                                                                        toast.dismiss(`rename_${route}${node.id}`)
+                                                                }, 600)
+                                                        })
+                                                }
+
+                                        });
+                                }
+                                else toast.error("Can't do that 😒")
+                        }
+                }
+                function handleShare(e)
+                {
+                        e.preventDefault()
+                        e.stopPropagation()
+
+                        const nodes_info = selectedRow.map(
+                        row =>
+                        {
+                                const node_data = window.Global_State.getNodeDataById(row.id)
+
+                                return (
+                                {
+                                        id: window.Global_State.identifyNode(node_data)[0],
+                                        model: window.Global_State.identifyNode(node_data)[1]
+                                }
+                                )
+                        }
+                        )
+
+                        console.log("Shaaaaaaaaaaaaaaaaaaaaaring")
+
+                        const Share_to_users_form = () =>
+                        {
+                                // const [selectedService, setSelectedServices] = useState(null);
+
+                                const msg_err = "Valeur de champ invalide"
+
+
+                                const handleSubmit = (submittedInfo) => {
+                                        // console.log(submittedInfo)
+                                        // return
+
+                                        toast( "Sharing...",
+                                                {
+                                                        id: "share",
+                                                       type: "loading",
+                                                        duration: Infinity
+                                                }
+                                        )
+
+                                        let queryBody = new FormData()
+
+                                        const inspector_ids = submittedInfo.inspectors.map( element => parseInt(element.value) )
+                                        // console.log(inspector_ids)
+
+                                        queryBody.append("inspectors", JSON.stringify(inspector_ids))
+
+                                        console.log("nodes_infoooooooooooooooo", nodes_info)
+                                        // return
+                                        queryBody.append("nodes_info", JSON.stringify(nodes_info))
+
+
+                                        // console.log("services", queryBody.get("services"))
+                                        // console.log("name", queryBody.get("name"))
+
+
+                                        window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner)
+                                        http.post('share', queryBody)
+                                        .then((res) => {
+                                                console.log(res)
+
+                                                if (res.data.statue === 'success') {
+                                                        toast("Fichier(s) partagé(s) avec success",
+                                                        {
+                                                                id: "share",
+                                                                type: "success",
+                                                                duration: 2000
+                                                        }
+                                                        )
+                                                }
+                                                else
+                                                {
+                                                        // console.log('cooooooode', res.data.data.code)
+                                                        toast.dismiss("share")
+                                                        swal({
+                                                                title: "ERROR!",
+                                                                text: res.data.data.msg,
+                                                                icon: "error",
+                                                        });
+                                                }
+                                        })
+
+                                        // Catch errors if any
+                                        .catch((err) => {
+                                                console.log(err)
+                                                toast.dismiss("share")
+                                                let msg
+                                                if (err.response.status === 500) msg = "erreur interne au serveur"
+                                                else if (err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page"
+                                                swal({
+                                                        title: "ERREUR!",
+                                                        text: err.response.data.message + "\n" + msg,
+                                                        icon: "error",
+                                                });
+                                        })
+
+
+                                        // console.log(queryBody.get("name"))
+                                };
+
+                                const validationRules = yup.object().shape({
+                                        inspectors: yup.array().min(1).required('Au moins 1'),
+
+                                });
+
+                                const formik = useFormik(
+                                {
+                                        validationSchema: validationRules,
+                                        onSubmit: handleSubmit,
+                                        initialValues:
+                                        {
+                                                inspectors: [],
+                                        }
+                                }
+                                )
+
+
+                                return (
+                                 <div onClick={ e => { e.stopPropagation(); /*console.log(e)*/ } }
+                                 style={{
+                                         // position: "fixed"
+                                         backgroundColor: "white",
+                                         width: "85%",
+                                         height: "fit-content",
+                                         maxHeight: "90%",
+                                         borderRadius: "15px",
+                                         padding: 15,
+                                         margin: 20
+                                 }}
+                                 >
+                                         <Form value = {undefined} onSubmit={formik.handleSubmit} >
+
+                                                 <Form.Group className="mb-3" >
+                                                         <Form.Label>Inspecteurs</Form.Label>
+                                                         <AsyncUsersSelectComponent
+                                                         areFixed={[]}
+                                                         updateMethod=
+                                                         {
+                                                                 (r) =>
+                                                                 {
+                                                                         console.log('new_val', r)
+                                                                         // const e = window.Global_State.copyObject(r)
+                                                                         // if (!r.length) r.unshift( { value: parseInt(window.Global_State.authUser.id), label: `${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}` } );
+                                                                         formik.setFieldValue("inspectors", r)
+                                                                 }
+                                                         }
+                                                         placeholder={"Sélectionner au moins 1 inspecteur"}
+                                                         filter={
+                                                                 (inputValue, list) => {
+                                                                         return list.filter((i) => ( (i.value !== window.Global_State.authUser.id) && i.label.toLowerCase().includes(inputValue.toLowerCase()) ) );
+                                                                 }
+                                                         }
+                                                         />
+                                                         <span className='text-danger' style={{ fontSize: 11.2 }} >{formik.errors.inspectors && "Au moins 1 inspecteur doit être sélectionné" }</span>
+                                                 </Form.Group>
+
+                                                 <div
+                                                 style = {
+                                                         {
+                                                                 display: 'flex',
+                                                                 justifyContent: 'center',
+                                                                 position: 'relative',
+                                                                 alignItems: 'center',
+                                                         }
+                                                 }
+                                                 >
+                                                         <Button variant="primary" type="submit">
+                                                                 Submit
+                                                         </Button>
+                                                 </div>
+                                         </Form>
+                                 </div>
+                                )
+                        }
+
+                        window.Global_State.setOverlay_props( t => (
+                        {
+                                ...t,
+                                style:
+                                {
+                                        ...t.style,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                },
+                                children: (
+                                        <div className="full_size_element d-flex justify-content-center"
+                                             style={{
+                                                     backgroundColor: "rgba(0,0,0,0.22)"
+                                             }}
+                                        >
+                                                <Share_to_users_form />
                                         </div>
-                                </li>
-                        </ul>
+                                ),
+
+                        }
+                        ) )
+
+                        // window.Global_State.modalManager.setContent(<Share_to_users_form/>)
+                        // window.Global_State.modalManager.open_modal("Partager á")
+
+                }
+                function handleDownload(e)
+                {
+                        e.preventDefault()
+                        e.stopPropagation()
+
+                        const nodes_info = selectedRow.map(
+                        row =>
+                        {
+                                const node_data = window.Global_State.getNodeDataById(row.id)
+
+                                return (
+                                {
+                                        id: window.Global_State.identifyNode(node_data)[0],
+                                        model: window.Global_State.identifyNode(node_data)[1]
+                                }
+                                )
+                        }
+                        )
+
+                        if ( (nodes_info.length === 1) && (nodes_info[0].model === "App\\Models\\Fichier") )
+                        {
+                                console.log(nodes_info)
+                                // return
+
+                                http.get(`download_file?id=${nodes_info[0].id}`, { responseType: 'blob' })
+                                .then( res => {
+                                        console.log(res)
+                                        const blob = new Blob([res.data])
+                                        // console.log(blob)
+                                        const url = window.URL.createObjectURL(blob);
+                                        const link = document.createElement('a');
+                                        link.href = url;
+                                        link.setAttribute('download', `${selectedRow[0].value}`);
+                                        document.body.appendChild(link);
+                                        link.click();
+                                } )
+                                .catch( err => { console.log(err) } )
+                        }
+                        else
+                        {
+                                console.log(nodes_info)
+                                // return
+                                const to_compress = new FormData()
+                                to_compress.append("nodes_info", JSON.stringify(nodes_info))
+
+                                http.post("compress", to_compress)
+                                .then(
+                                        res =>
+                                        {
+                                                console.log(res)
+
+                                                http.get(`download_by_path?path=${res.data}`, { responseType: 'blob' })
+                                                .then( res => {
+                                                        console.log(res)
+                                                        const blob = new Blob([res.data])
+                                                        // console.log(blob)
+                                                        const url = window.URL.createObjectURL(blob);
+                                                        const link = document.createElement('a');
+                                                        link.href = url;
+                                                        link.setAttribute('download', `${ selectedRow.length === 1 ? `${selectedRow[0].value}.zip` : "Compressed_file.zip" }`);
+                                                        document.body.appendChild(link);
+                                                        link.click();
+                                                } )
+                                                .catch( err => { console.log(err) } )
+
+                                        }
+                                )
+                                .catch( err => { console.log(err) } )
+                        }
+
+                }
+                function handleDelete(e)
+                {
+                        e.preventDefault()
+                        e.stopPropagation()
+
+                        const remove = async () =>
+                        {
+                                return  Promise.all(
+                                selectedRow.map(
+                                async row =>
+                                {
+                                        // console.log(window.Global_State.identifyNode(row))
+                                        const nodeIdentity = window.Global_State.identifyNode(row)
+                                        // const [ id, type ] = window.Global_State.identifyNode(row)
+
+                                        console.log(selectedRow)
+                                        switch (row.type) {
+                                                case 'audit':
+
+                                                        await http.delete('del_audit?id=' + nodeIdentity[0])
+                                                        .then( res => {
+                                                                console.log(res);
+                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                {
+                                                                        icon: <FaInfoCircle color='#2196F3' size={28} />
+                                                                })
+
+                                                        } )
+                                                        .catch(err =>
+                                                        {
+                                                                console.log(err);
+                                                                swal({
+                                                                        title: "Error",
+                                                                        text: err.response.data.message,
+                                                                        icon: "error"
+                                                                })
+                                                        })
+
+                                                        break;
+                                                case 'checkList':
+                                                        break;
+                                                case 'dp':
+                                                        break;
+                                                case 'nonC':
+                                                        break;
+                                                case 'fnc':
+
+                                                        await http.delete('del_fnc?id=' + nodeIdentity[0])
+                                                        .then( res => {
+                                                                console.log(res);
+                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                {
+                                                                        icon: <FaInfoCircle color='#2196F3' size={28} />
+                                                                })
+
+                                                        } )
+                                                        .catch(err =>
+                                                        {
+                                                                console.log(err);
+                                                                swal({
+                                                                        title: "Error",
+                                                                        text: err.response.data.message,
+                                                                        icon: "error"
+                                                                })
+                                                        })
+
+                                                        break;
+                                                case 'ds':
+
+                                                        await http.delete('del_folder?id=' + nodeIdentity[0])
+                                                        .then( res => {
+                                                                console.log(res);
+                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                {
+                                                                        icon: <FaInfoCircle color='#2196F3' size={28} />
+                                                                })
+
+                                                        } )
+                                                        .catch(err =>
+                                                        {
+                                                                console.log(err);
+                                                                swal({
+                                                                        title: "Error",
+                                                                        text: err.response.data.message,
+                                                                        icon: "error"
+                                                                })
+                                                        })
+
+                                                        break;
+                                                case 'f':
+                                                        // console.log(nodeIdentity[0])
+
+                                                        await http.delete('del_file?id=' + nodeIdentity[0])
+                                                        .then( res => {
+                                                                console.log(res);
+                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
+                                                                {
+                                                                        icon: <FaInfoCircle color='#2196F3' size={28} />,
+                                                                })
+
+                                                        } )
+                                                        .catch(err =>
+                                                        {
+                                                                console.log(err);
+                                                                swal({
+                                                                        title: "Error",
+                                                                        text: err.response.data.message,
+                                                                        icon: "error"
+                                                                })
+                                                        })
+
+                                                        break;
+
+                                                default:
+                                                        break;
+                                        }
+
+                                        // return 0;
+
+                                }
+                                )
+                                )
+                        }
+
+                        const localRemove = () =>
+                        {
+                                selectedRow.map(
+                                row =>
+                                {
+                                        // console.log(window.Global_State.identifyNode(row))
+                                        const nodeIdentity = window.Global_State.identifyNode(row)
+                                        // const [ id, type ] = window.Global_State.identifyNode(row)
+
+                                        console.log(selectedRow)
+                                        switch (row.type) {
+                                                case 'audit':
+
+                                                        console.log('audit dispatch del')
+                                                        window.Global_State.editor.audit.delete(nodeIdentity[0])
+
+                                                        break;
+                                                case 'checkList':
+                                                        break;
+                                                case 'dp':
+                                                        break;
+                                                case 'nonC':
+                                                        break;
+                                                case 'fnc':
+
+                                                        console.log('fnc dispatch del')
+                                                        window.Global_State.editor.fnc.delete(nodeIdentity[0])
+
+                                                        break;
+                                                case 'ds':
+
+                                                        console.log('folder del')
+                                                        window.Global_State.editor.folder.delete(nodeIdentity[0])
+
+                                                        break;
+                                                case 'f':
+
+                                                        console.log('file dispatch del')
+                                                        window.Global_State.editor.files.delete(nodeIdentity[0])
+
+                                                        break;
+
+                                                default:
+                                                        break;
+                                        }
+
+                                }
+                                )
+
+                        }
+
+                        // console.log(selectedRow[0].id.substring(2))
+                        if( !window.Global_State.isEditorMode )
+                        {
+                                swal({
+                                        title: "Etes vous sûr ?",
+                                        text: "La suppression est définitive !!",
+                                        icon: "warning",
+                                        buttons: true,
+                                        dangerMode: true,
+                                })
+                                .then((willDelete) => {
+                                        if (willDelete)
+                                        {
+                                                toast('Suppressing...',
+                                                        {
+                                                                id: 'Suppressing',
+                                                                type: "loading",
+                                                                duration: Infinity
+                                                        }
+                                                )
+
+                                                remove()
+                                                .then(
+                                                        res =>
+                                                        {
+                                                                setTimeout(
+                                                                () =>
+                                                                {
+                                                                        toast('Fin du proccesus',
+                                                                        {
+                                                                                id: 'Suppressing',
+                                                                                duration: 1000
+                                                                        })
+                                                                },
+                                                                800 )
+                                                        }
+                                                )
+                                        }
+                                });
+
+                        }
+                        else localRemove()
+
+                }
+                function handleUndo(e)
+                {
+                        // console.log("Undooooooooooo")
+                        if (window.Global_State.editor.can_undo)
+                        {
+                                e.preventDefault()
+                                e.stopPropagation()
+
+                                window.Global_State.EventsManager.emit("undo")
+                        }
+                }
+                function handleRedo(e)
+                {
+                        // console.log("Redooooooooooo")
+                        if (window.Global_State.editor.can_redo)
+                        {
+                                e.preventDefault()
+                                e.stopPropagation()
+
+                                window.Global_State.EventsManager.emit("redo")
+                        }
+                }
+
+                const refs =
+                {
+                        ctrl_c: useRef(),
+                        ctrl_x: useRef(),
+                        ctrl_d: useRef(),
+                        ctrl_s: useRef(),
+                        ctrl_t: useRef(),
+                        ctrl_r: useRef(),
+                }
+
+                useEffect(
+                        () =>
+                        {
+                                window.Global_State.EventsManager.on("shortcut",
+                                (value) =>
+                                {
+                                        console.log(refs[value]);
+                                        if (refs[value])
+                                        {
+                                                const action_button = refs[value].current
+
+                                                if (action_button) action_button.click()
+                                        }
+                                }
+                                )
+
+                                return(
+                                        () =>
+                                        {
+                                                window.Global_State.EventsManager.off("shortcut")
+                                        }
+                                )
+
+                        }, []
+                )
+
+                return(
+                <div className="file_table_container_actions">
+                        <div className="full_size_element d-flex justify-content-between" >
+
+                                <Stack className="full_size_element" direction={"row"} spacing={1} divider={<Divider orientation="vertical" flexItem />} >
+
+                                        <Tooltip title={"AJOUTER"} placement={`left-start`} >
+                                                <Dropdown >
+                                                        <Dropdown.Toggle as={IconButton} color={"primary"} id={`add_dropdown`} >
+                                                                <AddCircleTwoToneIcon color={"info"} fontSize={"medium"} />
+                                                        </Dropdown.Toggle >
+
+                                                        <Dropdown.Menu>
+                                                                {buttons}
+                                                        </Dropdown.Menu>
+                                                </Dropdown>
+                                        </Tooltip>
+
+                                        <Stack direction={"row"} >
+
+                                                <Tooltip title={"COUPER"} placement={`top-end`} >
+                                                        <div>
+                                                                <IconButton id={`ctrl_x`} ref={refs.ctrl_x} color={"error"} disabled={selectedRowNumber === 0} onClick={handleCut}>
+                                                                        <IoIosCut color={ selectedRowNumber === 0 ? '' : "#cc7613"} size={24} />
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+
+                                                <Tooltip title={"COPIER"} placement={`top-end`} >
+                                                        <div>
+                                                                <IconButton id={`ctrl_c`} ref={refs.ctrl_c} color={"success"} disabled={selectedRowNumber === 0} onClick={handleCopy}>
+                                                                        <CopyAllTwoToneIcon color={ selectedRowNumber === 0 ? '' : "success"} fontSize={"medium"} />
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+
+                                                <Tooltip title={"COLLER"} placement={`top-end`} >
+                                                        <div>
+                                                                <Paste_component />
+                                                        </div>
+                                                </Tooltip>
+
+                                                <Tooltip title={"RENOMMER"} placement={`top-end`} >
+                                                        <div>
+                                                                <IconButton ref={refs.ctrl_r} color={"primary"} disabled={selectedRowNumber !== 1} onClick={handleRename} >
+                                                                        <BiRename color={ selectedRowNumber !== 1 ? '' : "blue"} size={24} />
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+
+                                                <Tooltip title={"PARTAGER"} placement={`top-end`} >
+                                                        <div>
+                                                                <IconButton color={"secondary"} disabled={selectedRowNumber === 0} onClick={handleShare}>
+                                                                        <VscLiveShare color={ selectedRowNumber === 0 ? '' : "purple"} size={24} />
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+
+                                                <Tooltip title={"ACQUERIR"} placement={`top-end`} >
+                                                        <div>
+                                                                <IconButton color={"primary"} disabled={selectedRowNumber === 0} onClick={handleDownload}>
+                                                                        <ImDownload2 color={ selectedRowNumber === 0 ? '' : "#1565c0"} size={24} />
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+
+                                                <Tooltip title={"SUPPRIMER"} placement={`top-end`} >
+                                                        <div>
+                                                                <IconButton id={'ctrl_d'} ref={refs.ctrl_d} color={"error"} disabled={selectedRowNumber === 0} onClick={handleDelete}>
+                                                                        <RiDeleteBin2Fill color={ selectedRowNumber === 0 ? '' : "red"} size={24} />
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+
+                                        </Stack>
+
+                                </Stack>
+
+                                {
+                                        window.Global_State.isEditorMode ?
+                                        <Stack className="d-none d-sm-flex" direction={"row"} justifyContent="end" >
+                                                <Tooltip title={"Undo"} placement={`top-end`} >
+                                                        <div>
+                                                                <IconButton disabled={!window.Global_State.editor.can_undo} onClick={handleUndo}>
+                                                                        <MdUndo color={ !window.Global_State.editor.can_undo ? '' : "black"} size={24} />
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+
+                                                <Tooltip title={"Redo"} placement={`top-end`} >
+                                                        <div>
+                                                                <IconButton disabled={!window.Global_State.editor.can_redo} onClick={handleRedo}>
+                                                                        <MdRedo color={ !window.Global_State.editor.can_redo ? '' : "black"} size={24} />
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+                                        </Stack>
+                                        :
+                                        null
+                                }
+
+                        </div>
                 </div>
                 )
 
         }
-
 
         const dataFormater = (node) =>
         {
@@ -1912,8 +2801,11 @@ export default function FileTable({set})
                 function TypeIcon(props) {
                         const [data, iconSize] = [props.data, props.iconSize]
                         if (data.global_type === "folder") {
+
+                                const icon = window.Global_State.get_auditFamily_icon(data.type)
+
                                 return (
-                                        <FcFolder style={ { pointerEvents: "none" } } size={iconSize}  />
+                                        icon || <FcFolder style={ { pointerEvents: "none" } } size={iconSize}  />
                                 )
                         }
                         else
@@ -1923,7 +2815,7 @@ export default function FileTable({set})
                                         case "img":
                                                 return <img onClick={e =>
                                                 {
-                                                        Global_State.modalManager.setContent(
+                                                        window.Global_State.modalManager.setContent(
                                                         <div style= {
                                                                 {
                                                                         display: 'flex',
@@ -1938,12 +2830,12 @@ export default function FileTable({set})
                                                                                 height: 'auto',
                                                                         }} alt="Avatar" src = {data.url}  />
                                                         </div>)
-                                                        Global_State.modalManager.open_modal("Apercu de l' image")
+                                                        window.Global_State.modalManager.open_modal("Apercu de l' image")
                                                 }}  style={{  width: iconSize, height: iconSize, boxShadow: "1px 2px #888888" }} src = {data.url}   alt={''}/>
                                         case "vid":
                                                 return <FcVideoFile onClick={e =>
                                                 {
-                                                        Global_State.modalManager.setContent(
+                                                        window.Global_State.modalManager.setContent(
                                                         <div style= {
                                                                 {
                                                                         display: 'flex',
@@ -1956,12 +2848,12 @@ export default function FileTable({set})
                                                                         <source src={data.url} type={"video/" + data.ext} />
                                                                 </video>
                                                         </div>)
-                                                        Global_State.modalManager.open_modal("Apercu de l' image")
+                                                        window.Global_State.modalManager.open_modal("Apercu de l' image")
                                                 }}  size = {iconSize}   />
                                         case "docx":
                                                 return <RiFileWord2Fill color='#295394' size={iconSize} onClick = { e =>
                                                 {
-                                                        Global_State.modalManager.setContent(
+                                                        window.Global_State.modalManager.setContent(
                                                         <div style= {
                                                                 {
                                                                         display: 'flex',
@@ -1972,7 +2864,7 @@ export default function FileTable({set})
                                                         } >
                                                                 {/* <iframe src = { "https://drive.google.com/viewer?url=https://sunumaths.com/wp-content/uploads/2020/08/Cours-Terminale-L.pdf"} width="auto" height="auto" type="application/docx" ></iframe> */}
                                                         </div>)
-                                                        Global_State.modalManager.open_modal("Apercu du fichier")
+                                                        window.Global_State.modalManager.open_modal("Apercu du fichier")
                                                 }
                                                 } />
                                         case "pdf":
@@ -1985,7 +2877,7 @@ export default function FileTable({set})
                                                                  onClick = { e =>
                                                                         {
                                                                                 console.log(data)
-                                                                                Global_State.modalManager.setContent(
+                                                                                window.Global_State.modalManager.setContent(
                                                                                 <div style= {
                                                                                         {
                                                                                                 display: 'flex',
@@ -1994,9 +2886,9 @@ export default function FileTable({set})
                                                                                                 alignItems: 'center',
                                                                                         }
                                                                                 } >
-                                                                                        {Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : <embed src = {data.url + "#toolbar=0&navpanes=0&scrollbar=0"} width={900} height= {400} type="application/pdf"  ></embed>}
+                                                                                        {window.Global_State.getNodeDataById(data.id).onEdit ? 'Pas encore telechargé' : <embed src = {data.url + "#toolbar=0&navpanes=0&scrollbar=0"} width={900} height= {400} type="application/pdf"  ></embed>}
                                                                                 </div>)
-                                                                                Global_State.modalManager.open_modal("Apercu du fichier")
+                                                                                window.Global_State.modalManager.open_modal("Apercu du fichier")
                                                                         }
                                                                 }
                                                         />
@@ -2005,7 +2897,7 @@ export default function FileTable({set})
                                         case "pptx":
                                                 return <SiMicrosoftpowerpoint color='#ad0b00' size={iconSize} onClick = { e =>
                                                 {
-                                                        Global_State.modalManager.setContent(
+                                                        window.Global_State.modalManager.setContent(
                                                         <div style= {
                                                                 {
                                                                         display: 'flex',
@@ -2016,7 +2908,7 @@ export default function FileTable({set})
                                                         } >
                                                                 {/* <iframe src = {data.url} width="auto" height="auto" type="application/pptx"></iframe> */}
                                                         </div>)
-                                                        Global_State.modalManager.open_modal("Apercu du fichier")
+                                                        window.Global_State.modalManager.open_modal("Apercu du fichier")
                                                 }
                                                 } />
                                         default:
@@ -2116,9 +3008,9 @@ export default function FileTable({set})
                         function handleClick(e)
                         {
                                 console.log(level)
-                                const node_data = Global_State.getNodeDataById(data.id)
-                                const [id, lol] = Global_State.identifyNode(node_data)
-                                // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
+                                const node_data = window.Global_State.getNodeDataById(data.id)
+                                const [id, lol] = window.Global_State.identifyNode(node_data)
+                                // window.Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
 
                                 const query = new FormData;
                                 query.append('id', id)
@@ -2126,7 +3018,7 @@ export default function FileTable({set})
                                 query.append('new_value', nextNiv(level))
                                 query.append('additional_info', JSON.stringify( {} ))
 
-                                if(!Global_State.isEditorMode)
+                                if(!window.Global_State.isEditorMode)
                                 {
                                         const update = async () =>
                                         {
@@ -2151,7 +3043,7 @@ export default function FileTable({set})
                                 }
                                 else
                                 {
-                                        Global_State.editor.fnc.update(query)
+                                        window.Global_State.editor.fnc.update(query)
                                 }
 
 
@@ -2310,7 +3202,7 @@ export default function FileTable({set})
                                         {
                                                 e.stopPropagation()
 
-                                                Global_State.setOverlay_props(t => (
+                                                window.Global_State.setOverlay_props(t => (
                                                                 {
                                                                         ...t,
                                                                         style:
@@ -2323,7 +3215,7 @@ export default function FileTable({set})
                                                 )
 
                                                 console.log(new_review_date)
-                                                const [id, model_type] = Global_State.identifyNode(data)
+                                                const [id, model_type] = window.Global_State.identifyNode(data)
 
                                                 const query = new FormData;
                                                 query.append('id', id)
@@ -2335,7 +3227,7 @@ export default function FileTable({set})
                                                         }
                                                 ))
 
-                                                if(!Global_State.isEditorMode)
+                                                if(!window.Global_State.isEditorMode)
                                                 {
                                                         // const update = async () =>
                                                         // {
@@ -2384,7 +3276,7 @@ export default function FileTable({set})
                                                 }
                                                 else
                                                 {
-                                                        Global_State.editor.fnc.update(query)
+                                                        window.Global_State.editor.fnc.update(query)
                                                 }
                                         }
 
@@ -2417,7 +3309,7 @@ export default function FileTable({set})
                                 }
 
 
-                                Global_State.setOverlay_props( t => (
+                                window.Global_State.setOverlay_props( t => (
                                 {
                                         ...t,
                                         style:
@@ -2434,7 +3326,10 @@ export default function FileTable({set})
                                                         width: "max-content",
                                                         marginTop: 15,
                                                         backgroundColor: 'rgba(255,255,255,0)' ,
-                                                        translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+                                                        position: "absolute",
+                                                        top: e.clientY - 37,
+                                                        left: e.clientX - 185/2
+                                                        // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
                                                 }}
                                                 onClick={ e => { e.stopPropagation() } }
                                         >
@@ -2453,6 +3348,67 @@ export default function FileTable({set})
                         )
                 }
 
+                const IsClosedComponent = ({data}) =>
+                {
+                        const handleClick = e =>
+                        {
+                                e.stopPropagation()
+                                console.log("IsClosedComponent handle click")
+
+                                const [id, model] = window.Global_State.identifyNode(data)
+
+                                const query = new FormData;
+                                query.append('id', id)
+                                query.append('update_object', 'isClosed')
+                                query.append('new_value', data.isClosed ? 0 : 1)
+
+                                if(!window.Global_State.isEditorMode)
+                                {
+                                        toast.promise(
+                                        http.post('update_fnc', query),
+                                        {
+                                                loading: 'Loading...',
+                                                success: 'Processus achevé',
+                                                error: 'Erreur'
+                                        },
+                                        {
+                                                id: `is_closed_${data.id}`,
+                                                duration: Infinity
+                                        }
+
+                                        )
+                                        .then(
+                                        res =>
+                                        {
+                                                console.log(res)
+                                                switch (res.data.statue)
+                                                {
+                                                        case 'success':
+                                                                toast(`Le statue a été mise á jour !!`, {type: 'success'})
+                                                                break
+                                                        case 'error':
+                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                                break
+                                                        case 'info':
+                                                                toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+                                                                break
+                                                }
+                                                setTimeout( () => { toast.dismiss(`is_closed_${data.id}`) }, 600 )
+                                        }
+                                        )
+                                        .catch(err => { console.log(err); setTimeout( () => { toast.dismiss(`is_closed_${data.id}`) }, 600 ) })
+                                }
+                                else
+                                {
+                                        // window.Global_State.editor.fnc.update(query)
+                                }
+                        }
+
+                        return(
+                                data.isClosed ? <div className="badge bg-success-bright text-success" onClick={handleClick} >Clôturé</div> : <div className="badge bg-danger-bright text-danger" onClick={handleClick} >Non-Clôturé</div>
+                        )
+                }
+
                 const ValidBadge = ({data}) =>
                 {
                         const [checked, check] = useState(false)
@@ -2464,8 +3420,8 @@ export default function FileTable({set})
 
                                 console.log(e)
 
-                                const [id, model] = Global_State.identifyNode(data)
-                                // Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
+                                const [id, model] = window.Global_State.identifyNode(data)
+                                // window.Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
 
                                 const query = new FormData;
                                 query.append('id', id)
@@ -2503,47 +3459,47 @@ export default function FileTable({set})
 
                                 }
 
-                                if(/*!Global_State.isEditorMode*/ true)
+                                 // console.log(selectedRow[0].id.substring(2))
+                                toast.promise(
+                                http.post(`${route}`, query),
                                 {
-
-                                        // console.log(selectedRow[0].id.substring(2))
-                                        toast.promise(
-                                                http.post(`${route}`, query),
-                                                {
-                                                        loading: 'Loading...',
-                                                        success: 'Proccesus achevé',
-                                                        error: 'err'
-                                                },
-                                                {
-                                                        id: `${route}${data.id}`,
-                                                        duration: Infinity
-                                                }
-                                        )
-                                        .then(
-                                                res =>
-                                                {
-                                                        console.log(res)
-                                                        switch (res.data.statue)
-                                                        {
-                                                                case 'success':
-                                                                        toast(`L'element a été ${res.data.data.is_validated ? "validé" : "dévalidé"}`, {type: 'success'})
-                                                                        break
-                                                                case 'error':
-                                                                        toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
-                                                                        break
-                                                                case 'info':
-                                                                        toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
-                                                                        break
-                                                        }
-                                                        setTimeout( () => { toast.dismiss(`${route}${data.id}`) }, 600 )
-                                                }
-                                        )
-                                        .catch(err => { console.log(err); setTimeout( () => { toast.dismiss(`${route}${data.id}`) }, 600 ) })
-                                }
-                                else
+                                        loading: 'Loading...',
+                                        success: 'Proccesus achevé',
+                                        error: 'err'
+                                },
                                 {
-                                        // Global_State.editor.folder.update(query)
+                                        id: `${route}${data.id}`,
+                                        duration: Infinity
                                 }
+                                )
+                                .then(
+                                res => {
+                                        console.log(res)
+                                        switch (res.data.statue) {
+                                                case 'success':
+                                                        toast(`L'element a été ${res.data.data.is_validated ? "validé" : "dévalidé"}`, {type: 'success'})
+                                                        break
+                                                case 'error':
+                                                        toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+                                                        break
+                                                case 'info':
+                                                        toast(`Info: ${res.data.data.msg}`, {
+                                                                icon: "📢",
+                                                                style: {fontWeight: 'bold'}
+                                                        })
+                                                        break
+                                        }
+                                        setTimeout(() => {
+                                                toast.dismiss(`${route}${data.id}`)
+                                        }, 600)
+                                }
+                                )
+                                .catch(err => {
+                                        console.log(err);
+                                        setTimeout(() => {
+                                                toast.dismiss(`${route}${data.id}`)
+                                        }, 600)
+                                })
 
 
                         }
@@ -2552,22 +3508,45 @@ export default function FileTable({set})
 
                         return (
                                 <div className={'d-flex align-items-center justify-content-center'} style={{ width: 40, height: 30 }} onClick={ handleClick } >
-                                        <checkBox_package.CheckBox1
-                                                id={data.id}
-                                                color={'#14cc2e'}
-                                                style={ { margin: 0, borderRadius: '75%' } }
-                                                checked={data.is_validated}
-                                                // onChange={ handleClick }
-                                        />
+                                        {
+                                                data.is_validated ?
+                                                <BsPatchCheckFill size={16} color={"#0cd10c"} />
+                                                :
+                                                <VscCircleLargeOutline size={16} color={'#b4b2b2'} />
+                                        }
+
                                 </div>
                         );
+                }
+
+                function getTopLevelParent(node)
+                {
+                        if (node.parentId === "0") return {...node}
+                        else
+                        {
+                                const parent = window.Global_State.getNodeDataById(node.parentId)
+
+                                return getTopLevelParent(parent)
+                        }
                 }
 
                 for(let child_node of node.children )
                 {
                         // console.log('child_node.id', child_node)
-                        const data = child_node // Global_State.getNodeDataById(child_node.id)
+                        const data = child_node // window.Global_State.getNodeDataById(child_node.id)
                         // if (data === null) continue
+
+                        let validation_component
+
+                        if (data.is_validated) validation_component = <ValidBadge data={data} />
+                        else if (window.Global_State.authUser.right_lvl === 2) validation_component = <ValidBadge data={data} />
+                        else
+                        {
+                                const top_lvl_parent = getTopLevelParent(data)
+                                if ( top_lvl_parent.ra && (window.Global_State.authUser.id === top_lvl_parent.ra.id) ) validation_component = <ValidBadge data={data} />
+                                else validation_component = <div style={{ pointerEvents: "none" }} />
+                        }
+
                         datas.push(
                                 {
                                         id: data.id,
@@ -2576,15 +3555,15 @@ export default function FileTable({set})
                                         name: <NameFormater data = {data} />,
                                         level: data.type === "fnc" ? <LevelComponent data={data} /> : undefined,
                                         created_at: data.created_at,
-                                        isClosed: data.type === "fnc" ? data.isClosed ? <div className="badge bg-success-bright text-success">Clôturé</div> : <div className="badge bg-danger-bright text-danger">Non-Clôturé</div> : undefined ,
+                                        isClosed: data.type === "fnc" ? <IsClosedComponent data={data} /> : undefined ,
                                         RA:  node.type === "root" && data.type === 'audit' ? data.ra.name.substring(0, 1) + ". " +  data.ra.second_name : node.type === "audit" ? node.ra.name.substring(0, 1) + ". " +  node.ra.second_name : undefined,
-                                        size: data.global_type === 'file' ? Global_State.sizeFormater(data.taille) : undefined,
+                                        size: data.global_type === 'file' ? window.Global_State.sizeFormater(data.taille) : undefined,
                                         type: data.type,
                                         global_type: data.global_type,
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
                                         review_date: data.review_date === undefined ? '' : <ReviewDateComponent data={data} />,
-                                        valid_badge: data.is_validated ? <ValidBadge data={data} /> : Global_State.authUser.right_lvl === 2 ? <ValidBadge data={data} /> : <div data-tag="allowRowEvents" />,
+                                        valid_badge:  validation_component,
 
                                 }
                         )
@@ -2784,7 +3763,11 @@ export default function FileTable({set})
         useEffect(
         () =>
         {
-                Global_State.EventsManager.emit('clearSelected')
+                window.Global_State.EventsManager.emit('clearSelected')
+
+                if( (filter.tag === "la Date de revision") && (node.type !== "nonC") ) setFilter({tag: "le Nom", element: ''})
+                if( (filter.tag === "le RA") && (!contain_audit) ) setFilter({tag: "le Nom", element: ''})
+
         },[node]
         )
 
@@ -2811,7 +3794,7 @@ export default function FileTable({set})
 
         const handleChange = ( selectedCount, selectedRows, update = false ) =>
         {
-                // console.log(justChecking.current)
+                // console.log(selectedRows)
                 if(!justChecking.current && !update)
                 {
                         setNumber(selectedCount)
@@ -2867,13 +3850,13 @@ export default function FileTable({set})
                 if (!tree_row)
                 {
                         console.log('checkpoint 1', tree_row)
-                        const full_row_data = Global_State.getNodeDataById(row.id)
+                        const full_row_data = window.Global_State.getNodeDataById(row.id)
                         console.log('checkpoint 1.5', full_row_data)
                         if (full_row_data.global_type === 'folder')
                         {
                                 console.log('checkpoint 2', full_row_data)
 
-                                const parent_node = Global_State.getNodeDataById(full_row_data.parentId)
+                                const parent_node = window.Global_State.getNodeDataById(full_row_data.parentId)
                                 await onRowDoubleClicked(parent_node, '')
                                 tree_row = document.getElementById(`treeRow-${row.id}`)
                         }
@@ -2893,7 +3876,7 @@ export default function FileTable({set})
 
                 tree_row.dispatchEvent(doubleClickEvent);
 
-                // Global_State.backend.setCurrentSelectedFolder(row.id)
+                // window.Global_State.backend.setCurrentSelectedFolder(row.id)
                 // console.log('dbclick',row)
 
         }
@@ -2940,134 +3923,6 @@ export default function FileTable({set})
                 },
         ]
 
-
-        const SubHeaderComponent = useCallback(
-                function SubHeaderComponent({set, filter, node})
-                {
-
-                        const FilterComponent = useCallback(
-                                function FilterComponent({set, filter})
-                                {
-                                        switch (filter.tag)
-                                        {
-                                                case 'la Date de creation':
-                                                {
-                                                        const [startDate, endDate] = filter.element;
-                                                        return (
-                                                                <div style={{ maxWidth: 243 }} >
-                                                                        <label>Chercher selon {filter.tag} :</label>
-                                                                        <DatePicker
-                                                                                selectsRange={true}
-                                                                                startDate={startDate}
-                                                                                endDate={endDate}
-                                                                                popperClassName = 'reactDatePickerPopper'
-                                                                                onChange={
-                                                                                        (update) =>
-                                                                                        {
-                                                                                                // const now = new Date()
-                                                                                                // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
-                                                                                                set( t => ({...t, element: update}) );
-                                                                                        }
-                                                                                }
-                                                                                isClearable={true}
-                                                                                showYearDropdown
-                                                                                scrollableYearDropdown
-                                                                                yearDropdownItemNumber={1000}
-                                                                                minDate={new Date("2021/12/31")}
-                                                                                customInput ={ <input className="form-control form-control-sm mr-15" value={`${startDate} - ${endDate}`}/> }
-
-                                                                        />
-                                                                </div>
-
-                                                        );
-                                                }
-                                                case 'la Date de revision':
-                                                {
-                                                        const [startDate, endDate] = filter.element;
-                                                        return (
-                                                        <div style={{ maxWidth: 243 }} >
-                                                                <label>Chercher selon {filter.tag} :</label>
-                                                                <DatePicker
-                                                                selectsRange={true}
-                                                                startDate={startDate}
-                                                                endDate={endDate}
-                                                                popperClassName = 'reactDatePickerPopper'
-                                                                onChange={
-                                                                        (update) =>
-                                                                        {
-                                                                                // const now = new Date()
-                                                                                // console.log(update[0].valueOf(), update[0].getMonth()+1, update[0].getFullYear())
-                                                                                set( t => ({...t, element: update}) );
-                                                                        }
-                                                                }
-                                                                isClearable={true}
-                                                                showYearDropdown
-                                                                scrollableYearDropdown
-                                                                yearDropdownItemNumber={1000}
-                                                                minDate={new Date("2021/12/31")}
-                                                                customInput ={ <input className="form-control form-control-sm mr-15" value={`${startDate} - ${endDate}`}/> }
-
-                                                                />
-                                                        </div>
-
-                                                        );
-                                                }
-
-                                                default:
-                                                        return (
-                                                                <div>
-                                                                        <label>Chercher selon {filter.tag} :</label>
-                                                                        <input onChange={(e) => {set( t => ({...t, element: e.target.value}) )}} value={filter.element} type="search" className="form-control form-control-sm" placeholder="" aria-controls="table-files"/>
-                                                                </div>
-                                                        )
-                                        }
-                                }, []
-                        )
-
-                        return (
-                        <div className={'d-flex flex-row align-items-end'} >
-                                <Paste_component />
-                                <IconButton
-                                        style = {{ marginRight: 20, }}
-                                        disabled={node.isRoot}
-                                        onClick={
-                                                (e) =>
-                                                {
-                                                        e.preventDefault();
-
-                                                        const tree_row = document.getElementById(`treeRow-${node.id}`)
-
-                                                        if (tree_row)
-                                                        {
-                                                                const doubleClickEvent = new MouseEvent("dblclick", {
-                                                                        view: window,
-                                                                        bubbles: true,
-                                                                        cancelable: true,
-                                                                });
-                                                                doubleClickEvent.is_opening = false
-
-                                                                tree_row.dispatchEvent(doubleClickEvent);
-                                                        }
-
-                                                        // console.log('prrrrrrreeeeeeeeeeev', Global_State.backend.prev.current)
-
-                                                        Global_State.backend.setCurrentSelectedFolder(previousSelected.pop())
-                                                }
-                                        }
-                                >
-                                        {
-                                                node.isRoot ?
-                                                <IoArrowUndoOutline size={25} /> :
-                                                <IoArrowUndoSharp size={25} color={"black"} />
-                                        }
-                                </IconButton>
-                                <FilterComponent set={set} filter={filter} node={node} />
-                        </div>
-                        )
-                }, [node, mc_state]
-        )
-
-
         const filtered_datas = useMemo( () =>
                 {
                         return datas.filter(
@@ -3113,7 +3968,7 @@ export default function FileTable({set})
                                                 {
                                                         // console.log(new Date(row.created_at.substring(0, 10).split('-').join('/')).valueOf())
 
-                                                        const data = Global_State.getNodeDataById(row.id)
+                                                        const data = window.Global_State.getNodeDataById(row.id)
 
                                                         const [debut, fin] = filter.element
 
@@ -3151,58 +4006,73 @@ export default function FileTable({set})
                 }, [datas, filter]
         )
 
-        console.log('dataaaaaaas', datas)
+        console.log('filtered_datataaaaaaas', filtered_datas)
 
         return (
-        <animated.div className="col-xl-8" >
-                <div className="content-title mt-0">
-                        <h4>{node.name}</h4>
-                </div>
-                <ActionsMenu />
-                <DataTable
-                        columns={columns}
-                        data={filtered_datas}
-
-                        selectableRows
-                        selectableRowsVisibleOnly
-                        selectableRowsHighlight
-                        // selectableRowsComponent={Checkbox}
-                        // selectableRowsComponentProps={selectableRowsComponentProps}
-                        selectableRowSelected={ (row) => { justChecking.current = true; /* console.log('selectableRowSelected'); */ return row.isSelected }}
-                        onSelectedRowsChange={ ({selectedCount, selectedRows}) => { if(filtered_datas.length > 0)handleChange(selectedCount, selectedRows) } }
-                        clearSelectedRows={Global_State.toggleCleared}
-                        onRowDoubleClicked = { onRowDoubleClicked }
-                        onRowClicked = { handleClick }
-                        // onContextMenu={(event) => { console.log(event) }}
-
-                        paginationRowsPerPageOptions = {[15, 25, 50, 100, 200]}
-                        paginationPerPage={15}
-                        pagination = {true}
-                        paginationComponentOptions =
-                        {
+        <div className="file_table_container full_size_element" >
+                <div className="file_table_container_header" >
+                        <Stack direction={"row"} spacing={2} divider={<Divider orientation="vertical" flexItem />}
+                               style={{
+                                       padding: 3
+                               }}
+                        >
+                                <Stack direction={"row"} >
+                                        <Prev node={node} />
+                                        <Next />
+                                        { useMemo( () => <ClimbTree node={node} />, [node] ) }
+                                </Stack>
                                 {
-                                        rowsPerPageText: 'element par page:',
-                                        rangeSeparatorText: 'de',
-                                        noRowsPerPage: false,
-                                        selectAllRowsItem: true,
-                                        selectAllRowsItemText: 'Tout'
+                                        useMemo( () => <FilterComponent set={setFilter} filter={filter} node={node} />, [filter, node] )
                                 }
-                        }
-                        theme = "default"
-                        conditionalRowStyles={rowsStyles}
-                        fixedHeader = {true}
-                        fixedHeaderScrollHeight = "100vh"
-                        pointerOnHover = {true}
-                        highlightOnHover = {true}
-                        persistTableHead = {true}
-                        noHeader
-                        subHeader
-                        subHeaderComponent = { <SubHeaderComponent set = {setFilter} filter={filter} node = {node}  /> }
-                        noDataComponent = {<div style={{textAlign: "center", marginTop: 100}} > Vide 😢 </div>}
-                        sortIcon = {<FaSort size={10} />}
-                        defaultSortFieldId = {1}
-                />
-        </animated.div>
+                        </Stack>
+                        <ActionsMenu/>
+                </div>
+                <div className="file_table_container_content" >
+                        <DataTable
+                                className="dataTable_container"
+                                columns={columns}
+                                data={filtered_datas}
+                                selectableRows
+                                selectableRowsVisibleOnly
+                                selectableRowsHighlight
+                                // selectableRowsComponent={Checkbox}
+                                // selectableRowsComponentProps={selectableRowsComponentProps}
+                                selectableRowSelected={ (row) => { justChecking.current = true; /* console.log('selectableRowSelected'); */ return row.isSelected }}
+                                onSelectedRowsChange={ ({selectedCount, selectedRows}) => { if(filtered_datas.length > 0)handleChange(selectedCount, selectedRows) } }
+                                clearSelectedRows={window.Global_State.toggleCleared}
+                                onRowDoubleClicked = { onRowDoubleClicked }
+                                onRowClicked = { handleClick }
+                                // onContextMenu={(event) => { console.log(event) }}
+
+                                paginationRowsPerPageOptions = {[15, 25, 50, 100, 200]}
+                                paginationPerPage={50}
+                                pagination = {true}
+                                paginationComponentOptions =
+                                {
+                                        {
+                                                rowsPerPageText: 'element par page:',
+                                                rangeSeparatorText: 'de',
+                                                noRowsPerPage: false,
+                                                selectAllRowsItem: true,
+                                                selectAllRowsItemText: 'Tout'
+                                        }
+                                }
+                                theme = "default"
+                                conditionalRowStyles={rowsStyles}
+                                fixedHeader = {true}
+                                fixedHeaderScrollHeight = "100vh"
+                                pointerOnHover = {true}
+                                highlightOnHover = {true}
+                                persistTableHead = {true}
+                                noHeader
+                                // subHeader
+                                // subHeaderComponent = {  }
+                                noDataComponent = {<div style={{textAlign: "center", marginTop: 100}} > Vide 😢 </div>}
+                                sortIcon = {<FaSort size={10} />}
+                                defaultSortFieldId = {1}
+                        />
+                </div>
+        </div>
         )
 }
 

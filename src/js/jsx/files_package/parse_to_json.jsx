@@ -41,23 +41,23 @@ let echosHandler
 
 const listeners = () =>
 {
-  Global_State.EventsManager.once('updateData', () => { echosHandler('updateData') } )
+  window.Global_State.EventsManager.once('updateData', () => { echosHandler('updateData') } )
 }
 
 export default function parseToJson(value) {
 
 
-        // console.log('valllllllllllllluuuuuuuuuuuuuuuuuuuuuuuuuuuuuue', value)
+        console.log('valllllllllllllluuuuuuuuuuuuuuuuuuuuuuuuuuuuuue', value)
     const nodesData = { data : value };
 
-    
-    echosHandler = (tag, data = null) => 
+
+    echosHandler = (tag, data = null) =>
     {
       switch (tag) {
         case 'updateData':
           startUpdate()
           break;
-      
+
         default:
           break;
       }
@@ -66,10 +66,10 @@ export default function parseToJson(value) {
   //   useEffect(
   //     () =>
   //     {
-  //         Global_State.EventsManager.on('updateData', () => { startUpdate() } )
-  //         return () => 
+  //         window.Global_State.EventsManager.on('updateData', () => { startUpdate() } )
+  //         return () =>
   //         {
-  //             Global_State.EventsManager.off('updateData');
+  //             window.Global_State.EventsManager.off('updateData');
   //         }
   //     },
   //     []
@@ -245,6 +245,8 @@ export default function parseToJson(value) {
                 node.children = []
 
                 makeChildrenV2(node)
+
+                console.log('makeJsonTree', node)
 
           return (
 

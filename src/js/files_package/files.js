@@ -1,8 +1,10 @@
+import _regeneratorRuntime from "babel-runtime/regenerator";
+
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 /* eslint-disable import/first */
 
@@ -12,27 +14,30 @@ import useBack from "./nodeBackend";
 import FileTable from "./content";
 import FileDetails from "./files_details";
 import "./file_style.css";
-import { Global_State } from "../main";
 
 import { useSpring, animated } from 'react-spring';
 
-import { FcOpenedFolder, FcFolder } from "react-icons/fc";
+import { FcOpenedFolder, FcFolder, FcTodoList, FcMultipleCameras } from "react-icons/fc";
+import { GiArchiveResearch, GiTreeRoots } from "react-icons/gi";
 
 import TreeView from '@mui/lab/TreeView';
-// import TreeViewContext from '@mui/lab/TreeView/TreeViewContext';
 import TreeItem, { treeItemClasses } from '@mui/lab/TreeItem';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
+import PolicyTwoToneIcon from '@mui/icons-material/PolicyTwoTone';
+import GppBadTwoToneIcon from '@mui/icons-material/GppBadTwoTone';
+import RuleFolderTwoToneIcon from '@mui/icons-material/RuleFolderTwoTone';
 
 export default function useGetFiles(Global_research) {
+        var _this = this;
 
         useEffect(function () {
                 var handleKeyDown = function handleKeyDown(e) {
                         if (e.ctrlKey && e.key === 'f') {
                                 console.log('find node');
-                                Global_State.setOverlay_props(function (t) {
+                                window.Global_State.setOverlay_props(function (t) {
                                         return Object.assign({}, t, {
                                                 style: Object.assign({}, t.style, {
                                                         display: 'flex',
@@ -56,36 +61,104 @@ export default function useGetFiles(Global_research) {
                                         gr_input.select();
                                 });
                         } else if (e.ctrlKey && e.key.length === 1) {
-                                // console.log(e)
-                                var component = document.getElementById("ctrl_" + e.key);
-                                if (component) component.click();
+                                console.log(e);
+
+                                window.Global_State.EventsManager.emit("shortcut", "ctrl_" + e.key);
+
+                                // const component = document.getElementById(`ctrl_${e.key}`)
+                                // if (component)
+                                // {
+                                //         console.log(component)
+                                //         component.click()
+                                // }
                         }
                 };
 
                 // console.log('Global_research', Global_research)
 
                 document.addEventListener('keydown', handleKeyDown);
+                window.Global_State.EventsManager.on('show_on_screen', function () {
+                        var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(data) {
+                                var parent_id;
+                                return _regeneratorRuntime.wrap(function _callee$(_context) {
+                                        while (1) {
+                                                switch (_context.prev = _context.next) {
+                                                        case 0:
+                                                                console.log(data);
+                                                                _context.next = 3;
+                                                                return window.Global_State.setSectionId(data.section_id);
+
+                                                        case 3:
+                                                                parent_id = window.Global_State.getNodeDataById(data.id).parentId;
+                                                                _context.next = 6;
+                                                                return window.Global_State.backend.setCurrentSelectedFolder(parent_id);
+
+                                                        case 6:
+
+                                                                setTimeout(function () {
+                                                                        console.log("scroooooooooooooooooooooooooooool");
+                                                                        // const row = document.getElementById(`row-${data.id}`)
+                                                                        // row.click()
+                                                                        // const parent = document.querySelector(".content_xl_size_content")
+                                                                        //
+                                                                        // parent.scrollTop = row.offsetTop
+
+                                                                        window.Global_State.EventsManager.emit("select_row", data.id);
+                                                                }, 500);
+
+                                                        case 7:
+                                                        case "end":
+                                                                return _context.stop();
+                                                }
+                                        }
+                                }, _callee, _this);
+                        }));
+
+                        return function (_x) {
+                                return _ref.apply(this, arguments);
+                        };
+                }());
 
                 return function () {
                         document.removeEventListener('keydown', handleKeyDown);
+                        window.Global_State.EventsManager.off('show_on_screen');
                 };
         }, []);
 
-        Global_State['backend'] = useBack();
+        window.Global_State['backend'] = useBack();
+
+        window.Global_State.get_auditFamily_icon = function (type) {
+                switch (type) {
+                        case "root":
+                                return React.createElement(GiTreeRoots, { size: 30, color: "brown" });
+                        case "audit":
+                                return React.createElement(PolicyTwoToneIcon, { color: "secondary", style: { fontSize: 30, pointerEvents: "none" } });
+                        case "checkList":
+                                return React.createElement(FcTodoList, { size: 30, style: { pointerEvents: "none" } });
+                        case "dp":
+                                return React.createElement(GiArchiveResearch, { size: 30, color: "#35c1f1", style: { pointerEvents: "none" } });
+                        case "nonC":
+                                return React.createElement(RuleFolderTwoToneIcon, { color: "error", style: { fontSize: 30, pointerEvents: "none" } });
+                        case "fnc":
+                                return React.createElement(GppBadTwoToneIcon, { color: "error", style: { fontSize: 30, pointerEvents: "none" } });
+                        default:
+                                return null;
+                }
+        };
 
         var dataTable = useMemo(function () {
                 return React.createElement(FileTable, null);
-        }, [Global_State.backend.selectedNode.model]);
+        }, [window.Global_State.backend.selectedNode.model]);
 
         return {
-                fileTree: Global_State.hasSection ? React.createElement(FileTree, { data: Global_State.backend.data }) : React.createElement("div", null),
-                fileTable: Global_State.hasSection ? dataTable : React.createElement("div", null),
-                fileDetails: Global_State.hasSection ? React.createElement(FileDetails, null) : React.createElement("div", null)
+                fileTree: window.Global_State.hasSection ? React.createElement(FileTree, { data: window.Global_State.backend.data }) : React.createElement("div", null),
+                fileTable: window.Global_State.hasSection ? dataTable : React.createElement("div", null),
+                fileDetails: window.Global_State.hasSection ? React.createElement(FileDetails, null) : React.createElement("div", null)
         };
 }
 
-function FileTree(_ref) {
-        var data = _ref.data;
+function FileTree(_ref2) {
+        var data = _ref2.data;
 
 
         // console.log('data111111', data)
@@ -94,32 +167,7 @@ function FileTree(_ref) {
 
         var tree = useRef();
 
-        var _useState = useState(['0']),
-            _useState2 = _slicedToArray(_useState, 2),
-            expanded = _useState2[0],
-            setExpanded = _useState2[1];
-
-        // return (
-        //         <div style={{ height: "100%", width: "100%" }} >
-        //           <div>
-        //             <button onClick={ () => {tree.current.scrollToId(7); tree.current.selectById(7)} }>
-        //               add
-        //             </button>
-        //           </div>
-        //           <div id = 'tree' >
-        //             <Tree
-        //               ref={tree}
-        //               indent={20}
-        //               onToggle={backend.onToggle}
-        //               data={backend.data}
-        //               rowHeight = {40}
-        //               width = {500}
-        //             >
-        //               {Node}
-        //             </Tree>
-        //           </div>
-        //         </div>
-        // )
+        var expanded = window.Global_State.expanded;
 
         function TransitionComponent(props) {
                 var style = useSpring({
@@ -142,28 +190,28 @@ function FileTree(_ref) {
 
         var StyledTreeItem = styled(function (props) {
                 return React.createElement(TreeItem, Object.assign({}, props, { TransitionComponent: TransitionComponent }));
-        })(function (_ref2) {
-                var _ref3;
+        })(function (_ref3) {
+                var _ref4;
 
-                var theme = _ref2.theme;
-                return _ref3 = {}, _defineProperty(_ref3, "& ." + treeItemClasses.iconContainer, {
+                var theme = _ref3.theme;
+                return _ref4 = {}, _defineProperty(_ref4, "& ." + treeItemClasses.iconContainer, {
                         '& .close': {
                                 opacity: 0.3
                         }
-                }), _defineProperty(_ref3, "& ." + treeItemClasses.group, {
+                }), _defineProperty(_ref4, "& ." + treeItemClasses.group, {
                         marginLeft: 15,
                         paddingLeft: 5,
                         borderLeft: "1px dashed " + alpha(theme.palette.text.primary, 0.4)
-                }), _ref3;
+                }), _ref4;
         });
 
-        var Label = function Label(_ref4) {
-                var node = _ref4.node;
+        var Label = function Label(_ref5) {
+                var node = _ref5.node;
 
-                var _useState3 = useState(expanded.indexOf(node.id) !== -1),
-                    _useState4 = _slicedToArray(_useState3, 2),
-                    isOpen = _useState4[0],
-                    setIsOpen = _useState4[1];
+                var _useState = useState(expanded.indexOf(node.id) !== -1),
+                    _useState2 = _slicedToArray(_useState, 2),
+                    isOpen = _useState2[0],
+                    setIsOpen = _useState2[1];
 
                 var handleDbClick = function handleDbClick(e) {
                         // console.log('db_eeeeeeeeeeeeeevent', e, e.nativeEvent.is_opening)
@@ -191,20 +239,20 @@ function FileTree(_ref) {
 
                         console.log(expanded);
 
-                        setExpanded([].concat(_toConsumableArray(expanded)));
+                        window.Global_State.EventsManager.emit("setExpanded", expanded);
                 };
 
                 var handleClick = function handleClick(e) {
                         if (e) e.stopPropagation();
-                        Global_State.backend.setCurrentSelectedFolder(node.id);
+                        window.Global_State.backend.setCurrentSelectedFolder(node.id);
                 };
 
                 useEffect(function () {
-                        Global_State.EventsManager.on("toggle" + node.id, function (e) {
+                        window.Global_State.EventsManager.on("toggle" + node.id, function (e) {
                                 console.log("toggle" + node.id);handleDbClick(e);
                         });
                         return function () {
-                                Global_State.EventsManager.off("toggle" + node.id);
+                                window.Global_State.EventsManager.off("toggle" + node.id);
                         };
                 }, []);
 
@@ -214,27 +262,25 @@ function FileTree(_ref) {
                         React.createElement(
                                 "span",
                                 { className: "mr-1" },
-                                isOpen ? React.createElement(FcOpenedFolder, { size: 28 }) : React.createElement(FcFolder, { size: 28 })
+                                window.Global_State.get_auditFamily_icon(node.type) || (isOpen ? React.createElement(FcOpenedFolder, { size: 30 }) : React.createElement(FcFolder, { size: 30 }))
                         ),
                         node.name
                 );
         };
 
-        var RenderTree = useCallback(function RenderTree(_ref5) {
-                var node = _ref5.node;
+        var RenderTree = useCallback(function RenderTree(_ref6) {
+                var node = _ref6.node;
 
                 // console.log(tree.current.expanded)
 
                 return React.createElement(
                         StyledTreeItem,
-                        { key: node.id, nodeId: node.id.toString(), label: useMemo(function () {
-                                        return React.createElement(Label, { node: node });
-                                }, []),
+                        { key: node.id, nodeId: node.id.toString(), label: React.createElement(Label, { node: node }),
                                 expandIcon: React.createElement(ChevronRightIcon, { onClick: function onClick(e) {
-                                                Global_State.EventsManager.emit("toggle" + node.id, e);
+                                                window.Global_State.EventsManager.emit("toggle" + node.id, e);
                                         } }),
                                 collapseIcon: React.createElement(ExpandMoreIcon, { onClick: function onClick(e) {
-                                                Global_State.EventsManager.emit("toggle" + node.id, e);
+                                                window.Global_State.EventsManager.emit("toggle" + node.id, e);
                                         } })
                         },
                         Array.isArray(node.children) ? node.children.filter(function (node) {
@@ -243,14 +289,14 @@ function FileTree(_ref) {
                                 return React.createElement(RenderTree, { key: node.id, node: node });
                         }) : null
                 );
-        }, []);
+        }, [data]);
 
         // const handleFocus = (event) =>
         // {
         //         event.preventDefault()
         //         event.stopPropagation()
         //         console.log( 'foooooooooooooooooooooooooooooooocuuuuuuuuuuuuuuuuuuuuuus', event )
-        //         // Global_State.backend.setCurrentSelectedFolder(nodeId)
+        //         // window.Global_State.backend.setCurrentSelectedFolder(nodeId)
         //
         //         // setExpanded( [nodeId] )
         // }
@@ -262,18 +308,22 @@ function FileTree(_ref) {
         }, [expanded]);
 
         return React.createElement(
-                TreeView,
-                {
-                        id: "muiTree",
-                        "aria-label": "file system navigator",
-                        defaultCollapseIcon: React.createElement(ExpandMoreIcon, null),
-                        defaultExpanded: ['0'],
-                        defaultExpandIcon: React.createElement(ChevronRightIcon, null),
-                        sx: { height: 'max-content', flexGrow: 1, width: 'max-content', overflowY: 'auto' },
-                        expanded: expanded,
-                        multiSelect: true,
-                        ref: tree
-                },
-                React.createElement(RenderTree, { node: data })
+                "div",
+                { className: "file_tree_container" },
+                React.createElement(
+                        TreeView,
+                        {
+                                id: "muiTree",
+                                "aria-label": "file system navigator",
+                                defaultCollapseIcon: React.createElement(ExpandMoreIcon, null),
+                                defaultExpanded: ['0'],
+                                defaultExpandIcon: React.createElement(ChevronRightIcon, null),
+                                sx: { height: 'max-content', flexGrow: 1, width: 'max-content', overflowY: 'auto' },
+                                expanded: expanded,
+                                multiSelect: true,
+                                ref: tree
+                        },
+                        React.createElement(RenderTree, { node: data })
+                )
         );
 }

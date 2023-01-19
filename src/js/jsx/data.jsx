@@ -6,9 +6,8 @@ import React, {useCallback, useEffect, useMemo, useReducer, useRef, useState} fr
 
 import parseToJson from "./files_package/parse_to_json";
 import useEditor from './editor'
-import {Global_State} from "./main";
+import {http} from "./auth/login"
 
-import axios from "axios";
 import Echo from 'laravel-echo';
 import EventEmitter from 'eventemitter3';
 
@@ -23,14 +22,6 @@ import {useSpring, animated} from "react-spring";
 import {Collapse} from "react-bootstrap";
 
 window.Pusher = require('pusher-js');
-
-export const http = axios.create({
-        baseURL: 'http://localhost:80',
-        headers: {
-
-        },
-        withCredentials: true,
-})
 
 const EventsManager = new EventEmitter();
 
@@ -57,12 +48,12 @@ const options = {
         },
 };
 
-const echo = new Echo(options);
+// const echo = new Echo(options);
 
-let echosHandler
+// let echosHandler
 
 // echo.channel(`nodeUpdate`).listen( 'NodeUpdateEvent', (data) => {
-//   if (data.operation === 'add') 
+//   if (data.operation === 'add')
 //   {
 //     console.log('emitting echo')
 //     console.log(data)
@@ -246,8 +237,7 @@ export default function useGetData(TheDatas)
         const node_events_queue = useRef([])
 
 
-        echosHandler = useCallback(
-                async (tag, data = null) =>
+        const echosHandler = async (tag, data = null) =>
                 {
                         switch (tag) {
                                 case 'updateAuthUserInfo':
@@ -268,8 +258,9 @@ export default function useGetData(TheDatas)
                                         handling_node_events.current = true
 
                                         do {
-                                                // console.log('start', node_events_queue.current)
                                                 const data = node_events_queue.current.shift()
+                                                console.log('start', data, node_events_queue.current)
+                                                // return
 
                                                 if (data.operation === 'add')
                                                 {
@@ -363,8 +354,7 @@ export default function useGetData(TheDatas)
                                         break;
                         }
 
-                }, []
-        )
+                }
 
 
         // const handle_node_events = () =>
@@ -468,18 +458,31 @@ export default function useGetData(TheDatas)
         //         handling_node_events.current = false
         // }
 
+        const [expanded, setExpanded] = useState(["0"])
 
         useEffect(
                 () =>
                 {
+                        const echo = new Echo(options);
 
-                        echo.channel(`nodeUpdate`).listen( 'NodeUpdateEvent', (data) =>
+                        for (const service of authUser.services)
+                        {
+                                echo.private(`nodeUpdate.1`).listen( 'NodeUpdateEvent', (data) =>
                                 {
                                         node_events_queue.current.push(data)
-                                        console.log('NodeUpdateEvent')
+                                        console.log('NodeUpdateEvent', node_events_queue.current, data)
                                         if (!handling_node_events.current) echosHandler('handle_node_events')
                                 }
-                        );
+                                );
+                        }
+
+                        // echo.private(`nodeUpdate.1`).listen( 'NodeUpdateEvent', (data) =>
+                        // {
+                        //         node_events_queue.current.push(data)
+                        //         console.log('NodeUpdateEvent', node_events_queue.current, data)
+                        //         if (!handling_node_events.current) echosHandler('handle_node_events')
+                        // }
+                        // );
 
                         echo.private(`user.${authUser.id}`).listen('AuthUserUpdate',
                                 () =>
@@ -610,17 +613,22 @@ export default function useGetData(TheDatas)
 
                         EventsManager.on('updateAuthUserInfo', () => { echosHandler('updateAuthUserInfo') })
 
-                        // EventsManager.on('nodeUpdate', data => { dispatch({ type: 'update', data }) })
+                        // EventsManager.on('updateOK', (data) => { setO(data) })
+
+                        // EventsManager.on('update_open_state', data => { dispatch({ type: 'update_open_state', data }) })
+                        EventsManager.on('setExpanded', new_expanded => { setExpanded([...new_expanded]) })
 
                         // EventsManager.on('updateData', () => { console.log('emit working') })
 
                         return () =>
                         {
+                                echo.disconnect();
                                 EventsManager.off('updateAuthUserInfo')
-                                // EventsManager.off('nodeUpdate')
+                                // EventsManager.off('updateOK')
+                                EventsManager.off('setExpanded')
                         }
-                },
-                []
+                },[]
+
         )
 
 
@@ -815,6 +823,40 @@ export default function useGetData(TheDatas)
                                  return `${new_node.name}:`
                         }
                 }
+
+        }
+
+        const update_path = (node, current_state) =>
+        {
+                let up_to_date_node = JSON.parse( JSON.stringify( node ) )
+
+                up_to_date_node.path = getNewPath(up_to_date_node, current_state, true)
+
+                console.log('current_state', current_state)
+
+                let new_state = JSON.parse( JSON.stringify( current_state ) ).map(
+                current_node =>
+                {
+                        if ( (current_node.id === up_to_date_node.id) ) return up_to_date_node
+                        return current_node
+                }
+                )
+
+                console.log('new_state', new_state)
+
+                let final_state = JSON.parse( JSON.stringify( new_state ) )
+
+                new_state.forEach(
+                        new_node =>
+                        {
+                                if ( (new_node.parentId === up_to_date_node.id) )
+                                {
+                                        final_state = update_path(new_node, final_state)
+                                }
+                        }
+                )
+
+                return final_state
 
         }
 
@@ -1173,12 +1215,12 @@ export default function useGetData(TheDatas)
 
                 // console.log("DataFormater", allDataAsNodeData)
 
-                const structuredData = new Map()
+                // const structuredData = new Map()
 
-                for(let section of Data_Base.data.sections)
-                {
-                        structuredData.set(section.id, allDataAsNodeData.filter((nodeData) => { /*console.log(nodeData.section_id, section.id)*/; return nodeData.section_id === section.id || nodeData.section_id === -1 }).map((nodeData) => { return nodeData } ) )
-                }
+                // for(let section of Data_Base.data.sections)
+                // {
+                //         structuredData.set(section.id, allDataAsNodeData.filter((nodeData) => { /*console.log(nodeData.section_id, section.id)*/; return nodeData.section_id === section.id || nodeData.section_id === -1 }).map((nodeData) => { return nodeData } ) )
+                // }
 
                 // console.log(structuredData.get(1))
 
@@ -1326,40 +1368,6 @@ export default function useGetData(TheDatas)
                                 const data = action.data
                                 console.log( 'broadcast.........', data);
 
-                                const update_path = (node, current_state) =>
-                                {
-                                        let up_to_date_node = JSON.parse( JSON.stringify( node ) )
-
-                                        up_to_date_node.path = getNewPath(up_to_date_node, current_state, true)
-
-                                        console.log('current_state', current_state)
-
-                                        let new_state = JSON.parse( JSON.stringify( current_state ) ).map(
-                                        current_node =>
-                                        {
-                                                if ( (current_node.id === up_to_date_node.id) ) return up_to_date_node
-                                                return current_node
-                                        }
-                                        )
-
-                                        console.log('new_state', new_state)
-
-                                        let final_state = JSON.parse( JSON.stringify( new_state ) )
-
-                                        new_state.forEach(
-                                        new_node =>
-                                        {
-                                                if ( (new_node.parentId === up_to_date_node.id) )
-                                                {
-                                                        final_state = update_path(new_node, final_state)
-                                                }
-                                        }
-                                        )
-
-                                        return final_state
-
-                                }
-
                                 let newState = JSON.parse( JSON.stringify(state) )
 
                                 for (const node of data.node)
@@ -1397,6 +1405,18 @@ export default function useGetData(TheDatas)
 
                                 return JSON.parse(JSON.stringify(newState))
                         }
+                        // case "update_open_state":
+                        // {
+                        //         state = copyObject(state).map(
+                        //          node =>
+                        //          {
+                        //                  if (node.id === action.data.id) return {...node, isOpen: action.data.new_state}
+                        //                  return node
+                        //          }
+                        //         )
+                        //
+                        //         return state
+                        // }
 
                         default:
                                 break;
@@ -1413,9 +1433,9 @@ export default function useGetData(TheDatas)
         //   }, [FetchedNodesData]
         // )
 
-        Global_State['isEditorMode'] = isEditorMode
-        Global_State['dataBaseData'] = FetchedNodesData
-        Global_State['EventsManager'] = EventsManager
+        window.Global_State['isEditorMode'] = isEditorMode
+        window.Global_State['dataBaseData'] = FetchedNodesData
+        window.Global_State['EventsManager'] = EventsManager
 
         const editor = useEditor(FetchedNodesData)
 
@@ -1567,6 +1587,14 @@ export default function useGetData(TheDatas)
                         default:
                                 return "Type de fichier inconnu"
                 }
+        }
+
+        const getNodeSection = id =>
+        {
+                const node = dataToUse.find( node => node.id === id )
+
+                if (node) return node.section_id
+                return undefined
         }
 
         const getCurrentSection = () =>
@@ -1772,23 +1800,25 @@ export default function useGetData(TheDatas)
                         // });
 
                         return (
-                                <div id={id} onMouseEnter={handleEnter} onMouseLeave={handleLeave} >
+                                <div id={id} tabIndex={0} onClick={e => { e.preventDefault(); e.stopPropagation() }} onMouseEnter={handleEnter} onMouseLeave={handleLeave} onFocus={handleEnter} >
                                         <div>{icon}</div>
                                         <Collapse
                                                 in={open}
                                         >
                                                 <Popper id={`${drop_id}_pop`}
                                                         style={{
-                                                                zIndex: 999,
+                                                                zIndex: 1900,
                                                                 borderRadius: '0.25rem',
                                                                 fontSize: '14px',
                                                                 border: 'none',
                                                                 boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
                                                                 overflow: 'hidden',
                                                                 padding: '0.5rem',
-                                                                maxHeight: ( (window.innerHeight/100)*80 ),
+                                                                maxHeight: "80%",
+                                                                maxWidth: "95%",
                                                                 backgroundColor: "white",
                                                         }}
+                                                        onClick={  e => { e.preventDefault(); e.stopPropagation() }}
                                                         open={open}
                                                         anchorEl={anchorEl}
                                                 >
@@ -2037,11 +2067,9 @@ export default function useGetData(TheDatas)
                 style: {
                         display: 'none',
                         position: 'fixed',
-                        top: '0',
-                        left: '0',
                         zIndex: '1040',
-                        width: '100vw',
-                        height: '100vh',
+                        width: '100%',
+                        height: '100%',
                         overflow: 'auto',
                         backgroundColor: '#00000000',
                         // pointerEvents: 'none',
@@ -2067,7 +2095,7 @@ export default function useGetData(TheDatas)
 
         return (
                 {
-                        ...Global_State,
+                        ...window.Global_State,
                         // EventsManager,
                         // isEditorMode,
                         authUser: Data_Base.authUser,
@@ -2083,7 +2111,9 @@ export default function useGetData(TheDatas)
                         getNodeDataById: getNodeData,
                         getChildrenById: getChildrenFrom,
                         getType: getType,
+                        getNodeSection,
                         getNewPath,
+                        update_path,
                         copyObject,
                         compareObjects,
                         modalManager,
@@ -2091,7 +2121,7 @@ export default function useGetData(TheDatas)
                         selectedSectionId,
                         setSectionId,
                         sections,
-                        FetchedNodesData: structuredData,
+                        structuredData,
                         // setFnd,
                         selectedNodeIdsInSections,
                         getCurrentSection,
@@ -2102,39 +2132,10 @@ export default function useGetData(TheDatas)
                         CustomDropDown,
                         Overlay_component,
                         setOverlay_props,
+                        expanded
                 }
         )
 
 }
 
 
-
-
-
-
-
-
-
-
-// makeNodeData(1, "node1", "folder", true, -1, "", true),
-//     makeNodeData(2, "node2", "folder", true, 1, "", true),
-//     makeNodeData(3, "node3", "file", false, 7, "", false, "pdf"),//
-//     makeNodeData(4, "node4", "folder", false, 1, "", false),
-//     makeNodeData(5, "node5", "file", false, 1, "", false, "jpg"),//
-//     makeNodeData(6, "node6", "file", false, 2, "", false, "mp4"),//
-//     makeNodeData(7, "node7", "folder", false, 9, "", true),
-//     makeNodeData(8, "nodxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe8", "file", false, 9, "", false, "pptx"),//
-//     makeNodeData(9, "node9", "folder", false, 2, "", true),
-//     makeNodeData(10, "node10", "file", false, 2, "", false, "xlsx"),//
-//     makeNodeData(11, "node11", "folder", false, 1, "", true),
-//     makeNodeData(12, "node2", "folder", false, 1, "", true),
-//     makeNodeData(13, "node2", "folder", false, 1, "", true),
-//     makeNodeData(14, "node2", "folder", false, 1, "", true),
-//     makeNodeData(15, "node2", "folder", false, 1, "", true),
-//     makeNodeData(16, "node2", "folder", false, 1, "", true),
-//     makeNodeData(17, "node2", "folder", false, 1, "", true),
-//     makeNodeData(18, "node2", "folder", false, 1, "", true),
-//     makeNodeData(19, "node2", "folder", false, 1, "", true),
-//     makeNodeData(20, "node2", "folder", false, 1, "", true),
-//     makeNodeData(21, "node2", "folder", false, 1, "", true),
-//     makeNodeData(22, "node2", "folder", true, 1, "", true),

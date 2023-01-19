@@ -1,7 +1,6 @@
 /* eslint-disable import/first */
 
 import React, {useEffect, useState} from 'react';
-import { Global_State } from "../main";
 
 //     node: 
 // {
@@ -18,6 +17,7 @@ import { Global_State } from "../main";
 //  createdAt,
 //  modifiedAt,
 // }
+// }
 
 
 export default function FileDetails() {
@@ -25,21 +25,21 @@ export default function FileDetails() {
 
     const [selectedRow, setSelectedRow] = useState(null)
 
-    Global_State.EventsManager.on('viewDetailEnabled', (data) => { console.log('viewDetailEnabled'); setSelectedRow(data) })
+    window.Global_State.EventsManager.on('viewDetailEnabled', (data) => { console.log('viewDetailEnabled'); setSelectedRow(data) })
 
     useEffect(
         () =>
         {
-            return () => 
+            return () =>
             {
-                Global_State.EventsManager.off('viewDetailEnabled');
+                window.Global_State.EventsManager.off('viewDetailEnabled');
             }
         },
         []
     )
 
-    const data = selectedRow !== null ? Global_State.getNodeDataById(selectedRow.id) : null
-    
+    const data = selectedRow !== null ? window.Global_State.getNodeDataById(selectedRow.id) : null
+
     let Type
 
     if (selectedRow !== null && data !== null) {
@@ -66,14 +66,14 @@ export default function FileDetails() {
             case "nonC":
                 Type = "Dossier des Non-Conformités"
                 break;
-        
+
             default:
                 Type = "Unknown"
                 break;
         }
-        
+
     }
-    
+
     return (
     <React.Fragment>
             {
@@ -97,17 +97,17 @@ export default function FileDetails() {
                                     </div>
                                     <div className="row mb-3">
                                             <div className="col-4" style = {{fontWeight: 'bold'}} >Type:</div>
-                                            <div className="col-8">{data.type === "f" ? Global_State.getType(data.ext) : Type}</div>
+                                            <div className="col-8">{data.type === "f" ? window.Global_State.getType(data.ext) : Type}</div>
                                     </div>
                                     {data.type === "checkList" || data.type === "dp" || data.type === "nonC" ?
                                     <div className="row mb-3">
                                             <div className="col-4" style = {{fontWeight: 'bold'}} >Audit:</div>
-                                            <div className="col-8">{Global_State.getNodeDataById(data.parentId).name}</div>
+                                            <div className="col-8">{window.Global_State.getNodeDataById(data.parentId).name}</div>
                                     </div> : null}
                                     {data.type === "f" ?
                                     <div className="row mb-3">
                                             <div className="col-4" style = {{fontWeight: 'bold'}} >Taille:</div>
-                                            <div className="col-8">{Global_State.sizeFormater(data.taille, false)}</div>
+                                            <div className="col-8">{window.Global_State.sizeFormater(data.taille, false)}</div>
                                     </div> : null}
                                     {data.type === "audit" ?
                                     <div className="row mb-3">
