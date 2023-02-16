@@ -59,6 +59,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { useSpring, animated } from 'react-spring';
 import { Dropdown, FormCheck } from "react-bootstrap";
 import useCustomCheckBox, { CheckBox1 } from "../custom_checkBox/custom_check";
+import { LoadingButton } from "@mui/lab";
 
 function Files_Dropzone(props) {
 
@@ -177,8 +178,6 @@ function Files_Dropzone(props) {
                 )
         );
 }
-
-// let handleChange
 
 function FilterComponent(_ref) {
         var set = _ref.set,
@@ -321,7 +320,7 @@ function FilterComponent(_ref) {
                 }
         };
 
-        var contain_audit = node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name);
+        var contain_audit = node.type === "root" && /^(Audit|AUDIT)(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name);
 
         return React.createElement(
                 'div',
@@ -627,7 +626,7 @@ export default function FileTable() {
 
         // console.log("window.current_location", window.current_location)
 
-        var contain_audit = node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name);
+        var contain_audit = node.type === "root" && /^(Audit|AUDIT)(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name);
 
         console.log('contentNooooooooooooode', node, window.Global_State.backend);
 
@@ -1926,7 +1925,11 @@ export default function FileTable() {
                                                                         onChange: formik.handleChange,
                                                                         type: 'text',
                                                                         placeholder: 'Nouveau Dossier',
-                                                                        isInvalid: !!formik.errors.num_chrono
+                                                                        isInvalid: !!formik.errors.num_chrono,
+                                                                        autoFocus: true,
+                                                                        onFocus: function onFocus(e) {
+                                                                                e.target.select();
+                                                                        }
                                                                 }),
                                                                 React.createElement(
                                                                         Form.Control.Feedback,
@@ -2457,6 +2460,16 @@ export default function FileTable() {
 
         var ActionsMenu = function ActionsMenu() {
                 // let label1 =  ?  : node.type === "audit" ? "Nouvelle Non-Conformité" : "Nouveau Fichier de preuve"
+                var _useState17 = useState({
+                        rename: false,
+                        share: false,
+                        download: false,
+                        delete: false
+                }),
+                    _useState18 = _slicedToArray(_useState17, 2),
+                    loading_buttons = _useState18[0],
+                    setLoading = _useState18[1];
+
                 var buttons = [];
 
                 // console.log("kkkkkkkkkkkkk", window.Global_State.getCurrentSection().name)
@@ -2560,6 +2573,8 @@ export default function FileTable() {
                                                 } else if (/^\s|\s$/.test(value)) {
                                                         swal("Evitez les espaces au début ou á la fin des noms !!");
                                                 } else {
+                                                        setLoading(Object.assign({}, loading_buttons, { rename: true }));
+
                                                         var _window$Global_State$7 = window.Global_State.identifyNode(node),
                                                             _window$Global_State$8 = _slicedToArray(_window$Global_State$7, 2),
                                                             _id = _window$Global_State$8[0],
@@ -2586,37 +2601,14 @@ export default function FileTable() {
                                                         }
 
                                                         // console.log(selectedRow[0].id.substring(2))
-                                                        toast.promise(http.post('' + route, query), {
-                                                                loading: 'Loading...',
-                                                                success: 'Proccesus achevé',
-                                                                error: 'err'
-                                                        }, {
-                                                                id: 'rename_' + route + node.id,
-                                                                duration: Infinity
-                                                        }).then(function (res) {
+                                                        http.post('' + route, query).then(function (res) {
                                                                 console.log(res);
-                                                                switch (res.data.statue) {
-                                                                        case 'success':
-                                                                                toast('L\'element a \xE9t\xE9 renomm\xE9', { type: 'success' });
-                                                                                break;
-                                                                        case 'error':
-                                                                                toast('Erreur survenue: ' + res.data.data.msg, { type: 'error' });
-                                                                                break;
-                                                                        case 'info':
-                                                                                toast('Info: ' + res.data.data.msg, {
-                                                                                        icon: "📢",
-                                                                                        style: { fontWeight: 'bold' }
-                                                                                });
-                                                                                break;
-                                                                }
-                                                                setTimeout(function () {
-                                                                        toast.dismiss('rename_' + route + node.id);
-                                                                }, 600);
+                                                                if (res.data.statue === 'success') window.show_response(node.value + ' renomm\xE9 avec succ\xE8s !', "success");else window.show_response(res.data.data.msg, res.data.statue);
+                                                                setLoading(Object.assign({}, loading_buttons, { rename: false }));
                                                         }).catch(function (err) {
                                                                 console.log(err);
-                                                                setTimeout(function () {
-                                                                        toast.dismiss('rename_' + route + node.id);
-                                                                }, 600);
+                                                                window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                                                setLoading(Object.assign({}, loading_buttons, { rename: false }));
                                                         });
                                                 }
                                         });
@@ -2641,17 +2633,12 @@ export default function FileTable() {
                         var Share_to_users_form = function Share_to_users_form() {
                                 // const [selectedService, setSelectedServices] = useState(null);
 
-                                var msg_err = "Valeur de champ invalide";
 
                                 var handleSubmit = function handleSubmit(submittedInfo) {
                                         // console.log(submittedInfo)
                                         // return
 
-                                        toast("Sharing...", {
-                                                id: "share",
-                                                type: "loading",
-                                                duration: Infinity
-                                        });
+                                        setLoading(Object.assign({}, loading_buttons, { share: true }));
 
                                         var queryBody = new FormData();
 
@@ -2674,34 +2661,15 @@ export default function FileTable() {
                                         http.post('share', queryBody).then(function (res) {
                                                 console.log(res);
 
-                                                if (res.data.statue === 'success') {
-                                                        toast("Fichier(s) partagé(s) avec success", {
-                                                                id: "share",
-                                                                type: "success",
-                                                                duration: 2000
-                                                        });
-                                                } else {
-                                                        // console.log('cooooooode', res.data.data.code)
-                                                        toast.dismiss("share");
-                                                        swal({
-                                                                title: "ERROR!",
-                                                                text: res.data.data.msg,
-                                                                icon: "error"
-                                                        });
-                                                }
+                                                if (res.data.statue === 'success') window.show_response('Fichier(s) partag\xE9(s) avec success"', "success");else window.show_response(res.data.data.msg, res.data.statue);
+                                                setLoading(Object.assign({}, loading_buttons, { share: false }));
                                         })
 
                                         // Catch errors if any
                                         .catch(function (err) {
                                                 console.log(err);
-                                                toast.dismiss("share");
-                                                var msg = void 0;
-                                                if (err.response.status === 500) msg = "erreur interne au serveur";else if (err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page";
-                                                swal({
-                                                        title: "ERREUR!",
-                                                        text: err.response.data.message + "\n" + msg,
-                                                        icon: "error"
-                                                });
+                                                window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                                setLoading(Object.assign({}, loading_buttons, { share: false }));
                                         });
 
                                         // console.log(queryBody.get("name"))
@@ -2824,6 +2792,8 @@ export default function FileTable() {
                                 };
                         });
 
+                        setLoading(Object.assign({}, loading_buttons, { download: true }));
+
                         if (nodes_info.length === 1 && nodes_info[0].model === "App\\Models\\Fichier") {
                                 console.log(nodes_info);
                                 // return
@@ -2838,8 +2808,12 @@ export default function FileTable() {
                                         link.setAttribute('download', '' + selectedRow[0].value);
                                         document.body.appendChild(link);
                                         link.click();
+
+                                        setLoading(Object.assign({}, loading_buttons, { download: false }));
                                 }).catch(function (err) {
                                         console.log(err);
+                                        setLoading(Object.assign({}, loading_buttons, { download: false }));
+                                        window.show_response(err.message + ' ' + err.response.data.message, "error");
                                 });
                         } else {
                                 console.log(nodes_info);
@@ -2860,11 +2834,17 @@ export default function FileTable() {
                                                 link.setAttribute('download', '' + (selectedRow.length === 1 ? selectedRow[0].value + '.zip' : "Compressed_file.zip"));
                                                 document.body.appendChild(link);
                                                 link.click();
+
+                                                setLoading(Object.assign({}, loading_buttons, { download: false }));
                                         }).catch(function (err) {
                                                 console.log(err);
+                                                window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                                setLoading(Object.assign({}, loading_buttons, { download: false }));
                                         });
                                 }).catch(function (err) {
                                         console.log(err);
+                                        window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                        setLoading(Object.assign({}, loading_buttons, { download: false }));
                                 });
                         }
                 }
@@ -2880,9 +2860,11 @@ export default function FileTable() {
                                                 while (1) {
                                                         switch (_context5.prev = _context5.next) {
                                                                 case 0:
+                                                                        setLoading(Object.assign({}, loading_buttons, { delete: true }));
+
                                                                         return _context5.abrupt('return', Promise.all(selectedRow.map(function () {
                                                                                 var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(row) {
-                                                                                        var nodeIdentity;
+                                                                                        var nodeIdentity, route;
                                                                                         return _regeneratorRuntime.wrap(function _callee4$(_context4) {
                                                                                                 while (1) {
                                                                                                         switch (_context4.prev = _context4.next) {
@@ -2892,99 +2874,57 @@ export default function FileTable() {
                                                                                                                         // const [ id, type ] = window.Global_State.identifyNode(row)
 
                                                                                                                         console.log(selectedRow);
+                                                                                                                        route = '';
                                                                                                                         _context4.t0 = row.type;
-                                                                                                                        _context4.next = _context4.t0 === 'audit' ? 5 : _context4.t0 === 'checkList' ? 8 : _context4.t0 === 'dp' ? 9 : _context4.t0 === 'nonC' ? 10 : _context4.t0 === 'fnc' ? 11 : _context4.t0 === 'ds' ? 14 : _context4.t0 === 'f' ? 17 : 20;
+                                                                                                                        _context4.next = _context4.t0 === 'audit' ? 6 : _context4.t0 === 'checkList' ? 8 : _context4.t0 === 'dp' ? 9 : _context4.t0 === 'nonC' ? 10 : _context4.t0 === 'fnc' ? 11 : _context4.t0 === 'ds' ? 13 : _context4.t0 === 'f' ? 15 : 17;
                                                                                                                         break;
 
-                                                                                                                case 5:
-                                                                                                                        _context4.next = 7;
-                                                                                                                        return http.delete('del_audit?id=' + nodeIdentity[0]).then(function (res) {
-                                                                                                                                console.log(res);
-                                                                                                                                if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
-                                                                                                                                        icon: React.createElement(FaInfoCircle, { color: '#2196F3', size: 28 })
-                                                                                                                                });
-                                                                                                                        }).catch(function (err) {
-                                                                                                                                console.log(err);
-                                                                                                                                swal({
-                                                                                                                                        title: "Error",
-                                                                                                                                        text: err.response.data.message,
-                                                                                                                                        icon: "error"
-                                                                                                                                });
-                                                                                                                        });
-
-                                                                                                                case 7:
-                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                case 6:
+                                                                                                                        route = 'del_audit';
+                                                                                                                        return _context4.abrupt('break', 18);
 
                                                                                                                 case 8:
-                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                        return _context4.abrupt('break', 18);
 
                                                                                                                 case 9:
-                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                        return _context4.abrupt('break', 18);
 
                                                                                                                 case 10:
-                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                        return _context4.abrupt('break', 18);
 
                                                                                                                 case 11:
-                                                                                                                        _context4.next = 13;
-                                                                                                                        return http.delete('del_fnc?id=' + nodeIdentity[0]).then(function (res) {
-                                                                                                                                console.log(res);
-                                                                                                                                if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
-                                                                                                                                        icon: React.createElement(FaInfoCircle, { color: '#2196F3', size: 28 })
-                                                                                                                                });
-                                                                                                                        }).catch(function (err) {
-                                                                                                                                console.log(err);
-                                                                                                                                swal({
-                                                                                                                                        title: "Error",
-                                                                                                                                        text: err.response.data.message,
-                                                                                                                                        icon: "error"
-                                                                                                                                });
-                                                                                                                        });
+                                                                                                                        route = 'del_fnc';
+                                                                                                                        return _context4.abrupt('break', 18);
 
                                                                                                                 case 13:
-                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                        route = 'del_folder';
+                                                                                                                        return _context4.abrupt('break', 18);
 
-                                                                                                                case 14:
-                                                                                                                        _context4.next = 16;
-                                                                                                                        return http.delete('del_folder?id=' + nodeIdentity[0]).then(function (res) {
-                                                                                                                                console.log(res);
-                                                                                                                                if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
-                                                                                                                                        icon: React.createElement(FaInfoCircle, { color: '#2196F3', size: 28 })
-                                                                                                                                });
-                                                                                                                        }).catch(function (err) {
-                                                                                                                                console.log(err);
-                                                                                                                                swal({
-                                                                                                                                        title: "Error",
-                                                                                                                                        text: err.response.data.message,
-                                                                                                                                        icon: "error"
-                                                                                                                                });
-                                                                                                                        });
-
-                                                                                                                case 16:
-                                                                                                                        return _context4.abrupt('break', 21);
+                                                                                                                case 15:
+                                                                                                                        route = 'del_file';
+                                                                                                                        return _context4.abrupt('break', 18);
 
                                                                                                                 case 17:
-                                                                                                                        _context4.next = 19;
-                                                                                                                        return http.delete('del_file?id=' + nodeIdentity[0]).then(function (res) {
+                                                                                                                        return _context4.abrupt('break', 18);
+
+                                                                                                                case 18:
+                                                                                                                        _context4.next = 20;
+                                                                                                                        return http.delete(route + '?id=' + nodeIdentity[0]).then(function (res) {
                                                                                                                                 console.log(res);
-                                                                                                                                if (res.data === 'attente') toast('En attente de confirmation: ' + row.value, {
-                                                                                                                                        icon: React.createElement(FaInfoCircle, { color: '#2196F3', size: 28 })
-                                                                                                                                });
+                                                                                                                                if (res.data.statue === 'success') window.show_response(row.value + ' supprim\xE9 avec succ\xE8s !', "success");else window.show_response(res.data.data.msg, res.data.statue);
+                                                                                                                                setLoading(Object.assign({}, loading_buttons, { delete: false }));
                                                                                                                         }).catch(function (err) {
                                                                                                                                 console.log(err);
-                                                                                                                                swal({
-                                                                                                                                        title: "Error",
-                                                                                                                                        text: err.response.data.message,
-                                                                                                                                        icon: "error"
-                                                                                                                                });
+                                                                                                                                window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                                                                                                                setLoading(Object.assign({}, loading_buttons, { delete: false }));
+                                                                                                                                // swal({
+                                                                                                                                //         title: "Error",
+                                                                                                                                //         text: err.response.data.message,
+                                                                                                                                //         icon: "error"
+                                                                                                                                // })
                                                                                                                         });
 
-                                                                                                                case 19:
-                                                                                                                        return _context4.abrupt('break', 21);
-
                                                                                                                 case 20:
-                                                                                                                        return _context4.abrupt('break', 21);
-
-                                                                                                                case 21:
                                                                                                                 case 'end':
                                                                                                                         return _context4.stop();
                                                                                                         }
@@ -3001,7 +2941,7 @@ export default function FileTable() {
 
                                                                         )));
 
-                                                                case 1:
+                                                                case 2:
                                                                 case 'end':
                                                                         return _context5.stop();
                                                         }
@@ -3068,22 +3008,7 @@ export default function FileTable() {
                                         buttons: true,
                                         dangerMode: true
                                 }).then(function (willDelete) {
-                                        if (willDelete) {
-                                                toast('Suppressing...', {
-                                                        id: 'Suppressing',
-                                                        type: "loading",
-                                                        duration: Infinity
-                                                });
-
-                                                remove().then(function (res) {
-                                                        setTimeout(function () {
-                                                                toast('Fin du proccesus', {
-                                                                        id: 'Suppressing',
-                                                                        duration: 1000
-                                                                });
-                                                        }, 800);
-                                                });
-                                        }
+                                        if (willDelete) remove();
                                 });
                         } else localRemove();
                 }
@@ -3165,7 +3090,7 @@ export default function FileTable() {
                                                         { title: "COUPER", placement: 'top-end' },
                                                         React.createElement(
                                                                 'div',
-                                                                null,
+                                                                { className: 'action_button' },
                                                                 React.createElement(
                                                                         IconButton,
                                                                         { id: 'ctrl_x', ref: refs.ctrl_x, color: "error", disabled: selectedRowNumber === 0, onClick: handleCut },
@@ -3178,7 +3103,7 @@ export default function FileTable() {
                                                         { title: "COPIER", placement: 'top-end' },
                                                         React.createElement(
                                                                 'div',
-                                                                null,
+                                                                { className: 'action_button' },
                                                                 React.createElement(
                                                                         IconButton,
                                                                         { id: 'ctrl_c', ref: refs.ctrl_c, color: "success", disabled: selectedRowNumber === 0, onClick: handleCopy },
@@ -3191,7 +3116,7 @@ export default function FileTable() {
                                                         { title: "COLLER", placement: 'top-end' },
                                                         React.createElement(
                                                                 'div',
-                                                                null,
+                                                                { className: 'action_button' },
                                                                 React.createElement(Paste_component, null)
                                                         )
                                                 ),
@@ -3200,11 +3125,11 @@ export default function FileTable() {
                                                         { title: "RENOMMER", placement: 'top-end' },
                                                         React.createElement(
                                                                 'div',
-                                                                null,
+                                                                { className: 'action_button' },
                                                                 React.createElement(
-                                                                        IconButton,
-                                                                        { ref: refs.ctrl_r, color: "primary", disabled: selectedRowNumber !== 1, onClick: handleRename },
-                                                                        React.createElement(BiRename, { color: selectedRowNumber !== 1 ? '' : "blue", size: 24 })
+                                                                        LoadingButton,
+                                                                        { as: IconButton, loading: loading_buttons.rename, ref: refs.ctrl_r, color: "primary", disabled: selectedRowNumber !== 1, onClick: handleRename },
+                                                                        loading_buttons.rename ? null : React.createElement(BiRename, { color: selectedRowNumber !== 1 ? '' : "blue", size: 24 })
                                                                 )
                                                         )
                                                 ),
@@ -3213,11 +3138,11 @@ export default function FileTable() {
                                                         { title: "PARTAGER", placement: 'top-end' },
                                                         React.createElement(
                                                                 'div',
-                                                                null,
+                                                                { className: 'action_button' },
                                                                 React.createElement(
-                                                                        IconButton,
-                                                                        { color: "secondary", disabled: selectedRowNumber === 0, onClick: handleShare },
-                                                                        React.createElement(VscLiveShare, { color: selectedRowNumber === 0 ? '' : "purple", size: 24 })
+                                                                        LoadingButton,
+                                                                        { as: IconButton, loading: loading_buttons.share, color: "secondary", disabled: selectedRowNumber === 0, onClick: handleShare },
+                                                                        loading_buttons.share ? null : React.createElement(VscLiveShare, { color: selectedRowNumber === 0 ? '' : "purple", size: 24 })
                                                                 )
                                                         )
                                                 ),
@@ -3226,11 +3151,11 @@ export default function FileTable() {
                                                         { title: "ACQUERIR", placement: 'top-end' },
                                                         React.createElement(
                                                                 'div',
-                                                                null,
+                                                                { className: 'action_button' },
                                                                 React.createElement(
-                                                                        IconButton,
-                                                                        { color: "primary", disabled: selectedRowNumber === 0, onClick: handleDownload },
-                                                                        React.createElement(ImDownload2, { color: selectedRowNumber === 0 ? '' : "#1565c0", size: 24 })
+                                                                        LoadingButton,
+                                                                        { as: IconButton, loading: loading_buttons.download, color: "primary", disabled: selectedRowNumber === 0, onClick: handleDownload },
+                                                                        loading_buttons.download ? null : React.createElement(ImDownload2, { color: selectedRowNumber === 0 ? '' : "#1565c0", size: 24 })
                                                                 )
                                                         )
                                                 ),
@@ -3239,11 +3164,13 @@ export default function FileTable() {
                                                         { title: "SUPPRIMER", placement: 'top-end' },
                                                         React.createElement(
                                                                 'div',
-                                                                null,
+                                                                { className: 'action_button' },
                                                                 React.createElement(
-                                                                        IconButton,
-                                                                        { id: 'ctrl_d', ref: refs.ctrl_d, color: "error", disabled: selectedRowNumber === 0, onClick: handleDelete },
-                                                                        React.createElement(RiDeleteBin2Fill, { color: selectedRowNumber === 0 ? '' : "red", size: 24 })
+                                                                        LoadingButton,
+                                                                        { as: IconButton, loading: loading_buttons.delete, id: 'ctrl_d', ref: refs.ctrl_d, color: "error", disabled: selectedRowNumber === 0, onClick: handleDelete },
+                                                                        loading_buttons.delete ? null : React.createElement(RiDeleteBin2Fill, {
+                                                                                color: selectedRowNumber === 0 ? '' : "red",
+                                                                                size: 24 })
                                                                 )
                                                         )
                                                 )
@@ -3711,10 +3638,10 @@ export default function FileTable() {
                                                 );
                                         }, []);
 
-                                        var _useState17 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
-                                            _useState18 = _slicedToArray(_useState17, 2),
-                                            startDate = _useState18[0],
-                                            setStartDate = _useState18[1];
+                                        var _useState19 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
+                                            _useState20 = _slicedToArray(_useState19, 2),
+                                            startDate = _useState20[0],
+                                            setStartDate = _useState20[1];
 
                                         var new_review_date = startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate() + ' ' + startDate.getHours() + ':' + startDate.getMinutes();
                                         console.log('new_review_date', new_review_date, e);
@@ -3929,10 +3856,10 @@ export default function FileTable() {
                 var ValidBadge = function ValidBadge(_ref18) {
                         var data = _ref18.data;
 
-                        var _useState19 = useState(false),
-                            _useState20 = _slicedToArray(_useState19, 2),
-                            checked = _useState20[0],
-                            check = _useState20[1];
+                        var _useState21 = useState(false),
+                            _useState22 = _slicedToArray(_useState21, 2),
+                            checked = _useState22[0],
+                            check = _useState22[1];
 
                         function handleClick(e) {
                                 e.preventDefault();
@@ -4279,14 +4206,6 @@ export default function FileTable() {
         useEffect(function () {
                 dispatch({ type: 'nodeUpdate', newDatas: initDatas });
         }, [formattedDatas]);
-
-        // const [visibleData, setVisibleData] = useState(datas)
-
-
-        // useEffect(
-        //     () => {setVisibleData(datas)}, [datas]
-        // )
-
 
         console.log('contentRender');
 

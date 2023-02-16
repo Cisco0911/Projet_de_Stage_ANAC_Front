@@ -4,7 +4,10 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 import React, { useState, useEffect } from 'react';
 
-import { BottomNavigation, BottomNavigationAction, Box, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, InputLabel, ListItemText, MenuItem, OutlinedInput, Popover, Select, TableHead, TablePagination } from "@mui/material";
+import { http } from "../auth/login";
+import Warning_component from "./warning_component";
+
+import { BottomNavigation, BottomNavigationAction, Box, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, FormControlLabel, InputLabel, ListItemText, MenuItem, OutlinedInput, Popover, Select, TableHead, TablePagination, TextField } from "@mui/material";
 import Paper from "@mui/material/Paper";
 
 import { FaUsers } from "react-icons/fa";
@@ -20,8 +23,13 @@ import TableBody from "@mui/material/TableBody";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 
+import WarningTwoToneIcon from '@mui/icons-material/WarningTwoTone';
+
 import swal from "sweetalert";
 import { LoadingButton } from "@mui/lab";
+import toast from "react-hot-toast";
+
+import { CgAirplane } from "react-icons/cg";
 
 var ITEM_HEIGHT = 48;
 var ITEM_PADDING_TOP = 8;
@@ -33,25 +41,31 @@ var MenuProps = {
                 }
         }
 };
-function Services_component(_ref) {
-        var services = _ref.services;
-
-        var _React$useState = React.useState(false),
-            _React$useState2 = _slicedToArray(_React$useState, 2),
-            open = _React$useState2[0],
-            setOpen = _React$useState2[1];
+export function Services_component(_ref) {
+        var value = _ref.value,
+            is_user = _ref.is_user;
 
         var _useState = useState(false),
             _useState2 = _slicedToArray(_useState, 2),
-            loading = _useState2[0],
-            setLoading = _useState2[1];
+            open = _useState2[0],
+            setOpen = _useState2[1];
 
-        var _useState3 = useState(services.map(function (service) {
+        var _useState3 = useState(false),
+            _useState4 = _slicedToArray(_useState3, 2),
+            loading = _useState4[0],
+            setLoading = _useState4[1];
+
+        var _useState5 = useState(value.services.map(function (service) {
                 return service.name;
         })),
-            _useState4 = _slicedToArray(_useState3, 2),
-            selectedServices = _useState4[0],
-            setSelectedServices = _useState4[1];
+            _useState6 = _slicedToArray(_useState5, 2),
+            selectedServices = _useState6[0],
+            setSelectedServices = _useState6[1];
+
+        var _useState7 = useState(false),
+            _useState8 = _slicedToArray(_useState7, 2),
+            open_confirmation = _useState8[0],
+            setOpen_confirmation = _useState8[1];
 
         var handleChange = function handleChange(event) {
                 var value = event.target.value;
@@ -73,14 +87,67 @@ function Services_component(_ref) {
 
         var handleSubmit = function handleSubmit(event, reason) {
                 if (reason !== 'backdropClick') {
-                        console.log("Update services", selectedServices);
-                        setLoading(true);
-                        // setOpen(false);
+                        setOpen_confirmation(false);
+                        if (is_user) {
+                                console.log("Update services", selectedServices, value.id);
+                                setLoading(true);
+
+                                var queryBody = new FormData();
+
+                                queryBody.append('id', value.id.toString());
+                                queryBody.append('update_object', "services");
+                                queryBody.append("new_value", JSON.stringify(selectedServices));
+
+                                http.post("admin_update_user", queryBody).then(function (res) {
+                                        console.log(res);
+
+                                        if (res.data.statue === "success") {
+                                                window.reload();
+                                                window.show_response("Mise á jour reussie !", "success");
+                                        } else {
+                                                window.show_response(res.data.data.msg, res.data.statue);
+                                        }
+                                        setLoading(false);
+                                }).catch(function (err) {
+                                        console.log(err);
+
+                                        window.show_response(err.message + " " + err.response.data.message, "error");
+                                        setLoading(false);
+                                });
+                        } else {
+                                console.log("Update services", selectedServices, value.id);
+                                setLoading(true);
+
+                                var _queryBody = new FormData();
+
+                                _queryBody.append('id', value.id.toString());
+                                _queryBody.append('update_object', "services");
+                                _queryBody.append("new_value", JSON.stringify(selectedServices));
+
+                                http.post("admin_update_section", _queryBody).then(function (res) {
+                                        console.log(res);
+
+                                        if (res.data.statue === "success") {
+                                                window.reload();
+                                                window.show_response("Mise á jour reussie !", "success");
+                                        } else {
+                                                window.show_response(res.data.data.msg, res.data.statue);
+                                        }
+                                        setLoading(false);
+                                }).catch(function (err) {
+                                        console.log(err);
+
+                                        window.show_response(err.message + " " + err.response.data.message, "error");
+                                        setLoading(false);
+                                });
+                        }
                 }
         };
 
-        var services_names = services.reduce(function (acc, services) {
-                return acc ? acc + ", " + services.name : services.name;
+        var warning_infos = is_user ? ["Si l'utilisateur est détaché d'un service ou il a validé des fichiers, ces derniers seront automatiquement dévalidés; Il est préférable de faire une transmission de rôles d'abord;", "L'utilisateur sera detaché des audits auxquels il a participé;", "S'il est responsable d'un audit, la mise á jour n'aboutira pas, il faudra faire une transmission de role au préalable 1"] : ["Les Audits, Dossier, ... seront détachés de tous services dont la section sera detachée;", "Au cas ou ils se retrouvent détachés de tous les services, ils seront automatiquement ratachés aux nouveaux services de la section"];
+
+        var services_names = value.services.reduce(function (acc, service) {
+                return acc ? acc + ", " + service.name : service.name;
         }, "");
 
         return React.createElement(
@@ -158,11 +225,16 @@ function Services_component(_ref) {
                                 ),
                                 React.createElement(
                                         LoadingButton,
-                                        { loading: loading, onClick: handleSubmit },
+                                        { loading: loading, onClick: function onClick(e) {
+                                                        return setOpen_confirmation(true);
+                                                } },
                                         "Ok"
                                 )
                         )
-                )
+                ),
+                React.createElement(Warning_component, { open: open_confirmation, onConfirm: handleSubmit, onCancel: function onCancel(e) {
+                                setOpen_confirmation(false);handleClose();
+                        }, warning_infos: warning_infos })
         );
 }
 var nextLvl = function nextLvl(currentLvl) {
@@ -180,7 +252,13 @@ function Right_component(_ref2) {
 
 
         var handleClick = function handleClick(e) {
-                if (parseInt(value) === 2) {
+                toast("Updating...", {
+                        type: "loading",
+                        id: "right_" + value.id,
+                        duration: Infinity
+                });
+
+                if (parseInt(value.right_lvl) === 2) {
                         swal({
                                 title: "Etes vous sûr ?",
                                 text: "L'utilisateur a un niveau 2 de droit d'accès, il pourrait avoir validé des fichiers, ces derniers seront automatiquement dévalidés; Il est préférable de faire une transmission de rôles d'abord !!!",
@@ -189,16 +267,62 @@ function Right_component(_ref2) {
                                 dangerMode: true
                         }).then(function (will_continue) {
                                 if (will_continue) {
-                                        console.log("change right level", nextLvl(value));
-                                }
+                                        console.log("change right level danger", nextLvl(value.right_lvl), value.id);
+
+                                        var queryBody = new FormData();
+
+                                        queryBody.append('id', value.id.toString());
+                                        queryBody.append('update_object', "right_lvl");
+                                        queryBody.append("new_value", nextLvl(value.right_lvl));
+
+                                        http.post("admin_update_user", queryBody).then(function (res) {
+                                                console.log(res);
+
+                                                toast.dismiss("right_" + value.id);
+                                                if (res.data.statue === "success") {
+                                                        window.reload();
+                                                        window.show_response("Mise á jour reussie !", "success");
+                                                } else {
+                                                        window.show_response(res.data.data.msg, res.data.statue);
+                                                }
+                                        }).catch(function (err) {
+                                                console.log(err);
+
+                                                toast.dismiss("right_" + value.id);
+                                                window.show_response(err.message + " " + err.response.data.message, "error");
+                                        });
+                                } else toast.dismiss("right_" + value.id);
                         });
                 } else {
-                        console.log("change right level", nextLvl(value));
+                        console.log("change right level", nextLvl(value.right_lvl), value.id);
+
+                        var queryBody = new FormData();
+
+                        queryBody.append('id', value.id.toString());
+                        queryBody.append('update_object', "right_lvl");
+                        queryBody.append("new_value", nextLvl(value.right_lvl));
+
+                        http.post("admin_update_user", queryBody).then(function (res) {
+                                console.log(res);
+
+                                if (res.data.statue === "success") {
+                                        window.reload();
+                                        window.show_response("Mise á jour reussie !", "success");
+                                } else {
+                                        window.show_response(res.data.data.msg, res.data.statue);
+                                        toast.dismiss("right_" + value.id);
+                                }
+                        }).catch(function (err) {
+                                console.log(err);
+
+                                window.show_response(err.message + " " + err.response.data.message, "error");
+                                toast.dismiss("right_" + value.id);
+                        });
                 }
         };
 
         var color = void 0;
-        switch (parseInt(value)) {
+        switch (parseInt(value.right_lvl)) {
                 case 1:
                         color = "primary";
                         break;
@@ -209,58 +333,94 @@ function Right_component(_ref2) {
                         color = "default";
         }
 
-        return React.createElement(Chip, { label: value, onClick: handleClick, color: color });
+        return React.createElement(Chip, { label: value.right_lvl, onClick: handleClick, color: color });
 }
 function Name_component(_ref3) {
         var value = _ref3.value;
 
+        var _useState9 = useState(false),
+            _useState10 = _slicedToArray(_useState9, 2),
+            loading = _useState10[0],
+            setLoading = _useState10[1];
+
+        var _useState11 = useState(false),
+            _useState12 = _slicedToArray(_useState11, 2),
+            open_confirmation = _useState12[0],
+            setOpen_confirmation = _useState12[1];
 
         var handleDelete = function handleDelete(e) {
                 console.log("suppress user", value.id);
+                setLoading(true);
+                setOpen_confirmation(false);
+
+                http.delete("delete_user?id=" + value.id).then(function (res) {
+                        console.log(res);
+                        window.reload();
+                        if (res.data.statue === 'success') window.show_response("Utilisateur supprim\xE9 avec succ\xE8s !", "success");else window.show_response(res.data.data.msg, res.data.statue);
+                        setLoading(false);
+                }).catch(function (err) {
+                        console.log(err);
+                        window.show_response(err.message + " " + err.response.data.message, "error");
+                        setLoading(false);
+                });
         };
 
-        return React.createElement(Chip, {
-                avatar: React.createElement(
-                        Avatar,
-                        null,
-                        value.name[0]
-                ),
-                label: value.name,
-                variant: "outlined",
-                onDelete: handleDelete,
-                deleteIcon: React.createElement(
-                        IconButton,
-                        { color: "error" },
-                        React.createElement(TiUserDelete, { size: 20, color: "red" })
-                )
-        });
+        return React.createElement(
+                React.Fragment,
+                null,
+                React.createElement(Chip, {
+                        avatar: React.createElement(
+                                Avatar,
+                                null,
+                                value.name[0]
+                        ),
+                        label: value.name,
+                        variant: "outlined",
+                        onDelete: function onDelete(e) {
+                                return setOpen_confirmation(true);
+                        },
+                        deleteIcon: React.createElement(
+                                LoadingButton,
+                                { as: IconButton, loading: loading, color: "error" },
+                                loading ? null : React.createElement(TiUserDelete, { size: 20, color: "red" })
+                        )
+                }),
+                React.createElement(Warning_component, { open: open_confirmation, onConfirm: handleDelete, onCancel: function onCancel(e) {
+                                return setOpen_confirmation(false);
+                        }, warning_infos: ["Tout Audit, Dossir, Fichier ... que l'utilisateur a validé sera dévalidé !"] })
+        );
         // <Avatar alt="Natacha" src="/static/images/avatar/1.jpg" />
 }
 function Switch_user_component(_ref4) {
         var user_id = _ref4.user_id;
 
-        var _React$useState3 = React.useState(false),
-            _React$useState4 = _slicedToArray(_React$useState3, 2),
-            open = _React$useState4[0],
-            setOpen = _React$useState4[1];
+        var _React$useState = React.useState(false),
+            _React$useState2 = _slicedToArray(_React$useState, 2),
+            open = _React$useState2[0],
+            setOpen = _React$useState2[1];
 
-        var _useState5 = useState(''),
-            _useState6 = _slicedToArray(_useState5, 2),
-            new_user = _useState6[0],
-            setNew_user = _useState6[1];
+        var _useState13 = useState(''),
+            _useState14 = _slicedToArray(_useState13, 2),
+            to_id = _useState14[0],
+            setTo_id = _useState14[1];
 
-        var _useState7 = useState(),
-            _useState8 = _slicedToArray(_useState7, 2),
-            error_msg = _useState8[0],
-            setError = _useState8[1];
+        var _useState15 = useState(),
+            _useState16 = _slicedToArray(_useState15, 2),
+            error_msg = _useState16[0],
+            setError = _useState16[1];
 
-        var _useState9 = useState(0),
-            _useState10 = _slicedToArray(_useState9, 2),
-            echange = _useState10[0],
-            setEchange = _useState10[1];
+        var _useState17 = useState(false),
+            _useState18 = _slicedToArray(_useState17, 2),
+            echange = _useState18[0],
+            setEchange = _useState18[1];
+
+        var _useState19 = useState(false),
+            _useState20 = _slicedToArray(_useState19, 2),
+            loading = _useState20[0],
+            setLoading = _useState20[1];
 
         var handleChange = function handleChange(event) {
-                setNew_user(event.target.value);
+                setTo_id(event.target.value);
                 setError(undefined);
         };
 
@@ -275,9 +435,34 @@ function Switch_user_component(_ref4) {
         };
         var handleSubmit = function handleSubmit(event, reason) {
                 if (reason !== 'backdropClick') {
-                        if (new_user === '') setError("selectionner un utilisateur");else {
-                                console.log("Switching roles", user_id, new_user, echange);
-                                setOpen(false);
+                        if (to_id === '') setError("selectionner un utilisateur");else {
+                                console.log("Switching roles", user_id.id, to_id, echange);
+                                setLoading(true);
+
+                                var queryBody = new FormData();
+
+                                queryBody.append('from_id', user_id.id.toString());
+                                queryBody.append('to_id', to_id.toString());
+                                queryBody.append("exchange", echange ? '1' : '0');
+
+                                console.log("Switching roles queryBody", queryBody.get("exchange"));
+
+                                http.post("role_exchange", queryBody).then(function (res) {
+                                        console.log(res);
+
+                                        if (res.data.statue === "success") {
+                                                window.reload();
+                                                window.show_response((echange ? 'Echange' : 'Transmission') + " de role reussie !", "success");
+                                        } else {
+                                                window.show_response(res.data.data.msg, res.data.statue);
+                                        }
+                                        setLoading(false);
+                                }).catch(function (err) {
+                                        console.log(err);
+
+                                        window.show_response(err.message + " " + err.response.data.message, "error");
+                                        setLoading(false);
+                                });
                         }
                 }
         };
@@ -323,12 +508,12 @@ function Switch_user_component(_ref4) {
                                                         {
                                                                 labelId: "demo-simple-select-label",
                                                                 id: "demo-simple-select",
-                                                                value: new_user,
+                                                                value: to_id,
                                                                 label: "Nouveau utilisateur",
                                                                 onChange: handleChange
                                                         },
                                                         window.datas.users.filter(function (user) {
-                                                                return user.id !== user_id;
+                                                                return user.id !== user_id.id;
                                                         }).map(function (user) {
                                                                 return React.createElement(
                                                                         MenuItem,
@@ -341,8 +526,8 @@ function Switch_user_component(_ref4) {
                                         React.createElement(
                                                 Box,
                                                 { className: "mt-2" },
-                                                React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { checked: Boolean(echange), onChange: function onChange(e) {
-                                                                        return setEchange(echange ? 0 : 1);
+                                                React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { checked: echange, onChange: function onChange(e) {
+                                                                        return setEchange(!echange);
                                                                 } }), label: "Echange" })
                                         )
                                 )
@@ -356,8 +541,8 @@ function Switch_user_component(_ref4) {
                                         "Cancel"
                                 ),
                                 React.createElement(
-                                        Button,
-                                        { onClick: handleSubmit },
+                                        LoadingButton,
+                                        { loading: loading, onClick: handleSubmit },
                                         "Ok"
                                 )
                         )
@@ -385,8 +570,8 @@ var columns = [{ id: 'inspector_number', label: "Num\xE9ro\xA0Ins.", minWidth: 8
         id: 'services',
         label: 'Services',
         align: 'right',
-        format: function format(services) {
-                return React.createElement(Services_component, { services: services });
+        format: function format(value) {
+                return React.createElement(Services_component, { value: value, is_user: true });
         }
 }, {
         id: 'id',
@@ -401,15 +586,15 @@ var columns = [{ id: 'inspector_number', label: "Num\xE9ro\xA0Ins.", minWidth: 8
 function Users(_ref5) {
         var rows = _ref5.rows;
 
-        var _React$useState5 = React.useState(0),
-            _React$useState6 = _slicedToArray(_React$useState5, 2),
-            page = _React$useState6[0],
-            setPage = _React$useState6[1];
+        var _useState21 = useState(0),
+            _useState22 = _slicedToArray(_useState21, 2),
+            page = _useState22[0],
+            setPage = _useState22[1];
 
-        var _React$useState7 = React.useState(10),
-            _React$useState8 = _slicedToArray(_React$useState7, 2),
-            rowsPerPage = _React$useState8[0],
-            setRowsPerPage = _React$useState8[1];
+        var _useState23 = useState(10),
+            _useState24 = _slicedToArray(_useState23, 2),
+            rowsPerPage = _useState24[0],
+            setRowsPerPage = _useState24[1];
 
         var handleChangePage = function handleChangePage(event, newPage) {
                 setPage(newPage);
@@ -422,10 +607,10 @@ function Users(_ref5) {
 
         return React.createElement(
                 Paper,
-                { sx: { width: '100%', height: "85%", overflow: 'hidden' }, elevation: 0, variant: "outlined" },
+                { className: "d-flex flex-column", sx: { width: '100%', height: "85%", overflow: 'hidden' }, elevation: 0, variant: "outlined" },
                 React.createElement(
                         TableContainer,
-                        { sx: { maxHeight: 440 } },
+                        { sx: { maxHeight: "100%" } },
                         React.createElement(
                                 Table,
                                 { stickyHeader: true, "aria-label": "sticky table" },
@@ -458,12 +643,13 @@ function Users(_ref5) {
                                                         columns.map(function (column) {
                                                                 var value = void 0;
 
-                                                                if (column.id === "name") value = { name: row[column.id], id: row.id };else value = row[column.id];
+                                                                value = { id: row.id };
+                                                                value[column.id] = row[column.id];
 
                                                                 return React.createElement(
                                                                         TableCell,
                                                                         { key: column.id, align: column.align },
-                                                                        column.format ? column.format(value) : value
+                                                                        column.format ? column.format(value) : row[column.id]
                                                                 );
                                                         })
                                                 );
@@ -487,10 +673,10 @@ export default function User_admin_section(_ref6) {
         var users = _ref6.users,
             new_users = _ref6.new_users;
 
-        var _useState11 = useState(0),
-            _useState12 = _slicedToArray(_useState11, 2),
-            value = _useState12[0],
-            setValue = _useState12[1];
+        var _useState25 = useState(0),
+            _useState26 = _slicedToArray(_useState25, 2),
+            value = _useState26[0],
+            setValue = _useState26[1];
 
         return React.createElement(
                 "div",

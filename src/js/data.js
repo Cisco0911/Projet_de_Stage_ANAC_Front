@@ -275,7 +275,7 @@ export default function useGetData(TheDatas) {
         var _useState = useState(TheDatas.authUser),
             _useState2 = _slicedToArray(_useState, 2),
             authUser = _useState2[0],
-            updateAuthUserInfo = _useState2[1];
+            updateAuthUser = _useState2[1];
 
         var _useState3 = useState(false),
             _useState4 = _slicedToArray(_useState3, 2),
@@ -305,7 +305,7 @@ export default function useGetData(TheDatas) {
                                                         _context3.next = 6;
                                                         return http.get('user').then(function (res) {
                                                                 console.log(res);
-                                                                updateAuthUserInfo(res.data);
+                                                                updateAuthUser(res.data);
                                                         }).catch(function (err) {
                                                                 console.log(err);
                                                         });
@@ -553,7 +553,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator = authUser.services[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                                 var service = _step.value;
 
-                                echo.private("nodeUpdate.1").listen('NodeUpdateEvent', function (data) {
+                                echo.private("nodeUpdate." + service.id).listen('NodeUpdateEvent', function (data) {
                                         node_events_queue.current.push(data);
                                         console.log('NodeUpdateEvent', node_events_queue.current, data);
                                         if (!handling_node_events.current) echosHandler('handle_node_events');
@@ -903,26 +903,45 @@ export default function useGetData(TheDatas) {
                 sections.set(sct.id, Object.assign({}, sct, { selectedNodeIdInSection: 0 }));
         });
 
-        var getNewPath = function getNewPath(new_node, all_nodes) {
-                var to_update = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+        function copyObject(obj) {
+                if (!obj) return obj;
 
-                if (!new_node) return 'undefined';
+                var constructors = {
+                        is_json: function is_json(json) {
+                                return json.constructor === Object;
+                        },
+                        is_array: function is_array(array) {
+                                return array.constructor === Array;
+                        },
+                        is_map: function is_map(map) {
+                                return map.constructor === Map;
+                        },
+                        is_file: function is_file(file) {
+                                return file.constructor === File;
+                        }
 
-                if (new_node.type === 'root') {
-                        console.log('sectionnnnnnnnnnnnnnnnnnnnnnnnnn', sections.get(1), new_node);
-                        return sections.get(new_node.section_id).name + ":";
-                }
+                };
 
-                if (!to_update) {
+                if (constructors.is_map(obj)) {
+                        var map = new Map();
+
+                        obj.forEach(function (value, key) {
+                                map.set(key, copyObject(value));
+                        });
+
+                        return map;
+                } else if (constructors.is_array(obj)) {
+                        var array = [];
+
                         var _iteratorNormalCompletion4 = true;
                         var _didIteratorError4 = false;
                         var _iteratorError4 = undefined;
 
                         try {
-                                for (var _iterator4 = all_nodes[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                                        var node = _step4.value;
+                                for (var _iterator4 = obj[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                                        var arrayElement = _step4.value;
 
-                                        if (node.id === new_node.id) return node.path;
+                                        array.push(copyObject(arrayElement));
                                 }
                         } catch (err) {
                                 _didIteratorError4 = true;
@@ -935,6 +954,125 @@ export default function useGetData(TheDatas) {
                                 } finally {
                                         if (_didIteratorError4) {
                                                 throw _iteratorError4;
+                                        }
+                                }
+                        }
+
+                        return array;
+                } else if (constructors.is_json(obj)) {
+                        var json = {};
+
+                        for (var key in obj) {
+                                json["" + key] = copyObject(obj["" + key]);
+                        }
+
+                        return json;
+                } else return obj;
+        }
+
+        function compareObjects(obj1, obj2) {
+                // Si l'un des objets n'existe pas, retourner false
+                if (!obj1 || !obj2) return false;
+
+                // Si les objets sont de types différents, retourner false
+                if (obj1.constructor !== obj2.constructor) return false;
+
+                // Si les objets sont des Maps
+                if (obj1.constructor === Map) {
+                        // Si les Maps ont un nombre différent d'entrées, retourner false
+                        if (obj1.size !== obj2.size) return false;
+                        // Pour chaque entrée de la Map, comparer la clé et la valeur avec celles de l'autre Map
+                        var _iteratorNormalCompletion5 = true;
+                        var _didIteratorError5 = false;
+                        var _iteratorError5 = undefined;
+
+                        try {
+                                for (var _iterator5 = obj1[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                                        var _ref3 = _step5.value;
+
+                                        var _ref4 = _slicedToArray(_ref3, 2);
+
+                                        var key = _ref4[0];
+                                        var value = _ref4[1];
+
+                                        if (!obj2.has(key) || !compareObjects(value, obj2.get(key))) return false;
+                                }
+                        } catch (err) {
+                                _didIteratorError5 = true;
+                                _iteratorError5 = err;
+                        } finally {
+                                try {
+                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                                                _iterator5.return();
+                                        }
+                                } finally {
+                                        if (_didIteratorError5) {
+                                                throw _iteratorError5;
+                                        }
+                                }
+                        }
+
+                        return true;
+                }
+
+                // Si les objets sont des tableaux
+                if (obj1.constructor === Array) {
+                        // Si les tableaux ont une taille différente, retourner false
+                        if (obj1.length !== obj2.length) return false;
+                        // Pour chaque élément du tableau, comparer avec celui de l'autre tableau
+                        for (var i = 0; i < obj1.length; i++) {
+                                if (!compareObjects(obj1[i], obj2[i])) return false;
+                        }
+                        return true;
+                }
+
+                // Si les objets sont des objets JSON
+                if (obj1.constructor === Object) {
+                        // Si les objets JSON ont un nombre différent de propriétés, retourner false
+                        if (Object.keys(obj1).length !== Object.keys(obj2).length) return false;
+                        // Pour chaque propriété de l'objet, comparer avec celle de l'autre objet
+                        for (var _key in obj1) {
+                                if (!(_key in obj2) || !compareObjects(obj1[_key], obj2[_key])) return false;
+                        }
+                        return true;
+                }
+
+                // Si les objets sont de types différents, retourner false
+                return obj1 === obj2;
+        }
+
+        var getNewPath = function getNewPath(new_node, all_nodes) {
+                var to_update = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+                if (!new_node) return 'undefined';
+
+                if (new_node.type === 'root') {
+                        console.log('sectionnnnnnnnnnnnnnnnnnnnnnnnnn', sections.get(1), new_node);
+                        return sections.get(new_node.section_id).name + ":";
+                }
+
+                if (!to_update) {
+                        var _iteratorNormalCompletion6 = true;
+                        var _didIteratorError6 = false;
+                        var _iteratorError6 = undefined;
+
+                        try {
+                                for (var _iterator6 = all_nodes[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                                        var node = _step6.value;
+
+                                        if (node.id === new_node.id) return node.path;
+                                }
+                        } catch (err) {
+                                _didIteratorError6 = true;
+                                _iteratorError6 = err;
+                        } finally {
+                                try {
+                                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                                                _iterator6.return();
+                                        }
+                                } finally {
+                                        if (_didIteratorError6) {
+                                                throw _iteratorError6;
                                         }
                                 }
                         }
@@ -957,77 +1095,15 @@ export default function useGetData(TheDatas) {
                                 {
                                         var audit = void 0;
 
-                                        var _iteratorNormalCompletion5 = true;
-                                        var _didIteratorError5 = false;
-                                        var _iteratorError5 = undefined;
-
-                                        try {
-                                                for (var _iterator5 = all_nodes[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                                                        var _node = _step5.value;
-
-                                                        if (_node.id === new_node.parentId) audit = JSON.parse(JSON.stringify(_node));
-                                                }
-                                        } catch (err) {
-                                                _didIteratorError5 = true;
-                                                _iteratorError5 = err;
-                                        } finally {
-                                                try {
-                                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                                                                _iterator5.return();
-                                                        }
-                                                } finally {
-                                                        if (_didIteratorError5) {
-                                                                throw _iteratorError5;
-                                                        }
-                                                }
-                                        }
-
-                                        return getNewPath(audit, all_nodes) + "\\" + new_node.name;
-                                }
-                        case 'dp':
-                                {
-                                        var _audit = void 0;
-
-                                        var _iteratorNormalCompletion6 = true;
-                                        var _didIteratorError6 = false;
-                                        var _iteratorError6 = undefined;
-
-                                        try {
-                                                for (var _iterator6 = all_nodes[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                                                        var _node2 = _step6.value;
-
-                                                        if (_node2.id === new_node.parentId) _audit = JSON.parse(JSON.stringify(_node2));
-                                                }
-                                        } catch (err) {
-                                                _didIteratorError6 = true;
-                                                _iteratorError6 = err;
-                                        } finally {
-                                                try {
-                                                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                                                                _iterator6.return();
-                                                        }
-                                                } finally {
-                                                        if (_didIteratorError6) {
-                                                                throw _iteratorError6;
-                                                        }
-                                                }
-                                        }
-
-                                        return getNewPath(_audit, all_nodes) + "\\" + new_node.name;
-                                }
-                        case 'nonC':
-                                {
-                                        var _audit2 = void 0;
-
                                         var _iteratorNormalCompletion7 = true;
                                         var _didIteratorError7 = false;
                                         var _iteratorError7 = undefined;
 
                                         try {
                                                 for (var _iterator7 = all_nodes[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-                                                        var _node3 = _step7.value;
+                                                        var _node = _step7.value;
 
-                                                        if (_node3.id === new_node.parentId) _audit2 = JSON.parse(JSON.stringify(_node3));
+                                                        if (_node.id === new_node.parentId) audit = JSON.parse(JSON.stringify(_node));
                                                 }
                                         } catch (err) {
                                                 _didIteratorError7 = true;
@@ -1044,11 +1120,11 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
-                                        return getNewPath(_audit2, all_nodes) + "\\" + new_node.name;
+                                        return getNewPath(audit, all_nodes) + "\\" + new_node.name;
                                 }
-                        case 'fnc':
+                        case 'dp':
                                 {
-                                        var nc = void 0;
+                                        var _audit = void 0;
 
                                         var _iteratorNormalCompletion8 = true;
                                         var _didIteratorError8 = false;
@@ -1056,9 +1132,9 @@ export default function useGetData(TheDatas) {
 
                                         try {
                                                 for (var _iterator8 = all_nodes[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                                                        var _node4 = _step8.value;
+                                                        var _node2 = _step8.value;
 
-                                                        if (_node4.id === new_node.parentId) nc = JSON.parse(JSON.stringify(_node4));
+                                                        if (_node2.id === new_node.parentId) _audit = JSON.parse(JSON.stringify(_node2));
                                                 }
                                         } catch (err) {
                                                 _didIteratorError8 = true;
@@ -1075,11 +1151,11 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
-                                        return getNewPath(nc, all_nodes) + "\\" + new_node.name;
+                                        return getNewPath(_audit, all_nodes) + "\\" + new_node.name;
                                 }
-                        case 'ds':
+                        case 'nonC':
                                 {
-                                        var parent = void 0;
+                                        var _audit2 = void 0;
 
                                         var _iteratorNormalCompletion9 = true;
                                         var _didIteratorError9 = false;
@@ -1087,16 +1163,10 @@ export default function useGetData(TheDatas) {
 
                                         try {
                                                 for (var _iterator9 = all_nodes[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                                                        var _node5 = _step9.value;
+                                                        var _node3 = _step9.value;
 
-                                                        if (_node5.id === new_node.parentId) {
-                                                                if (_node5.type === 'root') parent = { type: 'root', section_id: new_node.section_id };else parent = JSON.parse(JSON.stringify(_node5));
-
-                                                                break;
-                                                        }
+                                                        if (_node3.id === new_node.parentId) _audit2 = JSON.parse(JSON.stringify(_node3));
                                                 }
-                                                // if (new_node.name === "Levius") console.log("Levius***************", all_nodes, parent, new_node)
-                                                // console.log('paaaaaaaaaaaaaath', new_node)
                                         } catch (err) {
                                                 _didIteratorError9 = true;
                                                 _iteratorError9 = err;
@@ -1112,11 +1182,11 @@ export default function useGetData(TheDatas) {
                                                 }
                                         }
 
-                                        return getNewPath(parent, all_nodes) + "\\" + new_node.name;
+                                        return getNewPath(_audit2, all_nodes) + "\\" + new_node.name;
                                 }
-                        case 'f':
+                        case 'fnc':
                                 {
-                                        var _parent = void 0;
+                                        var nc = void 0;
 
                                         var _iteratorNormalCompletion10 = true;
                                         var _didIteratorError10 = false;
@@ -1124,13 +1194,9 @@ export default function useGetData(TheDatas) {
 
                                         try {
                                                 for (var _iterator10 = all_nodes[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-                                                        var _node6 = _step10.value;
+                                                        var _node4 = _step10.value;
 
-                                                        if (_node6.id === new_node.parentId) {
-                                                                if (_node6.type === 'root') _parent = { type: 'root', section_id: new_node.section_id };else _parent = JSON.parse(JSON.stringify(_node6));
-
-                                                                break;
-                                                        }
+                                                        if (_node4.id === new_node.parentId) nc = JSON.parse(JSON.stringify(_node4));
                                                 }
                                         } catch (err) {
                                                 _didIteratorError10 = true;
@@ -1143,6 +1209,78 @@ export default function useGetData(TheDatas) {
                                                 } finally {
                                                         if (_didIteratorError10) {
                                                                 throw _iteratorError10;
+                                                        }
+                                                }
+                                        }
+
+                                        return getNewPath(nc, all_nodes) + "\\" + new_node.name;
+                                }
+                        case 'ds':
+                                {
+                                        var parent = void 0;
+
+                                        var _iteratorNormalCompletion11 = true;
+                                        var _didIteratorError11 = false;
+                                        var _iteratorError11 = undefined;
+
+                                        try {
+                                                for (var _iterator11 = all_nodes[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                                                        var _node5 = _step11.value;
+
+                                                        if (_node5.id === new_node.parentId) {
+                                                                if (_node5.type === 'root') parent = { type: 'root', section_id: new_node.section_id };else parent = JSON.parse(JSON.stringify(_node5));
+
+                                                                break;
+                                                        }
+                                                }
+                                                // if (new_node.name === "Levius") console.log("Levius***************", all_nodes, parent, new_node)
+                                                // console.log('paaaaaaaaaaaaaath', new_node)
+                                        } catch (err) {
+                                                _didIteratorError11 = true;
+                                                _iteratorError11 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                                                                _iterator11.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError11) {
+                                                                throw _iteratorError11;
+                                                        }
+                                                }
+                                        }
+
+                                        return getNewPath(parent, all_nodes) + "\\" + new_node.name;
+                                }
+                        case 'f':
+                                {
+                                        var _parent = void 0;
+
+                                        var _iteratorNormalCompletion12 = true;
+                                        var _didIteratorError12 = false;
+                                        var _iteratorError12 = undefined;
+
+                                        try {
+                                                for (var _iterator12 = all_nodes[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+                                                        var _node6 = _step12.value;
+
+                                                        if (_node6.id === new_node.parentId) {
+                                                                if (_node6.type === 'root') _parent = { type: 'root', section_id: new_node.section_id };else _parent = JSON.parse(JSON.stringify(_node6));
+
+                                                                break;
+                                                        }
+                                                }
+                                        } catch (err) {
+                                                _didIteratorError12 = true;
+                                                _iteratorError12 = err;
+                                        } finally {
+                                                try {
+                                                        if (!_iteratorNormalCompletion12 && _iterator12.return) {
+                                                                _iterator12.return();
+                                                        }
+                                                } finally {
+                                                        if (_didIteratorError12) {
+                                                                throw _iteratorError12;
                                                         }
                                                 }
                                         }
@@ -1226,27 +1364,27 @@ export default function useGetData(TheDatas) {
                 });
 
                 var getPath = function getPath(id, node_type) {
-                        var _iteratorNormalCompletion11 = true;
-                        var _didIteratorError11 = false;
-                        var _iteratorError11 = undefined;
+                        var _iteratorNormalCompletion13 = true;
+                        var _didIteratorError13 = false;
+                        var _iteratorError13 = undefined;
 
                         try {
-                                for (var _iterator11 = allDataAsNodeData[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-                                        var node = _step11.value;
+                                for (var _iterator13 = allDataAsNodeData[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+                                        var node = _step13.value;
 
                                         if (node.id === id + node_type) return node.path;
                                 }
                         } catch (err) {
-                                _didIteratorError11 = true;
-                                _iteratorError11 = err;
+                                _didIteratorError13 = true;
+                                _iteratorError13 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
-                                                _iterator11.return();
+                                        if (!_iteratorNormalCompletion13 && _iterator13.return) {
+                                                _iterator13.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError11) {
-                                                throw _iteratorError11;
+                                        if (_didIteratorError13) {
+                                                throw _iteratorError13;
                                         }
                                 }
                         }
@@ -1256,78 +1394,16 @@ export default function useGetData(TheDatas) {
                                         {
                                                 var audit = void 0;
 
-                                                var _iteratorNormalCompletion12 = true;
-                                                var _didIteratorError12 = false;
-                                                var _iteratorError12 = undefined;
-
-                                                try {
-                                                        for (var _iterator12 = Data_Base.data.audits[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-                                                                var auditElement = _step12.value;
-
-                                                                // console.log('paath audit ', id, '  ', auditElement.id)
-                                                                if (auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement));
-                                                        }
-                                                } catch (err) {
-                                                        _didIteratorError12 = true;
-                                                        _iteratorError12 = err;
-                                                } finally {
-                                                        try {
-                                                                if (!_iteratorNormalCompletion12 && _iterator12.return) {
-                                                                        _iterator12.return();
-                                                                }
-                                                        } finally {
-                                                                if (_didIteratorError12) {
-                                                                        throw _iteratorError12;
-                                                                }
-                                                        }
-                                                }
-
-                                                return getPath(audit.section_id, '') + "\\" + audit.name;
-                                        }
-                                case 'checkList':
-                                        {
-                                                var checkList = void 0;
-
-                                                var _iteratorNormalCompletion13 = true;
-                                                var _didIteratorError13 = false;
-                                                var _iteratorError13 = undefined;
-
-                                                try {
-                                                        for (var _iterator13 = Data_Base.data.checkLists[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-                                                                var checkListElement = _step13.value;
-
-                                                                if (checkListElement.id === id) checkList = JSON.parse(JSON.stringify(checkListElement));
-                                                        }
-                                                } catch (err) {
-                                                        _didIteratorError13 = true;
-                                                        _iteratorError13 = err;
-                                                } finally {
-                                                        try {
-                                                                if (!_iteratorNormalCompletion13 && _iterator13.return) {
-                                                                        _iterator13.return();
-                                                                }
-                                                        } finally {
-                                                                if (_didIteratorError13) {
-                                                                        throw _iteratorError13;
-                                                                }
-                                                        }
-                                                }
-
-                                                return getPath(checkList.audit_id, 'audit') + "\\" + checkList.name;
-                                        }
-                                case 'dp':
-                                        {
-                                                var dp = void 0;
-
                                                 var _iteratorNormalCompletion14 = true;
                                                 var _didIteratorError14 = false;
                                                 var _iteratorError14 = undefined;
 
                                                 try {
-                                                        for (var _iterator14 = Data_Base.data.dps[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-                                                                var dpElement = _step14.value;
+                                                        for (var _iterator14 = Data_Base.data.audits[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+                                                                var auditElement = _step14.value;
 
-                                                                if (dpElement.id === id) dp = JSON.parse(JSON.stringify(dpElement));
+                                                                // console.log('paath audit ', id, '  ', auditElement.id)
+                                                                if (auditElement.id === id) audit = JSON.parse(JSON.stringify(auditElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError14 = true;
@@ -1344,21 +1420,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(dp.audit_id, 'audit') + "\\" + dp.name;
+                                                return getPath(audit.section_id, '') + "\\" + audit.name;
                                         }
-                                case 'nonC':
+                                case 'checkList':
                                         {
-                                                var nc = void 0;
+                                                var checkList = void 0;
 
                                                 var _iteratorNormalCompletion15 = true;
                                                 var _didIteratorError15 = false;
                                                 var _iteratorError15 = undefined;
 
                                                 try {
-                                                        for (var _iterator15 = Data_Base.data.nonCs[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-                                                                var ncElement = _step15.value;
+                                                        for (var _iterator15 = Data_Base.data.checkLists[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+                                                                var checkListElement = _step15.value;
 
-                                                                if (ncElement.id === id) nc = JSON.parse(JSON.stringify(ncElement));
+                                                                if (checkListElement.id === id) checkList = JSON.parse(JSON.stringify(checkListElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError15 = true;
@@ -1375,21 +1451,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(nc.audit_id, 'audit') + "\\" + nc.name;
+                                                return getPath(checkList.audit_id, 'audit') + "\\" + checkList.name;
                                         }
-                                case 'fnc':
+                                case 'dp':
                                         {
-                                                var fnc = void 0;
+                                                var dp = void 0;
 
                                                 var _iteratorNormalCompletion16 = true;
                                                 var _didIteratorError16 = false;
                                                 var _iteratorError16 = undefined;
 
                                                 try {
-                                                        for (var _iterator16 = Data_Base.data.fncs[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-                                                                var fncElement = _step16.value;
+                                                        for (var _iterator16 = Data_Base.data.dps[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+                                                                var dpElement = _step16.value;
 
-                                                                if (fncElement.id === id) fnc = JSON.parse(JSON.stringify(fncElement));
+                                                                if (dpElement.id === id) dp = JSON.parse(JSON.stringify(dpElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError16 = true;
@@ -1406,21 +1482,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(fnc.nc_id, 'nonC') + "\\" + fnc.name;
+                                                return getPath(dp.audit_id, 'audit') + "\\" + dp.name;
                                         }
-                                case 'ds':
+                                case 'nonC':
                                         {
-                                                var folder = void 0;
+                                                var nc = void 0;
 
                                                 var _iteratorNormalCompletion17 = true;
                                                 var _didIteratorError17 = false;
                                                 var _iteratorError17 = undefined;
 
                                                 try {
-                                                        for (var _iterator17 = Data_Base.data.ds[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-                                                                var _ds = _step17.value;
+                                                        for (var _iterator17 = Data_Base.data.nonCs[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+                                                                var ncElement = _step17.value;
 
-                                                                if (_ds.id === id) folder = JSON.parse(JSON.stringify(_ds));
+                                                                if (ncElement.id === id) nc = JSON.parse(JSON.stringify(ncElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError17 = true;
@@ -1437,21 +1513,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(folder.parent_id, folder.parent_type) + "\\" + folder.name;
+                                                return getPath(nc.audit_id, 'audit') + "\\" + nc.name;
                                         }
-                                case 'f':
+                                case 'fnc':
                                         {
-                                                var file = void 0;
+                                                var fnc = void 0;
 
                                                 var _iteratorNormalCompletion18 = true;
                                                 var _didIteratorError18 = false;
                                                 var _iteratorError18 = undefined;
 
                                                 try {
-                                                        for (var _iterator18 = Data_Base.data.fs[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-                                                                var f = _step18.value;
+                                                        for (var _iterator18 = Data_Base.data.fncs[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+                                                                var fncElement = _step18.value;
 
-                                                                if (f.id === id) file = JSON.parse(JSON.stringify(f));
+                                                                if (fncElement.id === id) fnc = JSON.parse(JSON.stringify(fncElement));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError18 = true;
@@ -1468,19 +1544,21 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
 
-                                                return getPath(file.parent_id, file.parent_type) + "\\" + file.name;
+                                                return getPath(fnc.nc_id, 'nonC') + "\\" + fnc.name;
                                         }
-                                default:
+                                case 'ds':
                                         {
+                                                var folder = void 0;
+
                                                 var _iteratorNormalCompletion19 = true;
                                                 var _didIteratorError19 = false;
                                                 var _iteratorError19 = undefined;
 
                                                 try {
-                                                        for (var _iterator19 = Data_Base.data.sections[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-                                                                var section = _step19.value;
+                                                        for (var _iterator19 = Data_Base.data.ds[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+                                                                var _ds = _step19.value;
 
-                                                                if (section.id === id) return section.name + ":";
+                                                                if (_ds.id === id) folder = JSON.parse(JSON.stringify(_ds));
                                                         }
                                                 } catch (err) {
                                                         _didIteratorError19 = true;
@@ -1496,77 +1574,83 @@ export default function useGetData(TheDatas) {
                                                                 }
                                                         }
                                                 }
+
+                                                return getPath(folder.parent_id, folder.parent_type) + "\\" + folder.name;
+                                        }
+                                case 'f':
+                                        {
+                                                var file = void 0;
+
+                                                var _iteratorNormalCompletion20 = true;
+                                                var _didIteratorError20 = false;
+                                                var _iteratorError20 = undefined;
+
+                                                try {
+                                                        for (var _iterator20 = Data_Base.data.fs[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+                                                                var f = _step20.value;
+
+                                                                if (f.id === id) file = JSON.parse(JSON.stringify(f));
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError20 = true;
+                                                        _iteratorError20 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion20 && _iterator20.return) {
+                                                                        _iterator20.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError20) {
+                                                                        throw _iteratorError20;
+                                                                }
+                                                        }
+                                                }
+
+                                                return getPath(file.parent_id, file.parent_type) + "\\" + file.name;
+                                        }
+                                default:
+                                        {
+                                                var _iteratorNormalCompletion21 = true;
+                                                var _didIteratorError21 = false;
+                                                var _iteratorError21 = undefined;
+
+                                                try {
+                                                        for (var _iterator21 = Data_Base.data.sections[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+                                                                var section = _step21.value;
+
+                                                                if (section.id === id) return section.name + ":";
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError21 = true;
+                                                        _iteratorError21 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion21 && _iterator21.return) {
+                                                                        _iterator21.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError21) {
+                                                                        throw _iteratorError21;
+                                                                }
+                                                        }
+                                                }
                                         }
                         }
                 };
 
                 // audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19)
-                var _iteratorNormalCompletion20 = true;
-                var _didIteratorError20 = false;
-                var _iteratorError20 = undefined;
-
-                try {
-                        for (var _iterator20 = audits[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-                                var audit = _step20.value;
-
-                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined, audit.is_validated, audit.validator_id));
-                        }
-
-                        // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
-                } catch (err) {
-                        _didIteratorError20 = true;
-                        _iteratorError20 = err;
-                } finally {
-                        try {
-                                if (!_iteratorNormalCompletion20 && _iterator20.return) {
-                                        _iterator20.return();
-                                }
-                        } finally {
-                                if (_didIteratorError20) {
-                                        throw _iteratorError20;
-                                }
-                        }
-                }
-
-                var _iteratorNormalCompletion21 = true;
-                var _didIteratorError21 = false;
-                var _iteratorError21 = undefined;
-
-                try {
-                        for (var _iterator21 = checkLists[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
-                                var checkList = _step21.value;
-
-                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined, checkList.is_validated, checkList.validator_id));
-                        }
-
-                        // dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19)
-                } catch (err) {
-                        _didIteratorError21 = true;
-                        _iteratorError21 = err;
-                } finally {
-                        try {
-                                if (!_iteratorNormalCompletion21 && _iterator21.return) {
-                                        _iterator21.return();
-                                }
-                        } finally {
-                                if (_didIteratorError21) {
-                                        throw _iteratorError21;
-                                }
-                        }
-                }
-
                 var _iteratorNormalCompletion22 = true;
                 var _didIteratorError22 = false;
                 var _iteratorError22 = undefined;
 
                 try {
-                        for (var _iterator22 = dps[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
-                                var dp = _step22.value;
+                        for (var _iterator22 = audits[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
+                                var audit = _step22.value;
 
-                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined, dp.is_validated, dp.validator_id));
+                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined, audit.is_validated, audit.validator_id));
                         }
 
-                        // nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19)
+                        // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError22 = true;
                         _iteratorError22 = err;
@@ -1587,13 +1671,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError23 = undefined;
 
                 try {
-                        for (var _iterator23 = nonCs[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
-                                var nonC = _step23.value;
+                        for (var _iterator23 = checkLists[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
+                                var checkList = _step23.value;
 
-                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined, nonC.is_validated, nonC.validator_id));
+                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined, checkList.is_validated, checkList.validator_id));
                         }
 
-                        // fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19)
+                        // dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError23 = true;
                         _iteratorError23 = err;
@@ -1614,13 +1698,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError24 = undefined;
 
                 try {
-                        for (var _iterator24 = fncs[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
-                                var fnc = _step24.value;
+                        for (var _iterator24 = dps[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
+                                var dp = _step24.value;
 
-                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined, fnc.is_validated, fnc.validator_id));
+                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined, dp.is_validated, dp.validator_id));
                         }
 
-                        // f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19)
+                        // nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError24 = true;
                         _iteratorError24 = err;
@@ -1641,13 +1725,13 @@ export default function useGetData(TheDatas) {
                 var _iteratorError25 = undefined;
 
                 try {
-                        for (var _iterator25 = fs[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
-                                var f = _step25.value;
+                        for (var _iterator25 = nonCs[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
+                                var nonC = _step25.value;
 
-                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url, f.is_validated, f.validator_id));
+                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined, nonC.is_validated, nonC.validator_id));
                         }
 
-                        // d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19)
+                        // fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19)
                 } catch (err) {
                         _didIteratorError25 = true;
                         _iteratorError25 = err;
@@ -1668,8 +1752,62 @@ export default function useGetData(TheDatas) {
                 var _iteratorError26 = undefined;
 
                 try {
-                        for (var _iterator26 = ds[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
-                                var d = _step26.value;
+                        for (var _iterator26 = fncs[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
+                                var fnc = _step26.value;
+
+                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined, fnc.is_validated, fnc.validator_id));
+                        }
+
+                        // f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19)
+                } catch (err) {
+                        _didIteratorError26 = true;
+                        _iteratorError26 = err;
+                } finally {
+                        try {
+                                if (!_iteratorNormalCompletion26 && _iterator26.return) {
+                                        _iterator26.return();
+                                }
+                        } finally {
+                                if (_didIteratorError26) {
+                                        throw _iteratorError26;
+                                }
+                        }
+                }
+
+                var _iteratorNormalCompletion27 = true;
+                var _didIteratorError27 = false;
+                var _iteratorError27 = undefined;
+
+                try {
+                        for (var _iterator27 = fs[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
+                                var f = _step27.value;
+
+                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url, f.is_validated, f.validator_id));
+                        }
+
+                        // d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19)
+                } catch (err) {
+                        _didIteratorError27 = true;
+                        _iteratorError27 = err;
+                } finally {
+                        try {
+                                if (!_iteratorNormalCompletion27 && _iterator27.return) {
+                                        _iterator27.return();
+                                }
+                        } finally {
+                                if (_didIteratorError27) {
+                                        throw _iteratorError27;
+                                }
+                        }
+                }
+
+                var _iteratorNormalCompletion28 = true;
+                var _didIteratorError28 = false;
+                var _iteratorError28 = undefined;
+
+                try {
+                        for (var _iterator28 = ds[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
+                                var d = _step28.value;
 
                                 allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19), undefined, d.section_id, undefined, undefined, d.is_validated, d.validator_id));
                         }
@@ -1686,16 +1824,16 @@ export default function useGetData(TheDatas) {
                         // console.log(structuredData.get(1))
 
                 } catch (err) {
-                        _didIteratorError26 = true;
-                        _iteratorError26 = err;
+                        _didIteratorError28 = true;
+                        _iteratorError28 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion26 && _iterator26.return) {
-                                        _iterator26.return();
+                                if (!_iteratorNormalCompletion28 && _iterator28.return) {
+                                        _iterator28.return();
                                 }
                         } finally {
-                                if (_didIteratorError26) {
-                                        throw _iteratorError26;
+                                if (_didIteratorError28) {
+                                        throw _iteratorError28;
                                 }
                         }
                 }
@@ -1736,7 +1874,7 @@ export default function useGetData(TheDatas) {
                                         break;
                         }
 
-                        return makeNodeData(type + node.id, type === 'f' ? 'file' : 'folder', node.services, false, node.name, type, false, parentId, undefined, type !== 'f', type === 'f' ? node.extension : undefined, node.user, type === 'fnc' ? node.isClosed : undefined, type === 'fnc' ? node.review_date : undefined, node.created_at, //
+                        return makeNodeData(type + node.id, type === 'f' ? 'file' : 'folder', node.services, false, node.name, type, false, parentId, undefined, type !== 'f', type === 'f' ? node.extension : undefined, node.user, type === 'fnc' ? node.isClosed : undefined, type === 'fnc' ? node.review_date : undefined, node.created_at.substring(0, 10) + " A " + node.created_at.substring(11, 19), //
                         type === 'fnc' ? node.level : undefined, parseInt(node.section_id), type === 'f' ? node.size : undefined, type === 'f' ? node.url : undefined, node.is_validated, node.validator_id);
                 }
 
@@ -1768,15 +1906,45 @@ export default function useGetData(TheDatas) {
                                         // const section_id = data.node.constructor === Array ? parseInt(data.node[0].section_id) : parseInt(data.node.section_id)
 
                                         if (data.node.constructor === Array) {
-                                                // console.log("heeeerre", existing_data)
-                                                data.node.forEach(function (node) {
-
+                                                var _loop2 = function _loop2(node) {
                                                         var new_node = create_new_node(node);
+
+                                                        if (state.find(function (node) {
+                                                                return node.id === new_node.id;
+                                                        })) return "continue";
 
                                                         new_node.path = getNewPath(Object.assign({}, new_node), [].concat(_toConsumableArray(state)), true);
 
                                                         state.push(new_node);
-                                                });
+                                                };
+
+                                                // console.log("heeeerre", existing_data)
+                                                var _iteratorNormalCompletion29 = true;
+                                                var _didIteratorError29 = false;
+                                                var _iteratorError29 = undefined;
+
+                                                try {
+                                                        for (var _iterator29 = data.node[Symbol.iterator](), _step29; !(_iteratorNormalCompletion29 = (_step29 = _iterator29.next()).done); _iteratorNormalCompletion29 = true) {
+                                                                var node = _step29.value;
+
+                                                                var _ret2 = _loop2(node);
+
+                                                                if (_ret2 === "continue") continue;
+                                                        }
+                                                } catch (err) {
+                                                        _didIteratorError29 = true;
+                                                        _iteratorError29 = err;
+                                                } finally {
+                                                        try {
+                                                                if (!_iteratorNormalCompletion29 && _iterator29.return) {
+                                                                        _iterator29.return();
+                                                                }
+                                                        } finally {
+                                                                if (_didIteratorError29) {
+                                                                        throw _iteratorError29;
+                                                                }
+                                                        }
+                                                }
                                         }
 
                                         return JSON.parse(JSON.stringify(state));
@@ -1816,8 +1984,8 @@ export default function useGetData(TheDatas) {
 
                                         var _newState = JSON.parse(JSON.stringify(state));
 
-                                        var _loop2 = function _loop2(node) {
-                                                var updatedNode = create_new_node(node);
+                                        var _loop3 = function _loop3(_node7) {
+                                                var updatedNode = create_new_node(_node7);
 
                                                 console.log('updatedNode', updatedNode);
 
@@ -1840,29 +2008,29 @@ export default function useGetData(TheDatas) {
                                                 _newState = update_path(updatedNode, JSON.parse(JSON.stringify(_newState)));
                                         };
 
-                                        var _iteratorNormalCompletion27 = true;
-                                        var _didIteratorError27 = false;
-                                        var _iteratorError27 = undefined;
+                                        var _iteratorNormalCompletion30 = true;
+                                        var _didIteratorError30 = false;
+                                        var _iteratorError30 = undefined;
 
                                         try {
-                                                for (var _iterator27 = _data2.node[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
-                                                        var node = _step27.value;
+                                                for (var _iterator30 = _data2.node[Symbol.iterator](), _step30; !(_iteratorNormalCompletion30 = (_step30 = _iterator30.next()).done); _iteratorNormalCompletion30 = true) {
+                                                        var _node7 = _step30.value;
 
-                                                        _loop2(node);
+                                                        _loop3(_node7);
                                                 }
 
                                                 // EventsManager.emit('updateData')
                                         } catch (err) {
-                                                _didIteratorError27 = true;
-                                                _iteratorError27 = err;
+                                                _didIteratorError30 = true;
+                                                _iteratorError30 = err;
                                         } finally {
                                                 try {
-                                                        if (!_iteratorNormalCompletion27 && _iterator27.return) {
-                                                                _iterator27.return();
+                                                        if (!_iteratorNormalCompletion30 && _iterator30.return) {
+                                                                _iterator30.return();
                                                         }
                                                 } finally {
-                                                        if (_didIteratorError27) {
-                                                                throw _iteratorError27;
+                                                        if (_didIteratorError30) {
+                                                                throw _iteratorError30;
                                                         }
                                                 }
                                         }
@@ -1942,7 +2110,7 @@ export default function useGetData(TheDatas) {
         var structuredData = useMemo(function () {
                 var map = new Map();
 
-                var _loop3 = function _loop3(section) {
+                var _loop4 = function _loop4(section) {
                         map.set(section.id, dataToUse.filter(function (nodeData) {
                                 /*console.log(nodeData.section_id, section.id);*/return nodeData.section_id === section.id || nodeData.section_id === -1;
                         }).map(function (nodeData) {
@@ -1950,27 +2118,27 @@ export default function useGetData(TheDatas) {
                         }));
                 };
 
-                var _iteratorNormalCompletion28 = true;
-                var _didIteratorError28 = false;
-                var _iteratorError28 = undefined;
+                var _iteratorNormalCompletion31 = true;
+                var _didIteratorError31 = false;
+                var _iteratorError31 = undefined;
 
                 try {
-                        for (var _iterator28 = Data_Base.data.sections[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
-                                var section = _step28.value;
+                        for (var _iterator31 = Data_Base.data.sections[Symbol.iterator](), _step31; !(_iteratorNormalCompletion31 = (_step31 = _iterator31.next()).done); _iteratorNormalCompletion31 = true) {
+                                var section = _step31.value;
 
-                                _loop3(section);
+                                _loop4(section);
                         }
                 } catch (err) {
-                        _didIteratorError28 = true;
-                        _iteratorError28 = err;
+                        _didIteratorError31 = true;
+                        _iteratorError31 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion28 && _iterator28.return) {
-                                        _iterator28.return();
+                                if (!_iteratorNormalCompletion31 && _iterator31.return) {
+                                        _iterator31.return();
                                 }
                         } finally {
-                                if (_didIteratorError28) {
-                                        throw _iteratorError28;
+                                if (_didIteratorError31) {
+                                        throw _iteratorError31;
                                 }
                         }
                 }
@@ -2010,52 +2178,52 @@ export default function useGetData(TheDatas) {
                 var img = ["jpeg", "jpg", "png", "gif"];
                 var vid = ["mp4", "avi", "MOV", "mpeg"];
 
-                var _iteratorNormalCompletion29 = true;
-                var _didIteratorError29 = false;
-                var _iteratorError29 = undefined;
+                var _iteratorNormalCompletion32 = true;
+                var _didIteratorError32 = false;
+                var _iteratorError32 = undefined;
 
                 try {
-                        for (var _iterator29 = img[Symbol.iterator](), _step29; !(_iteratorNormalCompletion29 = (_step29 = _iterator29.next()).done); _iteratorNormalCompletion29 = true) {
-                                var imgExt = _step29.value;
+                        for (var _iterator32 = img[Symbol.iterator](), _step32; !(_iteratorNormalCompletion32 = (_step32 = _iterator32.next()).done); _iteratorNormalCompletion32 = true) {
+                                var imgExt = _step32.value;
 
                                 if (imgExt === ext) return "img";
                         }
                 } catch (err) {
-                        _didIteratorError29 = true;
-                        _iteratorError29 = err;
+                        _didIteratorError32 = true;
+                        _iteratorError32 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion29 && _iterator29.return) {
-                                        _iterator29.return();
+                                if (!_iteratorNormalCompletion32 && _iterator32.return) {
+                                        _iterator32.return();
                                 }
                         } finally {
-                                if (_didIteratorError29) {
-                                        throw _iteratorError29;
+                                if (_didIteratorError32) {
+                                        throw _iteratorError32;
                                 }
                         }
                 }
 
-                var _iteratorNormalCompletion30 = true;
-                var _didIteratorError30 = false;
-                var _iteratorError30 = undefined;
+                var _iteratorNormalCompletion33 = true;
+                var _didIteratorError33 = false;
+                var _iteratorError33 = undefined;
 
                 try {
-                        for (var _iterator30 = vid[Symbol.iterator](), _step30; !(_iteratorNormalCompletion30 = (_step30 = _iterator30.next()).done); _iteratorNormalCompletion30 = true) {
-                                var vidExt = _step30.value;
+                        for (var _iterator33 = vid[Symbol.iterator](), _step33; !(_iteratorNormalCompletion33 = (_step33 = _iterator33.next()).done); _iteratorNormalCompletion33 = true) {
+                                var vidExt = _step33.value;
 
                                 if (vidExt === ext) return "vid";
                         }
                 } catch (err) {
-                        _didIteratorError30 = true;
-                        _iteratorError30 = err;
+                        _didIteratorError33 = true;
+                        _iteratorError33 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion30 && _iterator30.return) {
-                                        _iterator30.return();
+                                if (!_iteratorNormalCompletion33 && _iterator33.return) {
+                                        _iterator33.return();
                                 }
                         } finally {
-                                if (_didIteratorError30) {
-                                        throw _iteratorError30;
+                                if (_didIteratorError33) {
+                                        throw _iteratorError33;
                                 }
                         }
                 }
@@ -2064,13 +2232,13 @@ export default function useGetData(TheDatas) {
         }
 
         function getNodeData(id) {
-                var _iteratorNormalCompletion31 = true;
-                var _didIteratorError31 = false;
-                var _iteratorError31 = undefined;
+                var _iteratorNormalCompletion34 = true;
+                var _didIteratorError34 = false;
+                var _iteratorError34 = undefined;
 
                 try {
-                        for (var _iterator31 = displayingSection[Symbol.iterator](), _step31; !(_iteratorNormalCompletion31 = (_step31 = _iterator31.next()).done); _iteratorNormalCompletion31 = true) {
-                                var node = _step31.value;
+                        for (var _iterator34 = displayingSection[Symbol.iterator](), _step34; !(_iteratorNormalCompletion34 = (_step34 = _iterator34.next()).done); _iteratorNormalCompletion34 = true) {
+                                var node = _step34.value;
 
                                 // console.log(node.id)
                                 if (id === node.id) {
@@ -2078,16 +2246,16 @@ export default function useGetData(TheDatas) {
                                 }
                         }
                 } catch (err) {
-                        _didIteratorError31 = true;
-                        _iteratorError31 = err;
+                        _didIteratorError34 = true;
+                        _iteratorError34 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion31 && _iterator31.return) {
-                                        _iterator31.return();
+                                if (!_iteratorNormalCompletion34 && _iterator34.return) {
+                                        _iterator34.return();
                                 }
                         } finally {
-                                if (_didIteratorError31) {
-                                        throw _iteratorError31;
+                                if (_didIteratorError34) {
+                                        throw _iteratorError34;
                                 }
                         }
                 }
@@ -2109,29 +2277,29 @@ export default function useGetData(TheDatas) {
 
         function getChildrenFrom(list_of_data, nodeId) {
                 var children = [];
-                var _iteratorNormalCompletion32 = true;
-                var _didIteratorError32 = false;
-                var _iteratorError32 = undefined;
+                var _iteratorNormalCompletion35 = true;
+                var _didIteratorError35 = false;
+                var _iteratorError35 = undefined;
 
                 try {
-                        for (var _iterator32 = list_of_data[Symbol.iterator](), _step32; !(_iteratorNormalCompletion32 = (_step32 = _iterator32.next()).done); _iteratorNormalCompletion32 = true) {
-                                var nodeData = _step32.value;
+                        for (var _iterator35 = list_of_data[Symbol.iterator](), _step35; !(_iteratorNormalCompletion35 = (_step35 = _iterator35.next()).done); _iteratorNormalCompletion35 = true) {
+                                var nodeData = _step35.value;
 
                                 if (nodeData.parentId === nodeId) {
                                         children.push(nodeData);
                                 }
                         }
                 } catch (err) {
-                        _didIteratorError32 = true;
-                        _iteratorError32 = err;
+                        _didIteratorError35 = true;
+                        _iteratorError35 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion32 && _iterator32.return) {
-                                        _iterator32.return();
+                                if (!_iteratorNormalCompletion35 && _iterator35.return) {
+                                        _iterator35.return();
                                 }
                         } finally {
-                                if (_didIteratorError32) {
-                                        throw _iteratorError32;
+                                if (_didIteratorError35) {
+                                        throw _iteratorError35;
                                 }
                         }
                 }
@@ -2331,12 +2499,12 @@ export default function useGetData(TheDatas) {
         // </div>
         // )
 
-        var CustomDropDown = useCallback(function CustomDropDown(_ref3) {
-                var id = _ref3.id,
-                    icon = _ref3.icon,
-                    content = _ref3.content,
-                    _ref3$f = _ref3.f,
-                    f = _ref3$f === undefined ? undefined : _ref3$f;
+        var CustomDropDown = useCallback(function CustomDropDown(_ref5) {
+                var id = _ref5.id,
+                    icon = _ref5.icon,
+                    content = _ref5.content,
+                    _ref5$f = _ref5.f,
+                    f = _ref5$f === undefined ? undefined : _ref5$f;
 
                 var _useState19 = useState(null),
                     _useState20 = _slicedToArray(_useState19, 2),
@@ -2549,144 +2717,6 @@ export default function useGetData(TheDatas) {
                 }
         };
 
-        function copyObject(obj) {
-                if (!obj) return obj;
-
-                var constructors = {
-                        is_json: function is_json(json) {
-                                return json.constructor === Object;
-                        },
-                        is_array: function is_array(array) {
-                                return array.constructor === Array;
-                        },
-                        is_map: function is_map(map) {
-                                return map.constructor === Map;
-                        },
-                        is_file: function is_file(file) {
-                                return file.constructor === File;
-                        }
-
-                };
-
-                if (constructors.is_map(obj)) {
-                        var map = new Map();
-
-                        obj.forEach(function (value, key) {
-                                map.set(key, copyObject(value));
-                        });
-
-                        return map;
-                } else if (constructors.is_array(obj)) {
-                        var array = [];
-
-                        var _iteratorNormalCompletion33 = true;
-                        var _didIteratorError33 = false;
-                        var _iteratorError33 = undefined;
-
-                        try {
-                                for (var _iterator33 = obj[Symbol.iterator](), _step33; !(_iteratorNormalCompletion33 = (_step33 = _iterator33.next()).done); _iteratorNormalCompletion33 = true) {
-                                        var arrayElement = _step33.value;
-
-                                        array.push(copyObject(arrayElement));
-                                }
-                        } catch (err) {
-                                _didIteratorError33 = true;
-                                _iteratorError33 = err;
-                        } finally {
-                                try {
-                                        if (!_iteratorNormalCompletion33 && _iterator33.return) {
-                                                _iterator33.return();
-                                        }
-                                } finally {
-                                        if (_didIteratorError33) {
-                                                throw _iteratorError33;
-                                        }
-                                }
-                        }
-
-                        return array;
-                } else if (constructors.is_json(obj)) {
-                        var json = {};
-
-                        for (var key in obj) {
-                                json["" + key] = copyObject(obj["" + key]);
-                        }
-
-                        return json;
-                } else return obj;
-        }
-
-        function compareObjects(obj1, obj2) {
-                // Si l'un des objets n'existe pas, retourner false
-                if (!obj1 || !obj2) return false;
-
-                // Si les objets sont de types différents, retourner false
-                if (obj1.constructor !== obj2.constructor) return false;
-
-                // Si les objets sont des Maps
-                if (obj1.constructor === Map) {
-                        // Si les Maps ont un nombre différent d'entrées, retourner false
-                        if (obj1.size !== obj2.size) return false;
-                        // Pour chaque entrée de la Map, comparer la clé et la valeur avec celles de l'autre Map
-                        var _iteratorNormalCompletion34 = true;
-                        var _didIteratorError34 = false;
-                        var _iteratorError34 = undefined;
-
-                        try {
-                                for (var _iterator34 = obj1[Symbol.iterator](), _step34; !(_iteratorNormalCompletion34 = (_step34 = _iterator34.next()).done); _iteratorNormalCompletion34 = true) {
-                                        var _ref4 = _step34.value;
-
-                                        var _ref5 = _slicedToArray(_ref4, 2);
-
-                                        var key = _ref5[0];
-                                        var value = _ref5[1];
-
-                                        if (!obj2.has(key) || !compareObjects(value, obj2.get(key))) return false;
-                                }
-                        } catch (err) {
-                                _didIteratorError34 = true;
-                                _iteratorError34 = err;
-                        } finally {
-                                try {
-                                        if (!_iteratorNormalCompletion34 && _iterator34.return) {
-                                                _iterator34.return();
-                                        }
-                                } finally {
-                                        if (_didIteratorError34) {
-                                                throw _iteratorError34;
-                                        }
-                                }
-                        }
-
-                        return true;
-                }
-
-                // Si les objets sont des tableaux
-                if (obj1.constructor === Array) {
-                        // Si les tableaux ont une taille différente, retourner false
-                        if (obj1.length !== obj2.length) return false;
-                        // Pour chaque élément du tableau, comparer avec celui de l'autre tableau
-                        for (var i = 0; i < obj1.length; i++) {
-                                if (!compareObjects(obj1[i], obj2[i])) return false;
-                        }
-                        return true;
-                }
-
-                // Si les objets sont des objets JSON
-                if (obj1.constructor === Object) {
-                        // Si les objets JSON ont un nombre différent de propriétés, retourner false
-                        if (Object.keys(obj1).length !== Object.keys(obj2).length) return false;
-                        // Pour chaque propriété de l'objet, comparer avec celle de l'autre objet
-                        for (var _key in obj1) {
-                                if (!(_key in obj2) || !compareObjects(obj1[_key], obj2[_key])) return false;
-                        }
-                        return true;
-                }
-
-                // Si les objets sont de types différents, retourner false
-                return obj1 === obj2;
-        }
-
         // function useOutsideAlerter(ref) {
         //   useEffect(() => {
         //     /**
@@ -2736,7 +2766,9 @@ export default function useGetData(TheDatas) {
         return Object.assign({}, window.Global_State, {
                 // EventsManager,
                 // isEditorMode,
-                authUser: Data_Base.authUser,
+                authUser: Data_Base.authUser, updateAuthUserInfo: function updateAuthUserInfo(value) {
+                        console.log("updateAuthUser", value);updateAuthUser(value);
+                },
                 // dataBaseData: FetchedNodesData,
                 dataToUse: dataToUse,
                 hasSection: Data_Base.data.sections.length !== 0,

@@ -49,7 +49,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { useSpring, animated } from 'react-spring';
 import {Dropdown, FormCheck} from "react-bootstrap";
 import useCustomCheckBox, {CheckBox1} from "../custom_checkBox/custom_check";
-
+import {LoadingButton} from "@mui/lab";
 
 
 function Files_Dropzone(props) {
@@ -152,8 +152,6 @@ function Files_Dropzone(props) {
       </div>
     );
   }
-
-// let handleChange
 
 function FilterComponent({set, filter, node})
 {
@@ -290,7 +288,7 @@ function FilterComponent({set, filter, node})
                 }
         }
 
-        const contain_audit = ( node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name) )
+        const contain_audit = ( node.type === "root" && /^(Audit|AUDIT)(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name) )
 
         return(
                 <div id="file_table_filter_component" className="full_size_element" >
@@ -552,7 +550,7 @@ export default function FileTable()
 
         // console.log("window.current_location", window.current_location)
 
-        const contain_audit = ( node.type === "root" && /^Audit(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name) )
+        const contain_audit = ( node.type === "root" && /^(Audit|AUDIT)(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name) )
 
         console.log('contentNooooooooooooode', node, window.Global_State.backend)
 
@@ -1461,6 +1459,8 @@ export default function FileTable()
                                                                 type="text"
                                                                 placeholder="Nouveau Dossier"
                                                                 isInvalid={!!formik.errors.num_chrono}
+                                                                autoFocus
+                                                                onFocus={ e => { e.target.select() } }
                                                                 />
                                                                 <Form.Control.Feedback type="invalid">
                                                                         {msg_err}
@@ -1936,10 +1936,18 @@ export default function FileTable()
                 }
         }
 
-
         const ActionsMenu = () =>
         {
                 // let label1 =  ?  : node.type === "audit" ? "Nouvelle Non-Conformité" : "Nouveau Fichier de preuve"
+                const [loading_buttons, setLoading] = useState(
+                {
+                        rename: false,
+                        share: false,
+                        download: false,
+                        delete: false,
+                }
+                )
+
                 let buttons = []
 
                 // console.log("kkkkkkkkkkkkk", window.Global_State.getCurrentSection().name)
@@ -2048,6 +2056,8 @@ export default function FileTable()
                                                 }
                                                 else
                                                 {
+                                                        setLoading( { ...loading_buttons, rename: true } )
+
                                                         const [id, model] = window.Global_State.identifyNode(node)
                                                         // window.Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
 
@@ -2072,45 +2082,19 @@ export default function FileTable()
                                                         }
 
                                                         // console.log(selectedRow[0].id.substring(2))
-                                                        toast.promise(
-                                                        http.post(`${route}`, query),
-                                                        {
-                                                                loading: 'Loading...',
-                                                                success: 'Proccesus achevé',
-                                                                error: 'err'
-                                                        },
-                                                        {
-                                                                id: `rename_${route}${node.id}`,
-                                                                duration: Infinity
-                                                        }
-                                                        )
+                                                        http.post(`${route}`, query)
                                                         .then(
                                                         res => {
                                                                 console.log(res)
-                                                                switch (res.data.statue) {
-                                                                        case 'success':
-                                                                                toast(`L'element a été renommé`, {type: 'success'})
-                                                                                break
-                                                                        case 'error':
-                                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
-                                                                                break
-                                                                        case 'info':
-                                                                                toast(`Info: ${res.data.data.msg}`, {
-                                                                                        icon: "📢",
-                                                                                        style: {fontWeight: 'bold'}
-                                                                                })
-                                                                                break
-                                                                }
-                                                                setTimeout(() => {
-                                                                        toast.dismiss(`rename_${route}${node.id}`)
-                                                                }, 600)
+                                                                if(res.data.statue === 'success') window.show_response(`${node.value} renommé avec succès !`, "success")
+                                                                else window.show_response(res.data.data.msg, res.data.statue)
+                                                                setLoading( { ...loading_buttons, rename: false } )
                                                         }
                                                         )
                                                         .catch(err => {
                                                                 console.log(err);
-                                                                setTimeout(() => {
-                                                                        toast.dismiss(`rename_${route}${node.id}`)
-                                                                }, 600)
+                                                                window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                                setLoading( { ...loading_buttons, rename: false } )
                                                         })
                                                 }
 
@@ -2144,20 +2128,12 @@ export default function FileTable()
                         {
                                 // const [selectedService, setSelectedServices] = useState(null);
 
-                                const msg_err = "Valeur de champ invalide"
-
 
                                 const handleSubmit = (submittedInfo) => {
                                         // console.log(submittedInfo)
                                         // return
 
-                                        toast( "Sharing...",
-                                                {
-                                                        id: "share",
-                                                       type: "loading",
-                                                        duration: Infinity
-                                                }
-                                        )
+                                        setLoading( { ...loading_buttons, share: true } )
 
                                         let queryBody = new FormData()
 
@@ -2180,39 +2156,16 @@ export default function FileTable()
                                         .then((res) => {
                                                 console.log(res)
 
-                                                if (res.data.statue === 'success') {
-                                                        toast("Fichier(s) partagé(s) avec success",
-                                                        {
-                                                                id: "share",
-                                                                type: "success",
-                                                                duration: 2000
-                                                        }
-                                                        )
-                                                }
-                                                else
-                                                {
-                                                        // console.log('cooooooode', res.data.data.code)
-                                                        toast.dismiss("share")
-                                                        swal({
-                                                                title: "ERROR!",
-                                                                text: res.data.data.msg,
-                                                                icon: "error",
-                                                        });
-                                                }
+                                                if(res.data.statue === 'success') window.show_response(`Fichier(s) partagé(s) avec success"`, "success")
+                                                else window.show_response(res.data.data.msg, res.data.statue)
+                                                setLoading( { ...loading_buttons, share: false } )
                                         })
 
                                         // Catch errors if any
                                         .catch((err) => {
                                                 console.log(err)
-                                                toast.dismiss("share")
-                                                let msg
-                                                if (err.response.status === 500) msg = "erreur interne au serveur"
-                                                else if (err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page"
-                                                swal({
-                                                        title: "ERREUR!",
-                                                        text: err.response.data.message + "\n" + msg,
-                                                        icon: "error",
-                                                });
+                                                window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                setLoading( { ...loading_buttons, share: false } )
                                         })
 
 
@@ -2340,6 +2293,8 @@ export default function FileTable()
                         }
                         )
 
+                        setLoading( { ...loading_buttons, download: true } )
+
                         if ( (nodes_info.length === 1) && (nodes_info[0].model === "App\\Models\\Fichier") )
                         {
                                 console.log(nodes_info)
@@ -2356,8 +2311,15 @@ export default function FileTable()
                                         link.setAttribute('download', `${selectedRow[0].value}`);
                                         document.body.appendChild(link);
                                         link.click();
+
+                                        setLoading( { ...loading_buttons, download: false } )
                                 } )
-                                .catch( err => { console.log(err) } )
+                                .catch( err =>
+                                {
+                                        console.log(err)
+                                        setLoading( { ...loading_buttons, download: false } )
+                                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                } )
                         }
                         else
                         {
@@ -2383,12 +2345,26 @@ export default function FileTable()
                                                         link.setAttribute('download', `${ selectedRow.length === 1 ? `${selectedRow[0].value}.zip` : "Compressed_file.zip" }`);
                                                         document.body.appendChild(link);
                                                         link.click();
+
+                                                        setLoading( { ...loading_buttons, download: false } )
                                                 } )
-                                                .catch( err => { console.log(err) } )
+                                                .catch(
+                                                err =>
+                                                {
+                                                        console.log(err)
+                                                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                        setLoading( { ...loading_buttons, download: false } )
+                                                } )
 
                                         }
                                 )
-                                .catch( err => { console.log(err) } )
+                                .catch(
+                                err =>
+                                {
+                                        console.log(err)
+                                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                        setLoading( { ...loading_buttons, download: false } )
+                                } )
                         }
 
                 }
@@ -2399,6 +2375,8 @@ export default function FileTable()
 
                         const remove = async () =>
                         {
+                                setLoading( { ...loading_buttons, delete: true } )
+
                                 return  Promise.all(
                                 selectedRow.map(
                                 async row =>
@@ -2408,28 +2386,10 @@ export default function FileTable()
                                         // const [ id, type ] = window.Global_State.identifyNode(row)
 
                                         console.log(selectedRow)
+                                        let route = ''
                                         switch (row.type) {
                                                 case 'audit':
-
-                                                        await http.delete('del_audit?id=' + nodeIdentity[0])
-                                                        .then( res => {
-                                                                console.log(res);
-                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                {
-                                                                        icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                })
-
-                                                        } )
-                                                        .catch(err =>
-                                                        {
-                                                                console.log(err);
-                                                                swal({
-                                                                        title: "Error",
-                                                                        text: err.response.data.message,
-                                                                        icon: "error"
-                                                                })
-                                                        })
-
+                                                        route = 'del_audit'
                                                         break;
                                                 case 'checkList':
                                                         break;
@@ -2438,76 +2398,39 @@ export default function FileTable()
                                                 case 'nonC':
                                                         break;
                                                 case 'fnc':
-
-                                                        await http.delete('del_fnc?id=' + nodeIdentity[0])
-                                                        .then( res => {
-                                                                console.log(res);
-                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                {
-                                                                        icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                })
-
-                                                        } )
-                                                        .catch(err =>
-                                                        {
-                                                                console.log(err);
-                                                                swal({
-                                                                        title: "Error",
-                                                                        text: err.response.data.message,
-                                                                        icon: "error"
-                                                                })
-                                                        })
-
+                                                        route = 'del_fnc'
                                                         break;
                                                 case 'ds':
-
-                                                        await http.delete('del_folder?id=' + nodeIdentity[0])
-                                                        .then( res => {
-                                                                console.log(res);
-                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                {
-                                                                        icon: <FaInfoCircle color='#2196F3' size={28} />
-                                                                })
-
-                                                        } )
-                                                        .catch(err =>
-                                                        {
-                                                                console.log(err);
-                                                                swal({
-                                                                        title: "Error",
-                                                                        text: err.response.data.message,
-                                                                        icon: "error"
-                                                                })
-                                                        })
-
+                                                        route = 'del_folder'
                                                         break;
                                                 case 'f':
-                                                        // console.log(nodeIdentity[0])
-
-                                                        await http.delete('del_file?id=' + nodeIdentity[0])
-                                                        .then( res => {
-                                                                console.log(res);
-                                                                if(res.data === 'attente') toast(`En attente de confirmation: ${row.value}`,
-                                                                {
-                                                                        icon: <FaInfoCircle color='#2196F3' size={28} />,
-                                                                })
-
-                                                        } )
-                                                        .catch(err =>
-                                                        {
-                                                                console.log(err);
-                                                                swal({
-                                                                        title: "Error",
-                                                                        text: err.response.data.message,
-                                                                        icon: "error"
-                                                                })
-                                                        })
-
+                                                        route = 'del_file'
                                                         break;
 
                                                 default:
                                                         break;
                                         }
+
+                                        await http.delete(`${route}?id=` + nodeIdentity[0])
+                                        .then(
+                                                res => {
+                                                        console.log(res);
+                                                        if(res.data.statue === 'success') window.show_response(`${row.value} supprimé avec succès !`, "success")
+                                                        else window.show_response(res.data.data.msg, res.data.statue)
+                                                        setLoading( { ...loading_buttons, delete: false } )
+                                                }
+                                        )
+                                        .catch(err =>
+                                        {
+                                                console.log(err);
+                                                window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                setLoading( { ...loading_buttons, delete: false } )
+                                                // swal({
+                                                //         title: "Error",
+                                                //         text: err.response.data.message,
+                                                //         icon: "error"
+                                                // })
+                                        })
 
                                         // return 0;
 
@@ -2578,33 +2501,7 @@ export default function FileTable()
                                         dangerMode: true,
                                 })
                                 .then((willDelete) => {
-                                        if (willDelete)
-                                        {
-                                                toast('Suppressing...',
-                                                        {
-                                                                id: 'Suppressing',
-                                                                type: "loading",
-                                                                duration: Infinity
-                                                        }
-                                                )
-
-                                                remove()
-                                                .then(
-                                                        res =>
-                                                        {
-                                                                setTimeout(
-                                                                () =>
-                                                                {
-                                                                        toast('Fin du proccesus',
-                                                                        {
-                                                                                id: 'Suppressing',
-                                                                                duration: 1000
-                                                                        })
-                                                                },
-                                                                800 )
-                                                        }
-                                                )
-                                        }
+                                        if (willDelete) remove()
                                 });
 
                         }
@@ -2691,7 +2588,7 @@ export default function FileTable()
                                         <Stack direction={"row"} >
 
                                                 <Tooltip title={"COUPER"} placement={`top-end`} >
-                                                        <div>
+                                                        <div className="action_button" >
                                                                 <IconButton id={`ctrl_x`} ref={refs.ctrl_x} color={"error"} disabled={selectedRowNumber === 0} onClick={handleCut}>
                                                                         <IoIosCut color={ selectedRowNumber === 0 ? '' : "#cc7613"} size={24} />
                                                                 </IconButton>
@@ -2699,7 +2596,7 @@ export default function FileTable()
                                                 </Tooltip>
 
                                                 <Tooltip title={"COPIER"} placement={`top-end`} >
-                                                        <div>
+                                                        <div className="action_button" >
                                                                 <IconButton id={`ctrl_c`} ref={refs.ctrl_c} color={"success"} disabled={selectedRowNumber === 0} onClick={handleCopy}>
                                                                         <CopyAllTwoToneIcon color={ selectedRowNumber === 0 ? '' : "success"} fontSize={"medium"} />
                                                                 </IconButton>
@@ -2707,40 +2604,54 @@ export default function FileTable()
                                                 </Tooltip>
 
                                                 <Tooltip title={"COLLER"} placement={`top-end`} >
-                                                        <div>
+                                                        <div className="action_button" >
                                                                 <Paste_component />
                                                         </div>
                                                 </Tooltip>
 
                                                 <Tooltip title={"RENOMMER"} placement={`top-end`} >
-                                                        <div>
-                                                                <IconButton ref={refs.ctrl_r} color={"primary"} disabled={selectedRowNumber !== 1} onClick={handleRename} >
-                                                                        <BiRename color={ selectedRowNumber !== 1 ? '' : "blue"} size={24} />
-                                                                </IconButton>
+                                                        <div className="action_button" >
+                                                                <LoadingButton as={IconButton} loading={loading_buttons.rename} ref={refs.ctrl_r} color={"primary"} disabled={selectedRowNumber !== 1} onClick={handleRename} >
+                                                                        {
+                                                                                loading_buttons.rename ? null :
+                                                                                <BiRename color={ selectedRowNumber !== 1 ? '' : "blue"} size={24} />
+                                                                        }
+                                                                </LoadingButton>
                                                         </div>
                                                 </Tooltip>
 
                                                 <Tooltip title={"PARTAGER"} placement={`top-end`} >
-                                                        <div>
-                                                                <IconButton color={"secondary"} disabled={selectedRowNumber === 0} onClick={handleShare}>
-                                                                        <VscLiveShare color={ selectedRowNumber === 0 ? '' : "purple"} size={24} />
-                                                                </IconButton>
+                                                        <div className="action_button" >
+                                                                <LoadingButton as={IconButton} loading={loading_buttons.share} color={"secondary"} disabled={selectedRowNumber === 0} onClick={handleShare}>
+                                                                        {
+                                                                                loading_buttons.share ? null :
+                                                                                <VscLiveShare color={ selectedRowNumber === 0 ? '' : "purple"} size={24} />
+                                                                        }
+                                                                </LoadingButton>
                                                         </div>
                                                 </Tooltip>
 
                                                 <Tooltip title={"ACQUERIR"} placement={`top-end`} >
-                                                        <div>
-                                                                <IconButton color={"primary"} disabled={selectedRowNumber === 0} onClick={handleDownload}>
-                                                                        <ImDownload2 color={ selectedRowNumber === 0 ? '' : "#1565c0"} size={24} />
-                                                                </IconButton>
+                                                        <div className="action_button" >
+                                                                <LoadingButton as={IconButton} loading={loading_buttons.download} color={"primary"} disabled={selectedRowNumber === 0} onClick={handleDownload}>
+                                                                        {
+                                                                                loading_buttons.download ? null :
+                                                                                <ImDownload2 color={ selectedRowNumber === 0 ? '' : "#1565c0"} size={24} />
+                                                                        }
+                                                                </LoadingButton>
                                                         </div>
                                                 </Tooltip>
 
                                                 <Tooltip title={"SUPPRIMER"} placement={`top-end`} >
-                                                        <div>
-                                                                <IconButton id={'ctrl_d'} ref={refs.ctrl_d} color={"error"} disabled={selectedRowNumber === 0} onClick={handleDelete}>
-                                                                        <RiDeleteBin2Fill color={ selectedRowNumber === 0 ? '' : "red"} size={24} />
-                                                                </IconButton>
+                                                        <div className="action_button" >
+                                                                <LoadingButton as={IconButton} loading={loading_buttons.delete} id={'ctrl_d'} ref={refs.ctrl_d} color={"error"} disabled={selectedRowNumber === 0} onClick={handleDelete}>
+                                                                        {
+                                                                                loading_buttons.delete ? null :
+                                                                                <RiDeleteBin2Fill
+                                                                                color={selectedRowNumber === 0 ? '' : "red"}
+                                                                                size={24}/>
+                                                                        }
+                                                                </LoadingButton>
                                                         </div>
                                                 </Tooltip>
 
@@ -3572,7 +3483,6 @@ export default function FileTable()
                 return datas
         }
 
-
         // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
         const sortByName = (rowA, rowB) => {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
@@ -3777,18 +3687,6 @@ export default function FileTable()
                 dispatch({type: 'nodeUpdate', newDatas: initDatas})
         }, [formattedDatas]
         )
-
-
-
-
-        // const [visibleData, setVisibleData] = useState(datas)
-
-
-        // useEffect(
-        //     () => {setVisibleData(datas)}, [datas]
-        // )
-
-
 
         console.log('contentRender')
 

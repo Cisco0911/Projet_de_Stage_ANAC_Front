@@ -21,7 +21,10 @@ import { useNavigate } from "react-router-dom";
 import { VscEyeClosed, VscEye } from "react-icons/vsc";
 import { RiLockPasswordFill, RiMapPinUserFill } from "react-icons/ri";
 import { FaUserTie, FaUserSecret } from "react-icons/fa";
+import { Link } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 
+// https://api.anac-togo-file-manager.com
 export var http = axios.create({
         baseURL: 'http://localhost:80',
         headers: {},
@@ -47,12 +50,18 @@ export default function Login() {
             showPassword = _useState2[0],
             setShowPassword = _useState2[1];
 
+        var _useState3 = useState(false),
+            _useState4 = _slicedToArray(_useState3, 2),
+            loading = _useState4[0],
+            setLoading = _useState4[1];
+
         var toggleShowPassword = function toggleShowPassword() {
                 setShowPassword(!showPassword);
         };
 
         var handleSubmit = function handleSubmit(submittedInfo) {
                 console.log(submittedInfo);
+                setLoading(true);
 
                 var queryBody = new FormData();
 
@@ -63,10 +72,18 @@ export default function Login() {
 
                 http.post('/login', queryBody).then(function (res) {
                         console.log(res);
+                        setLoading(false);
 
-                        if (!parseInt(res.data.user.id)) navigate("/administrator");else navigate("/files");
+                        if (!parseInt(res.data.user.id)) navigate("/administrator");else navigate("/files_browser");
                 }).catch(function (err) {
                         console.log(err);
+                        setLoading(true);
+
+                        swal({
+                                title: "Error",
+                                text: err.response.data.message,
+                                icon: "error"
+                        });
                 });
         };
 
@@ -82,6 +99,7 @@ export default function Login() {
                         Container,
                         {
                                 style: {
+                                        maxWidth: 600,
                                         width: "90%",
                                         justifyContent: 'center',
                                         position: 'relative',
@@ -212,8 +230,8 @@ export default function Login() {
                                                                 }
                                                         },
                                                         React.createElement(
-                                                                Button,
-                                                                { variant: 'primary', type: 'submit' },
+                                                                LoadingButton,
+                                                                { loading: loading, variant: 'outlined', type: 'submit' },
                                                                 'Connexion'
                                                         )
                                                 )
@@ -226,10 +244,15 @@ export default function Login() {
                         { className: 'mt-3' },
                         'don\'t have account ? ',
                         React.createElement(
-                                'a',
-                                { id: 'sign_in', href: '/sign_in' },
+                                Link,
+                                { href: "/sign_in" },
                                 'Sign in'
                         )
+                ),
+                React.createElement(
+                        Link,
+                        { href: "/forgot_password" },
+                        'Mot de passe oubli\xE9'
                 )
         );
 }

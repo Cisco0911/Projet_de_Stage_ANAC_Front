@@ -150,6 +150,12 @@ export default function useBack() {
                 var node = find(id);
                 console.log("nooooooooooooooooode_modeeeeeeeel", node, root);
 
+                if (!node) {
+                        node = find("0");
+                        navigation_history.current.prev = [];
+                        navigation_history.current.next = [];
+                }
+
                 var new_node_section_id = void 0;
 
                 if (node.model.isRoot) {

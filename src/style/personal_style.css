@@ -60,14 +60,22 @@ html, body, #root
     width: 80%;
 }
 
-#sign_in
+/*a.custom_link*/
+/*{*/
+/*    color: #287cf8 !important;*/
+/*    text-decoration: underline !important;*/
+/*}*/
+/*a.custom_link:hover*/
+/*{*/
+/*    color: blue !important;*/
+/*}*/
+
+.danger_list_item
 {
-    color: #287cf8;
-    text-decoration: underline !important;
-}
-#sign_in:hover
-{
-    color: blue;
+    color: orangered;
+    font-size: 12px;
+    margin: 5px 0;
+    display: block;
 }
 
 .custom_login_header
@@ -112,9 +120,10 @@ html, body, #root
 .sections_div
 {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 0 10px;
 }
@@ -269,6 +278,14 @@ html, body, #root
     position: relative;
     padding-right: 10px;
 }
+.action_button
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 40px;
+    min-height: 40px;
+}
 #file_table_filter_component
 {
     margin-bottom: 5px;
@@ -313,19 +330,13 @@ html, body, #root
 
 
 @media only screen and (max-width: 576px) {
-    /*.file_tree_sm_size*/
-    /*{*/
-    /*    position: absolute;*/
-    /*    z-index: 2000;*/
-    /*    background-color: whitesmoke;*/
-    /*    !*padding: 10px 15px;*!*/
-    /*    border: thin solid blue;*/
-    /*    border-radius: 100%;*/
-    /*    top: unset;*/
-    /*    right: unset;*/
-    /*    left: 0;*/
-    /*    bottom: 0;*/
-    /*}*/
+    .action_button
+    {
+        min-width: 20px;
+        /*min-height: 20px;*/
+        /*max-width: 30px;*/
+        /*max-height: 30px;*/
+    }
 }
 
 
@@ -369,4 +380,9 @@ html, body, #root
 {
     width: 100%;
     height: 100%;
+}
+
+.css-qywfm8-MuiDivider-wrapper
+{
+    min-width: fit-content;
 }

@@ -1,10 +1,6 @@
-import _regeneratorRuntime from "babel-runtime/regenerator";
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -16,21 +12,201 @@ import isEqual from "lodash.isequal";
 
 import { http } from "./auth/login";
 
-import Button from 'react-bootstrap/Button';
-
 import toast from "react-hot-toast";
 
-import { Stack } from '@mui/material';
+import { Button, Fade, Popper, Stack } from '@mui/material';
+import Draggable from "react-draggable";
+import Alert from "@mui/material/Alert";
+import Paper from "@mui/material/Paper";
+import { LoadingButton } from "@mui/lab";
 
-export default function useEditor(data) {
-        var _this = this;
+var save = function save(request) {
+        return new Promise(function (resolve, reject) {
+                http.post('handle_edit', request, {
+                        headers: {
+                                'Content-Type': 'multipart/form-data'
+                        }
+                }).then(function (res) {
+                        return resolve(res);
+                }).catch(function (err) {
+                        return reject(err);
+                });
+        });
+};
 
-        // const active = useMemo( () => (isEditorMode), [active] )
+var Save_component = function Save_component(_ref) {
+        var open = _ref.open,
+            jobs = _ref.jobs,
+            localDataState = _ref.localDataState;
 
         var _useState = useState(false),
             _useState2 = _slicedToArray(_useState, 2),
-            active = _useState2[0],
-            setActive = _useState2[1];
+            loading = _useState2[0],
+            setLoading = _useState2[1];
+
+        return React.createElement(
+                Draggable,
+                null,
+                React.createElement(
+                        Fade,
+                        { "in": open },
+                        React.createElement(
+                                Paper,
+                                { elevation: 5, style: {
+                                                width: "fit-content",
+                                                height: "fit-content",
+                                                padding: 10,
+                                                borderRadius: 10,
+                                                zIndex: 1000,
+                                                position: "absolute",
+                                                right: 15,
+                                                bottom: 20
+                                        } },
+                                React.createElement(
+                                        Stack,
+                                        { direction: "row", spacing: 3 },
+                                        React.createElement(
+                                                LoadingButton,
+                                                { loading: loading, variant: "outlined", color: "info", size: "medium",
+                                                        onClick: function onClick() {
+                                                                setLoading(true);
+                                                                var queryData = new FormData();
+
+                                                                var sortedJobs = [];
+                                                                var visitedJobs = new Set();
+
+                                                                function topologicalSort(jobs, jobId) {
+
+                                                                        visitedJobs.add(jobId);
+
+                                                                        var job = jobs.find(function (j) {
+                                                                                return j.id === jobId;
+                                                                        });
+                                                                        if (!job) return;
+
+                                                                        if ((!job.dependencies || job.dependencies.length === 0) && !job.copy_job_id) {
+                                                                                sortedJobs.push(job);
+                                                                                return;
+                                                                        }
+
+                                                                        var _iteratorNormalCompletion = true;
+                                                                        var _didIteratorError = false;
+                                                                        var _iteratorError = undefined;
+
+                                                                        try {
+                                                                                for (var _iterator = (job.dependencies || (job.copy_job_id ? [job.copy_job_id] : []))[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                                                                                        var dependency = _step.value;
+
+                                                                                        var dependencyId = typeof dependency === 'number' ? dependency : dependency.job_id;
+                                                                                        if (!visitedJobs.has(dependencyId)) {
+                                                                                                topologicalSort(jobs, dependencyId);
+                                                                                        }
+                                                                                }
+                                                                        } catch (err) {
+                                                                                _didIteratorError = true;
+                                                                                _iteratorError = err;
+                                                                        } finally {
+                                                                                try {
+                                                                                        if (!_iteratorNormalCompletion && _iterator.return) {
+                                                                                                _iterator.return();
+                                                                                        }
+                                                                                } finally {
+                                                                                        if (_didIteratorError) {
+                                                                                                throw _iteratorError;
+                                                                                        }
+                                                                                }
+                                                                        }
+
+                                                                        sortedJobs.push(job);
+                                                                }
+
+                                                                var _iteratorNormalCompletion2 = true;
+                                                                var _didIteratorError2 = false;
+                                                                var _iteratorError2 = undefined;
+
+                                                                try {
+                                                                        for (var _iterator2 = jobs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                                                                                var job = _step2.value;
+
+                                                                                if (!visitedJobs.has(job.id)) {
+                                                                                        topologicalSort(jobs, job.id);
+                                                                                }
+                                                                        }
+                                                                } catch (err) {
+                                                                        _didIteratorError2 = true;
+                                                                        _iteratorError2 = err;
+                                                                } finally {
+                                                                        try {
+                                                                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                                                                        _iterator2.return();
+                                                                                }
+                                                                        } finally {
+                                                                                if (_didIteratorError2) {
+                                                                                        throw _iteratorError2;
+                                                                                }
+                                                                        }
+                                                                }
+
+                                                                sortedJobs.map(function (job) {
+                                                                        if (job.operation === "add_copy") {
+                                                                                var parent = localDataState.find(function (node) {
+                                                                                        return node.id === job.identity_ref.to_id;
+                                                                                });
+                                                                                var the_node = localDataState.find(function (node) {
+                                                                                        return node.id === job.identity_ref.id;
+                                                                                });
+
+                                                                                // add_copy_job.data.relative_path = `${destination.name}\\${new_node.name}`;
+                                                                                job.data.relative_path = parent.name + "\\" + the_node.name;
+                                                                        }
+
+                                                                        queryData.append("jobs[]", JSON.stringify(job));
+                                                                        if (job.node_model === 'App\\Models\\Fichier' && job.operation === 'add') {
+                                                                                job.data.files.map(function (file) {
+                                                                                        queryData.append("job" + job.id + "_files[]", file);
+                                                                                });
+                                                                        }
+                                                                });
+
+                                                                // console.log('jooooooooobs', queryData.get('jobs[]'))
+
+
+                                                                var onFulfilled = function onFulfilled(res) {
+                                                                        console.log('editor handling ressssssssssssssssssssssssssssssssssss', res);
+                                                                        setLoading(false);
+                                                                        window.Global_State.changeMode();
+                                                                        window.show_response("Enregistrement terminé.", "success");
+                                                                };
+                                                                var onRejected = function onRejected(err) {
+                                                                        setLoading(false);
+                                                                        window.show_response(err.message + " " + err.response.data.message, "error");
+                                                                };
+
+                                                                save(queryData).then(onFulfilled, onRejected);
+                                                        }
+                                                },
+                                                "SAVE"
+                                        ),
+                                        React.createElement(
+                                                Button,
+                                                { variant: "outlined", color: "error", size: "medium", onClick: function onClick(e) {
+                                                                return window.Global_State.changeMode();
+                                                        } },
+                                                "DISCARD"
+                                        )
+                                )
+                        )
+                )
+        );
+};
+
+export default function useEditor(data) {
+        // const active = useMemo( () => (isEditorMode), [active] )
+
+        var _useState3 = useState(false),
+            _useState4 = _slicedToArray(_useState3, 2),
+            active = _useState4[0],
+            setActive = _useState4[1];
 
         var initData = useRef(JSON.parse(JSON.stringify(data)));
 
@@ -40,13 +216,13 @@ export default function useEditor(data) {
                         var isNew = true;
 
                         // console.log('enter foooooooooooooooor', initData.current)
-                        var _iteratorNormalCompletion = true;
-                        var _didIteratorError = false;
-                        var _iteratorError = undefined;
+                        var _iteratorNormalCompletion3 = true;
+                        var _didIteratorError3 = false;
+                        var _iteratorError3 = undefined;
 
                         try {
-                                for (var _iterator = initData.current[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                                        var initNode = _step.value;
+                                for (var _iterator3 = initData.current[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                                        var initNode = _step3.value;
 
                                         // console.log('idddddddddddddddddddddddddddddddddd', id, initNode.id)
                                         if (id === initNode.id) {
@@ -55,16 +231,16 @@ export default function useEditor(data) {
                                         }
                                 }
                         } catch (err) {
-                                _didIteratorError = true;
-                                _iteratorError = err;
+                                _didIteratorError3 = true;
+                                _iteratorError3 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion && _iterator.return) {
-                                                _iterator.return();
+                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                                _iterator3.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError) {
-                                                throw _iteratorError;
+                                        if (_didIteratorError3) {
+                                                throw _iteratorError3;
                                         }
                                 }
                         }
@@ -94,15 +270,15 @@ export default function useEditor(data) {
         var undo_data = useRef([]);
         var redo_data = useRef([]);
 
-        var _useState3 = useState(false),
-            _useState4 = _slicedToArray(_useState3, 2),
-            can_undo = _useState4[0],
-            setCan_undo = _useState4[1];
-
         var _useState5 = useState(false),
             _useState6 = _slicedToArray(_useState5, 2),
-            can_redo = _useState6[0],
-            setCan_redo = _useState6[1];
+            can_undo = _useState6[0],
+            setCan_undo = _useState6[1];
+
+        var _useState7 = useState(false),
+            _useState8 = _slicedToArray(_useState7, 2),
+            can_redo = _useState8[0],
+            setCan_redo = _useState8[1];
 
         var formData = useRef();
 
@@ -141,26 +317,26 @@ export default function useEditor(data) {
         var isExistingIn = function isExistingIn(list_of_data, node_name, destination_id) {
                 var children = window.Global_State.getChildrenById([].concat(_toConsumableArray(list_of_data)), destination_id);
 
-                var _iteratorNormalCompletion2 = true;
-                var _didIteratorError2 = false;
-                var _iteratorError2 = undefined;
+                var _iteratorNormalCompletion4 = true;
+                var _didIteratorError4 = false;
+                var _iteratorError4 = undefined;
 
                 try {
-                        for (var _iterator2 = children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                                var child = _step2.value;
+                        for (var _iterator4 = children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                                var child = _step4.value;
                                 if (child.name === node_name) return Object.assign({}, child);
                         }
                 } catch (err) {
-                        _didIteratorError2 = true;
-                        _iteratorError2 = err;
+                        _didIteratorError4 = true;
+                        _iteratorError4 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                                        _iterator2.return();
+                                if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                                        _iterator4.return();
                                 }
                         } finally {
-                                if (_didIteratorError2) {
-                                        throw _iteratorError2;
+                                if (_didIteratorError4) {
+                                        throw _iteratorError4;
                                 }
                         }
                 }
@@ -224,29 +400,29 @@ export default function useEditor(data) {
                                 return node.id !== qualified_id;
                         });
 
-                        var _iteratorNormalCompletion3 = true;
-                        var _didIteratorError3 = false;
-                        var _iteratorError3 = undefined;
+                        var _iteratorNormalCompletion5 = true;
+                        var _didIteratorError5 = false;
+                        var _iteratorError5 = undefined;
 
                         try {
-                                for (var _iterator3 = list_[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                                        var node = _step3.value;
+                                for (var _iterator5 = list_[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                                        var node = _step5.value;
 
                                         if (node.copying_node_id === qualified_id || node.root_node_id === qualified_id) {
                                                 rest = suppress_from(rest, node.id);
                                         }
                                 }
                         } catch (err) {
-                                _didIteratorError3 = true;
-                                _iteratorError3 = err;
+                                _didIteratorError5 = true;
+                                _iteratorError5 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                                                _iterator3.return();
+                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                                                _iterator5.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError3) {
-                                                throw _iteratorError3;
+                                        if (_didIteratorError5) {
+                                                throw _iteratorError5;
                                         }
                                 }
                         }
@@ -255,13 +431,13 @@ export default function useEditor(data) {
 
                         // console.log('childreeeeeeeeeeeeen', children)
 
-                        var _iteratorNormalCompletion4 = true;
-                        var _didIteratorError4 = false;
-                        var _iteratorError4 = undefined;
+                        var _iteratorNormalCompletion6 = true;
+                        var _didIteratorError6 = false;
+                        var _iteratorError6 = undefined;
 
                         try {
-                                for (var _iterator4 = children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                                        var child = _step4.value;
+                                for (var _iterator6 = children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                                        var child = _step6.value;
 
                                         // console.log(id, node.parentId)
                                         rest = suppress_from(rest, child.id);
@@ -269,16 +445,16 @@ export default function useEditor(data) {
 
                                 // console.log('resttttttttttttttttt', rest)
                         } catch (err) {
-                                _didIteratorError4 = true;
-                                _iteratorError4 = err;
+                                _didIteratorError6 = true;
+                                _iteratorError6 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                                                _iterator4.return();
+                                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                                                _iterator6.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError4) {
-                                                throw _iteratorError4;
+                                        if (_didIteratorError6) {
+                                                throw _iteratorError6;
                                         }
                                 }
                         }
@@ -314,22 +490,22 @@ export default function useEditor(data) {
                                                 if (initManager.isNew(node.id)) updated_state.push(node);
                                         });
 
-                                        var _iteratorNormalCompletion5 = true;
-                                        var _didIteratorError5 = false;
-                                        var _iteratorError5 = undefined;
+                                        var _iteratorNormalCompletion7 = true;
+                                        var _didIteratorError7 = false;
+                                        var _iteratorError7 = undefined;
 
                                         try {
-                                                for (var _iterator5 = state[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                                                        var localNode = _step5.value;
+                                                for (var _iterator7 = state[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                                                        var localNode = _step7.value;
 
                                                         var added = false;
-                                                        var _iteratorNormalCompletion6 = true;
-                                                        var _didIteratorError6 = false;
-                                                        var _iteratorError6 = undefined;
+                                                        var _iteratorNormalCompletion8 = true;
+                                                        var _didIteratorError8 = false;
+                                                        var _iteratorError8 = undefined;
 
                                                         try {
-                                                                for (var _iterator6 = new_data[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                                                                        var node = _step6.value;
+                                                                for (var _iterator8 = new_data[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                                                                        var node = _step8.value;
 
                                                                         if (node.id === localNode.id) {
                                                                                 if (initManager.haveBeenModified(node)) {
@@ -341,16 +517,16 @@ export default function useEditor(data) {
                                                                         }
                                                                 }
                                                         } catch (err) {
-                                                                _didIteratorError6 = true;
-                                                                _iteratorError6 = err;
+                                                                _didIteratorError8 = true;
+                                                                _iteratorError8 = err;
                                                         } finally {
                                                                 try {
-                                                                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                                                                                _iterator6.return();
+                                                                        if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                                                                                _iterator8.return();
                                                                         }
                                                                 } finally {
-                                                                        if (_didIteratorError6) {
-                                                                                throw _iteratorError6;
+                                                                        if (_didIteratorError8) {
+                                                                                throw _iteratorError8;
                                                                         }
                                                                 }
                                                         }
@@ -359,16 +535,16 @@ export default function useEditor(data) {
                                                         if (localNode.id.split('-').length === 2) updated_state.push(localNode);
                                                 }
                                         } catch (err) {
-                                                _didIteratorError5 = true;
-                                                _iteratorError5 = err;
+                                                _didIteratorError7 = true;
+                                                _iteratorError7 = err;
                                         } finally {
                                                 try {
-                                                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                                                                _iterator5.return();
+                                                        if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                                                                _iterator7.return();
                                                         }
                                                 } finally {
-                                                        if (_didIteratorError5) {
-                                                                throw _iteratorError5;
+                                                        if (_didIteratorError7) {
+                                                                throw _iteratorError7;
                                                         }
                                                 }
                                         }
@@ -486,29 +662,29 @@ export default function useEditor(data) {
                                                                                                                 to_update.push(child_to_move);
                                                                                                         };
 
-                                                                                                        var _iteratorNormalCompletion8 = true;
-                                                                                                        var _didIteratorError8 = false;
-                                                                                                        var _iteratorError8 = undefined;
+                                                                                                        var _iteratorNormalCompletion10 = true;
+                                                                                                        var _didIteratorError10 = false;
+                                                                                                        var _iteratorError10 = undefined;
 
                                                                                                         try {
-                                                                                                                for (var _iterator8 = children_to_move[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                                                                                                                        var child_to_move = _step8.value;
+                                                                                                                for (var _iterator10 = children_to_move[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                                                                                                                        var child_to_move = _step10.value;
 
                                                                                                                         var _ret3 = _loop2(child_to_move);
 
                                                                                                                         if (_ret3 === "continue") continue;
                                                                                                                 }
                                                                                                         } catch (err) {
-                                                                                                                _didIteratorError8 = true;
-                                                                                                                _iteratorError8 = err;
+                                                                                                                _didIteratorError10 = true;
+                                                                                                                _iteratorError10 = err;
                                                                                                         } finally {
                                                                                                                 try {
-                                                                                                                        if (!_iteratorNormalCompletion8 && _iterator8.return) {
-                                                                                                                                _iterator8.return();
+                                                                                                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                                                                                                                                _iterator10.return();
                                                                                                                         }
                                                                                                                 } finally {
-                                                                                                                        if (_didIteratorError8) {
-                                                                                                                                throw _iteratorError8;
+                                                                                                                        if (_didIteratorError10) {
+                                                                                                                                throw _iteratorError10;
                                                                                                                         }
                                                                                                                 }
                                                                                                         }
@@ -540,29 +716,29 @@ export default function useEditor(data) {
                                                         }
                                                 };
 
-                                                var _iteratorNormalCompletion7 = true;
-                                                var _didIteratorError7 = false;
-                                                var _iteratorError7 = undefined;
+                                                var _iteratorNormalCompletion9 = true;
+                                                var _didIteratorError9 = false;
+                                                var _iteratorError9 = undefined;
 
                                                 try {
-                                                        for (var _iterator7 = now_state[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-                                                                var _node = _step7.value;
+                                                        for (var _iterator9 = now_state[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                                                                var _node = _step9.value;
 
                                                                 var _ret2 = _loop(_node);
 
                                                                 if (_ret2 === "break") break;
                                                         }
                                                 } catch (err) {
-                                                        _didIteratorError7 = true;
-                                                        _iteratorError7 = err;
+                                                        _didIteratorError9 = true;
+                                                        _iteratorError9 = err;
                                                 } finally {
                                                         try {
-                                                                if (!_iteratorNormalCompletion7 && _iterator7.return) {
-                                                                        _iterator7.return();
+                                                                if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                                                                        _iterator9.return();
                                                                 }
                                                         } finally {
-                                                                if (_didIteratorError7) {
-                                                                        throw _iteratorError7;
+                                                                if (_didIteratorError9) {
+                                                                        throw _iteratorError9;
                                                                 }
                                                         }
                                                 }
@@ -603,13 +779,13 @@ export default function useEditor(data) {
 
                                         console.log('dataaaaaaaaaaaaaaaaaaas', files, action.job);
 
-                                        var _iteratorNormalCompletion9 = true;
-                                        var _didIteratorError9 = false;
-                                        var _iteratorError9 = undefined;
+                                        var _iteratorNormalCompletion11 = true;
+                                        var _didIteratorError11 = false;
+                                        var _iteratorError11 = undefined;
 
                                         try {
-                                                for (var _iterator9 = files[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                                                        var file = _step9.value;
+                                                for (var _iterator11 = files[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                                                        var file = _step11.value;
 
 
                                                         var part_name = file.name.split('.');
@@ -627,16 +803,16 @@ export default function useEditor(data) {
                                                         id.current = id.current - 1;
                                                 }
                                         } catch (err) {
-                                                _didIteratorError9 = true;
-                                                _iteratorError9 = err;
+                                                _didIteratorError11 = true;
+                                                _iteratorError11 = err;
                                         } finally {
                                                 try {
-                                                        if (!_iteratorNormalCompletion9 && _iterator9.return) {
-                                                                _iterator9.return();
+                                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                                                                _iterator11.return();
                                                         }
                                                 } finally {
-                                                        if (_didIteratorError9) {
-                                                                throw _iteratorError9;
+                                                        if (_didIteratorError11) {
+                                                                throw _iteratorError11;
                                                         }
                                                 }
                                         }
@@ -704,26 +880,26 @@ export default function useEditor(data) {
                                                                                 {
                                                                                         var children = window.Global_State.getChildrenById([].concat(_toConsumableArray(now_state)), destination.id);
 
-                                                                                        var _iteratorNormalCompletion10 = true;
-                                                                                        var _didIteratorError10 = false;
-                                                                                        var _iteratorError10 = undefined;
+                                                                                        var _iteratorNormalCompletion12 = true;
+                                                                                        var _didIteratorError12 = false;
+                                                                                        var _iteratorError12 = undefined;
 
                                                                                         try {
-                                                                                                for (var _iterator10 = children[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-                                                                                                        var child = _step10.value;
+                                                                                                for (var _iterator12 = children[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+                                                                                                        var child = _step12.value;
                                                                                                         if (child.name === node.name) to_delete.push(child.id);
                                                                                                 }
                                                                                         } catch (err) {
-                                                                                                _didIteratorError10 = true;
-                                                                                                _iteratorError10 = err;
+                                                                                                _didIteratorError12 = true;
+                                                                                                _iteratorError12 = err;
                                                                                         } finally {
                                                                                                 try {
-                                                                                                        if (!_iteratorNormalCompletion10 && _iterator10.return) {
-                                                                                                                _iterator10.return();
+                                                                                                        if (!_iteratorNormalCompletion12 && _iterator12.return) {
+                                                                                                                _iterator12.return();
                                                                                                         }
                                                                                                 } finally {
-                                                                                                        if (_didIteratorError10) {
-                                                                                                                throw _iteratorError10;
+                                                                                                        if (_didIteratorError12) {
+                                                                                                                throw _iteratorError12;
                                                                                                         }
                                                                                                 }
                                                                                         }
@@ -755,13 +931,13 @@ export default function useEditor(data) {
 
                                         console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_audit');
 
-                                        var _iteratorNormalCompletion11 = true;
-                                        var _didIteratorError11 = false;
-                                        var _iteratorError11 = undefined;
+                                        var _iteratorNormalCompletion13 = true;
+                                        var _didIteratorError13 = false;
+                                        var _iteratorError13 = undefined;
 
                                         try {
-                                                for (var _iterator11 = action.jobs[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-                                                        var job = _step11.value;
+                                                for (var _iterator13 = action.jobs[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+                                                        var job = _step13.value;
 
                                                         var _data4 = job.data;
 
@@ -774,16 +950,16 @@ export default function useEditor(data) {
                                                         state.push(new_node);
                                                 }
                                         } catch (err) {
-                                                _didIteratorError11 = true;
-                                                _iteratorError11 = err;
+                                                _didIteratorError13 = true;
+                                                _iteratorError13 = err;
                                         } finally {
                                                 try {
-                                                        if (!_iteratorNormalCompletion11 && _iterator11.return) {
-                                                                _iterator11.return();
+                                                        if (!_iteratorNormalCompletion13 && _iterator13.return) {
+                                                                _iterator13.return();
                                                         }
                                                 } finally {
-                                                        if (_didIteratorError11) {
-                                                                throw _iteratorError11;
+                                                        if (_didIteratorError13) {
+                                                                throw _iteratorError13;
                                                         }
                                                 }
                                         }
@@ -806,9 +982,9 @@ export default function useEditor(data) {
 
                                         var _data5 = action.job.data;
 
-                                        var _ref = [parseInt(_data5.debut), parseInt(_data5.fin)],
-                                            debut = _ref[0],
-                                            fin = _ref[1];
+                                        var _ref2 = [parseInt(_data5.debut), parseInt(_data5.fin)],
+                                            debut = _ref2[0],
+                                            fin = _ref2[1];
 
 
                                         var audit = state.find(function (node) {
@@ -914,56 +1090,56 @@ export default function useEditor(data) {
 
                 var getJobByKey = function getJobByKey(key) {
                         try {
-                                var _iteratorNormalCompletion12 = true;
-                                var _didIteratorError12 = false;
-                                var _iteratorError12 = undefined;
+                                var _iteratorNormalCompletion14 = true;
+                                var _didIteratorError14 = false;
+                                var _iteratorError14 = undefined;
 
                                 try {
-                                        for (var _iterator12 = state[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-                                                var job = _step12.value;
+                                        for (var _iterator14 = state[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+                                                var job = _step14.value;
 
                                                 console.log('searching joooooooooob key.job_id', job.id, key.job_id);
                                                 if (job.id === key.job_id) return job;
                                         }
                                 } catch (err) {
-                                        _didIteratorError12 = true;
-                                        _iteratorError12 = err;
+                                        _didIteratorError14 = true;
+                                        _iteratorError14 = err;
                                 } finally {
                                         try {
-                                                if (!_iteratorNormalCompletion12 && _iterator12.return) {
-                                                        _iterator12.return();
+                                                if (!_iteratorNormalCompletion14 && _iterator14.return) {
+                                                        _iterator14.return();
                                                 }
                                         } finally {
-                                                if (_didIteratorError12) {
-                                                        throw _iteratorError12;
+                                                if (_didIteratorError14) {
+                                                        throw _iteratorError14;
                                                 }
                                         }
                                 }
 
                                 return {};
                         } catch (e) {
-                                var _iteratorNormalCompletion13 = true;
-                                var _didIteratorError13 = false;
-                                var _iteratorError13 = undefined;
+                                var _iteratorNormalCompletion15 = true;
+                                var _didIteratorError15 = false;
+                                var _iteratorError15 = undefined;
 
                                 try {
-                                        for (var _iterator13 = state[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-                                                var _job = _step13.value;
+                                        for (var _iterator15 = state[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+                                                var _job = _step15.value;
 
                                                 console.log('searching joooooooooob key', _job.id, key);
                                                 if (_job.id === key) return _job;
                                         }
                                 } catch (err) {
-                                        _didIteratorError13 = true;
-                                        _iteratorError13 = err;
+                                        _didIteratorError15 = true;
+                                        _iteratorError15 = err;
                                 } finally {
                                         try {
-                                                if (!_iteratorNormalCompletion13 && _iterator13.return) {
-                                                        _iterator13.return();
+                                                if (!_iteratorNormalCompletion15 && _iterator15.return) {
+                                                        _iterator15.return();
                                                 }
                                         } finally {
-                                                if (_didIteratorError13) {
-                                                        throw _iteratorError13;
+                                                if (_didIteratorError15) {
+                                                        throw _iteratorError15;
                                                 }
                                         }
                                 }
@@ -975,13 +1151,15 @@ export default function useEditor(data) {
                 var get_dependants = function get_dependants(job_list, id) {
                         var dependants = [];
 
-                        var _iteratorNormalCompletion14 = true;
-                        var _didIteratorError14 = false;
-                        var _iteratorError14 = undefined;
+                        if (!Number.isInteger(id)) return dependants;
+
+                        var _iteratorNormalCompletion16 = true;
+                        var _didIteratorError16 = false;
+                        var _iteratorError16 = undefined;
 
                         try {
-                                for (var _iterator14 = job_list[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-                                        var job = _step14.value;
+                                for (var _iterator16 = job_list[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+                                        var job = _step16.value;
 
                                         if (job.dependencies && job.dependencies[0]) {
                                                 if (Number.isInteger(job.dependencies[0])) {
@@ -1000,16 +1178,16 @@ export default function useEditor(data) {
                                         }
                                 }
                         } catch (err) {
-                                _didIteratorError14 = true;
-                                _iteratorError14 = err;
+                                _didIteratorError16 = true;
+                                _iteratorError16 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion14 && _iterator14.return) {
-                                                _iterator14.return();
+                                        if (!_iteratorNormalCompletion16 && _iterator16.return) {
+                                                _iterator16.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError14) {
-                                                throw _iteratorError14;
+                                        if (_didIteratorError16) {
+                                                throw _iteratorError16;
                                         }
                                 }
                         }
@@ -1066,15 +1244,18 @@ export default function useEditor(data) {
                 var getJobsByNodeId = function getJobsByNodeId(node_id, node_model) {
                         var jobs = new Map();
 
+                        if (node_id === undefined || node_id === null) return jobs;
+
                         if (node_id && node_model) {
-                                var _iteratorNormalCompletion15 = true;
-                                var _didIteratorError15 = false;
-                                var _iteratorError15 = undefined;
+                                var _iteratorNormalCompletion17 = true;
+                                var _didIteratorError17 = false;
+                                var _iteratorError17 = undefined;
 
                                 try {
-                                        for (var _iterator15 = state[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-                                                var job = _step15.value;
+                                        for (var _iterator17 = state[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+                                                var job = _step17.value;
 
+                                                if (job.node_id === undefined || job.node_id === null) continue;
                                                 if (job.node_id === parseInt(node_id) && job.node_model === node_model) {
                                                         if (job.operation === 'copy') {
                                                                 var copy_jobs = jobs.get(job.operation);
@@ -1087,16 +1268,16 @@ export default function useEditor(data) {
                                                 }
                                         }
                                 } catch (err) {
-                                        _didIteratorError15 = true;
-                                        _iteratorError15 = err;
+                                        _didIteratorError17 = true;
+                                        _iteratorError17 = err;
                                 } finally {
                                         try {
-                                                if (!_iteratorNormalCompletion15 && _iterator15.return) {
-                                                        _iterator15.return();
+                                                if (!_iteratorNormalCompletion17 && _iterator17.return) {
+                                                        _iterator17.return();
                                                 }
                                         } finally {
-                                                if (_didIteratorError15) {
-                                                        throw _iteratorError15;
+                                                if (_didIteratorError17) {
+                                                        throw _iteratorError17;
                                                 }
                                         }
                                 }
@@ -1106,62 +1287,67 @@ export default function useEditor(data) {
                 };
 
                 var custom_filter = function custom_filter(job_list, id) {
+                        if (!Number.isInteger(id)) return job_list;
+
+                        console.log("jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist11111", job_list, id);
                         var new_job_list = window.Global_State.copyObject(job_list);
 
                         new_job_list = [].concat(_toConsumableArray(new_job_list)).filter(function (job) {
                                 return job.id !== id;
                         });
 
-                        var _iteratorNormalCompletion16 = true;
-                        var _didIteratorError16 = false;
-                        var _iteratorError16 = undefined;
+                        var _iteratorNormalCompletion18 = true;
+                        var _didIteratorError18 = false;
+                        var _iteratorError18 = undefined;
 
                         try {
-                                for (var _iterator16 = get_dependants(new_job_list, id)[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-                                        var dependant_id = _step16.value;
+                                for (var _iterator18 = get_dependants(new_job_list, id)[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+                                        var dependant_id = _step18.value;
 
                                         new_job_list = custom_filter(new_job_list, dependant_id);
                                 }
                         } catch (err) {
-                                _didIteratorError16 = true;
-                                _iteratorError16 = err;
+                                _didIteratorError18 = true;
+                                _iteratorError18 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion16 && _iterator16.return) {
-                                                _iterator16.return();
+                                        if (!_iteratorNormalCompletion18 && _iterator18.return) {
+                                                _iterator18.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError16) {
-                                                throw _iteratorError16;
+                                        if (_didIteratorError18) {
+                                                throw _iteratorError18;
                                         }
                                 }
                         }
 
-                        var _iteratorNormalCompletion17 = true;
-                        var _didIteratorError17 = false;
-                        var _iteratorError17 = undefined;
+                        var _iteratorNormalCompletion19 = true;
+                        var _didIteratorError19 = false;
+                        var _iteratorError19 = undefined;
 
                         try {
-                                for (var _iterator17 = new_job_list[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-                                        var job = _step17.value;
+                                for (var _iterator19 = new_job_list[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+                                        var job = _step19.value;
 
+                                        if (!Number.isInteger(job.copy_job_id)) continue;
                                         if (job.copy_job_id === id) new_job_list = custom_filter(new_job_list, job.id);
                                 }
                         } catch (err) {
-                                _didIteratorError17 = true;
-                                _iteratorError17 = err;
+                                _didIteratorError19 = true;
+                                _iteratorError19 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion17 && _iterator17.return) {
-                                                _iterator17.return();
+                                        if (!_iteratorNormalCompletion19 && _iterator19.return) {
+                                                _iterator19.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError17) {
-                                                throw _iteratorError17;
+                                        if (_didIteratorError19) {
+                                                throw _iteratorError19;
                                         }
                                 }
                         }
 
+                        console.log("neeeeeeeeeeeew_jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist", new_job_list, id);
                         return new_job_list;
                 };
 
@@ -1199,29 +1385,29 @@ export default function useEditor(data) {
                         }
 
                         console.log('children' + id, children);
-                        var _iteratorNormalCompletion18 = true;
-                        var _didIteratorError18 = false;
-                        var _iteratorError18 = undefined;
+                        var _iteratorNormalCompletion20 = true;
+                        var _didIteratorError20 = false;
+                        var _iteratorError20 = undefined;
 
                         try {
-                                for (var _iterator18 = children[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-                                        var child = _step18.value;
+                                for (var _iterator20 = children[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+                                        var child = _step20.value;
 
                                         var identity = window.Global_State.identifyNode(child);
 
                                         new_job_list = supress_from_jobs([].concat(_toConsumableArray(new_job_list)), identity[0], identity[1]);
                                 }
                         } catch (err) {
-                                _didIteratorError18 = true;
-                                _iteratorError18 = err;
+                                _didIteratorError20 = true;
+                                _iteratorError20 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion18 && _iterator18.return) {
-                                                _iterator18.return();
+                                        if (!_iteratorNormalCompletion20 && _iterator20.return) {
+                                                _iterator20.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError18) {
-                                                throw _iteratorError18;
+                                        if (_didIteratorError20) {
+                                                throw _iteratorError20;
                                         }
                                 }
                         }
@@ -1443,13 +1629,13 @@ export default function useEditor(data) {
                         // console.log('create_copy2')
 
                         if (root_node) root_node_id = new_node.id;else new_node.root_node_id = root_node_id;
-                        var _iteratorNormalCompletion19 = true;
-                        var _didIteratorError19 = false;
-                        var _iteratorError19 = undefined;
+                        var _iteratorNormalCompletion21 = true;
+                        var _didIteratorError21 = false;
+                        var _iteratorError21 = undefined;
 
                         try {
-                                for (var _iterator19 = children_to_copy[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-                                        var child = _step19.value;
+                                for (var _iterator21 = children_to_copy[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+                                        var child = _step21.value;
 
                                         // const res = root_children ? create_copy(child.id, new_node.id, new_all_nodes, on_exist, copy_job_id, true) : create_copy(child.id, new_node.id, new_all_nodes, on_exist, copy_job_id)
                                         var res = create_copy(child.id, new_node.id, new_all_nodes, on_exist, copy_job_id, false, root_node_id);
@@ -1461,16 +1647,16 @@ export default function useEditor(data) {
 
                                 // console.log('create_copy3')
                         } catch (err) {
-                                _didIteratorError19 = true;
-                                _iteratorError19 = err;
+                                _didIteratorError21 = true;
+                                _iteratorError21 = err;
                         } finally {
                                 try {
-                                        if (!_iteratorNormalCompletion19 && _iterator19.return) {
-                                                _iterator19.return();
+                                        if (!_iteratorNormalCompletion21 && _iterator21.return) {
+                                                _iterator21.return();
                                         }
                                 } finally {
-                                        if (_didIteratorError19) {
-                                                throw _iteratorError19;
+                                        if (_didIteratorError21) {
+                                                throw _iteratorError21;
                                         }
                                 }
                         }
@@ -1702,7 +1888,7 @@ export default function useEditor(data) {
                                                 _job5 = {
                                                         id: job_id.current,
                                                         operation: 'copy',
-                                                        node_id: parseInt(_json_request.id),
+                                                        // node_id: parseInt(json_request.id),
                                                         node_model: 'App\\Models\\DossierSimple',
                                                         data: _json_request,
                                                         etat: 'waiting',
@@ -1919,7 +2105,7 @@ export default function useEditor(data) {
                                                 _job9 = {
                                                         id: job_id.current,
                                                         operation: 'copy',
-                                                        node_id: parseInt(_json_request3.id),
+                                                        // node_id: parseInt(json_request.id),
                                                         node_model: 'App\\Models\\Fichier',
                                                         data: _json_request3,
                                                         etat: 'waiting',
@@ -2120,13 +2306,13 @@ export default function useEditor(data) {
 
                                         var _node7 = form_to_json(_request8);
 
-                                        var _iteratorNormalCompletion20 = true;
-                                        var _didIteratorError20 = false;
-                                        var _iteratorError20 = undefined;
+                                        var _iteratorNormalCompletion22 = true;
+                                        var _didIteratorError22 = false;
+                                        var _iteratorError22 = undefined;
 
                                         try {
-                                                for (var _iterator20 = _new_state12[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-                                                        var _job15 = _step20.value;
+                                                for (var _iterator22 = _new_state12[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
+                                                        var _job15 = _step22.value;
 
                                                         if (_job15.operation === 'update' && _job15.data.id === _node7.id && _job15.data.update_object === _node7.update_object) {
                                                                 _job15.data = _node7;
@@ -2137,16 +2323,16 @@ export default function useEditor(data) {
                                                         }
                                                 }
                                         } catch (err) {
-                                                _didIteratorError20 = true;
-                                                _iteratorError20 = err;
+                                                _didIteratorError22 = true;
+                                                _iteratorError22 = err;
                                         } finally {
                                                 try {
-                                                        if (!_iteratorNormalCompletion20 && _iterator20.return) {
-                                                                _iterator20.return();
+                                                        if (!_iteratorNormalCompletion22 && _iterator22.return) {
+                                                                _iterator22.return();
                                                         }
                                                 } finally {
-                                                        if (_didIteratorError20) {
-                                                                throw _iteratorError20;
+                                                        if (_didIteratorError22) {
+                                                                throw _iteratorError22;
                                                         }
                                                 }
                                         }
@@ -2225,199 +2411,135 @@ export default function useEditor(data) {
                 setDatasState({ type: 'update_initData', new_data: new_data });
         };
 
-        var save = function () {
-                var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(request) {
-                        return _regeneratorRuntime.wrap(function _callee$(_context) {
-                                while (1) {
-                                        switch (_context.prev = _context.next) {
-                                                case 0:
-                                                        _context.next = 2;
-                                                        return http.post('handle_edit', request, {
-                                                                headers: {
-                                                                        'Content-Type': 'multipart/form-data'
-                                                                }
-                                                        }).then(function (res) {
-                                                                console.log('editor handling ressssssssssssssssssssssssssssssssssss', res);
-                                                                // toast.dismiss('Saving')
-                                                        }).catch(function (err) {
-                                                                console.log(err);
-                                                        });
-
-                                                case 2:
-                                                case "end":
-                                                        return _context.stop();
-                                        }
-                                }
-                        }, _callee, _this);
-                }));
-
-                return function save(_x4) {
-                        return _ref2.apply(this, arguments);
-                };
-        }();
-
         useEffect(function () {
-                if (jobs.length > 0) {
-
-                        toast(function (t) {
-                                return React.createElement(
-                                        "div",
-                                        { style: { width: 'max-content' } },
-                                        React.createElement(
-                                                Stack,
-                                                { spacing: 2, direction: 'row',
-                                                        sx: {
-                                                                display: 'flex',
-                                                                justifyContent: 'center',
-                                                                position: 'relative',
-                                                                alignItems: 'center'
-                                                        }
-                                                },
-                                                React.createElement(
-                                                        Button,
-                                                        { variant: "light", onClick: function onClick() {
-                                                                        var queryData = new FormData();
-
-                                                                        var sortedJobs = [];
-                                                                        var visitedJobs = new Set();
-
-                                                                        function topologicalSort(jobs, jobId) {
-
-                                                                                visitedJobs.add(jobId);
-
-                                                                                var job = jobs.find(function (j) {
-                                                                                        return j.id === jobId;
-                                                                                });
-                                                                                if (!job) return;
-
-                                                                                if ((!job.dependencies || job.dependencies.length === 0) && !job.copy_job_id) {
-                                                                                        sortedJobs.push(job);
-                                                                                        return;
-                                                                                }
-
-                                                                                var _iteratorNormalCompletion21 = true;
-                                                                                var _didIteratorError21 = false;
-                                                                                var _iteratorError21 = undefined;
-
-                                                                                try {
-                                                                                        for (var _iterator21 = (job.dependencies || (job.copy_job_id ? [job.copy_job_id] : []))[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
-                                                                                                var dependency = _step21.value;
-
-                                                                                                var dependencyId = typeof dependency === 'number' ? dependency : dependency.job_id;
-                                                                                                if (!visitedJobs.has(dependencyId)) {
-                                                                                                        topologicalSort(jobs, dependencyId);
-                                                                                                }
-                                                                                        }
-                                                                                } catch (err) {
-                                                                                        _didIteratorError21 = true;
-                                                                                        _iteratorError21 = err;
-                                                                                } finally {
-                                                                                        try {
-                                                                                                if (!_iteratorNormalCompletion21 && _iterator21.return) {
-                                                                                                        _iterator21.return();
-                                                                                                }
-                                                                                        } finally {
-                                                                                                if (_didIteratorError21) {
-                                                                                                        throw _iteratorError21;
-                                                                                                }
-                                                                                        }
-                                                                                }
-
-                                                                                sortedJobs.push(job);
-                                                                        }
-
-                                                                        var _iteratorNormalCompletion22 = true;
-                                                                        var _didIteratorError22 = false;
-                                                                        var _iteratorError22 = undefined;
-
-                                                                        try {
-                                                                                for (var _iterator22 = jobs[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
-                                                                                        var job = _step22.value;
-
-                                                                                        if (!visitedJobs.has(job.id)) {
-                                                                                                topologicalSort(jobs, job.id);
-                                                                                        }
-                                                                                }
-                                                                        } catch (err) {
-                                                                                _didIteratorError22 = true;
-                                                                                _iteratorError22 = err;
-                                                                        } finally {
-                                                                                try {
-                                                                                        if (!_iteratorNormalCompletion22 && _iterator22.return) {
-                                                                                                _iterator22.return();
-                                                                                        }
-                                                                                } finally {
-                                                                                        if (_didIteratorError22) {
-                                                                                                throw _iteratorError22;
-                                                                                        }
-                                                                                }
-                                                                        }
-
-                                                                        sortedJobs.map(function (job) {
-                                                                                if (job.operation === "add_copy") {
-                                                                                        var parent = localDataState.find(function (node) {
-                                                                                                return node.id === job.identity_ref.to_id;
-                                                                                        });
-                                                                                        var the_node = localDataState.find(function (node) {
-                                                                                                return node.id === job.identity_ref.id;
-                                                                                        });
-
-                                                                                        // add_copy_job.data.relative_path = `${destination.name}\\${new_node.name}`;
-                                                                                        job.data.relative_path = parent.name + "\\" + the_node.name;
-                                                                                }
-
-                                                                                queryData.append("jobs[]", JSON.stringify(job));
-                                                                                if (job.node_model === 'App\\Models\\Fichier' && job.operation === 'add') {
-                                                                                        job.data.files.map(function (file) {
-                                                                                                queryData.append("job" + job.id + "_files[]", file);
-                                                                                        });
-                                                                                }
-                                                                        });
-
-                                                                        // console.log('jooooooooobs', queryData.get('jobs[]'))
-
-                                                                        window.Global_State.changeMode();
-
-                                                                        toast.promise(save(queryData), {
-                                                                                loading: 'Saving...',
-                                                                                success: 'Processus achevé',
-                                                                                error: 'err'
-                                                                        }, {
-                                                                                id: 'Saving',
-                                                                                duration: Infinity
-                                                                        }).then(function (res) {
-                                                                                setTimeout(function () {
-                                                                                        toast.dismiss('Saving');
-                                                                                }, 800);
-                                                                        });
-                                                                } },
-                                                        "SAVE"
-                                                ),
-                                                React.createElement(
-                                                        Button,
-                                                        { variant: "danger", onClick: function onClick() {} },
-                                                        "DISCARD"
-                                                )
-                                        )
-                                );
-                        }, {
-                                id: 'save',
-                                position: "bottom-right",
-                                duration: Infinity,
-                                style: {
-                                        // width: '1700px',
-                                        border: '1px solid #0062ff',
-                                        padding: '16px',
-                                        color: '#0062ff'
-                                }
-                        });
-                } else {
-                        toast.dismiss('save');
-                }
+                console.log("ooooooooooooooooooooooopeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeen", active, jobs);
+                setActive(Boolean(jobs.length));
+                // if (jobs.length > 0 )
+                // {
+                //
+                //         toast((t) => (
+                //                         <div style={{ width: 'max-content' }} >
+                //                                 <Stack spacing={2} direction = {'row'}
+                //                                        sx = {
+                //                                                {
+                //                                                        display: 'flex',
+                //                                                        justifyContent: 'center',
+                //                                                        position: 'relative',
+                //                                                        alignItems: 'center',
+                //                                                }
+                //                                        }
+                //                                 >
+                //                                         <Button variant="light"
+                //                                                 onClick={() =>
+                //                                                 {
+                //                                                         const queryData = new FormData
+                //
+                //                                                         const sortedJobs = [];
+                //                                                         const visitedJobs = new Set();
+                //
+                //                                                         function topologicalSort(jobs, jobId) {
+                //
+                //                                                                 visitedJobs.add(jobId);
+                //
+                //                                                                 const job = jobs.find((j) => j.id === jobId);
+                //                                                                 if (!job) return;
+                //
+                //                                                                 if  ( ( !job.dependencies || (job.dependencies.length === 0) ) && !job.copy_job_id ) {
+                //                                                                         sortedJobs.push(job);
+                //                                                                         return;
+                //                                                                 }
+                //
+                //                                                                 for ( const dependency of (job.dependencies || (job.copy_job_id ? [job.copy_job_id] : []) ) ) {
+                //                                                                         const dependencyId = typeof dependency === 'number' ? dependency : dependency.job_id;
+                //                                                                         if (!visitedJobs.has(dependencyId)) {
+                //                                                                                 topologicalSort(jobs, dependencyId);
+                //                                                                         }
+                //                                                                 }
+                //
+                //                                                                 sortedJobs.push(job);
+                //                                                         }
+                //
+                //                                                         for (const job of jobs) {
+                //                                                                 if (!visitedJobs.has(job.id)) {
+                //                                                                         topologicalSort(jobs, job.id);
+                //                                                                 }
+                //                                                         }
+                //
+                //                                                         sortedJobs.map(
+                //                                                         job =>
+                //                                                         {
+                //                                                                 if (job.operation === "add_copy")
+                //                                                                 {
+                //                                                                         const parent = localDataState.find( node => node.id === job.identity_ref.to_id )
+                //                                                                         const the_node = localDataState.find( node => node.id === job.identity_ref.id )
+                //
+                //                                                                         // add_copy_job.data.relative_path = `${destination.name}\\${new_node.name}`;
+                //                                                                         job.data.relative_path = `${parent.name}\\${the_node.name}`;
+                //                                                                 }
+                //
+                //                                                                 queryData.append( "jobs[]", JSON.stringify(job) )
+                //                                                                 if( job.node_model === 'App\\Models\\Fichier'  && job.operation === 'add' )
+                //                                                                 {
+                //                                                                         job.data.files.map(
+                //                                                                         file =>
+                //                                                                         {
+                //                                                                                 queryData.append( `job${job.id}_files[]`, file )
+                //                                                                         }
+                //                                                                         )
+                //                                                                 }
+                //                                                         })
+                //
+                //                                                         // console.log('jooooooooobs', queryData.get('jobs[]'))
+                //
+                //                                                         window.Global_State.changeMode()
+                //
+                //                                                         toast.promise(
+                //                                                                 save(queryData),
+                //                                                                 {
+                //                                                                         loading: 'Saving...',
+                //                                                                         success: 'Processus achevé',
+                //                                                                         error: 'err'
+                //                                                                 },
+                //                                                                 {
+                //                                                                         id: 'Saving',
+                //                                                                         duration: Infinity
+                //                                                                 }
+                //                                                         ).then( res => { setTimeout( () => { toast.dismiss('Saving') }, 800 ) } )
+                //
+                //
+                //                                                 }
+                //                                         }>
+                //                                                 SAVE
+                //                                         </Button>
+                //                                         <Button   variant="danger" onClick={() =>
+                //                                         {
+                //                                         }
+                //                                         }>
+                //                                                 DISCARD
+                //                                         </Button>
+                //                                 </Stack>
+                //                         </div>
+                //                 ),
+                //                 {
+                //                         id: 'save',
+                //                         position: "bottom-right",
+                //                         duration: Infinity,
+                //                         style: {
+                //                                 // width: '1700px',
+                //                                 border: '1px solid #0062ff',
+                //                                 padding: '16px',
+                //                                 color: '#0062ff',
+                //                         },
+                //                 }
+                //         );
+                // }
+                // else
+                // {
+                //         toast.dismiss('save')
+                // }
         }, [jobs]);
 
         var close = function close() {
-                setActive(false);
                 toast.dismiss('save');
                 dispatch_job({ type: 'reset' });
         };
@@ -2425,11 +2547,10 @@ export default function useEditor(data) {
         console.log('localDataState', localDataState, initData.current, jobs);
 
         return {
+                save_component: React.createElement(Save_component, { open: active, jobs: jobs, localDataState: localDataState }),
                 data: localDataState,
                 update_initData: update_initData,
-                open: function open() {
-                        setActive(true);
-                },
+                open: function open() {},
                 close: close,
                 can_undo: can_undo, can_redo: can_redo,
                 folder: {

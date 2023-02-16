@@ -76,9 +76,9 @@ export default function Loaded_administrator_page({datas})
 
         const sections =
         {
-                1: <User_admin_section users={datas.users} new_users={[]} />,
+                1: <User_admin_section users={datas.users} new_users={datas.new_users} />,
                 2: <Service_admin_section services={datas.services} />,
-                3: <Section_admin_section sections={datas.section} />,
+                3: <Section_admin_section sections={datas.sections} />,
                 4: <History_admin_section histories={datas.history || []} />,
         }
 

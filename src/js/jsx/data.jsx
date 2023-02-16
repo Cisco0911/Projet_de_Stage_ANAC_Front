@@ -229,7 +229,7 @@ export default function useGetData(TheDatas)
         console.log('checking', TheDatas)
 
 
-        const [authUser, updateAuthUserInfo] = useState(TheDatas.authUser)
+        const [authUser, updateAuthUser] = useState(TheDatas.authUser)
         const [isEditorMode, setIsEditorMode] = useState(false)
 
         const to_refresh = useRef(true)
@@ -247,7 +247,7 @@ export default function useGetData(TheDatas)
                                         .then(res =>
                                                 {
                                                         console.log(res)
-                                                        updateAuthUserInfo(res.data)
+                                                        updateAuthUser(res.data)
                                                 }
                                         )
                                         .catch( err => { console.log(err) })
@@ -467,7 +467,7 @@ export default function useGetData(TheDatas)
 
                         for (const service of authUser.services)
                         {
-                                echo.private(`nodeUpdate.1`).listen( 'NodeUpdateEvent', (data) =>
+                                echo.private(`nodeUpdate.${service.id}`).listen( 'NodeUpdateEvent', (data) =>
                                 {
                                         node_events_queue.current.push(data)
                                         console.log('NodeUpdateEvent', node_events_queue.current, data)
@@ -705,6 +705,103 @@ export default function useGetData(TheDatas)
         }
         )
 
+
+
+        function copyObject(obj)
+        {
+                if (!obj) return obj
+
+                const constructors =
+                {
+                        is_json: (json) => (json.constructor === Object),
+                        is_array: (array) => (array.constructor === Array),
+                        is_map: (map) => (map.constructor === Map),
+                        is_file: (file) => (file.constructor === File),
+
+
+                }
+
+                if ( constructors.is_map(obj) )
+                {
+                        const map = new Map()
+
+                        obj.forEach(
+                        (value, key) =>
+                        {
+                                map.set(key, copyObject(value))
+                        }
+                        )
+
+                        return map
+                }
+                else if ( constructors.is_array(obj) )
+                {
+                        const array = []
+
+                        for (const arrayElement of obj)
+                        {
+                                array.push( copyObject(arrayElement) )
+                        }
+
+                        return array
+                }
+                else if ( constructors.is_json(obj) )
+                {
+                        const json = {}
+
+                        for (const key in obj)
+                        {
+                                json[`${key}`] = copyObject(obj[`${key}`])
+                        }
+
+                        return json
+                }
+                else return obj
+        }
+
+        function compareObjects(obj1, obj2) {
+                // Si l'un des objets n'existe pas, retourner false
+                if (!obj1 || !obj2) return false;
+
+                // Si les objets sont de types différents, retourner false
+                if (obj1.constructor !== obj2.constructor) return false;
+
+                // Si les objets sont des Maps
+                if (obj1.constructor === Map) {
+                        // Si les Maps ont un nombre différent d'entrées, retourner false
+                        if (obj1.size !== obj2.size) return false;
+                        // Pour chaque entrée de la Map, comparer la clé et la valeur avec celles de l'autre Map
+                        for (const [key, value] of obj1) {
+                                if (!obj2.has(key) || !compareObjects(value, obj2.get(key))) return false;
+                        }
+                        return true;
+                }
+
+                // Si les objets sont des tableaux
+                if (obj1.constructor === Array) {
+                        // Si les tableaux ont une taille différente, retourner false
+                        if (obj1.length !== obj2.length) return false;
+                        // Pour chaque élément du tableau, comparer avec celui de l'autre tableau
+                        for (let i = 0; i < obj1.length; i++) {
+                                if (!compareObjects(obj1[i], obj2[i])) return false;
+                        }
+                        return true;
+                }
+
+                // Si les objets sont des objets JSON
+                if (obj1.constructor === Object) {
+                        // Si les objets JSON ont un nombre différent de propriétés, retourner false
+                        if (Object.keys(obj1).length !== Object.keys(obj2).length) return false;
+                        // Pour chaque propriété de l'objet, comparer avec celle de l'autre objet
+                        for (const key in obj1) {
+                                if (!(key in obj2) || !compareObjects(obj1[key], obj2[key])) return false;
+                        }
+                        return true;
+                }
+
+                // Si les objets sont de types différents, retourner false
+                return obj1 === obj2;
+        }
 
         const getNewPath = (new_node, all_nodes, to_update = false) =>
         {
@@ -1281,7 +1378,7 @@ export default function useGetData(TheDatas)
                                 node.user,
                                 type === 'fnc' ? node.isClosed : undefined,
                                 type === 'fnc' ? node.review_date : undefined,
-                                node.created_at,//
+                                node.created_at.substring(0, 10) + " A " + node.created_at.substring(11, 19),//
                                 type === 'fnc' ? node.level : undefined,
                                 parseInt(node.section_id),
                                 type === 'f' ? node.size : undefined,
@@ -1318,16 +1415,16 @@ export default function useGetData(TheDatas)
                                 if (data.node.constructor === Array)
                                 {
                                         // console.log("heeeerre", existing_data)
-                                        data.node.forEach(node =>
-                                                {
+                                        for (const node of data.node)
+                                        {
+                                                const new_node = create_new_node(node)
 
-                                                        const new_node = create_new_node(node)
+                                                if ( state.find( node => node.id === new_node.id ) ) continue
 
-                                                        new_node.path = getNewPath({...new_node}, [...state], true)
+                                                new_node.path = getNewPath({...new_node}, [...state], true)
 
-                                                        state.push(new_node)
-                                                }
-                                        );
+                                                state.push(new_node)
+                                        }
                                 }
 
                                 return JSON.parse(JSON.stringify(state))
@@ -1947,102 +2044,6 @@ export default function useGetData(TheDatas)
                 }
         }
 
-        function copyObject(obj)
-        {
-                if (!obj) return obj
-
-                const constructors =
-                {
-                        is_json: (json) => (json.constructor === Object),
-                        is_array: (array) => (array.constructor === Array),
-                        is_map: (map) => (map.constructor === Map),
-                        is_file: (file) => (file.constructor === File),
-
-
-                }
-
-                if ( constructors.is_map(obj) )
-                {
-                        const map = new Map()
-
-                        obj.forEach(
-                                (value, key) =>
-                                {
-                                        map.set(key, copyObject(value))
-                                }
-                        )
-
-                        return map
-                }
-                else if ( constructors.is_array(obj) )
-                {
-                        const array = []
-
-                        for (const arrayElement of obj)
-                        {
-                                array.push( copyObject(arrayElement) )
-                        }
-
-                        return array
-                }
-                else if ( constructors.is_json(obj) )
-                {
-                        const json = {}
-
-                        for (const key in obj)
-                        {
-                                json[`${key}`] = copyObject(obj[`${key}`])
-                        }
-
-                        return json
-                }
-                else return obj
-        }
-
-        function compareObjects(obj1, obj2) {
-                // Si l'un des objets n'existe pas, retourner false
-                if (!obj1 || !obj2) return false;
-
-                // Si les objets sont de types différents, retourner false
-                if (obj1.constructor !== obj2.constructor) return false;
-
-                // Si les objets sont des Maps
-                if (obj1.constructor === Map) {
-                        // Si les Maps ont un nombre différent d'entrées, retourner false
-                        if (obj1.size !== obj2.size) return false;
-                        // Pour chaque entrée de la Map, comparer la clé et la valeur avec celles de l'autre Map
-                        for (const [key, value] of obj1) {
-                                if (!obj2.has(key) || !compareObjects(value, obj2.get(key))) return false;
-                        }
-                        return true;
-                }
-
-                // Si les objets sont des tableaux
-                if (obj1.constructor === Array) {
-                        // Si les tableaux ont une taille différente, retourner false
-                        if (obj1.length !== obj2.length) return false;
-                        // Pour chaque élément du tableau, comparer avec celui de l'autre tableau
-                        for (let i = 0; i < obj1.length; i++) {
-                                if (!compareObjects(obj1[i], obj2[i])) return false;
-                        }
-                        return true;
-                }
-
-                // Si les objets sont des objets JSON
-                if (obj1.constructor === Object) {
-                        // Si les objets JSON ont un nombre différent de propriétés, retourner false
-                        if (Object.keys(obj1).length !== Object.keys(obj2).length) return false;
-                        // Pour chaque propriété de l'objet, comparer avec celle de l'autre objet
-                        for (const key in obj1) {
-                                if (!(key in obj2) || !compareObjects(obj1[key], obj2[key])) return false;
-                        }
-                        return true;
-                }
-
-                // Si les objets sont de types différents, retourner false
-                return obj1 === obj2;
-        }
-
 
         // function useOutsideAlerter(ref) {
         //   useEffect(() => {
@@ -2098,7 +2099,7 @@ export default function useGetData(TheDatas)
                         ...window.Global_State,
                         // EventsManager,
                         // isEditorMode,
-                        authUser: Data_Base.authUser,
+                        authUser: Data_Base.authUser, updateAuthUserInfo: value => { console.log("updateAuthUser", value); updateAuthUser(value) },
                         // dataBaseData: FetchedNodesData,
                         dataToUse,
                         hasSection: Data_Base.data.sections.length !== 0,

@@ -161,10 +161,6 @@ function FileTree(_ref2) {
         var data = _ref2.data;
 
 
-        // console.log('data111111', data)
-        //
-        // data = [...data].filter( node_data => ( node_data.global_type === 'folder' ) )
-
         var tree = useRef();
 
         var expanded = window.Global_State.expanded;

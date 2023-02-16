@@ -80,6 +80,13 @@ export default function useBack() {
                 let node = find(id)
                 console.log("nooooooooooooooooode_modeeeeeeeel", node, root)
 
+                if (!node)
+                {
+                        node = find("0")
+                        navigation_history.current.prev = []
+                        navigation_history.current.next = []
+                }
+
                 let new_node_section_id
 
                 if (node.model.isRoot)

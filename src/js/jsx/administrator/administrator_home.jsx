@@ -22,8 +22,10 @@ import { useNavigate } from "react-router-dom";
 import {VscEyeClosed, VscEye} from "react-icons/vsc"
 import {RiLockPasswordFill, RiMapPinUserFill} from "react-icons/ri"
 import {FaUserTie, FaUserSecret} from "react-icons/fa"
-import {Toaster} from "react-hot-toast";
+import toast, {Toaster} from "react-hot-toast";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 
 
 
@@ -82,6 +84,42 @@ export default function Administrator_home()
 
 
         console.log("render_administrator")
+
+        window.show_error = (msg) =>
+        {
+                swal({
+                        title: "Error",
+                        text: msg,
+                        icon: "error"
+                })
+        }
+        window.show_response = (msg, type) =>
+        {
+                toast(
+                (t) =>
+                (
+                // t.visible ?
+                <Alert onClose={ () => toast.dismiss(t.id) } severity={type} sx={{ width: 'fit-content', minWidth: 300, animation: "fadeMe 0.3s" }}>
+                        <AlertTitle sx={{ width: "fit-content" }} > { type.replace(/^\w/, c => c.toUpperCase()) } </AlertTitle>
+                        {msg}
+                </Alert>
+                ),
+                {
+                        position: "bottom-left",
+                        duration: type === "error" ? Infinity : 3000,
+                        style: {
+                                background: 'rgba(255,255,255,0)',
+                                padding: 0,
+                                boxShadow: 'unset',
+                        },
+                }
+                )
+                // swal({
+                //         title: "Error",
+                //         text: msg,
+                //         icon: type
+                // })
+        }
 
 
         const theme = createTheme({

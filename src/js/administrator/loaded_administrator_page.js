@@ -66,9 +66,9 @@ export default function Loaded_administrator_page(_ref) {
             dispatch_options_state = _useReducer2[1];
 
         var sections = {
-                1: React.createElement(User_admin_section, { users: datas.users, new_users: [] }),
+                1: React.createElement(User_admin_section, { users: datas.users, new_users: datas.new_users }),
                 2: React.createElement(Service_admin_section, { services: datas.services }),
-                3: React.createElement(Section_admin_section, { sections: datas.section }),
+                3: React.createElement(Section_admin_section, { sections: datas.sections }),
                 4: React.createElement(History_admin_section, { histories: datas.history || [] })
         };
 

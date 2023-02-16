@@ -19,9 +19,12 @@ import { useNavigate } from "react-router-dom";
 import {VscEyeClosed, VscEye} from "react-icons/vsc"
 import {RiLockPasswordFill, RiMapPinUserFill} from "react-icons/ri"
 import {FaUserTie, FaUserSecret} from "react-icons/fa"
+import {Link} from "@mui/material";
+import {LoadingButton} from "@mui/lab";
 
 
 
+// https://api.anac-togo-file-manager.com
 export const http = axios.create({
         baseURL: 'http://localhost:80',
         headers: {
@@ -50,6 +53,7 @@ export default function Login()
 
 
         const [showPassword, setShowPassword] = useState(false)
+        const [loading, setLoading] = useState(false)
 
         const toggleShowPassword = () => {
                 setShowPassword(!showPassword);
@@ -58,6 +62,7 @@ export default function Login()
         const handleSubmit = (submittedInfo) =>
         {
                 console.log(submittedInfo)
+                setLoading(true)
 
                 let queryBody = new FormData()
 
@@ -71,12 +76,24 @@ export default function Login()
                 res =>
                 {
                         console.log(res)
+                        setLoading(false)
 
                         if ( !parseInt(res.data.user.id) ) navigate("/administrator")
-                        else navigate("/files")
+                        else navigate("/files_browser")
 
                 })
-                .catch(err => {console.log(err)})
+                .catch(
+                err =>
+                {
+                        console.log(err)
+                        setLoading(true)
+
+                        swal({
+                                title: "Error",
+                                text: err.response.data.message,
+                                icon: "error"
+                        })
+                })
 
         };
 
@@ -91,6 +108,7 @@ export default function Login()
                 <Container
                         style = {
                                 {
+                                        maxWidth: 600,
                                         width: "90%",
                                         justifyContent: 'center',
                                         position: 'relative',
@@ -198,9 +216,9 @@ export default function Login()
                                                         }
                                                 }
                                                 >
-                                                        <Button variant="primary" type="submit">
+                                                        <LoadingButton loading={loading} variant="outlined" type="submit">
                                                                 Connexion
-                                                        </Button>
+                                                        </LoadingButton>
                                                 </div>
                                         </Form>
                                         )
@@ -209,8 +227,11 @@ export default function Login()
                         </Formik>
                 </Container>
                 <span className="mt-3">
-                        don't have account ? <a id="sign_in" href="/sign_in" >Sign in</a>
+                        don't have account ? <Link href={"/sign_in"} >Sign in</Link>
                 </span>
+                <Link href={"/forgot_password"} >
+                        Mot de passe oublié
+                </Link>
         </div>
 
         )

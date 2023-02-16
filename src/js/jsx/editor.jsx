@@ -6,12 +6,149 @@ import isEqual from "lodash.isequal";
 
 import {http} from "./auth/login";
 
-import Button from 'react-bootstrap/Button';
-
 import toast from "react-hot-toast";
 
-import {Stack} from '@mui/material';
+import {Button, Fade, Popper, Stack} from '@mui/material';
+import Draggable from "react-draggable";
+import Alert from "@mui/material/Alert";
+import Paper from "@mui/material/Paper";
+import {LoadingButton} from "@mui/lab";
 
+
+
+const save =  request =>
+{
+         return new Promise(
+                (resolve, reject) =>
+                {
+                        http.post('handle_edit', request, {
+                                headers:{
+                                        'Content-Type': 'multipart/form-data'
+                                }
+                        })
+                        .then(
+                        res => resolve(res)
+                        )
+                        .catch(
+                        err => reject(err)
+                        )
+                }
+         )
+}
+
+const Save_component = ({open, jobs, localDataState}) =>
+{
+        const [loading, setLoading] = useState(false)
+
+        return (
+        <Draggable>
+                <Fade in={open} >
+                        <Paper elevation={5} style={{
+                                width: "fit-content",
+                                height: "fit-content",
+                                padding: 10,
+                                borderRadius: 10,
+                                zIndex: 1000,
+                                position: "absolute",
+                                right: 15,
+                                bottom: 20
+                        }} >
+                                <Stack direction={"row"} spacing={3}>
+                                        <LoadingButton loading={loading} variant={"outlined"} color={"info"} size="medium"
+                                                       onClick={
+                                                               () =>
+                                                               {
+                                                                       setLoading(true)
+                                                                       const queryData = new FormData
+
+                                                                       const sortedJobs = [];
+                                                                       const visitedJobs = new Set();
+
+                                                                       function topologicalSort(jobs, jobId) {
+
+                                                                               visitedJobs.add(jobId);
+
+                                                                               const job = jobs.find((j) => j.id === jobId);
+                                                                               if (!job) return;
+
+                                                                               if  ( ( !job.dependencies || (job.dependencies.length === 0) ) && !job.copy_job_id ) {
+                                                                                       sortedJobs.push(job);
+                                                                                       return;
+                                                                               }
+
+                                                                               for ( const dependency of (job.dependencies || (job.copy_job_id ? [job.copy_job_id] : []) ) ) {
+                                                                                       const dependencyId = typeof dependency === 'number' ? dependency : dependency.job_id;
+                                                                                       if (!visitedJobs.has(dependencyId)) {
+                                                                                               topologicalSort(jobs, dependencyId);
+                                                                                       }
+                                                                               }
+
+                                                                               sortedJobs.push(job);
+                                                                       }
+
+                                                                       for (const job of jobs) {
+                                                                               if (!visitedJobs.has(job.id)) {
+                                                                                       topologicalSort(jobs, job.id);
+                                                                               }
+                                                                       }
+
+                                                                       sortedJobs.map(
+                                                                       job =>
+                                                                       {
+                                                                               if (job.operation === "add_copy")
+                                                                               {
+                                                                                       const parent = localDataState.find( node => node.id === job.identity_ref.to_id )
+                                                                                       const the_node = localDataState.find( node => node.id === job.identity_ref.id )
+
+                                                                                       // add_copy_job.data.relative_path = `${destination.name}\\${new_node.name}`;
+                                                                                       job.data.relative_path = `${parent.name}\\${the_node.name}`;
+                                                                               }
+
+                                                                               queryData.append( "jobs[]", JSON.stringify(job) )
+                                                                               if( job.node_model === 'App\\Models\\Fichier'  && job.operation === 'add' )
+                                                                               {
+                                                                                       job.data.files.map(
+                                                                                       file =>
+                                                                                       {
+                                                                                               queryData.append( `job${job.id}_files[]`, file )
+                                                                                       }
+                                                                                       )
+                                                                               }
+                                                                       })
+
+                                                                       // console.log('jooooooooobs', queryData.get('jobs[]'))
+
+
+                                                                       const onFulfilled = (res) =>
+                                                                       {
+                                                                               console.log('editor handling ressssssssssssssssssssssssssssssssssss', res)
+                                                                               setLoading(false)
+                                                                               window.Global_State.changeMode()
+                                                                               window.show_response("Enregistrement terminé.", "success")
+                                                                       }
+                                                                       const onRejected = (err) =>
+                                                                       {
+                                                                               setLoading(false)
+                                                                               window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                                       }
+
+                                                                       save(queryData)
+                                                                       .then(onFulfilled, onRejected)
+
+                                                               }
+                                                       }
+                                        >
+                                                SAVE
+                                        </LoadingButton>
+                                        <Button variant={"outlined"} color={"error"} size="medium" onClick={ e => window.Global_State.changeMode() } >
+                                                DISCARD
+                                        </Button>
+                                </Stack>
+                        </Paper>
+                </Fade>
+        </Draggable>
+        )
+}
 
 export default function useEditor(data)
 {
@@ -830,6 +967,8 @@ export default function useEditor(data)
                 {
                         const dependants = []
 
+                        if ( !Number.isInteger(id) ) return dependants
+
                         for (const job of job_list)
                         {
                                 if ( job.dependencies && job.dependencies[0] )
@@ -910,10 +1049,13 @@ export default function useEditor(data)
                 {
                         let jobs = new Map()
 
+                        if ( (node_id === undefined) || (node_id === null) ) return jobs
+
                         if (node_id && node_model)
                         {
                                 for (const job of state)
                                 {
+                                        if ( (job.node_id === undefined) || (job.node_id === null) ) continue
                                         if ( (job.node_id === parseInt(node_id)) && (job.node_model === node_model) )
                                         {
                                                 if (job.operation === 'copy')
@@ -937,6 +1079,9 @@ export default function useEditor(data)
 
                 const custom_filter = (job_list, id) =>
                 {
+                        if ( !Number.isInteger(id) ) return job_list
+
+                        console.log("jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist11111", job_list, id)
                         let new_job_list = window.Global_State.copyObject(job_list)
 
                         new_job_list = [...new_job_list].filter( job => job.id !== id )
@@ -948,9 +1093,11 @@ export default function useEditor(data)
 
                         for (const job of new_job_list)
                         {
+                                if ( !Number.isInteger(job.copy_job_id) ) continue
                                 if ( job.copy_job_id === id ) new_job_list = custom_filter(new_job_list, job.id)
                         }
 
+                        console.log("neeeeeeeeeeeew_jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist", new_job_list, id)
                         return new_job_list
                 }
 
@@ -1504,7 +1651,7 @@ export default function useEditor(data)
                                         {
                                                 id: job_id.current,
                                                 operation: 'copy',
-                                                node_id: parseInt(json_request.id),
+                                                // node_id: parseInt(json_request.id),
                                                 node_model: 'App\\Models\\DossierSimple',
                                                 data: json_request,
                                                 etat: 'waiting',
@@ -1744,7 +1891,7 @@ export default function useEditor(data)
                                         {
                                                 id: job_id.current,
                                                 operation: 'copy',
-                                                node_id: parseInt(json_request.id),
+                                                // node_id: parseInt(json_request.id),
                                                 node_model: 'App\\Models\\Fichier',
                                                 data: json_request,
                                                 etat: 'waiting',
@@ -2059,183 +2206,160 @@ export default function useEditor(data)
                 }
         )
 
-        const update_initData =
-                new_data =>
-                {
-                        console.log('update_initData')
-
-                        setDatasState({ type: 'update_initData', new_data })
-                }
-
-        const save = async request =>
+        const update_initData = new_data =>
         {
-                await http.post('handle_edit', request, {
-                                headers:{
-                                        'Content-Type': 'multipart/form-data'
-                                }
-                        })
-                        .then(
-                                res =>
-                                {
-                                        console.log('editor handling ressssssssssssssssssssssssssssssssssss', res)
-                                        // toast.dismiss('Saving')
-                                }
-                        )
-                        .catch(
-                                err =>
-                                {
-                                        console.log(err)
-                                }
-                        )
+                console.log('update_initData')
 
-
+                setDatasState({ type: 'update_initData', new_data })
         }
 
         useEffect(
                 () =>
                 {
-                        if (jobs.length > 0 )
-                        {
-
-                                toast((t) => (
-                                                <div style={{ width: 'max-content' }} >
-                                                        <Stack spacing={2} direction = {'row'}
-                                                               sx = {
-                                                                       {
-                                                                               display: 'flex',
-                                                                               justifyContent: 'center',
-                                                                               position: 'relative',
-                                                                               alignItems: 'center',
-                                                                       }
-                                                               }
-                                                        >
-                                                                <Button variant="light" onClick={() =>
-                                                                {
-                                                                        const queryData = new FormData
-
-                                                                        const sortedJobs = [];
-                                                                        const visitedJobs = new Set();
-
-                                                                        function topologicalSort(jobs, jobId) {
-
-                                                                                visitedJobs.add(jobId);
-
-                                                                                const job = jobs.find((j) => j.id === jobId);
-                                                                                if (!job) return;
-
-                                                                                if  ( ( !job.dependencies || (job.dependencies.length === 0) ) && !job.copy_job_id ) {
-                                                                                        sortedJobs.push(job);
-                                                                                        return;
-                                                                                }
-
-                                                                                for ( const dependency of (job.dependencies || (job.copy_job_id ? [job.copy_job_id] : []) ) ) {
-                                                                                        const dependencyId = typeof dependency === 'number' ? dependency : dependency.job_id;
-                                                                                        if (!visitedJobs.has(dependencyId)) {
-                                                                                                topologicalSort(jobs, dependencyId);
-                                                                                        }
-                                                                                }
-
-                                                                                sortedJobs.push(job);
-                                                                        }
-
-                                                                        for (const job of jobs) {
-                                                                                if (!visitedJobs.has(job.id)) {
-                                                                                        topologicalSort(jobs, job.id);
-                                                                                }
-                                                                        }
-
-                                                                        sortedJobs.map(
-                                                                        job =>
-                                                                        {
-                                                                                if (job.operation === "add_copy")
-                                                                                {
-                                                                                        const parent = localDataState.find( node => node.id === job.identity_ref.to_id )
-                                                                                        const the_node = localDataState.find( node => node.id === job.identity_ref.id )
-
-                                                                                        // add_copy_job.data.relative_path = `${destination.name}\\${new_node.name}`;
-                                                                                        job.data.relative_path = `${parent.name}\\${the_node.name}`;
-                                                                                }
-
-                                                                                queryData.append( "jobs[]", JSON.stringify(job) )
-                                                                                if( job.node_model === 'App\\Models\\Fichier'  && job.operation === 'add' )
-                                                                                {
-                                                                                        job.data.files.map(
-                                                                                        file =>
-                                                                                        {
-                                                                                                queryData.append( `job${job.id}_files[]`, file )
-                                                                                        }
-                                                                                        )
-                                                                                }
-                                                                        })
-
-                                                                        // console.log('jooooooooobs', queryData.get('jobs[]'))
-
-                                                                        window.Global_State.changeMode()
-
-                                                                        toast.promise(
-                                                                                save(queryData),
-                                                                                {
-                                                                                        loading: 'Saving...',
-                                                                                        success: 'Processus achevé',
-                                                                                        error: 'err'
-                                                                                },
-                                                                                {
-                                                                                        id: 'Saving',
-                                                                                        duration: Infinity
-                                                                                }
-                                                                        ).then( res => { setTimeout( () => { toast.dismiss('Saving') }, 800 ) } )
-
-
-                                                                }
-                                                                }>
-                                                                        SAVE
-                                                                </Button>
-                                                                <Button   variant="danger" onClick={() =>
-                                                                {
-                                                                }
-                                                                }>
-                                                                        DISCARD
-                                                                </Button>
-                                                        </Stack>
-                                                </div>
-                                        ),
-                                        {
-                                                id: 'save',
-                                                position: "bottom-right",
-                                                duration: Infinity,
-                                                style: {
-                                                        // width: '1700px',
-                                                        border: '1px solid #0062ff',
-                                                        padding: '16px',
-                                                        color: '#0062ff',
-                                                },
-                                        }
-                                );
-                        }
-                        else
-                        {
-                                toast.dismiss('save')
-                        }
+                        console.log("ooooooooooooooooooooooopeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeen", active, jobs)
+                        setActive( Boolean(jobs.length) )
+                        // if (jobs.length > 0 )
+                        // {
+                        //
+                        //         toast((t) => (
+                        //                         <div style={{ width: 'max-content' }} >
+                        //                                 <Stack spacing={2} direction = {'row'}
+                        //                                        sx = {
+                        //                                                {
+                        //                                                        display: 'flex',
+                        //                                                        justifyContent: 'center',
+                        //                                                        position: 'relative',
+                        //                                                        alignItems: 'center',
+                        //                                                }
+                        //                                        }
+                        //                                 >
+                        //                                         <Button variant="light"
+                        //                                                 onClick={() =>
+                        //                                                 {
+                        //                                                         const queryData = new FormData
+                        //
+                        //                                                         const sortedJobs = [];
+                        //                                                         const visitedJobs = new Set();
+                        //
+                        //                                                         function topologicalSort(jobs, jobId) {
+                        //
+                        //                                                                 visitedJobs.add(jobId);
+                        //
+                        //                                                                 const job = jobs.find((j) => j.id === jobId);
+                        //                                                                 if (!job) return;
+                        //
+                        //                                                                 if  ( ( !job.dependencies || (job.dependencies.length === 0) ) && !job.copy_job_id ) {
+                        //                                                                         sortedJobs.push(job);
+                        //                                                                         return;
+                        //                                                                 }
+                        //
+                        //                                                                 for ( const dependency of (job.dependencies || (job.copy_job_id ? [job.copy_job_id] : []) ) ) {
+                        //                                                                         const dependencyId = typeof dependency === 'number' ? dependency : dependency.job_id;
+                        //                                                                         if (!visitedJobs.has(dependencyId)) {
+                        //                                                                                 topologicalSort(jobs, dependencyId);
+                        //                                                                         }
+                        //                                                                 }
+                        //
+                        //                                                                 sortedJobs.push(job);
+                        //                                                         }
+                        //
+                        //                                                         for (const job of jobs) {
+                        //                                                                 if (!visitedJobs.has(job.id)) {
+                        //                                                                         topologicalSort(jobs, job.id);
+                        //                                                                 }
+                        //                                                         }
+                        //
+                        //                                                         sortedJobs.map(
+                        //                                                         job =>
+                        //                                                         {
+                        //                                                                 if (job.operation === "add_copy")
+                        //                                                                 {
+                        //                                                                         const parent = localDataState.find( node => node.id === job.identity_ref.to_id )
+                        //                                                                         const the_node = localDataState.find( node => node.id === job.identity_ref.id )
+                        //
+                        //                                                                         // add_copy_job.data.relative_path = `${destination.name}\\${new_node.name}`;
+                        //                                                                         job.data.relative_path = `${parent.name}\\${the_node.name}`;
+                        //                                                                 }
+                        //
+                        //                                                                 queryData.append( "jobs[]", JSON.stringify(job) )
+                        //                                                                 if( job.node_model === 'App\\Models\\Fichier'  && job.operation === 'add' )
+                        //                                                                 {
+                        //                                                                         job.data.files.map(
+                        //                                                                         file =>
+                        //                                                                         {
+                        //                                                                                 queryData.append( `job${job.id}_files[]`, file )
+                        //                                                                         }
+                        //                                                                         )
+                        //                                                                 }
+                        //                                                         })
+                        //
+                        //                                                         // console.log('jooooooooobs', queryData.get('jobs[]'))
+                        //
+                        //                                                         window.Global_State.changeMode()
+                        //
+                        //                                                         toast.promise(
+                        //                                                                 save(queryData),
+                        //                                                                 {
+                        //                                                                         loading: 'Saving...',
+                        //                                                                         success: 'Processus achevé',
+                        //                                                                         error: 'err'
+                        //                                                                 },
+                        //                                                                 {
+                        //                                                                         id: 'Saving',
+                        //                                                                         duration: Infinity
+                        //                                                                 }
+                        //                                                         ).then( res => { setTimeout( () => { toast.dismiss('Saving') }, 800 ) } )
+                        //
+                        //
+                        //                                                 }
+                        //                                         }>
+                        //                                                 SAVE
+                        //                                         </Button>
+                        //                                         <Button   variant="danger" onClick={() =>
+                        //                                         {
+                        //                                         }
+                        //                                         }>
+                        //                                                 DISCARD
+                        //                                         </Button>
+                        //                                 </Stack>
+                        //                         </div>
+                        //                 ),
+                        //                 {
+                        //                         id: 'save',
+                        //                         position: "bottom-right",
+                        //                         duration: Infinity,
+                        //                         style: {
+                        //                                 // width: '1700px',
+                        //                                 border: '1px solid #0062ff',
+                        //                                 padding: '16px',
+                        //                                 color: '#0062ff',
+                        //                         },
+                        //                 }
+                        //         );
+                        // }
+                        // else
+                        // {
+                        //         toast.dismiss('save')
+                        // }
 
                 }, [jobs]
         )
 
         const close = () =>
         {
-                setActive(false)
                 toast.dismiss('save')
                 dispatch_job({ type: 'reset' })
         }
-
 
 
         console.log('localDataState', localDataState, initData.current, jobs)
 
         return (
                 {
+                        save_component: <Save_component open={active} jobs={jobs} localDataState={localDataState} />,
                         data: localDataState,
                         update_initData,
-                        open: () => { setActive(true) },
+                        open: () => { },
                         close,
                         can_undo, can_redo,
                         folder:

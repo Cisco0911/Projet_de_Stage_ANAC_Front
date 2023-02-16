@@ -2,15 +2,18 @@
 
 import React, {useState, useEffect} from 'react';
 
+import {http} from "../auth/login";
+import Warning_component from "./warning_component";
+
 import {
         BottomNavigation,
         BottomNavigationAction,
         Box, Button, Checkbox,
-        Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel,
+        Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, FormControlLabel,
         InputLabel, ListItemText, MenuItem, OutlinedInput,
         Popover, Select,
         TableHead,
-        TablePagination
+        TablePagination, TextField
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 
@@ -27,8 +30,13 @@ import TableBody from "@mui/material/TableBody";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 
+import WarningTwoToneIcon from '@mui/icons-material/WarningTwoTone';
+
 import swal from "sweetalert";
 import {LoadingButton} from "@mui/lab";
+import toast from "react-hot-toast";
+
+import {CgAirplane} from "react-icons/cg"
 
 
 
@@ -47,11 +55,12 @@ const MenuProps = {
                 },
         },
 };
-function Services_component({services})
+export function Services_component({value, is_user})
 {
-        const [open, setOpen] = React.useState(false);
+        const [open, setOpen] = useState(false);
         const [loading, setLoading] = useState(false);
-        const [selectedServices, setSelectedServices] = useState( services.map(service => service.name) );
+        const [selectedServices, setSelectedServices] = useState( value.services.map(service => service.name) );
+        const [open_confirmation, setOpen_confirmation] = useState(false);
 
         const handleChange = (event) => {
                 const {
@@ -63,7 +72,8 @@ function Services_component({services})
                 );
         };
 
-        const handleClickOpen = () => {
+        const handleClickOpen = () =>
+        {
                 setOpen(true);
         };
 
@@ -74,17 +84,105 @@ function Services_component({services})
                 }
         };
 
-        const handleSubmit = (event, reason) => {
+        const handleSubmit = (event, reason) =>
+        {
                 if (reason !== 'backdropClick')
                 {
-                        console.log("Update services", selectedServices)
-                        setLoading(true)
-                        // setOpen(false);
+                        setOpen_confirmation(false)
+                        if (is_user)
+                        {
+                                console.log("Update services", selectedServices, value.id)
+                                setLoading(true)
+
+                                const queryBody = new FormData();
+
+                                queryBody.append('id', value.id.toString())
+                                queryBody.append('update_object', "services")
+                                queryBody.append("new_value", JSON.stringify(selectedServices))
+
+                                http.post("admin_update_user", queryBody)
+                                .then(
+                                res =>
+                                {
+                                        console.log(res)
+
+                                        if (res.data.statue === "success")
+                                        {
+                                                window.reload()
+                                                window.show_response("Mise á jour reussie !", "success")
+                                        }
+                                        else
+                                        {
+                                                window.show_response(res.data.data.msg, res.data.statue)
+                                        }
+                                        setLoading(false)
+                                }
+                                )
+                                .catch(
+                                err =>
+                                {
+                                        console.log(err)
+
+                                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                        setLoading(false)
+                                }
+                                )
+                        }
+                        else
+                        {
+                                console.log("Update services", selectedServices, value.id)
+                                setLoading(true)
+
+                                const queryBody = new FormData();
+
+                                queryBody.append('id', value.id.toString())
+                                queryBody.append('update_object', "services")
+                                queryBody.append("new_value", JSON.stringify(selectedServices))
+
+                                http.post("admin_update_section", queryBody)
+                                .then(
+                                res =>
+                                {
+                                        console.log(res)
+
+                                        if (res.data.statue === "success")
+                                        {
+                                                window.reload()
+                                                window.show_response("Mise á jour reussie !", "success")
+                                        }
+                                        else
+                                        {
+                                                window.show_response(res.data.data.msg, res.data.statue)
+                                        }
+                                        setLoading(false)
+                                }
+                                )
+                                .catch(
+                                err =>
+                                {
+                                        console.log(err)
+
+                                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                        setLoading(false)
+                                }
+                                )
+                        }
                 }
         };
 
 
-        const services_names = services.reduce((acc, services) => acc ? `${acc}, ${services.name}` : services.name, "")
+        const warning_infos = is_user ?
+        [
+                "Si l'utilisateur est détaché d'un service ou il a validé des fichiers, ces derniers seront automatiquement dévalidés; Il est préférable de faire une transmission de rôles d'abord;",
+                "L'utilisateur sera detaché des audits auxquels il a participé;",
+                "S'il est responsable d'un audit, la mise á jour n'aboutira pas, il faudra faire une transmission de role au préalable 1"
+        ] :
+        [
+                "Les Audits, Dossier, ... seront détachés de tous services dont la section sera detachée;",
+                "Au cas ou ils se retrouvent détachés de tous les services, ils seront automatiquement ratachés aux nouveaux services de la section"
+        ]
+
+        const services_names = value.services.reduce((acc, service) => acc ? `${acc}, ${service.name}` : service.name, "")
 
         return(
                 <Box>
@@ -130,9 +228,10 @@ function Services_component({services})
                                 </DialogContent>
                                 <DialogActions>
                                         <Button onClick={handleClose}>Cancel</Button>
-                                        <LoadingButton loading={loading} onClick={handleSubmit}>Ok</LoadingButton>
+                                        <LoadingButton loading={loading} onClick={e => setOpen_confirmation(true)}>Ok</LoadingButton>
                                 </DialogActions>
                         </Dialog>
+                        <Warning_component open={open_confirmation} onConfirm={handleSubmit} onCancel={e => {setOpen_confirmation(false); handleClose()} } warning_infos={warning_infos} />
                 </Box>
         )
 }
@@ -152,7 +251,15 @@ function Right_component({value})
 
         const handleClick = e =>
         {
-                if ( parseInt(value) === 2 )
+                toast("Updating...",
+                {
+                        type: "loading",
+                        id: `right_${value.id}`,
+                        duration: Infinity
+                }
+                )
+
+                if ( parseInt(value.right_lvl) === 2 )
                 {
                         swal({
                                 title: "Etes vous sûr ?",
@@ -166,19 +273,89 @@ function Right_component({value})
                                 {
                                         if (will_continue)
                                         {
-                                                console.log("change right level", nextLvl(value))
+                                                console.log("change right level danger", nextLvl(value.right_lvl), value.id)
+
+                                                const queryBody = new FormData();
+
+                                                queryBody.append('id', value.id.toString())
+                                                queryBody.append('update_object', "right_lvl")
+                                                queryBody.append("new_value", nextLvl(value.right_lvl))
+
+                                                http.post("admin_update_user", queryBody)
+                                                .then(
+                                                        res =>
+                                                        {
+                                                                console.log(res)
+
+                                                                toast.dismiss(`right_${value.id}`)
+                                                                if (res.data.statue === "success")
+                                                                {
+                                                                        window.reload()
+                                                                        window.show_response("Mise á jour reussie !", "success")
+                                                                }
+                                                                else
+                                                                {
+                                                                        window.show_response(res.data.data.msg, res.data.statue)
+                                                                }
+                                                        }
+                                                )
+                                                .catch(
+                                                        err =>
+                                                        {
+                                                                console.log(err)
+
+                                                                toast.dismiss(`right_${value.id}`)
+                                                                window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                        }
+                                                )
                                         }
+                                        else toast.dismiss(`right_${value.id}`)
                                 }
                         )
                 }
                 else
                 {
-                        console.log("change right level", nextLvl(value))
+                        console.log("change right level", nextLvl(value.right_lvl), value.id)
+
+                        const queryBody = new FormData();
+
+                        queryBody.append('id', value.id.toString())
+                        queryBody.append('update_object', "right_lvl")
+                        queryBody.append("new_value", nextLvl(value.right_lvl))
+
+                        http.post("admin_update_user", queryBody)
+                        .then(
+                                res =>
+                                {
+                                        console.log(res)
+
+                                        if (res.data.statue === "success")
+                                        {
+                                                window.reload()
+                                                window.show_response("Mise á jour reussie !", "success")
+                                        }
+                                        else
+                                        {
+                                                window.show_response(res.data.data.msg, res.data.statue)
+                                                toast.dismiss(`right_${value.id}`)
+                                        }
+                                }
+                        )
+                        .catch(
+                                err =>
+                                {
+                                        console.log(err)
+
+                                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                        toast.dismiss(`right_${value.id}`)
+                                }
+                        )
+
                 }
         }
 
         let color
-        switch (parseInt(value))
+        switch (parseInt(value.right_lvl))
         {
                 case 1:
                         color = "primary"
@@ -191,29 +368,55 @@ function Right_component({value})
         }
 
         return(
-                <Chip label={value} onClick={handleClick} color={color} />
+                <Chip label={value.right_lvl} onClick={handleClick} color={color} />
         )
 }
 function Name_component({value})
 {
+        const [loading, setLoading] = useState(false);
+        const [open_confirmation, setOpen_confirmation] = useState(false);
 
         const handleDelete = e =>
         {
                 console.log("suppress user", value.id)
+                setLoading( true )
+                setOpen_confirmation(false)
+
+                http.delete(`delete_user?id=${value.id}`)
+                .then(
+                res => {
+                        console.log(res);
+                        window.reload();
+                        if(res.data.statue === 'success') window.show_response(`Utilisateur supprimé avec succès !`, "success")
+                        else window.show_response(res.data.data.msg, res.data.statue)
+                        setLoading( false )
+                }
+                )
+                .catch(err =>
+                {
+                        console.log(err);
+                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                        setLoading( false )
+                })
         }
 
         return(
-                <Chip
-                        avatar={<Avatar>{value.name[0]}</Avatar>}
-                        label={value.name}
-                        variant="outlined"
-                        onDelete={handleDelete}
-                        deleteIcon={
-                                <IconButton color="error" >
-                                        <TiUserDelete size={20} color={"red"} />
-                                </IconButton>
-                        }
-                />
+                <React.Fragment>
+                        <Chip
+                                avatar={<Avatar>{value.name[0]}</Avatar>}
+                                label={value.name}
+                                variant="outlined"
+                                onDelete={ e => setOpen_confirmation(true) }
+                                deleteIcon={
+                                        <LoadingButton as={IconButton} loading={loading} color="error" >
+                                                {
+                                                        loading ? null : <TiUserDelete size={20} color={"red"} />
+                                                }
+                                        </LoadingButton>
+                                }
+                        />
+                        <Warning_component open={open_confirmation} onConfirm={handleDelete} onCancel={e => setOpen_confirmation(false)} warning_infos={[ "Tout Audit, Dossir, Fichier ... que l'utilisateur a validé sera dévalidé !" ]} />
+                </React.Fragment>
         )
         // <Avatar alt="Natacha" src="/static/images/avatar/1.jpg" />
 }
@@ -221,12 +424,13 @@ function Switch_user_component({user_id})
 {
 
         const [open, setOpen] = React.useState(false);
-        const [new_user, setNew_user] = useState('');
+        const [to_id, setTo_id] = useState('');
         const [error_msg, setError] = useState();
-        const [echange, setEchange] = useState(0);
+        const [echange, setEchange] = useState(false);
+        const [loading, setLoading] = useState(false);
 
         const handleChange = (event) => {
-                setNew_user(event.target.value);
+                setTo_id(event.target.value);
                 setError(undefined)
         };
 
@@ -242,11 +446,47 @@ function Switch_user_component({user_id})
         const handleSubmit = (event, reason) => {
                 if (reason !== 'backdropClick')
                 {
-                        if (new_user === '') setError("selectionner un utilisateur")
+                        if (to_id === '') setError("selectionner un utilisateur")
                         else
                         {
-                                console.log("Switching roles", user_id, new_user, echange)
-                                setOpen(false);
+                                console.log("Switching roles", user_id.id, to_id, echange)
+                                setLoading(true)
+
+                                const queryBody = new FormData();
+
+                                queryBody.append('from_id', user_id.id.toString())
+                                queryBody.append('to_id', to_id.toString())
+                                queryBody.append("exchange", echange ? '1' : '0')
+
+                                console.log("Switching roles queryBody", queryBody.get("exchange"))
+
+                                http.post("role_exchange", queryBody)
+                                .then(
+                                res =>
+                                {
+                                        console.log(res)
+
+                                        if (res.data.statue === "success")
+                                        {
+                                                window.reload()
+                                                window.show_response(`${ echange ? 'Echange'  : 'Transmission' } de role reussie !`, "success")
+                                        }
+                                        else
+                                        {
+                                                window.show_response(res.data.data.msg, res.data.statue)
+                                        }
+                                        setLoading(false)
+                                }
+                                )
+                                .catch(
+                                err =>
+                                {
+                                        console.log(err)
+
+                                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                        setLoading(false)
+                                }
+                                )
                         }
                 }
         };
@@ -271,13 +511,13 @@ function Switch_user_component({user_id})
                                                 <Select
                                                 labelId="demo-simple-select-label"
                                                 id="demo-simple-select"
-                                                value={new_user}
+                                                value={to_id}
                                                 label="Nouveau utilisateur"
                                                 onChange={handleChange}
                                                 >
                                                         {
                                                                 window.datas.users
-                                                                .filter(user => user.id !== user_id)
+                                                                .filter(user => user.id !== user_id.id)
                                                                 .map(
                                                                 user => <MenuItem key={user.id} value={user.id}>{`${user.name} ${user.second_name}`}</MenuItem>
                                                                 )
@@ -286,13 +526,13 @@ function Switch_user_component({user_id})
                                         </FormControl>
 
                                         <Box className="mt-2">
-                                                <FormControlLabel control={<Checkbox checked={ Boolean(echange) } onChange={e => setEchange( echange ? 0 : 1 )} />} label="Echange" />
+                                                <FormControlLabel control={<Checkbox checked={ echange } onChange={e => setEchange( !echange )} />} label="Echange" />
                                         </Box>
                                 </Box>
                         </DialogContent>
                         <DialogActions>
                                 <Button onClick={handleClose}>Cancel</Button>
-                                <Button onClick={handleSubmit}>Ok</Button>
+                                <LoadingButton loading={loading} onClick={handleSubmit}>Ok</LoadingButton>
                         </DialogActions>
                 </Dialog>
         </div>
@@ -322,7 +562,7 @@ const columns = [
                 id: 'services',
                 label: 'Services',
                 align: 'right',
-                format: (services) => <Services_component services={services} />,
+                format: (value) => <Services_component value={value} is_user={true} />,
         },
         {
                 id: 'id',
@@ -335,8 +575,8 @@ const columns = [
 
 function Users({rows})
 {
-        const [page, setPage] = React.useState(0);
-        const [rowsPerPage, setRowsPerPage] = React.useState(10);
+        const [page, setPage] = useState(0);
+        const [rowsPerPage, setRowsPerPage] = useState(10);
 
         const handleChangePage = (event, newPage) => {
                 setPage(newPage);
@@ -349,8 +589,8 @@ function Users({rows})
 
 
         return(
-        <Paper sx={{ width: '100%', height: "85%", overflow: 'hidden' }} elevation={0} variant="outlined" >
-                <TableContainer sx={{ maxHeight: 440 }}>
+        <Paper className="d-flex flex-column" sx={{ width: '100%', height: "85%", overflow: 'hidden' }} elevation={0} variant="outlined" >
+                <TableContainer sx={{ maxHeight: "100%" }}>
                         <Table stickyHeader aria-label="sticky table">
                                 <TableHead>
                                         <TableRow>
@@ -371,36 +611,38 @@ function Users({rows})
                                         </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                        {rows
-                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .map(
-                                        (row) => {
-                                                return (
-                                                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                                                        {
-                                                                columns.map(
-                                                                        column =>
-                                                                        {
-                                                                                let value
+                                        {
+                                                rows
+                                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                                .map(
+                                                (row) => {
+                                                        return (
+                                                        <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                                                                {
+                                                                        columns.map(
+                                                                                column =>
+                                                                                {
+                                                                                        let value
 
-                                                                                if (column.id === "name") value = {name: row[column.id], id: row.id};
-                                                                                else value = row[column.id]
+                                                                                        value = {id: row.id};
+                                                                                        value[column.id] = row[column.id]
 
-                                                                                return (
-                                                                                <TableCell key={column.id} align={column.align}>
-                                                                                        {
-                                                                                                column.format
-                                                                                                ? column.format(value)
-                                                                                                : value
-                                                                                        }
-                                                                                </TableCell>
-                                                                                );
-                                                                        }
-                                                                )
-                                                        }
-                                                </TableRow>
-                                                );
-                                        })}
+                                                                                        return (
+                                                                                        <TableCell key={column.id} align={column.align}>
+                                                                                                {
+                                                                                                        column.format
+                                                                                                        ? column.format(value)
+                                                                                                        : row[column.id]
+                                                                                                }
+                                                                                        </TableCell>
+                                                                                        );
+                                                                                }
+                                                                        )
+                                                                }
+                                                        </TableRow>
+                                                        );
+                                                })
+                                        }
                                 </TableBody>
                         </Table>
                 </TableContainer>

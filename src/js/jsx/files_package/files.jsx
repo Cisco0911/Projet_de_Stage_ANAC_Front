@@ -152,10 +152,6 @@ export default function useGetFiles(Global_research) {
 
 function FileTree({data}) {
 
-        // console.log('data111111', data)
-        //
-        // data = [...data].filter( node_data => ( node_data.global_type === 'folder' ) )
-
         const tree = useRef()
 
         const expanded = window.Global_State.expanded

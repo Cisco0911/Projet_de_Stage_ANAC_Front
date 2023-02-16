@@ -122,7 +122,7 @@ export default function Global_research(_ref) {
                                         }
                                 },
                                 window.Global_State.dataToUse.filter(function (node) {
-                                        if (value === '') return false;else if (node.type === 'checkList' || node.type === 'dp' || node.type === 'nc') return false;else if (filterTag === 'All') return node.name.indexOf(value) !== -1;else if (filterTag === 'Audit') return node.type === 'audit' && node.name.indexOf(value) !== -1;else if (filterTag === 'FNC') return node.type === 'fnc' && node.name.indexOf(value) !== -1;else if (filterTag === 'Folder') return node.type === 'ds' && node.name.indexOf(value) !== -1;else if (filterTag === 'File') return node.type === 'f' && node.name.indexOf(value) !== -1;
+                                        if (value === '' || node.isRoot) return false;else if (node.type === 'checkList' || node.type === 'dp' || node.type === 'nc') return false;else if (filterTag === 'All') return node.name.indexOf(value) !== -1;else if (filterTag === 'Audit') return node.type === 'audit' && node.name.indexOf(value) !== -1;else if (filterTag === 'FNC') return node.type === 'fnc' && node.name.indexOf(value) !== -1;else if (filterTag === 'Folder') return node.type === 'ds' && node.name.indexOf(value) !== -1;else if (filterTag === 'File') return node.type === 'f' && node.name.indexOf(value) !== -1;
                                 }).map(function (node) {
                                         var Research_name_component = function Research_name_component(_ref2) {
                                                 var name = _ref2.name,

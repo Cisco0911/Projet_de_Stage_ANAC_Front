@@ -1,6 +1,6 @@
 /* eslint-disable import/first */
 
-import React, {useState, useEffect, useRef, useReducer, useMemo} from 'react';
+import React, {useState, useEffect, useRef, useReducer, useMemo, Component} from 'react';
 import useGetData, {getFromDataBase} from "./data";
 import ReactDOM from 'react-dom/client';
 
@@ -11,6 +11,9 @@ import Create_account from "./auth/create_account";
 import { http } from "./auth/login";
 import Notifications from "./auth/user_notification";
 import QuickSettings from "./auth/quick_settings";
+import User_infos from "./user/user_infos";
+import Forgot_password from "./auth/password_reset/forgot_password";
+import Reset_password from "./auth/password_reset/reset_password";
 
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
@@ -36,9 +39,12 @@ import {
         RouterProvider,
 } from "react-router-dom";
 import { useRouteError, redirect, useNavigate } from "react-router-dom";
-import {Box, Button, Popper, SwipeableDrawer, Tooltip} from "@mui/material";
+import {Box, Button, Popper, Snackbar, SwipeableDrawer, Tooltip} from "@mui/material";
 import {Collapse, Fade, Offcanvas} from "react-bootstrap";
 import Administrator_home from "./administrator/administrator_home";
+import swal from "sweetalert";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 
 
 
@@ -63,6 +69,7 @@ export const test = "Success"
 
 
 window.Global_State = {}
+
 // Object.defineProperty(window, 'Global_State', {
 //         get: function() {
 //                 return Global_State;
@@ -136,7 +143,14 @@ function Header()
 
         const dropMenuItemsUser = (
         <React.Fragment>
-                <div className=" d-flex flex-column justify-content-center align-items-center py-4" data-background-image="./style/assets/media/image/user/man_avatar3.jpg" style={{background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100}} >
+                <div className=" d-flex flex-column justify-content-center align-items-center py-4" data-background-image="./style/assets/media/image/user/man_avatar3.jpg" style={{background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100}}
+                     onClick={
+                        e =>
+                        {
+                                navigate("/user_information")
+                        }
+                     }
+                >
                         <Avatar alt={`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`} src="./style/assets/media/image/user/man_avatar3.jpg" />
                         <h5 className="mb-0">{`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`}</h5>
                 </div>
@@ -227,7 +241,7 @@ function Sections_side_bar()
                                 </a>
                         </div>
                         <div className="sections_div" >
-                                <Stack direction={`column`} spacing={2} className="full_size_element">
+                                <Stack direction={`column`} spacing={2} className="full_size_element d-flex justify-content-center align-items-center">
                                         {
                                                 sections.map(
                                                         (section, idx) =>
@@ -235,7 +249,9 @@ function Sections_side_bar()
                                                                 // console.log(sections)
                                                                 return (
                                                                 <Tooltip key={ section.id } title={section.name} placement="right-start" >
-                                                                                <span className="full_size_element" >
+                                                                                <span className="full_size_element" style={{
+                                                                                        height: "fit-content"
+                                                                                }} >
                                                                                         <Button className={`d-flex p-2 full_size_element`} tabIndex={-1} variant={`${window.Global_State.selectedSectionId === section.id ? "outlined" : "text"}`}
                                                                                                 style={{
                                                                                                         borderColor: "blue"
@@ -268,9 +284,9 @@ function Sections_side_bar()
                                         }
                                 </Stack>
                         </div>
-                        <IconButton size={`large`} color={`primary`} style={{ width: "fit-content" }} >
-                                <ManageAccountsTwoToneIcon style={{ fontSize: 60, color: "blue" }} />
-                        </IconButton>
+                        {/*<IconButton size={`large`} color={`primary`} style={{ width: "fit-content" }} >*/}
+                        {/*        <ManageAccountsTwoToneIcon style={{ fontSize: 60, color: "blue" }} />*/}
+                        {/*</IconButton>*/}
                 </div>
         );
 
@@ -595,6 +611,7 @@ function Load({datas})
                 {/* {overlaySideBar} */}
                 {window.Global_State.Overlay_component}
                 {window.Global_State.modalManager.modal}
+                {window.Global_State.editor.save_component}
 
                 <div className="full_size_element layout-wrapper d-none d-xl-block">
                         <Stack className="full_size_element d-flex" direction="row" spacing={0.5} alignItems = 'center' justifyContent='flex-end' >
@@ -743,6 +760,33 @@ function Load({datas})
 
 function File_home()
 {
+        window.show_response = (msg, type) =>
+        {
+                toast(
+                        (t) =>
+                        (
+                                // t.visible ?
+                                <Alert onClose={ () => toast.dismiss(t.id) } severity={type} sx={{ width: 'fit-content', minWidth: 300, animation: "fadeMe 0.3s" }}>
+                                        <AlertTitle> { type.replace(/^\w/, c => c.toUpperCase()) } </AlertTitle>
+                                        {msg}
+                                </Alert>
+                        ),
+                        {
+                                position: "bottom-left",
+                                duration: type === "error" ? Infinity : 3000,
+                                style: {
+                                        background: 'rgba(255,255,255,0)',
+                                        padding: 0,
+                                        boxShadow: 'unset',
+                                },
+                        }
+                )
+                // swal({
+                //         title: "Error",
+                //         text: msg,
+                //         icon: type
+                // })
+        }
 
         document.onkeydown = function (e) {
                 if(e.ctrlKey && e.key === 'f') return false
@@ -804,7 +848,7 @@ function Page()
         const navigate = useNavigate()
 
         useEffect(() => {
-                setTimeout( () => { navigate("/files") }, 3000 )
+                setTimeout( () => { navigate("/files_browser") }, 3000 )
         }, [])
 
         console.log("render")
@@ -815,7 +859,7 @@ function Page()
 
 }
 
-const loader = async () => {
+const files_loader = async () => {
         let user
         await http.get('user')
         .then(
@@ -830,6 +874,46 @@ const loader = async () => {
         console.log(user)
 
         if(user === '') return redirect("/login")
+        else if ( !user.id ) return redirect("/administrator")
+        else return "ok"
+};
+
+const user_info_loader = async () => {
+        let user
+        await http.get('user')
+        .then(
+                res =>
+                {
+                        console.log(res)
+                        user = res.data
+                }
+        )
+        .catch( err => { console.log(err) })
+
+        console.log(user)
+
+        if(user === '') return redirect("/login")
+        else if ( !window.Global_State || !window.Global_State.authUser ) return redirect("/files_browser")
+        else if ( !user.id ) return redirect("/administrator")
+        else return "ok"
+};
+
+const admin_loader = async () => {
+        let user
+        await http.get('user')
+        .then(
+                res =>
+                {
+                        console.log(res)
+                        user = res.data
+                }
+        )
+        .catch( err => { console.log(err) })
+
+        console.log(user)
+
+        if(user === '') return redirect("/login")
+        else if ( user.id ) return redirect("/files_browser")
         else return "ok"
 };
 
@@ -848,14 +932,27 @@ const router = createBrowserRouter([
                 element: <Create_account />,
         },
         {
-                path: "/files",
+                path: "/forgot_password",
+                element: <Forgot_password />,
+        },
+        {
+                path: "/reset_password",
+                element: <Reset_password />,
+        },
+        {
+                path: "/files_browser",
                 element: <File_home />,
-                loader: loader
+                loader: files_loader
         },
         {
                 path: "/administrator",
                 element: <Administrator_home />,
-                loader: loader,
+                loader: admin_loader,
+        },
+        {
+                path: "/user_information",
+                element: <User_infos />,
+                loader: user_info_loader,
         },
 ]);
 

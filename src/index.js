@@ -14,7 +14,9 @@ import './style/vendors/bundle.css';
 
 import "./style/vendors/dropzone/dropzone.css";
 
-import './style/assets/css/app.min.css';
+// import './style/assets/css/app.min.css';
+
+import './style/old_css.css'
 
 import './style/personal_style.css'
 

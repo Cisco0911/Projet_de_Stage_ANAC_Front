@@ -105,7 +105,7 @@ export default function Global_research({display})
                                         window.Global_State.dataToUse.filter(
                                         node =>
                                         {
-                                                if (value === '') return false
+                                                if ( (value === '') || node.isRoot ) return false
                                                 else if (node.type === 'checkList' || node.type === 'dp' || node.type === 'nc') return false
                                                 else if (filterTag === 'All') return node.name.indexOf(value) !== -1
                                                 else if (filterTag === 'Audit') return (node.type === 'audit' && node.name.indexOf(value) !== -1)

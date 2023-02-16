@@ -4,7 +4,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 import React, { useState, useEffect } from 'react';
 
-import { FcDepartment, FcDeleteRow } from "react-icons/fc";
+import { MdDeleteSweep } from "react-icons/md";
 import { ImNotification } from "react-icons/im";
 import { IoBusinessOutline } from "react-icons/io5";
 
@@ -18,39 +18,88 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import AddIcon from '@mui/icons-material/Add';
 import IconButton from "@mui/material/IconButton";
+import { LoadingButton } from "@mui/lab";
+import { http } from "../auth/login";
+import toast from "react-hot-toast";
+import Warning_component from "./warning_component";
 
-function Name_component(_ref) {
-        var value = _ref.value;
+export function Name_component(_ref) {
+        var value = _ref.value,
+            is_service = _ref.is_service;
 
-
-        var handleDelete = function handleDelete(e) {
-                console.log("suppress services", value.id);
-        };
-
-        return React.createElement(Chip, {
-                label: value.name,
-                variant: "outlined",
-                onDelete: handleDelete,
-                deleteIcon: React.createElement(
-                        IconButton,
-                        { color: "error" },
-                        React.createElement(FcDeleteRow, { size: 20 })
-                )
-        });
-}
-
-function Description_component(_ref2) {
-        var value = _ref2.value;
-
-        var _useState = useState(''),
+        var _useState = useState(false),
             _useState2 = _slicedToArray(_useState, 2),
-            description = _useState2[0],
-            setDescription = _useState2[1];
+            loading = _useState2[0],
+            setLoading = _useState2[1];
 
         var _useState3 = useState(false),
             _useState4 = _slicedToArray(_useState3, 2),
-            open_dialog = _useState4[0],
-            setOpen_dialog = _useState4[1];
+            open_confirmation = _useState4[0],
+            setOpen_confirmation = _useState4[1];
+
+        var handleDelete = function handleDelete(e) {
+                console.log("suppress services", value.id);
+                setLoading(true);
+                setOpen_confirmation(false);
+
+                http.delete((is_service ? "delete_service" : "delete_section") + "?id=" + value.id).then(function (res) {
+                        console.log(res);
+
+                        if (res.data.statue === 'success') {
+                                window.reload();
+                                window.show_response((is_service ? "Service" : "Section") + " supprim\xE9 !", "success");
+                        } else window.show_response(res.data.data.msg, res.data.statue);
+
+                        setLoading(false);
+                }).catch(function (err) {
+                        console.log(err);
+
+                        window.show_response(err.message + " " + err.response.data.message, "error");
+                        setLoading(false);
+                });
+        };
+
+        var warning_infos = is_service ? ["Les Audits, Dossier, ... et utilisateurs seront détachés du service;", "Au cas ou ils se retrouvent n'appartenant à aucun autre service, ils seront automatiquent supprimés;", "S'il s'avèrent qu'un utilisateur est validateur d'un fichier ou responsabe d'un audit qui est lié à un autre service, la suppression n'aboutira pas !!"] : ["Tout ce que contient la section sera supprimé, la suppression est irréversible !!"];
+
+        return React.createElement(
+                React.Fragment,
+                null,
+                React.createElement(Chip, {
+                        label: value.name,
+                        variant: "outlined",
+                        onDelete: function onDelete(e) {
+                                return setOpen_confirmation(true);
+                        },
+                        deleteIcon: React.createElement(
+                                LoadingButton,
+                                { as: IconButton, loading: loading, color: "error" },
+                                loading ? '' : React.createElement(MdDeleteSweep, { color: "red", size: 20 })
+                        )
+                }),
+                React.createElement(Warning_component, { open: open_confirmation, onConfirm: handleDelete, onCancel: function onCancel(e) {
+                                return setOpen_confirmation(false);
+                        }, warning_infos: warning_infos })
+        );
+}
+
+export function Description_component(_ref2) {
+        var value = _ref2.value,
+            is_service = _ref2.is_service;
+
+        var _useState5 = useState(value.description),
+            _useState6 = _slicedToArray(_useState5, 2),
+            description = _useState6[0],
+            setDescription = _useState6[1];
+
+        var _useState7 = useState(false),
+            _useState8 = _slicedToArray(_useState7, 2),
+            open_dialog = _useState8[0],
+            setOpen_dialog = _useState8[1];
+
+        var _useState9 = useState(false),
+            _useState10 = _slicedToArray(_useState9, 2),
+            loading = _useState10[0],
+            setLoading = _useState10[1];
 
         var handleChange = function handleChange(e) {
                 var typed_value = e.target.value;
@@ -65,8 +114,31 @@ function Description_component(_ref2) {
 
         var handleSubmit = function handleSubmit() {
 
-                console.log("Updating description", description);
-                setOpen_dialog(false);
+                console.log("Updating description", description, value.id);
+
+                setLoading(true);
+
+                var queryData = new FormData();
+                queryData.append("id", value.id);
+                queryData.append("description", description === '' ? "Aucune description apportée" : description);
+
+                http.post(is_service ? "describe_service" : "describe_section", queryData).then(function (res) {
+                        console.log(res);
+
+                        if (res.data.statue === 'success') {
+                                window.reload();
+                                window.show_response("Service mise á jour !", "success");
+
+                                setOpen_dialog(false);
+                        } else window.show_response(res.data.data.msg, res.data.statue);
+
+                        setLoading(false);
+                }).catch(function (err) {
+                        console.log(err);
+
+                        window.show_response(err.message + " " + err.response.data.message, "error");
+                        setLoading(false);
+                });
         };
 
         return React.createElement(
@@ -84,7 +156,7 @@ function Description_component(_ref2) {
                                         cursor: "pointer"
                                 }
                         },
-                        value.description + "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjssssssssssssssssssssssssssssssssssssssssssssssssssssss sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+                        value.description
                 ),
                 React.createElement(
                         Dialog,
@@ -104,6 +176,9 @@ function Description_component(_ref2) {
                                 ),
                                 React.createElement(TextField, {
                                         autoFocus: true,
+                                        onFocus: function onFocus(e) {
+                                                e.target.select();
+                                        },
                                         multiline: true,
                                         margin: "dense",
                                         id: "description_service",
@@ -124,8 +199,8 @@ function Description_component(_ref2) {
                                         "Cancel"
                                 ),
                                 React.createElement(
-                                        Button,
-                                        { onClick: handleSubmit },
+                                        LoadingButton,
+                                        { loading: loading, onClick: handleSubmit },
                                         "Update"
                                 )
                         )
@@ -137,14 +212,14 @@ var columns = [{
         id: 'name',
         label: 'Nom',
         format: function format(value) {
-                return React.createElement(Name_component, { value: value });
+                return React.createElement(Name_component, { value: value, is_service: true });
         },
         minWidth: 50
 }, {
         id: 'description',
         label: 'Description',
         format: function format(value) {
-                return React.createElement(Description_component, { value: value });
+                return React.createElement(Description_component, { value: value, is_service: true });
         },
         minWidth: 250
 }];
@@ -152,15 +227,15 @@ var columns = [{
 function Services(_ref3) {
         var rows = _ref3.rows;
 
-        var _useState5 = useState(0),
-            _useState6 = _slicedToArray(_useState5, 2),
-            page = _useState6[0],
-            setPage = _useState6[1];
+        var _useState11 = useState(0),
+            _useState12 = _slicedToArray(_useState11, 2),
+            page = _useState12[0],
+            setPage = _useState12[1];
 
-        var _useState7 = useState(10),
-            _useState8 = _slicedToArray(_useState7, 2),
-            rowsPerPage = _useState8[0],
-            setRowsPerPage = _useState8[1];
+        var _useState13 = useState(10),
+            _useState14 = _slicedToArray(_useState13, 2),
+            rowsPerPage = _useState14[0],
+            setRowsPerPage = _useState14[1];
 
         var handleChangePage = function handleChangePage(event, newPage) {
                 setPage(newPage);
@@ -173,10 +248,10 @@ function Services(_ref3) {
 
         return React.createElement(
                 Paper,
-                { sx: { width: '100%', height: "85%", overflow: 'hidden' }, elevation: 0, variant: "outlined" },
+                { sx: { width: '100%', height: "100%", overflow: 'hidden' }, elevation: 0, variant: "outlined" },
                 React.createElement(
                         TableContainer,
-                        { sx: { maxHeight: 440 } },
+                        { sx: { maxHeight: "100%" } },
                         React.createElement(
                                 Table,
                                 { stickyHeader: true, "aria-label": "sticky table" },
@@ -237,25 +312,25 @@ function Services(_ref3) {
 export default function Service_admin_section(_ref4) {
         var services = _ref4.services;
 
-        var _useState9 = useState(0),
-            _useState10 = _slicedToArray(_useState9, 2),
-            value = _useState10[0],
-            setValue = _useState10[1];
-
-        var _useState11 = useState(''),
-            _useState12 = _slicedToArray(_useState11, 2),
-            name = _useState12[0],
-            setName = _useState12[1];
-
-        var _useState13 = useState(false),
-            _useState14 = _slicedToArray(_useState13, 2),
-            open_dialog = _useState14[0],
-            setOpen_dialog = _useState14[1];
-
-        var _useState15 = useState(undefined),
+        var _useState15 = useState(''),
             _useState16 = _slicedToArray(_useState15, 2),
-            error = _useState16[0],
-            setError = _useState16[1];
+            name = _useState16[0],
+            setName = _useState16[1];
+
+        var _useState17 = useState(false),
+            _useState18 = _slicedToArray(_useState17, 2),
+            open_dialog = _useState18[0],
+            setOpen_dialog = _useState18[1];
+
+        var _useState19 = useState(false),
+            _useState20 = _slicedToArray(_useState19, 2),
+            loading = _useState20[0],
+            setLoading = _useState20[1];
+
+        var _useState21 = useState(undefined),
+            _useState22 = _slicedToArray(_useState21, 2),
+            error = _useState22[0],
+            setError = _useState22[1];
 
         var handleChange = function handleChange(e) {
                 var typed_value = e.target.value;
@@ -272,7 +347,29 @@ export default function Service_admin_section(_ref4) {
         var handleSubmit = function handleSubmit() {
                 if (name === '') setError("Veuillez saisir le nom");else {
                         console.log("Creating service", name);
-                        setOpen_dialog(false);
+                        setLoading(true);
+
+                        var queryData = new FormData();
+                        queryData.append("name", name);
+
+                        http.post("create_service", queryData).then(function (res) {
+                                console.log(res);
+
+                                if (res.data.statue === 'success') {
+                                        window.reload();
+                                        window.show_response("Service créé !", "success");
+
+                                        setOpen_dialog(false);
+                                } else window.show_response(res.data.data.msg, res.data.statue);
+
+                                setLoading(false);
+                        }).catch(function (err) {
+                                console.log(err);
+
+                                window.show_response(err.message + " " + err.response.data.message, "error");
+                                setLoading(false);
+                        });
+
                         setError(undefined);
                 }
         };
@@ -304,22 +401,6 @@ export default function Service_admin_section(_ref4) {
                                                 return setOpen_dialog(true);
                                         } },
                                 React.createElement(AddIcon, null)
-                        )
-                ),
-                React.createElement(
-                        Paper,
-                        { sx: { position: 'absolute', bottom: 0, left: 0, right: 0 }, elevation: 3 },
-                        React.createElement(
-                                BottomNavigation,
-                                {
-                                        showLabels: true,
-                                        value: value,
-                                        onChange: function onChange(event, newValue) {
-                                                setValue(newValue);
-                                        }
-                                },
-                                React.createElement(BottomNavigationAction, { label: "Services", icon: React.createElement(IoBusinessOutline, { size: 30 }) }),
-                                React.createElement(BottomNavigationAction, { label: "Requests", icon: React.createElement(ImNotification, { size: 30 }) })
                         )
                 ),
                 React.createElement(
@@ -361,8 +442,8 @@ export default function Service_admin_section(_ref4) {
                                         "Cancel"
                                 ),
                                 React.createElement(
-                                        Button,
-                                        { onClick: handleSubmit },
+                                        LoadingButton,
+                                        { loading: loading, onClick: handleSubmit },
                                         "Add"
                                 )
                         )

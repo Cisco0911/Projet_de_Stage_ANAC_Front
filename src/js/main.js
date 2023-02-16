@@ -8,7 +8,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 /* eslint-disable import/first */
 
-import React, { useState, useEffect, useRef, useReducer, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useReducer, useMemo, Component } from 'react';
 import useGetData, { getFromDataBase } from "./data";
 import ReactDOM from 'react-dom/client';
 
@@ -19,6 +19,9 @@ import Create_account from "./auth/create_account";
 import { http } from "./auth/login";
 import Notifications from "./auth/user_notification";
 import QuickSettings from "./auth/quick_settings";
+import User_infos from "./user/user_infos";
+import Forgot_password from "./auth/password_reset/forgot_password";
+import Reset_password from "./auth/password_reset/reset_password";
 
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
@@ -41,9 +44,12 @@ import toast, { Toaster } from "react-hot-toast";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useRouteError, redirect, useNavigate } from "react-router-dom";
-import { Box, Button, Popper, SwipeableDrawer, Tooltip } from "@mui/material";
+import { Box, Button, Popper, Snackbar, SwipeableDrawer, Tooltip } from "@mui/material";
 import { Collapse, Fade, Offcanvas } from "react-bootstrap";
 import Administrator_home from "./administrator/administrator_home";
+import swal from "sweetalert";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
 
 export default function ErrorPage() {
         var error = useRouteError();
@@ -77,6 +83,7 @@ export default function ErrorPage() {
 export var test = "Success";
 
 window.Global_State = {};
+
 // Object.defineProperty(window, 'Global_State', {
 //         get: function() {
 //                 return Global_State;
@@ -165,7 +172,11 @@ function Header() {
                 null,
                 React.createElement(
                         'div',
-                        { className: ' d-flex flex-column justify-content-center align-items-center py-4', 'data-background-image': './style/assets/media/image/user/man_avatar3.jpg', style: { background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100 } },
+                        { className: ' d-flex flex-column justify-content-center align-items-center py-4', 'data-background-image': './style/assets/media/image/user/man_avatar3.jpg', style: { background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100 },
+                                onClick: function onClick(e) {
+                                        navigate("/user_information");
+                                }
+                        },
                         React.createElement(Avatar, { alt: window.Global_State.authUser.name + ' ' + window.Global_State.authUser.second_name, src: './style/assets/media/image/user/man_avatar3.jpg' }),
                         React.createElement(
                                 'h5',
@@ -275,7 +286,7 @@ function Sections_side_bar() {
                         { className: 'sections_div' },
                         React.createElement(
                                 Stack,
-                                { direction: 'column', spacing: 2, className: 'full_size_element' },
+                                { direction: 'column', spacing: 2, className: 'full_size_element d-flex justify-content-center align-items-center' },
                                 sections.map(function (section, idx) {
                                         // console.log(sections)
                                         return React.createElement(
@@ -283,7 +294,9 @@ function Sections_side_bar() {
                                                 { key: section.id, title: section.name, placement: 'right-start' },
                                                 React.createElement(
                                                         'span',
-                                                        { className: 'full_size_element' },
+                                                        { className: 'full_size_element', style: {
+                                                                        height: "fit-content"
+                                                                } },
                                                         React.createElement(
                                                                 Button,
                                                                 { className: 'd-flex p-2 full_size_element', tabIndex: -1, variant: '' + (window.Global_State.selectedSectionId === section.id ? "outlined" : "text"),
@@ -324,11 +337,6 @@ function Sections_side_bar() {
                                         );
                                 })
                         )
-                ),
-                React.createElement(
-                        IconButton,
-                        { size: 'large', color: 'primary', style: { width: "fit-content" } },
-                        React.createElement(ManageAccountsTwoToneIcon, { style: { fontSize: 60, color: "blue" } })
                 )
         );
 }
@@ -666,6 +674,7 @@ function Load(_ref5) {
                 ),
                 window.Global_State.Overlay_component,
                 window.Global_State.modalManager.modal,
+                window.Global_State.editor.save_component,
                 React.createElement(
                         'div',
                         { className: 'full_size_element layout-wrapper d-none d-xl-block' },
@@ -830,6 +839,42 @@ function Load(_ref5) {
 }
 
 function File_home() {
+        window.show_response = function (msg, type) {
+                toast(function (t) {
+                        return (
+                                // t.visible ?
+                                React.createElement(
+                                        Alert,
+                                        { onClose: function onClose() {
+                                                        return toast.dismiss(t.id);
+                                                }, severity: type, sx: { width: 'fit-content', minWidth: 300, animation: "fadeMe 0.3s" } },
+                                        React.createElement(
+                                                AlertTitle,
+                                                null,
+                                                ' ',
+                                                type.replace(/^\w/, function (c) {
+                                                        return c.toUpperCase();
+                                                }),
+                                                ' '
+                                        ),
+                                        msg
+                                )
+                        );
+                }, {
+                        position: "bottom-left",
+                        duration: type === "error" ? Infinity : 3000,
+                        style: {
+                                background: 'rgba(255,255,255,0)',
+                                padding: 0,
+                                boxShadow: 'unset'
+                        }
+                });
+                // swal({
+                //         title: "Error",
+                //         text: msg,
+                //         icon: type
+                // })
+        };
 
         document.onkeydown = function (e) {
                 if (e.ctrlKey && e.key === 'f') return false;
@@ -918,7 +963,7 @@ function Page() {
 
         useEffect(function () {
                 setTimeout(function () {
-                        navigate("/files");
+                        navigate("/files_browser");
                 }, 3000);
         }, []);
 
@@ -927,7 +972,7 @@ function Page() {
         return container;
 }
 
-var loader = function () {
+var files_loader = function () {
         var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
                 var user;
                 return _regeneratorRuntime.wrap(function _callee3$(_context3) {
@@ -955,9 +1000,17 @@ var loader = function () {
                                                 return _context3.abrupt('return', redirect("/login"));
 
                                         case 8:
+                                                if (user.id) {
+                                                        _context3.next = 12;
+                                                        break;
+                                                }
+
+                                                return _context3.abrupt('return', redirect("/administrator"));
+
+                                        case 12:
                                                 return _context3.abrupt('return', "ok");
 
-                                        case 9:
+                                        case 13:
                                         case 'end':
                                                 return _context3.stop();
                                 }
@@ -965,8 +1018,118 @@ var loader = function () {
                 }, _callee3, _this2);
         }));
 
-        return function loader() {
+        return function files_loader() {
                 return _ref7.apply(this, arguments);
+        };
+}();
+
+var user_info_loader = function () {
+        var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4() {
+                var user;
+                return _regeneratorRuntime.wrap(function _callee4$(_context4) {
+                        while (1) {
+                                switch (_context4.prev = _context4.next) {
+                                        case 0:
+                                                user = void 0;
+                                                _context4.next = 3;
+                                                return http.get('user').then(function (res) {
+                                                        console.log(res);
+                                                        user = res.data;
+                                                }).catch(function (err) {
+                                                        console.log(err);
+                                                });
+
+                                        case 3:
+
+                                                console.log(user);
+
+                                                if (!(user === '')) {
+                                                        _context4.next = 8;
+                                                        break;
+                                                }
+
+                                                return _context4.abrupt('return', redirect("/login"));
+
+                                        case 8:
+                                                if (!(!window.Global_State || !window.Global_State.authUser)) {
+                                                        _context4.next = 12;
+                                                        break;
+                                                }
+
+                                                return _context4.abrupt('return', redirect("/files_browser"));
+
+                                        case 12:
+                                                if (user.id) {
+                                                        _context4.next = 16;
+                                                        break;
+                                                }
+
+                                                return _context4.abrupt('return', redirect("/administrator"));
+
+                                        case 16:
+                                                return _context4.abrupt('return', "ok");
+
+                                        case 17:
+                                        case 'end':
+                                                return _context4.stop();
+                                }
+                        }
+                }, _callee4, _this2);
+        }));
+
+        return function user_info_loader() {
+                return _ref8.apply(this, arguments);
+        };
+}();
+
+var admin_loader = function () {
+        var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
+                var user;
+                return _regeneratorRuntime.wrap(function _callee5$(_context5) {
+                        while (1) {
+                                switch (_context5.prev = _context5.next) {
+                                        case 0:
+                                                user = void 0;
+                                                _context5.next = 3;
+                                                return http.get('user').then(function (res) {
+                                                        console.log(res);
+                                                        user = res.data;
+                                                }).catch(function (err) {
+                                                        console.log(err);
+                                                });
+
+                                        case 3:
+
+                                                console.log(user);
+
+                                                if (!(user === '')) {
+                                                        _context5.next = 8;
+                                                        break;
+                                                }
+
+                                                return _context5.abrupt('return', redirect("/login"));
+
+                                        case 8:
+                                                if (!user.id) {
+                                                        _context5.next = 12;
+                                                        break;
+                                                }
+
+                                                return _context5.abrupt('return', redirect("/files_browser"));
+
+                                        case 12:
+                                                return _context5.abrupt('return', "ok");
+
+                                        case 13:
+                                        case 'end':
+                                                return _context5.stop();
+                                }
+                        }
+                }, _callee5, _this2);
+        }));
+
+        return function admin_loader() {
+                return _ref9.apply(this, arguments);
         };
 }();
 
@@ -981,13 +1144,23 @@ var router = createBrowserRouter([{
         path: "/sign_in",
         element: React.createElement(Create_account, null)
 }, {
-        path: "/files",
+        path: "/forgot_password",
+        element: React.createElement(Forgot_password, null)
+}, {
+        path: "/reset_password",
+        element: React.createElement(Reset_password, null)
+}, {
+        path: "/files_browser",
         element: React.createElement(File_home, null),
-        loader: loader
+        loader: files_loader
 }, {
         path: "/administrator",
         element: React.createElement(Administrator_home, null),
-        loader: loader
+        loader: admin_loader
+}, {
+        path: "/user_information",
+        element: React.createElement(User_infos, null),
+        loader: user_info_loader
 }]);
 
 var root = ReactDOM.createRoot(document.getElementById("root"));
