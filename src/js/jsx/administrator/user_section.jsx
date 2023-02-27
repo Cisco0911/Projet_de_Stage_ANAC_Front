@@ -669,7 +669,9 @@ export default function User_admin_section({users, new_users})
         return(
         <div className="full_size_element"
              style={{
-                     position: "relative"
+                     position: "relative",
+                     backgroundColor: "white",
+                     borderRadius: 10,
              }}
         >
                 <div className="full_size_element p-3" >

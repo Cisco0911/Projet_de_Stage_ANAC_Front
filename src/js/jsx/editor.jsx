@@ -121,7 +121,7 @@ const Save_component = ({open, jobs, localDataState}) =>
 
                                                                        const onFulfilled = (res) =>
                                                                        {
-                                                                               console.log('editor handling ressssssssssssssssssssssssssssssssssss', res)
+                                                                               // console.log('editor handling ressssssssssssssssssssssssssssssssssss', res)
                                                                                setLoading(false)
                                                                                window.Global_State.changeMode()
                                                                                window.show_response("Enregistrement terminé.", "success")
@@ -352,7 +352,7 @@ export default function useEditor(data)
                 {
                         case 'reset':
                         {
-                                console.log('initData.current', initData.current)
+                                // console.log('initData.current', initData.current)
 
                                 id.current = -2
                                 job_id.current = 1
@@ -409,7 +409,7 @@ export default function useEditor(data)
                         case 'add_folder':
                         {
 
-                                console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
+                                // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
 
                                 const data = action.job.data
 
@@ -426,6 +426,7 @@ export default function useEditor(data)
                                                         data.front_parent_type === 'root' ? '0' : data.front_parent_type + data.parent_id,
                                                         "",
                                                         true,
+                                                        undefined,
                                                         undefined,
                                                         undefined,
                                                         undefined,
@@ -492,7 +493,7 @@ export default function useEditor(data)
 
                                                 if ( isExistingIn([...now_state], new_node.name, destination.id) )
                                                 {
-                                                        console.log('on_________exist', data)
+                                                        // console.log('on_________exist', data)
                                                         new_node.ori_name = new_node.name
 
                                                         switch ( parseInt(data.on_exist) )
@@ -603,12 +604,12 @@ export default function useEditor(data)
                         case 'add_files':
                         {
 
-                                console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_files')
+                                // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_files')
 
                                 const data = action.job.data
                                 const files = action.job.data.files
 
-                                console.log('dataaaaaaaaaaaaaaaaaaas', files, action.job)
+                                // console.log('dataaaaaaaaaaaaaaaaaaas', files, action.job)
 
                                 for (const file of files)
                                 {
@@ -617,7 +618,7 @@ export default function useEditor(data)
 
                                         const ext = part_name[part_name.length-1]
 
-                                        console.log("idxxxxxxxxxxxxxxxxx_file", files.indexOf(file))
+                                        // console.log("idxxxxxxxxxxxxxxxxx_file", files.indexOf(file))
                                         let new_file =
                                         window.Global_State.createNodeData
                                         (
@@ -632,6 +633,7 @@ export default function useEditor(data)
                                                 "",
                                                 false,
                                                 ext,
+                                                undefined,
                                                 undefined,
                                                 undefined,
                                                 undefined,
@@ -699,7 +701,7 @@ export default function useEditor(data)
 
                                                 if ( isExistingIn([...now_state], node.name, destination.id) )
                                                 {
-                                                        console.log('on_________exist', data)
+                                                        // console.log('on_________exist', data)
                                                         new_node.ori_name = new_node.name
 
                                                         switch ( parseInt(data.on_exist) )
@@ -751,7 +753,7 @@ export default function useEditor(data)
                         case 'add_audit':
                         {
 
-                                console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_audit')
+                                // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_audit')
 
                                 for (const job of action.jobs)
                                 {
@@ -774,6 +776,7 @@ export default function useEditor(data)
                                                 true,
                                                 undefined,
                                                 type === 'audit' ? window.Global_State.authUser : undefined,
+                                                undefined,
                                                 undefined,
                                                 undefined,
                                                 'pas encore créé',
@@ -803,13 +806,16 @@ export default function useEditor(data)
                         case 'add_fncs':
                         {
 
-                                console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
+                                // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
 
                                 const data = action.job.data
 
                                 const [debut, fin] = [parseInt(data.debut), parseInt(data.fin)]
 
                                 const audit = state.find( node => node.id === state.find(node => node.id === `nonC${data.nonC_id}`).parentId )
+
+                                const opening_date = new Date();
+                                const formattedDate = `${opening_date.getFullYear()}/${(opening_date.getMonth() + 1).toString().padStart(2, '0')}/${opening_date.getDate().toString().padStart(2, '0')}`;
 
                                 for (let i = debut; i < fin + 1; i++)
                                 {
@@ -828,6 +834,7 @@ export default function useEditor(data)
                                                 true,
                                                 undefined,
                                                 undefined,
+                                                formattedDate,
                                                 false,
                                                 null,
                                                 'pas encore créé',
@@ -859,7 +866,7 @@ export default function useEditor(data)
                         case 'update_fnc':
                         {
 
-                                console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
+                                // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
 
                                 const data = action.job.data
 
@@ -907,7 +914,7 @@ export default function useEditor(data)
 
         function jobs_reducer( state, action )
         {
-                console.log("executinnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnng", undo.current, redo.current)
+                // console.log("executinnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnng", undo.current, redo.current)
                 if (action.type === "undo")
                 {
                         // setCan_redo(true)
@@ -945,7 +952,7 @@ export default function useEditor(data)
                         {
                                 for (const job of state)
                                 {
-                                        console.log('searching joooooooooob key.job_id', job.id, key.job_id)
+                                        // console.log('searching joooooooooob key.job_id', job.id, key.job_id)
                                         if( job.id === key.job_id ) return job
                                 }
 
@@ -955,7 +962,7 @@ export default function useEditor(data)
                         {
                                 for (const job of state)
                                 {
-                                        console.log('searching joooooooooob key', job.id, key)
+                                        // console.log('searching joooooooooob key', job.id, key)
                                         if( job.id === key ) return job
                                 }
 
@@ -1081,7 +1088,7 @@ export default function useEditor(data)
                 {
                         if ( !Number.isInteger(id) ) return job_list
 
-                        console.log("jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist11111", job_list, id)
+                        // console.log("jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist11111", job_list, id)
                         let new_job_list = window.Global_State.copyObject(job_list)
 
                         new_job_list = [...new_job_list].filter( job => job.id !== id )
@@ -1097,7 +1104,7 @@ export default function useEditor(data)
                                 if ( job.copy_job_id === id ) new_job_list = custom_filter(new_job_list, job.id)
                         }
 
-                        console.log("neeeeeeeeeeeew_jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist", new_job_list, id)
+                        // console.log("neeeeeeeeeeeew_jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist", new_job_list, id)
                         return new_job_list
                 }
 
@@ -1108,7 +1115,7 @@ export default function useEditor(data)
                         let new_job_list = [...job_list]
 
                         const jobs_to_del = getJobsByNodeId(id, model)
-                        console.log('jobs_to_del', jobs_to_del)
+                        // console.log('jobs_to_del', jobs_to_del)
                         if (jobs_to_del.size)
                         {
 
@@ -1141,7 +1148,7 @@ export default function useEditor(data)
                                 )
                         }
 
-                        console.log('children'+id, children)
+                        // console.log('children'+id, children)
                         for (const child of children)
                         {
                                 const identity = window.Global_State.identifyNode(child)
@@ -1170,7 +1177,7 @@ export default function useEditor(data)
 
                 const create_copy = (from_id, to_id, all_nodes, on_exist, copy_job_id, root_node = false, root_node_id = undefined) =>
                 {
-                        console.log('from_id, to_id, all_nodes, on_exist', from_id, to_id, on_exist)
+                        // console.log('from_id, to_id, all_nodes, on_exist', from_id, to_id, on_exist)
 
                         // let root_children = false
 
@@ -1188,7 +1195,7 @@ export default function useEditor(data)
                                 destination.section_id = current_section.id
                                 destination.name = current_section.name
                         }
-                        console.log('destination.section_id111', destination.section_id)
+                        // console.log('destination.section_id111', destination.section_id)
 
                         let new_node = destination ? isExistingIn([...new_all_nodes].filter( node => node.section_id === destination.section_id ), node_to_copy.name, destination.id) : false
 
@@ -1316,7 +1323,7 @@ export default function useEditor(data)
                         {
                                 //create add in copy job
 
-                                console.log('destination', destination)
+                                // console.log('destination', destination)
 
                                 const parent_id = window.Global_State.identifyNode(destination)[0]
 
@@ -1348,7 +1355,7 @@ export default function useEditor(data)
                                 id.current = id.current - 1
 
                                 new_node.parentId = destination.id
-                                console.log('destination.section_id', destination.section_id)
+                                // console.log('destination.section_id', destination.section_id)
                                 new_node.section_id = destination.section_id
                                 new_node.services = destination.services
 
@@ -1504,7 +1511,7 @@ export default function useEditor(data)
 
                                 const to_move = localDataState.find(node => node.id === `ds${json_request.id}`)
 
-                                console.log('mooooooove', json_request)
+                                // console.log('mooooooove', json_request)
 
                                 if ( (parseInt(json_request.id) > 0) || to_move.onCopy )
                                 {
@@ -1569,7 +1576,7 @@ export default function useEditor(data)
                                                 {
                                                         if ( ( job.node_model === 'App\\Models\\DossierSimple' ) && ( job.node_id === parseInt(json_request.id) ) )
                                                         {
-                                                                console.log('destination', destination)
+                                                                // console.log('destination', destination)
 
                                                                 const parent_services = destination.type === 'root' ? window.Global_State.getCurrentSection().services : destination.services
                                                                 const parent_section_id = destination.type === 'root' ? window.Global_State.getCurrentSection().id : destination.section_id
@@ -1613,16 +1620,16 @@ export default function useEditor(data)
 
                                 const json_request = form_to_json(request)
 
-                                console.log('new_state_copy', new_state, state)
+                                // console.log('new_state_copy', new_state, state)
 
                                 const destination_var = localDataState.find(node => node.id === `${ window.Global_State.parseModelToFrontType(json_request.destination_type) === 'root' ?  '0' : `${window.Global_State.parseModelToFrontType(json_request.destination_type)}${json_request.destination_id}`}`)
                                 const destination = JSON.parse( JSON.stringify( destination_var ) )
                                 if (destination.type === 'root') destination.section_id = window.Global_State.getCurrentSection().id
-                                console.log('destination', destination, window.Global_State.parseModelToFrontType(json_request.destination_type))
+                                // console.log('destination', destination, window.Global_State.parseModelToFrontType(json_request.destination_type))
 
                                 const old_folder = localDataState.find(node => node.id === `ds${json_request.id}`)
 
-                                console.log('cooooooopy', json_request)
+                                // console.log('cooooooopy', json_request)
 
                                 // id.current = id.current - 1
                                 let job
@@ -1697,7 +1704,7 @@ export default function useEditor(data)
                                 }
 
 
-                                console.log('nooooooooooooooooooooooooooooode file', {node})
+                                // console.log('nooooooooooooooooooooooooooooode file', {node})
 
                                 new_state.push(job)
 
@@ -1757,7 +1764,7 @@ export default function useEditor(data)
 
                                 const file_to_move = localDataState.find(node => node.id === `f${json_request.id}`)
 
-                                console.log('mooooooove', json_request)
+                                // console.log('mooooooove', json_request)
 
                                 if ( true ) // (parseInt(json_request.id) > 0)  || file_to_move.onCopy
                                 {
@@ -1812,7 +1819,7 @@ export default function useEditor(data)
                                                 {
                                                         if ( ( job.node_model === 'App\\Models\\Fichier' ) && ( job.node_id === parseInt(json_request.id) ) )
                                                         {
-                                                                console.log('destination', destination)
+                                                                // console.log('destination', destination)
 
                                                                 const parent_services = destination.type === 'root' ? window.Global_State.getCurrentSection().services : destination.services
                                                                 const parent_section_id = destination.type === 'root' ? window.Global_State.getCurrentSection().id : destination.section_id
@@ -1858,11 +1865,11 @@ export default function useEditor(data)
 
                                 const destination = localDataState.find(node => node.id === `${ window.Global_State.parseModelToFrontType(json_request.destination_type) === 'root' ?  '0' : `${window.Global_State.parseModelToFrontType(json_request.destination_type)}${json_request.destination_id}`}`)
                                 if (destination.type === 'root') destination.section_id = window.Global_State.getCurrentSection().id
-                                console.log('destination', destination, window.Global_State.parseModelToFrontType(json_request.destination_type))
+                                // console.log('destination', destination, window.Global_State.parseModelToFrontType(json_request.destination_type))
 
                                 const old_file = localDataState.find(node => node.id === `f${json_request.id}`)
 
-                                console.log('cooooooopy', json_request)
+                                // console.log('cooooooopy', json_request)
 
                                 // id.current = id.current - 1
                                 let job
@@ -2189,7 +2196,7 @@ export default function useEditor(data)
                         window.Global_State.EventsManager.on("undo", handleUndo)
                         window.Global_State.EventsManager.on("redo", handleRedo)
 
-                        console.log("undooooooooooooooooooooooo", undo.current)
+                        // console.log("undooooooooooooooooooooooo", undo.current)
 
                         if (undo.current.length > 0) setCan_undo(true)
                         else setCan_undo(false)
@@ -2208,7 +2215,7 @@ export default function useEditor(data)
 
         const update_initData = new_data =>
         {
-                console.log('update_initData')
+                // console.log('update_initData')
 
                 setDatasState({ type: 'update_initData', new_data })
         }
@@ -2216,7 +2223,7 @@ export default function useEditor(data)
         useEffect(
                 () =>
                 {
-                        console.log("ooooooooooooooooooooooopeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeen", active, jobs)
+                        // console.log("ooooooooooooooooooooooopeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeen", active, jobs)
                         setActive( Boolean(jobs.length) )
                         // if (jobs.length > 0 )
                         // {
@@ -2352,7 +2359,7 @@ export default function useEditor(data)
         }
 
 
-        console.log('localDataState', localDataState, initData.current, jobs)
+        // console.log('localDataState', localDataState, initData.current, jobs)
 
         return (
                 {

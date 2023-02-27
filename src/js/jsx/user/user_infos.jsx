@@ -127,23 +127,23 @@ export default function User_infos()
                                                         </Grid>
                                                 </Grid>
                                         </Grid>
-                                        <Grid item xs={8} >
-                                                <Box className="full_size_element" style={{
-                                                        border: 'thin solid red',
-                                                        borderRadius: 10,
-                                                        padding: 20,
-                                                }} >
-                                                        <Stack className="full_size_element" direction={"column"} spacing={3} >
-                                                                <Divider sx={{
-                                                                        // marginBottom: 10,
-                                                                }} >
-                                                                        <span style={{ fontWeight: "bold", fontSize: 15, color: "red" }} >DANGER ZONE</span>
-                                                                </Divider>
+                                        {/*<Grid item xs={8} >*/}
+                                        {/*        <Box className="full_size_element" style={{*/}
+                                        {/*                border: 'thin solid red',*/}
+                                        {/*                borderRadius: 10,*/}
+                                        {/*                padding: 20,*/}
+                                        {/*        }} >*/}
+                                        {/*                <Stack className="full_size_element" direction={"column"} spacing={3} >*/}
+                                        {/*                        <Divider sx={{*/}
+                                        {/*                                // marginBottom: 10,*/}
+                                        {/*                        }} >*/}
+                                        {/*                                <span style={{ fontWeight: "bold", fontSize: 15, color: "red" }} >DANGER ZONE</span>*/}
+                                        {/*                        </Divider>*/}
 
-                                                                <Info_field label={"MOT DE PASSE"} type={"password"} default_value={''} />
-                                                        </Stack>
-                                                </Box>
-                                        </Grid>
+                                        {/*                        <Info_field label={"MOT DE PASSE"} type={"password"} default_value={''} />*/}
+                                        {/*                </Stack>*/}
+                                        {/*        </Box>*/}
+                                        {/*</Grid>*/}
                                 </Grid>
                         </div>
                 </ThemeProvider>

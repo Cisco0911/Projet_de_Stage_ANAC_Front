@@ -197,7 +197,9 @@ export default function Section_admin_section(_ref2) {
                 "div",
                 { className: "full_size_element",
                         style: {
-                                position: "relative"
+                                position: "relative",
+                                backgroundColor: "white",
+                                borderRadius: 10
                         }
                 },
                 React.createElement(

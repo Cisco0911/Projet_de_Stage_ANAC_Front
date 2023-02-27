@@ -39,12 +39,13 @@ import {
         RouterProvider,
 } from "react-router-dom";
 import { useRouteError, redirect, useNavigate } from "react-router-dom";
-import {Box, Button, Popper, Snackbar, SwipeableDrawer, Tooltip} from "@mui/material";
+import {Box, Button, Chip, Popover, Popper, Snackbar, SwipeableDrawer, Tooltip} from "@mui/material";
 import {Collapse, Fade, Offcanvas} from "react-bootstrap";
 import Administrator_home from "./administrator/administrator_home";
 import swal from "sweetalert";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import {createPortal} from "react-dom";
 
 
 
@@ -98,7 +99,7 @@ function Lol({lal}) {
                 ico = iconNO
         }
 
-        console.log("Lolllllll rerender")
+        // console.log("Lolllllll rerender")
 
         return (
         <div onClick={ event => { window.Global_State.EventsManager.emit("updateOK", window.Global_State.o+"OK") } }
@@ -142,7 +143,7 @@ function Header()
         const navigate = useNavigate()
 
         const dropMenuItemsUser = (
-        <React.Fragment>
+        <Box>
                 <div className=" d-flex flex-column justify-content-center align-items-center py-4" data-background-image="./style/assets/media/image/user/man_avatar3.jpg" style={{background: 'url("./style/assets/media/image/user/man_avatar3.jpg")', width: 300, height: 100}}
                      onClick={
                         e =>
@@ -151,7 +152,7 @@ function Header()
                         }
                      }
                 >
-                        <Avatar alt={`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`} src="./style/assets/media/image/user/man_avatar3.jpg" />
+                        <Avatar alt={`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`} src="" />
                         <h5 className="mb-0">{`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`}</h5>
                 </div>
                 <div className="dropdown-divider"/>
@@ -173,14 +174,14 @@ function Header()
                                 .then(
                                         res =>
                                         {
-                                                console.log(res)
+                                                // console.log(res)
                                                 setTimeout( () => { navigate("/login") }, 1000 )
                                         }
                                 )
                                 .catch(err => {console.log(err)})
                         }
                 } >Sign Out!</a>
-        </React.Fragment>
+        </Box>
         )
         const dropTogglerContentUser = (
         <React.Fragment>
@@ -188,7 +189,7 @@ function Header()
                         <Stack className=''  direction="row" spacing={1} alignItems = 'center' justifyContent='flex-end' >
                                 <span className='m-5' > {`${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}`} </span>
 
-                                <Avatar sx={{ bgcolor: 'green' }}>N</Avatar>
+                                <Avatar sx={{ bgcolor: 'green' }}>{window.Global_State.authUser.name[0]}</Avatar>
                                 <MdOutlineArrowDropDownCircle />
                         </Stack>
                 </Typography>
@@ -220,8 +221,198 @@ function Header()
                 </React.Fragment>
         );
 }
+function Responsive_header({component})
+{
+
+        const [open, setOpen] = useState(false);
+        const ref = useRef()
+
+        const handleOpen = e =>
+        {
+                // console.log("Open header")
+
+                ref.current.style.position = "absolute"
+                ref.current.style.top = 0
+                ref.current.style.right = 0
+                ref.current.style.zIndex = 1000
+                // ref.current.style.width = "80%"
+                ref.current.style.height = "fit-content"
+
+                setOpen(true)
+        }
+
+        const handleClose = () =>
+        {
+                // console.log("Close header")
+
+                ref.current.style.position = "unset"
+                ref.current.style.top = "unset"
+                ref.current.style.left = "unset"
+                ref.current.style.zIndex = "unset"
+                ref.current.style.width = "100%"
+                ref.current.style.height = "100%"
+
+                setOpen(false)
+        }
+
+        return(
+        <div ref={ref} className={"full_size_element wrapper_xs_size_header"} >
+                {
+                        !open ?
+                        <div className="full_size_element d-flex justify-content-start align-items-center" onClick={handleOpen} >
+                                <Tooltip title={window.current_location}>
+                                        <b
+                                        style={{
+                                                fontSize: 16,
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: 'nowrap'
+                                        }}
+                                        >
+                                                {window.current_location}
+                                        </b>
+                                </Tooltip>
+                        </div>
+                        :
+                        <div className="content_header_xs_size"
+                             style={{ animation: "fadeMe 0.3s", position: "relative" }}
+                        >
+                                {
+                                        createPortal(
+                                        <div className="custom_overlay" onClick={handleClose} > </div>,
+                                        document.getElementById("file_loaded")
+                                        )
+                                }
+                                {component}
+                        </div>
+                }
+        </div>
+        )
+}
 
 
+function GroupByServiceComponent({service, sections})
+{
+        const [anchorEl, setAnchorEl] = useState(null);
+
+        const handlePopoverOpen = (event) => {
+                // console.log("enterrrrrrrrrr", service.name, open)
+                setAnchorEl(event.currentTarget);
+        };
+
+        const handlePopoverClose = () => {
+                // console.log("closinnnnnnnnnnnnnnnnnnnnnnnnng", service.name, open)
+                setAnchorEl(null);
+        };
+
+        const open = Boolean(anchorEl);
+
+        const selectedSection = window.Global_State.sections.get(window.Global_State.selectedSectionId)
+
+        const is_active = Boolean( selectedSection.services.find( sectionService => sectionService.id === service.id ) )
+
+        return(
+                <div>
+                        <Typography
+                        variant={'div'}
+                        aria-owns={open ? 'mouse-over-popover' : undefined}
+                        aria-haspopup="true"
+                        >
+                                <Chip className={`d-flex p-2 full_size_element`} tabIndex={-1} variant={`${ is_active ? "outlined" : "filled"}`}
+                                        style={{
+                                                borderColor: "blue"
+                                        }}
+                                        // disabled={is_active}
+                                        onClick = {handlePopoverOpen}
+                                        color={"primary"}
+                                        label={
+                                              <b
+                                              style={{
+                                                      maxWidth: "100%",
+                                                      overflow: "hidden",
+                                                      textOverflow: 'ellipsis',
+                                                      color: `${ is_active ? "blue" : "white"}`,
+                                              }}
+                                              >
+                                                      { service.name }
+                                              </b>
+                                        }
+                                />
+                        </Typography>
+                        <Popover
+                                id={`${service.name}-over-popover`}
+                                PaperProps={{
+                                        className: 'd-flex',
+                                        style: {
+                                                marginLeft: 20,
+                                                border: "thin solid blue",
+                                                boxShadow: "none",
+                                        }
+                                }}
+                                open={open}
+                                anchorEl={anchorEl}
+                                anchorOrigin={{
+                                        vertical: 'center',
+                                        horizontal: 'right',
+                                }}
+                                transformOrigin={{
+                                        vertical: 'center',
+                                        horizontal: 'left',
+                                }}
+                                onClose={handlePopoverClose}
+                                disableRestoreFocus
+                        >
+                                <Typography variant={'div'} sx={{ p: 1 }}>
+                                        <Stack direction={`column`} spacing={2} className="full_size_element d-flex justify-content-center align-items-center">
+                                                {
+                                                        sections.map(
+                                                                (section, idx) =>
+                                                                {
+                                                                        // console.log(sections)
+                                                                        return (
+                                                                        <Tooltip key={ idx } title={section.name} placement="right-start" >
+                                                                                        <span className="full_size_element" style={{
+                                                                                                height: "fit-content"
+                                                                                        }} >
+                                                                                                <Button className={`d-flex p-2 full_size_element`} tabIndex={-1} variant="text"
+                                                                                                        style={{
+                                                                                                                borderColor: "blue"
+                                                                                                        }}
+                                                                                                        disabled={window.Global_State.selectedSectionId === section.id}
+                                                                                                        onClick = {
+                                                                                                                () => {
+                                                                                                                        const overlay = document.getElementById("section_side_bar_responsive_overlay")
+                                                                                                                        if (overlay) overlay.click()
+                                                                                                                        window.Global_State.setSectionId(section.id)
+                                                                                                                        // window.Global_State.backend.setCurrentSelectedFolder(window.Global_State.selectedNodeIdsInSections.current.get(section.id) )
+                                                                                                                }
+                                                                                                        }
+                                                                                                >
+
+                                                                                                        <b
+                                                                                                        style={{
+                                                                                                                maxWidth: "100%",
+                                                                                                                overflow: "hidden",
+                                                                                                                textOverflow: 'ellipsis',
+                                                                                                                color: `${window.Global_State.selectedSectionId === section.id ? '' : 'blue'}`,
+                                                                                                        }}
+                                                                                                        >
+                                                                                                                { section.name }
+                                                                                                        </b>
+                                                                                                </Button>
+                                                                                        </span>
+                                                                        </Tooltip>
+                                                                        )
+                                                                }
+                                                        )
+                                                }
+                                        </Stack>
+                                </Typography>
+                        </Popover>
+                </div>
+        )
+
+}
 function Sections_side_bar()
 {
         let sections = []
@@ -233,6 +424,8 @@ function Sections_side_bar()
         }
         )
 
+        let services = [...window.Global_State.authUser.services]
+
         return (
                 <div className="navigation_content full_size_element" >
                         <div className="anac_logo">
@@ -241,9 +434,30 @@ function Sections_side_bar()
                                 </a>
                         </div>
                         <div className="sections_div" >
-                                <Stack direction={`column`} spacing={2} className="full_size_element d-flex justify-content-center align-items-center">
-                                        {
-                                                sections.map(
+                                {
+                                        services.length > 1 ?
+                                        <Stack direction={`column`} spacing={2} className="full_size_element d-flex justify-content-center align-items-center">
+                                                {
+                                                        services.map(
+                                                        (service, idx) =>
+                                                        {
+                                                                // console.log(sections)
+
+                                                                const service_sections = sections.filter(
+                                                                section => Boolean( section.services.find( section_service => section_service.id === service.id ) )
+                                                                )
+
+                                                                return (
+                                                                <GroupByServiceComponent key={idx} service={service} sections={service_sections} />
+                                                                )
+                                                        }
+                                                        )
+                                                }
+                                        </Stack>
+                                        :
+                                        <Stack direction={`column`} spacing={2} className="full_size_element d-flex justify-content-center align-items-center">
+                                                {
+                                                        sections.map(
                                                         (section, idx) =>
                                                         {
                                                                 // console.log(sections)
@@ -258,8 +472,10 @@ function Sections_side_bar()
                                                                                                 }}
                                                                                                 disabled={window.Global_State.selectedSectionId === section.id}
                                                                                                 onClick = {
-                                                                                                        async () => {
-                                                                                                                await window.Global_State.setSectionId(section.id)
+                                                                                                        () => {
+                                                                                                                const overlay = document.getElementById("section_side_bar_responsive_overlay")
+                                                                                                                if (overlay) overlay.click()
+                                                                                                                window.Global_State.setSectionId(section.id)
                                                                                                                 // window.Global_State.backend.setCurrentSelectedFolder(window.Global_State.selectedNodeIdsInSections.current.get(section.id) )
                                                                                                         }
                                                                                                 }
@@ -280,9 +496,10 @@ function Sections_side_bar()
                                                                 </Tooltip>
                                                                 )
                                                         }
-                                                )
-                                        }
-                                </Stack>
+                                                        )
+                                                }
+                                        </Stack>
+                                }
                         </div>
                         {/*<IconButton size={`large`} color={`primary`} style={{ width: "fit-content" }} >*/}
                         {/*        <ManageAccountsTwoToneIcon style={{ fontSize: 60, color: "blue" }} />*/}
@@ -302,7 +519,7 @@ function Responsive_sections_side_bar({component, icon})
                 {
                         e.preventDefault()
                         e.stopPropagation()
-                        console.log("opppppeeeeeeeeeeen")
+                        // console.log("opppppeeeeeeeeeeen", e.target)
                         // const element = document.getElementById("section_side_bar_responsive")
                         ref.current.style.height = "95vh"
 
@@ -312,7 +529,7 @@ function Responsive_sections_side_bar({component, icon})
                 {
                         e.preventDefault()
                         e.stopPropagation()
-                        console.log("clossssssssssssssse")
+                        // console.log("clossssssssssssssse")
                         // const element = document.getElementById("section_side_bar_responsive")
                         ref.current.style.height = "100%"
 
@@ -320,41 +537,17 @@ function Responsive_sections_side_bar({component, icon})
                 },
         ]
 
-
-        // useEffect(
-        // () => {
-        //         /**
-        //          * Alert if clicked on outside of element
-        //          */
-        //         function handleClickOutside(event) {
-        //                 // console.log('outside')
-        //                 const dropdown = document.getElementById("section_side_bar_responsive")
-        //                 if (dropdown && !dropdown.contains(event.target)) {
-        //                         console.log('outside')
-        //                         close()
-        //                 }
-        //         }
-        //         // Bind the event listener
-        //         document.addEventListener("click", handleClickOutside);
-        //         return () => {
-        //                 // Unbind the event listener on clean up
-        //                 console.log('byeeeeeeeeeeeeeeeeeeeee')
-        //                 document.removeEventListener("click", handleClickOutside);
-        //
-        //         };
-        //
-        // }, [])
-
         return (
                 <div id={"section_side_bar_responsive"} ref={ref} tabIndex={-1} onClick={open} /*onBlur={close}*/ >
                         {
                                 show ?
-                                <div className="full_size_element" tabIndex={-1} style={{ animation: "fadeMe 0.3s", position: "relative" }} onClick={ e => { console.log(e) } }  >
-                                        <div className="custom_close_button" onClick={close} >
-                                                <IconButton color={"error"} >
-                                                        <AiOutlineCloseSquare size={20} color={"red"} />
-                                                </IconButton>
-                                        </div>
+                                <div className="full_size_element" tabIndex={-1} style={{ animation: "fadeMe 0.3s", position: "relative" }} onClick={ e => { /*console.log(e);*/ e.preventDefault(); e.stopPropagation() } }  >
+                                        {
+                                                createPortal(
+                                                <div id={"section_side_bar_responsive_overlay"} className="custom_overlay" onClick={close} > </div>,
+                                                document.getElementById("file_loaded")
+                                                )
+                                        }
                                         {component}
                                 </div>
                                 : icon
@@ -395,8 +588,8 @@ function Responsive_file_tree()
                 offsetX.current = e.clientX - X
                 offsetY.current = e.clientY - Y
 
-                console.log("Drag startttttttttttt", offsetX, offsetY )
-                console.log("element.offsetLeft", element.offsetLeft)
+                // console.log("Drag startttttttttttt", offsetX, offsetY )
+                // console.log("element.offsetLeft", element.offsetLeft)
         }
 
         function arrange(distance, max, component_size, strict = false)
@@ -430,7 +623,7 @@ function Responsive_file_tree()
                 const newX = arrange(xOpposite, window.innerWidth, 48, true)
                 const newY = arrange(Y, window.innerHeight, 48)
 
-                console.log("New plaaaaaaaaace", xOpposite, newY)
+                // console.log("New plaaaaaaaaace", xOpposite, newY)
 
                 on_left.current = Boolean(newX)
 
@@ -448,7 +641,7 @@ function Responsive_file_tree()
 
         const handleClick = e =>
         {
-                console.log("Toggle file treeeeeeeeeeeeeeeeee", on_left)
+                // console.log("Toggle file treeeeeeeeeeeeeeeeee", on_left)
                 setOpen( !open)
         }
         const handleClose = () => setOpen(false)
@@ -475,95 +668,6 @@ function Responsive_file_tree()
 }
 
 
-function Responsive_header({component})
-{
-
-        const [open, setOpen] = useState(false);
-        const ref = useRef()
-
-        const handleOpen = e =>
-        {
-                console.log("Open header")
-
-                ref.current.style.position = "absolute"
-                ref.current.style.top = 0
-                ref.current.style.right = 0
-                ref.current.style.zIndex = 1000
-                // ref.current.style.width = "80%"
-                ref.current.style.height = "fit-content"
-
-                setOpen(true)
-        }
-
-        const handleClose = () =>
-        {
-                console.log("Close header")
-
-                ref.current.style.position = "unset"
-                ref.current.style.top = "unset"
-                ref.current.style.left = "unset"
-                ref.current.style.width = "100%"
-                ref.current.style.height = "100%"
-
-                setOpen(false)
-        }
-
-        return(
-                <div ref={ref} className={"full_size_element wrapper_xs_size_header"} >
-                        {
-                                !open ?
-                                <div className="full_size_element d-flex justify-content-start align-items-center" onClick={handleOpen} >
-                                        <Tooltip title={window.current_location}>
-                                                <b
-                                                style={{
-                                                        fontSize: 16,
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis",
-                                                        whiteSpace: 'nowrap'
-                                                }}
-                                                >
-                                                        {window.current_location}
-                                                </b>
-                                        </Tooltip>
-                                </div>
-                                :
-                                <div className="content_header_xs_size"
-                                     style={{ animation: "fadeMe 0.3s", position: "relative" }}
-                                >
-                                        <div className="custom_close_button" onClick={handleClose} >
-                                                <IconButton color={"error"} >
-                                                        <AiOutlineCloseSquare size={20} color={"red"} />
-                                                </IconButton>
-                                        </div>
-                                        {component}
-                                </div>
-                        }
-                </div>
-        )
-
-        // return(
-        //         <div className={"full_size_element wrapper_xs_size_header"} onClick={handleOpen} >
-        //                 <Tooltip title={window.current_location}>
-        //                         <b
-        //                         style={{
-        //                                 fontSize: 16,
-        //                                 overflow: "hidden",
-        //                                 textOverflow: "ellipsis",
-        //                                 whiteSpace: 'nowrap'
-        //                         }}
-        //                         >
-        //                                 {window.current_location}
-        //                         </b>
-        //                 </Tooltip>
-        //
-        //                 <Offcanvas className="content_header_xs_size" show={open} onHide={handleClose} placement="top" >
-        //                         <Offcanvas.Body as={Header_offcanvas_body} >
-        //                         </Offcanvas.Body>
-        //                 </Offcanvas>
-        //         </div>
-        // )
-
-}
 
 
 
@@ -573,7 +677,7 @@ function Load({datas})
         // const [le, setLe] = useState(initData)
         // console.log("Leeeee", le);
         window.Global_State = useGetData(JSON.parse(JSON.stringify(datas)))
-        console.log(window.Global_State)
+        // console.log(window.Global_State)
 
         window.files_family = useGetFiles(<Global_research display={'d-none d-sm-flex'} />)
 
@@ -583,7 +687,7 @@ function Load({datas})
         const k = <Lol />
 
         return(
-        <div className={`full_size_element`} >
+        <div id={"file_loaded"} className={`full_size_element`} >
                 <div>
                         <Toaster
                         toastOptions={{
@@ -610,8 +714,10 @@ function Load({datas})
                 </div>
                 {/* {overlaySideBar} */}
                 {window.Global_State.Overlay_component}
+                {window.Global_State.absolutePopover.popover}
                 {window.Global_State.modalManager.modal}
                 {window.Global_State.editor.save_component}
+                {window.files_family.fileDetails}
 
                 <div className="full_size_element layout-wrapper d-none d-xl-block">
                         <Stack className="full_size_element d-flex" direction="row" spacing={0.5} alignItems = 'center' justifyContent='flex-end' >
@@ -762,13 +868,25 @@ function File_home()
 {
         window.show_response = (msg, type) =>
         {
+                const msg_part = [...msg.split("L@O%L&")]
+
                 toast(
                         (t) =>
                         (
                                 // t.visible ?
                                 <Alert onClose={ () => toast.dismiss(t.id) } severity={type} sx={{ width: 'fit-content', minWidth: 300, animation: "fadeMe 0.3s" }}>
                                         <AlertTitle> { type.replace(/^\w/, c => c.toUpperCase()) } </AlertTitle>
-                                        {msg}
+                                        {
+                                                msg_part.map(
+                                                        (value, idx) =>
+                                                        (
+                                                                <div key={idx} >
+                                                                        {value}
+                                                                </div>
+                                                        )
+                                                )
+
+                                        }
                                 </Alert>
                         ),
                         {
@@ -814,7 +932,7 @@ function File_home()
                 FetchData()
         }, [])
 
-        console.log("render")
+        // console.log("render")
 
         const theme = createTheme({
                 typography: {
@@ -851,7 +969,7 @@ function Page()
                 setTimeout( () => { navigate("/files_browser") }, 3000 )
         }, [])
 
-        console.log("render")
+        // console.log("render")
 
         return(
         container
@@ -859,19 +977,41 @@ function Page()
 
 }
 
+const auth_loader = async () => {
+        let user
+        await http.get('user')
+        .then(
+                res =>
+                {
+                        // console.log(res)
+                        user = res.data
+                }
+        )
+        .catch( err => { console.log(err) })
+
+        // console.log(user)
+
+        if(user instanceof Object)
+        {
+                if ( !user.id ) return redirect("/administrator")
+                else return redirect("/files_browser")
+        }
+        else return "ok"
+};
+
 const files_loader = async () => {
         let user
         await http.get('user')
         .then(
                 res =>
                 {
-                        console.log(res)
+                        // console.log(res)
                         user = res.data
                 }
         )
         .catch( err => { console.log(err) })
 
-        console.log(user)
+        // console.log(user)
 
         if(user === '') return redirect("/login")
         else if ( !user.id ) return redirect("/administrator")
@@ -884,13 +1024,13 @@ const user_info_loader = async () => {
         .then(
                 res =>
                 {
-                        console.log(res)
+                        // console.log(res)
                         user = res.data
                 }
         )
         .catch( err => { console.log(err) })
 
-        console.log(user)
+        // console.log(user)
 
         if(user === '') return redirect("/login")
         else if ( !window.Global_State || !window.Global_State.authUser ) return redirect("/files_browser")
@@ -904,13 +1044,13 @@ const admin_loader = async () => {
         .then(
                 res =>
                 {
-                        console.log(res)
+                        // console.log(res)
                         user = res.data
                 }
         )
         .catch( err => { console.log(err) })
 
-        console.log(user)
+        // console.log(user)
 
         if(user === '') return redirect("/login")
         else if ( user.id ) return redirect("/files_browser")
@@ -926,18 +1066,22 @@ const router = createBrowserRouter([
         {
                 path: "/login",
                 element: <Login />,
+                loader: auth_loader
         },
         {
                 path: "/sign_in",
                 element: <Create_account />,
+                loader: auth_loader
         },
         {
                 path: "/forgot_password",
                 element: <Forgot_password />,
+                loader: auth_loader
         },
         {
                 path: "/reset_password",
                 element: <Reset_password />,
+                loader: auth_loader
         },
         {
                 path: "/files_browser",

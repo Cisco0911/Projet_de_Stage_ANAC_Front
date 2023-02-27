@@ -167,7 +167,7 @@ function AskingPermitComponent({ap_notif, dispatch})
                                                                 event.preventDefault()
                                                                 event.stopPropagation()
 
-                                                                console.log('Approvedddddddddddd', ap_notif.data.operation, ap_notif.state, approved)
+                                                                // console.log('Approvedddddddddddd', ap_notif.data.operation, ap_notif.state, approved)
                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: true})
 
                                                                 const queryBody = new FormData()
@@ -178,7 +178,7 @@ function AskingPermitComponent({ap_notif, dispatch})
                                                                 .then(
                                                                         res =>
                                                                         {
-                                                                                console.log(res)
+                                                                                // console.log(res)
                                                                                 if (res.data.statue === 'success')
                                                                                 {
                                                                                         dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true})
@@ -208,7 +208,7 @@ function AskingPermitComponent({ap_notif, dispatch})
                                                                 event.preventDefault()
                                                                 event.stopPropagation()
 
-                                                                console.log("Rejectedddddddddddddd")
+                                                                // console.log("Rejectedddddddddddddd")
                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: false})
 
                                                                 const queryBody = new FormData()
@@ -219,7 +219,7 @@ function AskingPermitComponent({ap_notif, dispatch})
                                                                 .then(
                                                                 res =>
                                                                 {
-                                                                        console.log(res)
+                                                                        // console.log(res)
                                                                         if (res.data.statue === 'success')
                                                                         {
                                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: false})
@@ -260,7 +260,7 @@ function useAskingPermitNotif(asking_permission_notifications)
                                         {
                                                 if (notif.id === action.id)
                                                 {
-                                                        console.log('newStaaaaaaaaaaaate', notif.state)
+                                                        // console.log('newStaaaaaaaaaaaate', notif.state)
                                                         return { ...notif, state: action.newState, approved: action.approved };
                                                 }
                                                 else
@@ -326,7 +326,7 @@ function useOnScreen(root) {
                 [
                         isIntersecting,
                         (target) => { observer.observe(target) },
-                        () => { console.log('disconect') }
+                        () => { /*console.log('disconect')*/ }
                 ]
         )
 }
@@ -616,10 +616,10 @@ export default function Notifications()
         useEffect(
                 () =>
                 {
-                        console.log('check_update_asking_permit_notifs')
+                        // console.log('check_update_asking_permit_notifs')
                         if ( !( JSON.stringify(askingPermitNotif) === JSON.stringify(window.Global_State.authUser.asking_permission_notifications) ) )
                         {
-                                console.log('update_asking_permit_notifs')
+                                // console.log('update_asking_permit_notifs')
                                 update( JSON.parse(JSON.stringify(window.Global_State.authUser.asking_permission_notifications)) )
                         }
                 }, [window.Global_State.authUser.asking_permission_notifications]
@@ -629,7 +629,7 @@ export default function Notifications()
         useEffect(
                 () =>
                 {
-                        console.log('rerendring_notiffffffffffffffffffffffffffs')
+                        // console.log('rerendring_notiffffffffffffffffffffffffffs')
                 }
         )
 
@@ -695,7 +695,7 @@ export default function Notifications()
         useEffect(
         () =>
         {
-                console.log(isOpen, "notifPanel")
+                // console.log(isOpen, "notifPanel")
                 if ( (readNotifs.length !== 0) && !isOpen)
                 {
 
@@ -708,8 +708,8 @@ export default function Notifications()
                         readNotifs = []
 
                         http.post(`markAsRead`, notif_ids)
-                        .then( res => { console.log(res) } )
-                        .catch(err => { console.log(err) })
+                        // .then( res => { console.log(res) } )
+                        // .catch(err => { console.log(err) })
                 }
 
         }, [isOpen]
@@ -781,7 +781,7 @@ export default function Notifications()
 
         return (
                 useMemo(
-                        () => ( <window.Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} /> ),
+                        () => ( <window.Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = { <Box style={{ overflowY: "scroll" }} > {renderingComponent} </Box> } /> ),
                         [renderingComponent]
                 )
                 // <window.Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />

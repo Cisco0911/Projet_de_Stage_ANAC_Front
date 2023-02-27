@@ -78,7 +78,7 @@ export default function useBack() {
                 // console.log("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiid", id)
 
                 let node = find(id)
-                console.log("nooooooooooooooooode_modeeeeeeeel", node, root)
+                // console.log("nooooooooooooooooode_modeeeeeeeel", node, root)
 
                 if (!node)
                 {
@@ -174,13 +174,13 @@ export default function useBack() {
         () =>
         {
 
-                console.log('root', root)
+                // console.log('root', root)
                 window.Global_State.clearSelected()
                 // setSelectedFolder(find(selectedNode.model.id))
                 const section_id = window.Global_State.selectedSectionId
                 if (section_id) setCurrentSelectedFolder(window.Global_State.selectedNodeIdsInSections.current.get(section_id))
-                console.log('nodeBackend_selectedNode', selectedNode)
-                console.log('2',isUpdate)
+                // console.log('nodeBackend_selectedNode', selectedNode)
+                // console.log('2',isUpdate)
         },
         [root]
         )
@@ -218,7 +218,7 @@ export default function useBack() {
 
         // console.log('nodeBackend', jsonData)
         // console.log('root', root)
-        console.log('selectedNode', selectedNode.model)
+        // console.log('selectedNode', selectedNode.model)
 
         return {
                 data: jsonData.data,

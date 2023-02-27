@@ -3,6 +3,13 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 /* eslint-disable import/first */
 
 import React, { useEffect, useState } from 'react';
+import { AppBar, Chip, Dialog, DialogContent, DialogContentText, DialogTitle, Slide, Toolbar } from "@mui/material";
+import Stack from "@mui/material/Stack";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+
+import { AiFillCloseSquare } from "react-icons/ai";
 
 //     node: 
 // {
@@ -22,262 +29,349 @@ import React, { useEffect, useState } from 'react';
 // }
 
 
-export default function FileDetails() {
-        var _useState = useState(null),
-            _useState2 = _slicedToArray(_useState, 2),
-            selectedRow = _useState2[0],
-            setSelectedRow = _useState2[1];
+var Transition = React.forwardRef(function Transition(props, ref) {
+        return React.createElement(Slide, Object.assign({ direction: "up", ref: ref }, props));
+});
 
-        window.Global_State.EventsManager.on('viewDetailEnabled', function (data) {
-                console.log('viewDetailEnabled');setSelectedRow(data);
-        });
+function FileDetail(_ref) {
+        var node = _ref.node,
+            open = _ref.open,
+            handleClose = _ref.handleClose;
 
-        useEffect(function () {
-                return function () {
-                        window.Global_State.EventsManager.off('viewDetailEnabled');
-                };
-        }, []);
-
-        var data = selectedRow !== null ? window.Global_State.getNodeDataById(selectedRow.id) : null;
-
-        var Type = void 0;
-
-        if (selectedRow !== null && data !== null) {
-
-                console.log(selectedRow);
-                console.log(data);
-
-                switch (data.type) {
-                        case "audit":
-                                Type = "Audit";
-                                break;
-                        case "fnc":
-                                Type = "Non-Conformite";
-                                break;
-                        case "ds":
-                                Type = "Dossier";
-                                break;
-                        case "checkList":
-                                Type = "CheckList";
-                                break;
-                        case "dp":
-                                Type = "Dossier Preuve d'Audit";
-                                break;
-                        case "nonC":
-                                Type = "Dossier des Non-Conformités";
-                                break;
-
-                        default:
-                                Type = "Unknown";
-                                break;
+        var jsonDetails = {
+                general: {
+                        NOM: node.name,
+                        CHEMIN: node.path,
+                        "CREE LE": node.created_at.replace("T", " À "),
+                        VALIDE: node.is_validated ? "OUI par " + (node.validator ? node.validator.name + " " + node.validator.second_name : 'inconnu') : "NON",
+                        SERVICES: node.services.reduce(function (acc, service) {
+                                return acc ? acc + ", " + service.name : service.name;
+                        }, "")
                 }
+        };
+
+        switch (node.type) {
+                case 'audit':
+                        jsonDetails.specific = {
+                                TYPE: "AUDIT",
+                                "RESPONSABLE AUDIT": React.createElement(
+                                        "b",
+                                        { style: { color: "blue" } },
+                                        node.ra.name + " " + node.ra.second_name
+                                )
+                        };
+
+                        break;
+                case 'checkList':
+                        jsonDetails.specific = {
+                                TYPE: "CHECKLIST"
+                        };
+
+                        break;
+                case 'dp':
+                        jsonDetails.specific = {
+                                TYPE: "DOSSIER PREUVE"
+                        };
+
+                        break;
+                case 'nonC':
+                        jsonDetails.specific = {
+                                TYPE: "DOSSIER NC"
+                        };
+
+                        break;
+                case 'fnc':
+                        var levelComponent = void 0;
+                        switch (parseInt(node.level)) {
+                                case 1:
+                                        levelComponent = React.createElement(Chip, { label: node.level, variant: "filled", color: "error" });
+                                        break;
+                                case 2:
+                                        levelComponent = React.createElement(Chip, { label: node.level, variant: "filled", color: "warning" });
+                                        break;
+                                case 3:
+                                        levelComponent = React.createElement(Chip, { label: node.level, variant: "filled", color: "default" });
+                                        break;
+
+                        }
+
+                        jsonDetails.specific = {
+                                TYPE: "NON-CONFORMITÉ",
+                                NIVEAU: levelComponent,
+                                "DATE DE REVISION": node.review_date || "____/__/__",
+                                STATUT: node.isClosed ? React.createElement(
+                                        "div",
+                                        { className: "badge bg-success-bright text-success" },
+                                        "Cl\xF4tur\xE9"
+                                ) : React.createElement(
+                                        "div",
+                                        { className: "badge bg-danger-bright text-danger" },
+                                        "Non-Cl\xF4tur\xE9"
+                                )
+                        };
+
+                        break;
+                case 'ds':
+                        jsonDetails.specific = {
+                                TYPE: "DOSSIER SIMPLE"
+                        };
+
+                        break;
+                case 'f':
+                        jsonDetails.specific = {
+                                TYPE: "FICHIER"
+                        };
+
+                        break;
+                default:
+                        break;
+        }
+
+        var generalDetails = [];
+
+        for (var key in jsonDetails.general) {
+                var value = jsonDetails.general[key];
+
+                generalDetails.push(React.createElement(
+                        Stack,
+                        { direction: "row", spacing: 1, key: key,
+                                style: {
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        display: "block"
+                                }
+                        },
+                        React.createElement(
+                                "b",
+                                { style: {
+                                                height: "fit-content"
+                                        } },
+                                " ",
+                                key,
+                                ": "
+                        ),
+                        typeof value === "string" ? React.createElement(
+                                "b",
+                                { title: value },
+                                " ",
+                                value,
+                                " "
+                        ) : value
+                ));
+        }
+        var specificDetails = [];
+
+        for (var _key in jsonDetails.specific) {
+                var _value = jsonDetails.specific[_key];
+
+                specificDetails.push(React.createElement(
+                        Stack,
+                        { direction: "row", spacing: 1, key: _key, alignItems: "end",
+                                style: {
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        display: "block"
+                                }
+                        },
+                        React.createElement(
+                                "b",
+                                { style: {
+                                                height: "fit-content"
+                                        } },
+                                " ",
+                                _key,
+                                ": "
+                        ),
+                        typeof _value === "string" ? React.createElement(
+                                "b",
+                                { title: _value },
+                                " ",
+                                _value,
+                                " "
+                        ) : _value
+                ));
         }
 
         return React.createElement(
-                React.Fragment,
-                null,
-                selectedRow !== null && data !== null ? React.createElement(
-                        'div',
-                        { className: 'sidebar', id: 'view-detail' },
+                Dialog,
+                {
+                        fullScreen: window.innerWidth < 576,
+                        open: open,
+                        TransitionComponent: Transition,
+                        onClose: handleClose,
+                        "aria-labelledby": "FileDetail-dialog-title",
+                        "aria-describedby": "FileDetail-dialog-description"
+                },
+                window.innerWidth > 576 ? React.createElement(
+                        React.Fragment,
+                        null,
                         React.createElement(
-                                'div',
-                                { className: 'sidebar-header' },
-                                React.createElement(
-                                        'h4',
-                                        null,
-                                        'View Detail'
-                                ),
-                                React.createElement(
-                                        'a',
-                                        { href: '#', className: 'btn btn-light btn-floating sidebar-close-btn' },
-                                        React.createElement('i', { className: 'ti-angle-right' })
-                                )
+                                DialogTitle,
+                                { id: "FileDetail-dialog-title" },
+                                node.name
                         ),
                         React.createElement(
-                                'div',
-                                { className: 'sidebar-content' },
+                                DialogContent,
+                                null,
                                 React.createElement(
-                                        'figure',
-                                        { className: 'avatar mb-4' },
+                                        Stack,
+                                        { direction: "column", spacing: 5 },
                                         React.createElement(
-                                                'span',
-                                                { className: 'avatar-title bg-info-bright text-info rounded-pill' },
-                                                React.createElement('i', { className: 'ti-file' })
-                                        )
-                                ),
-                                React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Nom:'
+                                                Divider,
+                                                { textAlign: "center" },
+                                                " GENERAL "
                                         ),
                                         React.createElement(
-                                                'div',
-                                                { className: 'col-8' },
-                                                data.name
-                                        )
-                                ),
-                                React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Type:'
+                                                Stack,
+                                                { direction: "column", spacing: 3 },
+                                                generalDetails
                                         ),
                                         React.createElement(
-                                                'div',
-                                                { className: 'col-8' },
-                                                data.type === "f" ? window.Global_State.getType(data.ext) : Type
-                                        )
-                                ),
-                                data.type === "checkList" || data.type === "dp" || data.type === "nonC" ? React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Audit:'
+                                                Divider,
+                                                { textAlign: "center" },
+                                                " SPECIFIQUE "
                                         ),
                                         React.createElement(
-                                                'div',
-                                                { className: 'col-8' },
-                                                window.Global_State.getNodeDataById(data.parentId).name
+                                                Stack,
+                                                { direction: "column", spacing: 3 },
+                                                specificDetails
                                         )
-                                ) : null,
-                                data.type === "f" ? React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Taille:'
-                                        ),
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-8' },
-                                                window.Global_State.sizeFormater(data.taille, false)
-                                        )
-                                ) : null,
-                                data.type === "audit" ? React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'RA:'
-                                        ),
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-8' },
-                                                data.ra.name + " " + data.ra.second_name
-                                        )
-                                ) : null,
-                                data.type === "fnc" ? React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Level:'
-                                        ),
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-8 text-danger' },
-                                                "Level " + data.level
-                                        )
-                                ) : null,
-                                data.type === "fnc" ? React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Revision:'
-                                        ),
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-8 ' + (data.review_date !== null ? 'text-success' : 'text-warning') },
-                                                '' + (data.review_date !== null ? data.review_date : '____/__/__')
-                                        )
-                                ) : null,
-                                data.type === "fnc" ? React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Cl\xF4tur\xE9:'
-                                        ),
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-8' },
-                                                data.isClosed ? React.createElement(
-                                                        'div',
-                                                        { className: 'badge bg-success-bright text-success' },
-                                                        'true'
-                                                ) : React.createElement(
-                                                        'div',
-                                                        { className: 'badge bg-danger-bright text-danger' },
-                                                        'false'
-                                                )
-                                        )
-                                ) : null,
-                                data.isClosed === 1 ? React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Date de cloture:'
-                                        ),
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-8' },
-                                                '2022-11-05'
-                                        )
-                                ) : null,
-                                React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Cr\xE9\xE9 le:'
-                                        ),
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-8 text-primary' },
-                                                data.created_at
-                                        )
-                                ),
-                                React.createElement(
-                                        'div',
-                                        { className: 'row mb-3' },
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-4', style: { fontWeight: 'bold' } },
-                                                'Modifi\xE9 le:'
-                                        ),
-                                        React.createElement(
-                                                'div',
-                                                { className: 'col-8 text-success' },
-                                                data.created_at
-                                        )
-                                )
-                        ),
-                        React.createElement(
-                                'div',
-                                { className: 'sidebar-footer' },
-                                React.createElement(
-                                        'button',
-                                        { className: 'btn btn-lg btn-block btn-primary' },
-                                        React.createElement('i', { className: 'ti-share mr-3' }),
-                                        ' Share'
                                 )
                         )
-                ) : null
+                ) : React.createElement(
+                        React.Fragment,
+                        null,
+                        React.createElement(
+                                AppBar,
+                                { sx: { position: 'relative' } },
+                                React.createElement(
+                                        Toolbar,
+                                        null,
+                                        React.createElement(
+                                                IconButton,
+                                                {
+                                                        edge: "start",
+                                                        color: "inherit",
+                                                        onClick: handleClose,
+                                                        "aria-label": "close"
+                                                },
+                                                React.createElement(AiFillCloseSquare, { size: 24 })
+                                        ),
+                                        React.createElement(
+                                                Typography,
+                                                { sx: { ml: 2, flex: 1 }, variant: "h6", component: "div" },
+                                                node.name
+                                        )
+                                )
+                        ),
+                        React.createElement(
+                                Stack,
+                                { direction: "column", spacing: 5, margin: 3 },
+                                React.createElement(
+                                        Divider,
+                                        { textAlign: "center" },
+                                        " GENERAL "
+                                ),
+                                React.createElement(
+                                        Stack,
+                                        { direction: "column", spacing: 3 },
+                                        generalDetails
+                                ),
+                                React.createElement(
+                                        Divider,
+                                        { textAlign: "center" },
+                                        " SPECIFIQUE "
+                                ),
+                                React.createElement(
+                                        Stack,
+                                        { direction: "column", spacing: 3 },
+                                        specificDetails
+                                )
+                        )
+                )
         );
+}
+
+export default function useFileDetails() {
+        var _useState = useState(false),
+            _useState2 = _slicedToArray(_useState, 2),
+            open = _useState2[0],
+            setOpen = _useState2[1];
+
+        var _useState3 = useState(null),
+            _useState4 = _slicedToArray(_useState3, 2),
+            nodeId = _useState4[0],
+            setNodeId = _useState4[1];
+
+        var showDetails = function showDetails(id) {
+                setNodeId(id);
+                setOpen(true);
+        };
+
+        var handleClose = function handleClose() {
+                setOpen(false);
+                setNodeId(null);
+        };
+
+        var detailsComponent = null;
+
+        if (nodeId) {
+                var node = window.Global_State.getNodeDataById(nodeId);
+
+                if (node) {
+                        detailsComponent = React.createElement(FileDetail, { node: node, open: open, handleClose: handleClose });
+                } else {
+                        detailsComponent = React.createElement(
+                                Dialog,
+                                {
+                                        open: open,
+                                        onClose: handleClose,
+                                        "aria-labelledby": "not_found-dialog-title",
+                                        "aria-describedby": "not_found-dialog-description"
+                                },
+                                React.createElement(
+                                        DialogTitle,
+                                        { id: "not_found-dialog-title" },
+                                        "Fichier introuvable"
+                                ),
+                                React.createElement(
+                                        DialogContent,
+                                        null,
+                                        React.createElement(
+                                                DialogContentText,
+                                                { id: "not_found-dialog-description" },
+                                                "Aucun d\xE9tail"
+                                        )
+                                )
+                        );
+                }
+        } else {
+                detailsComponent = React.createElement(
+                        Dialog,
+                        {
+                                open: open,
+                                onClose: handleClose,
+                                "aria-labelledby": "invalid_id-dialog-title",
+                                "aria-describedby": "invalid_id-dialog-description"
+                        },
+                        React.createElement(
+                                DialogTitle,
+                                { id: "invalid_id-dialog-title" },
+                                "Id invalide"
+                        ),
+                        React.createElement(
+                                DialogContent,
+                                null,
+                                React.createElement(
+                                        DialogContentText,
+                                        { id: "invalid_id-dialog-description" },
+                                        "Aucun d\xE9tail"
+                                )
+                        )
+                );
+        }
+
+        return { showDetails: showDetails, detailsComponent: detailsComponent };
 }

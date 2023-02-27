@@ -211,7 +211,7 @@ function AskingPermitComponent(_ref) {
                                                                 event.preventDefault();
                                                                 event.stopPropagation();
 
-                                                                console.log('Approvedddddddddddd', ap_notif.data.operation, ap_notif.state, approved);
+                                                                // console.log('Approvedddddddddddd', ap_notif.data.operation, ap_notif.state, approved)
                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: true });
 
                                                                 var queryBody = new FormData();
@@ -219,7 +219,7 @@ function AskingPermitComponent(_ref) {
                                                                 queryBody.append('approved', '1');
 
                                                                 http.post('authorization_response', queryBody).then(function (res) {
-                                                                        console.log(res);
+                                                                        // console.log(res)
                                                                         if (res.data.statue === 'success') {
                                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: true });
 
@@ -250,7 +250,7 @@ function AskingPermitComponent(_ref) {
                                                                 event.preventDefault();
                                                                 event.stopPropagation();
 
-                                                                console.log("Rejectedddddddddddddd");
+                                                                // console.log("Rejectedddddddddddddd")
                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'loading', approved: false });
 
                                                                 var queryBody = new FormData();
@@ -258,7 +258,7 @@ function AskingPermitComponent(_ref) {
                                                                 queryBody.append('approved', '0');
 
                                                                 http.post('authorization_response', queryBody).then(function (res) {
-                                                                        console.log(res);
+                                                                        // console.log(res)
                                                                         if (res.data.statue === 'success') {
                                                                                 dispatch({ type: 'update_state', id: ap_notif.id, newState: 'dealt', approved: false });
 
@@ -288,7 +288,7 @@ function useAskingPermitNotif(asking_permission_notifications) {
                         case "update_state":
                                 return state.map(function (notif) {
                                         if (notif.id === action.id) {
-                                                console.log('newStaaaaaaaaaaaate', notif.state);
+                                                // console.log('newStaaaaaaaaaaaate', notif.state)
                                                 return Object.assign({}, notif, { state: action.newState, approved: action.approved });
                                         } else {
                                                 return notif;
@@ -355,9 +355,7 @@ function useOnScreen(root) {
 
         return [isIntersecting, function (target) {
                 observer.observe(target);
-        }, function () {
-                console.log('disconect');
-        }];
+        }, function () {/*console.log('disconect')*/}];
 }
 
 function useUnreadReviewNotif() {
@@ -681,15 +679,15 @@ export default function Notifications() {
             update = _useState8[1];
 
         useEffect(function () {
-                console.log('check_update_asking_permit_notifs');
+                // console.log('check_update_asking_permit_notifs')
                 if (!(JSON.stringify(askingPermitNotif) === JSON.stringify(window.Global_State.authUser.asking_permission_notifications))) {
-                        console.log('update_asking_permit_notifs');
+                        // console.log('update_asking_permit_notifs')
                         update(JSON.parse(JSON.stringify(window.Global_State.authUser.asking_permission_notifications)));
                 }
         }, [window.Global_State.authUser.asking_permission_notifications]);
 
         useEffect(function () {
-                console.log('rerendring_notiffffffffffffffffffffffffffs');
+                // console.log('rerendring_notiffffffffffffffffffffffffffs')
         });
 
         var askingPermitNotifs = useAskingPermitNotif(askingPermitNotif);
@@ -754,7 +752,7 @@ export default function Notifications() {
         // const isOpen = Boolean(anchorEl)
 
         useEffect(function () {
-                console.log(isOpen, "notifPanel");
+                // console.log(isOpen, "notifPanel")
                 if (readNotifs.length !== 0 && !isOpen) {
 
                         var notif_ids = new FormData();
@@ -765,11 +763,9 @@ export default function Notifications() {
 
                         readNotifs = [];
 
-                        http.post('markAsRead', notif_ids).then(function (res) {
-                                console.log(res);
-                        }).catch(function (err) {
-                                console.log(err);
-                        });
+                        http.post('markAsRead', notif_ids);
+                        // .then( res => { console.log(res) } )
+                        // .catch(err => { console.log(err) })
                 }
         }, [isOpen]);
 
@@ -838,7 +834,13 @@ export default function Notifications() {
 
 
         return useMemo(function () {
-                return React.createElement(window.Global_State.CustomDropDown, { id: 'notifPanel', icon: notifButton, content: renderingComponent });
+                return React.createElement(window.Global_State.CustomDropDown, { id: 'notifPanel', icon: notifButton, content: React.createElement(
+                                Box,
+                                { style: { overflowY: "scroll" } },
+                                ' ',
+                                renderingComponent,
+                                ' '
+                        ) });
         }, [renderingComponent])
         // <window.Global_State.CustomDropDown id = {'notifPanel'} icon = {notifButton} content = {renderingComponent} />
         ;

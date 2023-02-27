@@ -17,6 +17,7 @@ import TableCell from "@mui/material/TableCell";
 
 import {Global_State} from "../main";
 import {createPortal} from "react-dom";
+import Stack from "@mui/material/Stack";
 
 
 
@@ -64,7 +65,7 @@ export default function Global_research({display})
         }
 
         return(
-        <div>
+        <div onClick={e => { e.preventDefault(); e.stopPropagation() }} >
                 <Form id={'global_research'} className ={`${display} container-fluid`} style={{ width: (window.innerWidth > 576 ? 500 : 'unset') }} >
                         <Form.Label htmlFor="inlineFormInputGroup" visuallyHidden>
                                 Global_research
@@ -79,7 +80,7 @@ export default function Global_research({display})
                                 aria-label="Search"
                                 value={value}
                                 onChange={handleChange}
-                                // autoFocus
+                                autoFocus
                                 />
                         </InputGroup>
                 </Form>
@@ -123,11 +124,20 @@ export default function Global_research({display})
                                                         const [prev, current, next] = [ name.substring(0, idx), name.substring(idx, idx + researched_word.length), name.substring(idx + researched_word.length, name.length)  ]
 
                                                         return (
-                                                        <span className={'d-flex align-items-center'} >
-                                                                        {prev}
+                                                        <span className={'d-block align-items-center'} title={name}
+                                                              style={{
+                                                                      width: "-webkit-fit-content",
+                                                                      overflow: 'hidden',
+                                                                      textOverflow: "ellipsis",
+                                                                      maxWidth: window.innerWidth > 576 ? '45%' : '100%',
+                                                                      flex: "0 0 auto",
+                                                              }}
+                                                        >
+                                                                {prev}
                                                                 <span style={{ backgroundColor: 'blue', color: 'white', borderRadius: 2, padding: 2 }} >{current}</span>
                                                                 {next}
-                                                                </span>
+                                                        </span>
+
                                                         )
                                                 }
 
@@ -135,6 +145,8 @@ export default function Global_research({display})
                                                 {
                                                         e.stopPropagation()
 
+                                                        if ( window.innerWidth > 576 ) window.Global_State.absolutePopover.close()
+                                                        else setValue('')
                                                         window.Global_State.EventsManager.emit("show_on_screen", node)
                                                 }
 
@@ -152,12 +164,20 @@ export default function Global_research({display})
                                                                 }}
                                                                 onClick={handleClick}
                                                         >
-                                                                <div className={'d-none d-sm-flex'}  style={{ minWidth: 'max-content' }}>
+                                                                <Stack direction={"row"} spacing={1} className="d-none d-sm-flex flex-sm-row align-items-center"  style={{ width: '100%', whiteSpace: "nowrap"}}>
                                                                         <Research_name_component name={node.name} researched_word={value}  />
-                                                                        &nbsp;&nbsp;
-                                                                        <span className={'d-flex align-items-center'} style={{ color: "#00000075", fontSize: 13 }} > {`${node.path}`} </span>
-                                                                </div>
-                                                                <div className={'d-block d-sm-none'}  style={{ minWidth: 'max-content' }}>
+                                                                        <span title={`${node.path}`}
+                                                                                style={{
+                                                                                        height: "fit-content",
+                                                                                        color: "#00000075",
+                                                                                        fontSize: 13,
+                                                                                        overflow: "hidden",
+                                                                                        textOverflow: "ellipsis",
+                                                                                        flex: 1
+                                                                                }}
+                                                                        > {`${node.path}`} </span>
+                                                                </Stack>
+                                                                <div title={node.path} className={'d-block d-sm-none'}  style={{ width: '100%' }}>
                                                                         <Research_name_component name={node.name} researched_word={value}  />
                                                                 </div>
                                                         </Card>
@@ -170,90 +190,5 @@ export default function Global_research({display})
 
         </div>
         )
-
-
-        // {
-        //         createPortal(
-        //         <div style={{
-        //                 width: '100%',
-        //                 height: '100%',
-        //                 position: 'absolute',
-        //                 top: '0px',
-        //                 display: 'flex',
-        //                 alignItems: 'end',
-        //                 justifyContent: 'center'
-        //         }} >
-        //                 <Card id={'global_research_result'} className={`${value === '' ? 'd-none' : 'd-flex flex-column'} mt-1 p-1`}
-        //                       sx =
-        //                       {{
-        //                               maxHeight: 3*window.innerHeight/4,
-        //                               maxWidth: 9*window.innerWidth/10,
-        //                               backgroundColor: '#0062ff7a',
-        //                               border: 'solid blue 1px',
-        //                               overflowY: 'scroll',
-        //                               zIndex: 1900
-        //                       }}
-        //                 >
-        //                         {
-        //                                 window.Global_State.dataToUse.filter(
-        //                                 node =>
-        //                                 {
-        //                                         if (value === '') return false
-        //                                         else if (node.type === 'checkList' || node.type === 'dp' || node.type === 'nc') return false
-        //                                         else if (filterTag === 'All') return node.name.indexOf(value) !== -1
-        //                                         else if (filterTag === 'Audit') return (node.type === 'audit' && node.name.indexOf(value) !== -1)
-        //                                         else if (filterTag === 'FNC') return (node.type === 'fnc' && node.name.indexOf(value) !== -1)
-        //                                         else if (filterTag === 'Folder') return (node.type === 'ds' && node.name.indexOf(value) !== -1)
-        //                                         else if (filterTag === 'File') return (node.type === 'f' && node.name.indexOf(value) !== -1)
-        //                                 }
-        //                                 ).map(
-        //                                 node =>
-        //                                 {
-        //                                         const Research_name_component = ({name, researched_word}) =>
-        //                                         {
-        //                                                 const idx = name.indexOf(researched_word)
-        //
-        //                                                 const [prev, current, next] = [ name.substring(0, idx), name.substring(idx, idx + researched_word.length), name.substring(idx + researched_word.length, name.length)  ]
-        //
-        //                                                 return (
-        //                                                 <span className={'d-flex align-items-center'} >
-        //                                                                         {prev}
-        //                                                         <span style={{ backgroundColor: 'blue', color: 'white', borderRadius: 2, padding: 2 }} >{current}</span>
-        //                                                         {next}
-        //                                                                 </span>
-        //                                                 )
-        //                                         }
-        //
-        //                                         return (
-        //                                         <Card
-        //                                         key={node.id}
-        //                                         className={'m-1 d-flex align-items-center'}
-        //                                         sx =
-        //                                         {{
-        //                                                 minHeight: 35,
-        //                                                 margin: 5,
-        //                                                 padding: 2,
-        //                                                 overflowX: 'scroll',
-        //                                                 cursor: 'pointer'
-        //                                         }}
-        //                                         >
-        //                                                 <div className={'d-none d-sm-flex'}  style={{ minWidth: 'max-content' }}>
-        //                                                         <Research_name_component name={node.name} researched_word={value}  />
-        //                                                         &nbsp;&nbsp;
-        //                                                         <span className={'d-flex align-items-center'} style={{ color: "#00000075", fontSize: 13 }} > {`${node.path}`} </span>
-        //                                                 </div>
-        //                                                 <div className={'d-block d-sm-none'}  style={{ minWidth: 'max-content' }}>
-        //                                                         <Research_name_component name={node.name} researched_word={value}  />
-        //                                                 </div>
-        //                                         </Card>
-        //                                         )
-        //                                 }
-        //                                 )
-        //                         }
-        //                 </Card>
-        //         </div>
-        //         , document.getElementById("root")
-        //         )
-        // }
 
 }

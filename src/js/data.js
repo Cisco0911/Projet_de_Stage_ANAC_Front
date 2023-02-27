@@ -24,7 +24,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
 
 import toast from "react-hot-toast";
-import { Box, Grow, Popper } from "@mui/material";
+import { Box, Fade, Grow, Popover, Popper } from "@mui/material";
 import { Queue } from "@mui/icons-material";
 import { useSpring, animated } from "react-spring";
 import { Collapse } from "react-bootstrap";
@@ -54,49 +54,9 @@ var options = {
         }
 };
 
-// const echo = new Echo(options);
-
-// let echosHandler
-
-// echo.channel(`nodeUpdate`).listen( 'NodeUpdateEvent', (data) => {
-//   if (data.operation === 'add')
-//   {
-//     console.log('emitting echo')
-//     console.log(data)
-//     const ids = new FormData
-//     data.node.forEach(element => {
-//       console.log(element)
-//       ids.append('ids[]', element)
-//     });
-//     console.log(ids.get('ids[]'))
-
-//     http.post('getDatasByIds', ids)
-//     .then( res =>
-//       {
-//         console.log(res)
-
-//         echosHandler('NodeUpdateEvent', {...data, 'node': res.data})
-//       }
-//     )
-//     .catch( err =>
-//       {
-//         console.log(err)
-//       }
-//     )
-//   }
-//   else if(data.operation === 'delete')
-//   {
-//     console.log('emitting echo')
-//     echosHandler('NodeUpdateEvent', data)
-//   }
-// });
-
-
-var isLogged = false;
-
 export var getFromDataBase = function () {
         var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee() {
-                var Datas;
+                var Datas, data;
                 return _regeneratorRuntime.wrap(function _callee$(_context) {
                         while (1) {
                                 switch (_context.prev = _context.next) {
@@ -136,125 +96,70 @@ export var getFromDataBase = function () {
                                                                 ds: -1,
                                                                 services: -1
                                                         }
+
+                                                        // await http
+                                                        //         .get("user")
+                                                        //         .then(response => {Datas.authUser = response.data})
+                                                        //
+                                                        // await http
+                                                        //         .get("get_ss")
+                                                        //         .then(response => { Datas.status.sections = response.status; Datas.data.sections = response.data; })
+                                                        //         .catch(error => Datas.errors.sections = error);
+                                                        //
+                                                        // await http
+                                                        //         .get("get_audits")
+                                                        //         .then(response => { Datas.status.audits = response.status; Datas.data.audits = response.data; })
+                                                        //         .catch(error => Datas.errors.audits = error);
+                                                        //
+                                                        // await http
+                                                        //         .get("get_checkLists")
+                                                        //         .then(response => { Datas.status.checkLists = response.status; Datas.data.checkLists = response.data; })
+                                                        //         .catch(error => Datas.errors.checkLists = error);
+                                                        //
+                                                        // await http
+                                                        //         .get("get_Dps")
+                                                        //         .then(response => { Datas.status.dps = response.status; Datas.data.dps = response.data; })
+                                                        //         .catch(error => Datas.errors.dps = error);
+                                                        //
+                                                        // await http
+                                                        //         .get("get_NonCs")
+                                                        //         .then(response => { Datas.status.nonCs = response.status; Datas.data.nonCs = response.data; })
+                                                        //         .catch(error => Datas.errors.nonCs = error);
+                                                        //
+                                                        // await http
+                                                        //         .get("get_fncs")
+                                                        //         .then(response => { Datas.status.fncs = response.status; Datas.data.fncs = response.data; })
+                                                        //         .catch(error => Datas.errors.fncs = error);
+                                                        //
+                                                        // await http
+                                                        //         .get("get_ds")
+                                                        //         .then(response => { Datas.status.ds = response.status; Datas.data.ds = response.data; })
+                                                        //         .catch(error => Datas.errors.ds = error);
+                                                        //
+                                                        // await http
+                                                        //         .get("get_fs")
+                                                        //         .then(response => { Datas.status.fs = response.status; Datas.data.fs = response.data; })
+                                                        //         .catch(error => Datas.errors.fs = error);
+                                                        //
+                                                        // await http
+                                                        //         .get("get_services")
+                                                        //         .then(response => { Datas.status.services = response.status; Datas.data.services = response.data; })
+                                                        //         .catch(error => Datas.errors.services = error);
+
+
                                                 };
-                                                _context.next = 3;
-                                                return http.get("user").then(function (response) {
-                                                        Datas.authUser = response.data;
+                                                data = void 0;
+                                                _context.next = 4;
+                                                return http.post("get_data", {}).then(function (res) {
+                                                        return data = res.data;
+                                                }).catch(function (error) {
+                                                        return console.log(error);
                                                 });
 
-                                        case 3:
-                                                _context.next = 5;
-                                                return http.get("get_ss").then(function (response) {
-                                                        Datas.status.sections = response.status;Datas.data.sections = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.sections = error;
-                                                });
+                                        case 4:
+                                                return _context.abrupt("return", data);
 
                                         case 5:
-                                                _context.next = 7;
-                                                return http.get("get_audits").then(function (response) {
-                                                        Datas.status.audits = response.status;Datas.data.audits = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.audits = error;
-                                                });
-
-                                        case 7:
-                                                _context.next = 9;
-                                                return http.get("get_checkLists").then(function (response) {
-                                                        Datas.status.checkLists = response.status;Datas.data.checkLists = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.checkLists = error;
-                                                });
-
-                                        case 9:
-                                                _context.next = 11;
-                                                return http.get("get_Dps").then(function (response) {
-                                                        Datas.status.dps = response.status;Datas.data.dps = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.dps = error;
-                                                });
-
-                                        case 11:
-                                                _context.next = 13;
-                                                return http.get("get_NonCs").then(function (response) {
-                                                        Datas.status.nonCs = response.status;Datas.data.nonCs = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.nonCs = error;
-                                                });
-
-                                        case 13:
-                                                _context.next = 15;
-                                                return http.get("get_fncs").then(function (response) {
-                                                        Datas.status.fncs = response.status;Datas.data.fncs = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.fncs = error;
-                                                });
-
-                                        case 15:
-                                                _context.next = 17;
-                                                return http.get("get_ds").then(function (response) {
-                                                        Datas.status.ds = response.status;Datas.data.ds = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.ds = error;
-                                                });
-
-                                        case 17:
-                                                _context.next = 19;
-                                                return http.get("get_fs").then(function (response) {
-                                                        Datas.status.fs = response.status;Datas.data.fs = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.fs = error;
-                                                });
-
-                                        case 19:
-                                                _context.next = 21;
-                                                return http.get("get_services").then(function (response) {
-                                                        Datas.status.services = response.status;Datas.data.services = response.data;
-                                                }).catch(function (error) {
-                                                        return Datas.errors.services = error;
-                                                });
-
-                                        case 21:
-
-                                                console.log(Datas);
-
-                                                // echo.private(`validating.${Datas.authUser.id}`).listen('RemovalEvent', (data) => {
-                                                //   toast((t) => (
-                                                //     <div>
-                                                //       <div  >
-                                                //         Confirmer la suppression de  : {data.node_type} <b>{data.node.name}</b>
-                                                //       </div>
-                                                //       <div
-                                                //           style = {
-                                                //               {
-                                                //                 display: 'flex',
-                                                //                 justifyContent: 'center',
-                                                //                 position: 'relative',
-                                                //                 alignItems: 'center',
-                                                //               }
-                                                //           }
-                                                //           >
-                                                //           <Button style={{ width: 85, height: 35, alignItems: 'center', justifyContent: 'center', }}  variant="primary" onClick={() => toast.dismiss(t.id)}>
-                                                //               Dismiss
-                                                //           </Button>
-                                                //       </div>
-                                                //     </div>
-                                                //   ),
-                                                //   {
-                                                //     position: "top-right",
-                                                //     style: {
-                                                //       border: '1px solid #713200',
-                                                //       padding: '16px',
-                                                //       color: '#713200',
-                                                //     },
-                                                //     duration: 9999999999999999,
-                                                //   }
-                                                //   );
-                                                // });
-
-                                                return _context.abrupt("return", Datas);
-
-                                        case 23:
                                         case "end":
                                                 return _context.stop();
                                 }
@@ -267,20 +172,99 @@ export var getFromDataBase = function () {
         };
 }();
 
+function useAbsolutePopover() {
+        var _useState = useState(false),
+            _useState2 = _slicedToArray(_useState, 2),
+            isOpen = _useState2[0],
+            setIsOpen = _useState2[1];
+
+        var _useState3 = useState(null),
+            _useState4 = _slicedToArray(_useState3, 2),
+            anchorEl = _useState4[0],
+            setAnchorEl = _useState4[1];
+
+        var _useState5 = useState(null),
+            _useState6 = _slicedToArray(_useState5, 2),
+            content = _useState6[0],
+            setContent = _useState6[1];
+
+        function open(child) {
+                var origin = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+                // console.log("origiiiiiiiiiiiinnnnnnnnn", origin)
+                if (origin) setAnchorEl(origin);
+                setContent(child);
+                setIsOpen(true);
+        }
+
+        function close() {
+                setIsOpen(false);
+                setTimeout(function () {
+                        return setAnchorEl(null);
+                }, 500);
+        }
+
+        var paperStyle = anchorEl ? {
+                backgroundColor: '#ffffff00',
+                boxShadow: 'none',
+                overflow: 'visible'
+        } : {
+                display: "contents"
+        };
+
+        var popover = React.createElement(
+                Popover,
+                {
+                        open: isOpen,
+                        anchorReference: anchorEl ? "anchorEl" : "none",
+                        anchorEl: anchorEl,
+                        onClose: close,
+                        PaperProps: {
+                                style: paperStyle
+                        },
+                        anchorOrigin: {
+                                vertical: anchorEl ? 'bottom' : 'top',
+                                horizontal: 'center'
+                        },
+                        transformOrigin: {
+                                vertical: anchorEl ? "top" : 'center',
+                                horizontal: 'center'
+                        }
+                        // TransitionComponent={Fade}
+                },
+                React.createElement(
+                        "div",
+                        { className: "" + (anchorEl ? '' : "d-flex justify-content-center align-items-start"),
+                                style: {
+                                        marginTop: !anchorEl ? 15 : 0,
+                                        width: anchorEl ? "fit-content" : "100%",
+                                        height: anchorEl ? "fit-content" : "100%",
+                                        animation: "fadeMe 0.5s"
+                                },
+                                onClick: close
+                        },
+                        content
+                )
+        );
+
+        return { open: open, close: close, popover: popover };
+}
+
 export default function useGetData(TheDatas) {
         var _this2 = this;
 
-        console.log('checking', TheDatas);
+        // console.log('checking', TheDatas)
 
-        var _useState = useState(TheDatas.authUser),
-            _useState2 = _slicedToArray(_useState, 2),
-            authUser = _useState2[0],
-            updateAuthUser = _useState2[1];
 
-        var _useState3 = useState(false),
-            _useState4 = _slicedToArray(_useState3, 2),
-            isEditorMode = _useState4[0],
-            setIsEditorMode = _useState4[1];
+        var _useState7 = useState(TheDatas.authUser),
+            _useState8 = _slicedToArray(_useState7, 2),
+            authUser = _useState8[0],
+            updateAuthUser = _useState8[1];
+
+        var _useState9 = useState(false),
+            _useState10 = _slicedToArray(_useState9, 2),
+            isEditorMode = _useState10[0],
+            setIsEditorMode = _useState10[1];
 
         var to_refresh = useRef(true);
         var handling_node_events = useRef(false);
@@ -297,23 +281,22 @@ export default function useGetData(TheDatas) {
                                         switch (_context3.prev = _context3.next) {
                                                 case 0:
                                                         _context3.t0 = tag;
-                                                        _context3.next = _context3.t0 === 'updateAuthUserInfo' ? 3 : _context3.t0 === 'handle_node_events' ? 7 : 13;
+                                                        _context3.next = _context3.t0 === 'updateAuthUserInfo' ? 3 : _context3.t0 === 'handle_node_events' ? 6 : 12;
                                                         break;
 
                                                 case 3:
-                                                        console.log('updateAuthUserInfo');
-                                                        _context3.next = 6;
+                                                        _context3.next = 5;
                                                         return http.get('user').then(function (res) {
-                                                                console.log(res);
+                                                                // console.log(res)
                                                                 updateAuthUser(res.data);
                                                         }).catch(function (err) {
                                                                 console.log(err);
                                                         });
 
-                                                case 6:
-                                                        return _context3.abrupt("break", 14);
+                                                case 5:
+                                                        return _context3.abrupt("break", 13);
 
-                                                case 7:
+                                                case 6:
                                                         handling_node_events.current = true;
 
                                                         _loop = /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
@@ -324,28 +307,27 @@ export default function useGetData(TheDatas) {
                                                                                 switch (_context2.prev = _context2.next) {
                                                                                         case 0:
                                                                                                 data = node_events_queue.current.shift();
-
-                                                                                                console.log('start', data, node_events_queue.current);
+                                                                                                // console.log('start', data, node_events_queue.current)
                                                                                                 // return
 
                                                                                                 if (!(data.operation === 'add')) {
-                                                                                                        _context2.next = 12;
+                                                                                                        _context2.next = 8;
                                                                                                         break;
                                                                                                 }
 
-                                                                                                console.log('emitting echo');
-                                                                                                console.log(data);
+                                                                                                // console.log('emitting echo')
+                                                                                                // console.log(data)
                                                                                                 ids = new FormData();
 
                                                                                                 data.node.map(function (element) {
-                                                                                                        console.log(element);
+                                                                                                        // console.log(element)
                                                                                                         ids.append('ids[]', element);
                                                                                                 });
-                                                                                                console.log(ids.get('ids[]'));
+                                                                                                // console.log(ids.get('ids[]'))
 
-                                                                                                _context2.next = 10;
+                                                                                                _context2.next = 6;
                                                                                                 return http.post('getDatasByIds', ids).then(function (res) {
-                                                                                                        console.log('getDatasByIds_add', res);
+                                                                                                        // console.log('getDatasByIds_add', res)
 
                                                                                                         setImmediate(function () {
                                                                                                                 dispatch({ type: 'add', data: Object.assign({}, data, { 'node': res.data }) });
@@ -354,41 +336,41 @@ export default function useGetData(TheDatas) {
                                                                                                         console.log(err);
                                                                                                 });
 
-                                                                                        case 10:
-                                                                                                _context2.next = 24;
+                                                                                        case 6:
+                                                                                                _context2.next = 17;
+                                                                                                break;
+
+                                                                                        case 8:
+                                                                                                if (!(data.operation === 'delete')) {
+                                                                                                        _context2.next = 12;
+                                                                                                        break;
+                                                                                                }
+
+                                                                                                // console.log('emitting echo')
+                                                                                                setImmediate(function () {
+                                                                                                        dispatch({ type: 'delete', data: data });
+                                                                                                });
+                                                                                                _context2.next = 17;
                                                                                                 break;
 
                                                                                         case 12:
-                                                                                                if (!(data.operation === 'delete')) {
+                                                                                                if (!(data.operation === 'update')) {
                                                                                                         _context2.next = 17;
                                                                                                         break;
                                                                                                 }
 
-                                                                                                console.log('emitting echo');
-                                                                                                setImmediate(function () {
-                                                                                                        dispatch({ type: 'delete', data: data });
-                                                                                                });
-                                                                                                _context2.next = 24;
-                                                                                                break;
-
-                                                                                        case 17:
-                                                                                                if (!(data.operation === 'update')) {
-                                                                                                        _context2.next = 24;
-                                                                                                        break;
-                                                                                                }
-
-                                                                                                console.log('echo update ');
+                                                                                                // console.log('echo update ')
 
                                                                                                 _ids = new FormData();
+                                                                                                // console.log('data.node', data.node)
 
-                                                                                                console.log('data.node', data.node);
                                                                                                 data.node.map(function (element) {
-                                                                                                        console.log(element);
+                                                                                                        // console.log(element)
                                                                                                         _ids.append('ids[]', element);
                                                                                                 });
-                                                                                                _context2.next = 24;
+                                                                                                _context2.next = 17;
                                                                                                 return http.post('getDatasByIds', _ids).then(function (res) {
-                                                                                                        console.log('getDatasByIds_update', res);
+                                                                                                        // console.log('getDatasByIds_update', res)
 
                                                                                                         setImmediate(function () {
                                                                                                                 dispatch({ type: 'update', data: Object.assign({}, data, { 'node': res.data }) });
@@ -397,7 +379,7 @@ export default function useGetData(TheDatas) {
                                                                                                         console.log(err);
                                                                                                 });
 
-                                                                                        case 24:
+                                                                                        case 17:
                                                                                         case "end":
                                                                                                 return _context2.stop();
                                                                                 }
@@ -405,25 +387,25 @@ export default function useGetData(TheDatas) {
                                                                 }, _callee2, _this2);
                                                         });
 
-                                                case 9:
-                                                        return _context3.delegateYield(_loop(), "t1", 10);
+                                                case 8:
+                                                        return _context3.delegateYield(_loop(), "t1", 9);
 
-                                                case 10:
+                                                case 9:
                                                         if (node_events_queue.current.length) {
-                                                                _context3.next = 9;
+                                                                _context3.next = 8;
                                                                 break;
                                                         }
 
-                                                case 11:
+                                                case 10:
 
                                                         handling_node_events.current = false;
 
-                                                        return _context3.abrupt("break", 14);
+                                                        return _context3.abrupt("break", 13);
+
+                                                case 12:
+                                                        return _context3.abrupt("break", 13);
 
                                                 case 13:
-                                                        return _context3.abrupt("break", 14);
-
-                                                case 14:
                                                 case "end":
                                                         return _context3.stop();
                                         }
@@ -431,116 +413,15 @@ export default function useGetData(TheDatas) {
                         }, _callee3, _this2);
                 }));
 
-                return function echosHandler(_x2) {
+                return function echosHandler(_x3) {
                         return _ref2.apply(this, arguments);
                 };
         }();
 
-        // const handle_node_events = () =>
-        // {
-        //         handling_node_events.current = true
-        //
-        //         for (const event_data of node_events_queue.current)
-        //         {
-        //                 const data = event_data
-        //
-        //                 if (data.operation === 'add')
-        //                 {
-        //                         console.log('emitting echo')
-        //                         console.log(data)
-        //                         const ids = new FormData
-        //                         data.node.map(element => {
-        //                                 console.log(element)
-        //                                 ids.append('ids[]', element)
-        //                         });
-        //                         console.log(ids.get('ids[]'))
-        //
-        //                         http.post('getDatasByIds', ids)
-        //                         .then( res =>
-        //                         {
-        //                                 console.log('getDatasByIds', res)
-        //
-        //                                 dispatch({type: 'add', data: {...data, 'node': res.data}})
-        //                         }
-        //                         )
-        //                         .catch( err =>
-        //                         {
-        //                                 console.log(err)
-        //                         }
-        //                         )
-        //                 }
-        //                 else if(data.operation === 'delete')
-        //                 {
-        //                         console.log('emitting echo')
-        //                         // while (true) {
-        //                         //         if (!wait_for_update.current) {
-        //                         //                 console.log('deleteeeee')
-        //                         //                 dispatch({type: 'delete', data})
-        //                         //                 break
-        //                         //         }
-        //                         // }
-        //
-        //                 }
-        //                 else if(data.operation === 'update')
-        //                 {
-        //                         console.log('echo update ')
-        //
-        //                         const ids = new FormData
-        //                         console.log('data.node', data.node)
-        //                         data.node.map(element => {
-        //                                 console.log(element)
-        //                                 ids.append('ids[]', element)
-        //                         });
-        //                         wait_for_update.current = true
-        //                         http.post('getDatasByIds', ids)
-        //                         .then( res =>
-        //                         {
-        //                                 console.log(res)
-        //
-        //                                 dispatch({type: 'update', data: {...data, 'node': res.data}})
-        //                                 wait_for_update.current = false
-        //                         }
-        //                         )
-        //                         .catch( err =>
-        //                         {
-        //                                 console.log(err)
-        //                                 wait_for_update.current = false
-        //                         }
-        //                         )
-        //                 }
-        //                 else if (data.operation === 'move')
-        //                 {
-        //                         console.log('emitting move echo', data)
-        //                         const ids = new FormData
-        //                         data.node.map(element => {
-        //                                 console.log(element)
-        //                                 ids.append('ids[]', element)
-        //                         });
-        //                         console.log(ids.get('ids[]'))
-        //
-        //                         http.post('getDatasByIds', ids)
-        //                         .then( res =>
-        //                         {
-        //                                 console.log(res)
-        //
-        //                                 dispatch({type: 'move', data: {...data, 'node': res.data}})
-        //                         }
-        //                         )
-        //                         .catch( err =>
-        //                         {
-        //                                 console.log(err)
-        //                         }
-        //                         )
-        //                 }
-        //         }
-        //
-        //         handling_node_events.current = false
-        // }
-
-        var _useState5 = useState(["0"]),
-            _useState6 = _slicedToArray(_useState5, 2),
-            expanded = _useState6[0],
-            setExpanded = _useState6[1];
+        var _useState11 = useState(["0"]),
+            _useState12 = _slicedToArray(_useState11, 2),
+            expanded = _useState12[0],
+            setExpanded = _useState12[1];
 
         useEffect(function () {
                 var echo = new Echo(options);
@@ -555,7 +436,7 @@ export default function useGetData(TheDatas) {
 
                                 echo.private("nodeUpdate." + service.id).listen('NodeUpdateEvent', function (data) {
                                         node_events_queue.current.push(data);
-                                        console.log('NodeUpdateEvent', node_events_queue.current, data);
+                                        // console.log('NodeUpdateEvent', node_events_queue.current, data)
                                         if (!handling_node_events.current) echosHandler('handle_node_events');
                                 });
                         }
@@ -583,13 +464,13 @@ export default function useGetData(TheDatas) {
                 }
 
                 echo.private("user." + authUser.id).listen('AuthUserUpdate', function () {
-                        console.log('AuthUserUpdate');
+                        // console.log('AuthUserUpdate')
                         echosHandler('updateAuthUserInfo');
                 });
 
                 echo.private("user." + authUser.id).notification(function (data) {
                         if (data.type === 'AskPermission') {
-                                console.log(data);
+                                // console.log(data)
 
                                 echosHandler('updateAuthUserInfo');
 
@@ -601,7 +482,7 @@ export default function useGetData(TheDatas) {
                                         duration: 5000
                                 });
                         } else if (data.type === "Information") {
-                                console.log('Informationnnnnnnnnnnnnn!!!!!', data);
+                                // console.log('Informationnnnnnnnnnnnnn!!!!!', data)
 
                                 var attachment = JSON.parse(data.attachment);
                                 var attachment_items = [];
@@ -707,7 +588,7 @@ export default function useGetData(TheDatas) {
                                         duration: Infinity
                                 });
                         } else if (data.type === 'FncReviewNotification') {
-                                console.log(data);
+                                // console.log(data)
 
                                 // const ids = new FormData
                                 //
@@ -764,17 +645,6 @@ export default function useGetData(TheDatas) {
                         EventsManager.off('setExpanded');
                 };
         }, []);
-
-        // sections: [],
-        //           audits: [],
-        //           checkLists: [],
-        //           dps: [],
-        //           nonCs: [],
-        //           fncs: [],
-        //           fs: [],
-        //           ds: [],
-
-        // console.log(TheDatas)
 
         var haveRightToSee = function haveRightToSee(elementServices, authServices) {
                 var _iteratorNormalCompletion2 = true;
@@ -869,7 +739,9 @@ export default function useGetData(TheDatas) {
                 return visibleElement;
         });
 
-        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, isClosed, review_date, created_at, level, section_id, taille, url, is_validated, validator_id) {
+        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, opening_date, isClosed, review_date, created_at, level, section_id, taille, url, is_validated, validator_id) {
+                var validator = arguments.length > 22 && arguments[22] !== undefined ? arguments[22] : null;
+
 
                 return {
                         id: id,
@@ -883,16 +755,18 @@ export default function useGetData(TheDatas) {
                         validator_id: validator_id,
                         taille: taille,
                         level: level,
-                        created_at: created_at,
+                        created_at: created_at && created_at.substring(0, 19),
                         ra: ra,
                         hasChildren: hasChildren,
                         isRoot: isRoot,
                         parentId: parentId,
                         path: path,
                         isClosed: isClosed,
+                        opening_date: opening_date,
                         review_date: review_date,
                         ext: ext,
-                        url: url
+                        url: url,
+                        validator: validator
                 };
         }
 
@@ -1047,7 +921,7 @@ export default function useGetData(TheDatas) {
                 if (!new_node) return 'undefined';
 
                 if (new_node.type === 'root') {
-                        console.log('sectionnnnnnnnnnnnnnnnnnnnnnnnnn', sections.get(1), new_node);
+                        // console.log('sectionnnnnnnnnnnnnnnnnnnnnnnnnn', sections.get(1), new_node)
                         return sections.get(new_node.section_id).name + ":";
                 }
 
@@ -1299,14 +1173,14 @@ export default function useGetData(TheDatas) {
 
                 up_to_date_node.path = getNewPath(up_to_date_node, current_state, true);
 
-                console.log('current_state', current_state);
+                // console.log('current_state', current_state)
 
                 var new_state = JSON.parse(JSON.stringify(current_state)).map(function (current_node) {
                         if (current_node.id === up_to_date_node.id) return up_to_date_node;
                         return current_node;
                 });
 
-                console.log('new_state', new_state);
+                // console.log('new_state', new_state)
 
                 var final_state = JSON.parse(JSON.stringify(new_state));
 
@@ -1325,7 +1199,7 @@ export default function useGetData(TheDatas) {
 
                 // makeNodeData(0, "Racine", "root", true, -1, "", true)
 
-                var allDataAsNodeData = [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, undefined, -1)];
+                var allDataAsNodeData = [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, undefined, undefined, -1)];
 
                 var audits = Data_Base.data.audits.map(function (audit) {
                         return Object.assign({}, audit, {
@@ -1647,7 +1521,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator22 = audits[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
                                 var audit = _step22.value;
 
-                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19), undefined, audit.section_id, undefined, undefined, audit.is_validated, audit.validator_id));
+                                allDataAsNodeData.push(makeNodeData(audit.id, "folder", audit.services, false, audit.name, "audit", false, '0', getPath(parseInt(audit.id.substring(5), 10), 'audit'), true, undefined, audit.user, undefined, undefined, undefined, audit.created_at, undefined, audit.section_id, undefined, undefined, audit.is_validated, audit.validator_id, audit.validator));
                         }
 
                         // checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19)
@@ -1674,7 +1548,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator23 = checkLists[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
                                 var checkList = _step23.value;
 
-                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19), undefined, checkList.section_id, undefined, undefined, checkList.is_validated, checkList.validator_id));
+                                allDataAsNodeData.push(makeNodeData(checkList.id, "folder", checkList.services, false, checkList.name, "checkList", false, "audit" + checkList.audit_id, getPath(parseInt(checkList.id.substring(9), 10), 'checkList'), true, undefined, undefined, undefined, undefined, undefined, checkList.created_at, undefined, checkList.section_id, undefined, undefined, checkList.is_validated, checkList.validator_id, checkList.validator));
                         }
 
                         // dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19)
@@ -1701,7 +1575,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator24 = dps[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
                                 var dp = _step24.value;
 
-                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19), undefined, dp.section_id, undefined, undefined, dp.is_validated, dp.validator_id));
+                                allDataAsNodeData.push(makeNodeData(dp.id, "folder", dp.services, false, dp.name, "dp", false, "audit" + dp.audit_id, getPath(parseInt(dp.id.substring(2), 10), 'dp'), true, undefined, undefined, undefined, undefined, undefined, dp.created_at, undefined, dp.section_id, undefined, undefined, dp.is_validated, dp.validator_id, dp.validator));
                         }
 
                         // nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19)
@@ -1728,7 +1602,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator25 = nonCs[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
                                 var nonC = _step25.value;
 
-                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19), undefined, nonC.section_id, undefined, undefined, nonC.is_validated, nonC.validator_id));
+                                allDataAsNodeData.push(makeNodeData(nonC.id, "folder", nonC.services, false, nonC.name, "nonC", false, "audit" + nonC.audit_id, getPath(parseInt(nonC.id.substring(4), 10), 'nonC'), true, undefined, undefined, undefined, undefined, undefined, nonC.created_at, undefined, nonC.section_id, undefined, undefined, nonC.is_validated, nonC.validator_id, nonC.validator));
                         }
 
                         // fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19)
@@ -1755,7 +1629,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator26 = fncs[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
                                 var fnc = _step26.value;
 
-                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.isClosed, fnc.review_date, fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19), fnc.level, fnc.section_id, undefined, undefined, fnc.is_validated, fnc.validator_id));
+                                allDataAsNodeData.push(makeNodeData(fnc.id, "folder", fnc.services, false, fnc.name, "fnc", false, "nonC" + fnc.nc_id, getPath(parseInt(fnc.id.substring(3), 10), 'fnc'), true, undefined, undefined, fnc.opening_date, fnc.isClosed, fnc.review_date, fnc.created_at, fnc.level, fnc.section_id, undefined, undefined, fnc.is_validated, fnc.validator_id, fnc.validator));
                         }
 
                         // f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19)
@@ -1782,7 +1656,7 @@ export default function useGetData(TheDatas) {
                         for (var _iterator27 = fs[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
                                 var f = _step27.value;
 
-                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19), undefined, f.section_id, f.size, f.url, f.is_validated, f.validator_id));
+                                allDataAsNodeData.push(makeNodeData(f.id, "file", f.services, false, f.name, "f", false, f.parent_type === '' ? '0' : f.parent_type + f.parent_id, getPath(parseInt(f.id.substring(1), 10), 'f'), false, f.extension, undefined, undefined, undefined, undefined, f.created_at, undefined, f.section_id, f.size, f.url, f.is_validated, f.validator_id, f.validator));
                         }
 
                         // d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19)
@@ -1809,19 +1683,10 @@ export default function useGetData(TheDatas) {
                         for (var _iterator28 = ds[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
                                 var d = _step28.value;
 
-                                allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19), undefined, d.section_id, undefined, undefined, d.is_validated, d.validator_id));
+                                allDataAsNodeData.push(makeNodeData(d.id, "folder", d.services, false, d.name, "ds", false, d.parent_type === '' ? '0' : d.parent_type + d.parent_id, getPath(parseInt(d.id.substring(2), 10), 'ds'), true, undefined, undefined, undefined, undefined, undefined, d.created_at, undefined, d.section_id, undefined, undefined, d.is_validated, d.validator_id, d.validator));
                         }
 
                         // console.log("DataFormater", allDataAsNodeData)
-
-                        // const structuredData = new Map()
-
-                        // for(let section of Data_Base.data.sections)
-                        // {
-                        //         structuredData.set(section.id, allDataAsNodeData.filter((nodeData) => { /*console.log(nodeData.section_id, section.id)*/; return nodeData.section_id === section.id || nodeData.section_id === -1 }).map((nodeData) => { return nodeData } ) )
-                        // }
-
-                        // console.log(structuredData.get(1))
 
                 } catch (err) {
                         _didIteratorError28 = true;
@@ -1874,8 +1739,8 @@ export default function useGetData(TheDatas) {
                                         break;
                         }
 
-                        return makeNodeData(type + node.id, type === 'f' ? 'file' : 'folder', node.services, false, node.name, type, false, parentId, undefined, type !== 'f', type === 'f' ? node.extension : undefined, node.user, type === 'fnc' ? node.isClosed : undefined, type === 'fnc' ? node.review_date : undefined, node.created_at.substring(0, 10) + " A " + node.created_at.substring(11, 19), //
-                        type === 'fnc' ? node.level : undefined, parseInt(node.section_id), type === 'f' ? node.size : undefined, type === 'f' ? node.url : undefined, node.is_validated, node.validator_id);
+                        return makeNodeData(type + node.id, type === 'f' ? 'file' : 'folder', node.services, false, node.name, type, false, parentId, undefined, type !== 'f', type === 'f' ? node.extension : undefined, type === 'audit' ? node.user : undefined, type === 'fnc' ? node.opening_date : undefined, type === 'fnc' ? node.isClosed : undefined, type === 'fnc' ? node.review_date : undefined, node.created_at, //
+                        type === 'fnc' ? node.level : undefined, parseInt(node.section_id), type === 'f' ? node.size : undefined, type === 'f' ? node.url : undefined, node.is_validated, node.validator_id, node.validator);
                 }
 
                 function supress_from_list(qualified_id, list_of_data) {
@@ -1901,7 +1766,7 @@ export default function useGetData(TheDatas) {
                                         to_refresh.current = true;
 
                                         var data = action.data;
-                                        console.log('broadcast.........', data);
+                                        // console.log( 'broadcast.........', data);
 
                                         // const section_id = data.node.constructor === Array ? parseInt(data.node[0].section_id) : parseInt(data.node.section_id)
 
@@ -1954,14 +1819,14 @@ export default function useGetData(TheDatas) {
                                         to_refresh.current = true;
 
                                         var _data = action.data;
-                                        console.log('broadcast.........', _data);
+                                        // console.log( 'broadcast.........', data);
 
-                                        console.log('enter notif update');
+                                        // console.log('enter notif update')
 
                                         authUser.asking_permission_notifications.forEach(function (notif) {
-                                                console.log(notif.operable_id, _data.node.id, notif.operable_id === _data.node.id);
+                                                // console.log(notif.operable_id, data.node.id, notif.operable_id === data.node.id)
                                                 if (notif.operable_id === _data.node.id) {
-                                                        console.log('notif update');
+                                                        // console.log('notif update')
                                                         echosHandler('updateAuthUserInfo');
                                                         EventsManager.emit('updateNotif', notif.id);
                                                 }
@@ -1971,7 +1836,7 @@ export default function useGetData(TheDatas) {
 
                                         // EventsManager.emit('updateData')
 
-                                        console.log('newState', newState);
+                                        // console.log('newState', newState)
 
                                         return JSON.parse(JSON.stringify(newState));
                                 }
@@ -1980,14 +1845,14 @@ export default function useGetData(TheDatas) {
                                         to_refresh.current = true;
 
                                         var _data2 = action.data;
-                                        console.log('broadcast.........', _data2);
+                                        // console.log( 'broadcast.........', data);
 
                                         var _newState = JSON.parse(JSON.stringify(state));
 
                                         var _loop3 = function _loop3(_node7) {
                                                 var updatedNode = create_new_node(_node7);
 
-                                                console.log('updatedNode', updatedNode);
+                                                // console.log('updatedNode', updatedNode)
 
                                                 var current_state = JSON.parse(JSON.stringify(_newState));
                                                 _newState = current_state.map(function (node) {
@@ -2020,6 +1885,8 @@ export default function useGetData(TheDatas) {
                                                 }
 
                                                 // EventsManager.emit('updateData')
+
+                                                // console.log('finalState', newState)
                                         } catch (err) {
                                                 _didIteratorError30 = true;
                                                 _iteratorError30 = err;
@@ -2034,8 +1901,6 @@ export default function useGetData(TheDatas) {
                                                         }
                                                 }
                                         }
-
-                                        console.log('finalState', _newState);
 
                                         return JSON.parse(JSON.stringify(_newState));
                                 }
@@ -2062,14 +1927,6 @@ export default function useGetData(TheDatas) {
             FetchedNodesData = _useReducer2[0],
             dispatch = _useReducer2[1];
 
-        // useEffect(
-        //   () =>
-        //   {
-        //     console.log('emiiiiiiiiiiiiiiiiiiiiiiiiit' false
-        //     EventsManager.emit('updateData')
-        //   }, [FetchedNodesData]
-        // )
-
         window.Global_State['isEditorMode'] = isEditorMode;
         window.Global_State['dataBaseData'] = FetchedNodesData;
         window.Global_State['EventsManager'] = EventsManager;
@@ -2091,21 +1948,6 @@ export default function useGetData(TheDatas) {
         var dataToUse = useMemo(function () {
                 return isEditorMode ? editor.data : JSON.parse(JSON.stringify(FetchedNodesData));
         }, [FetchedNodesData, isEditorMode, editor.data]);
-
-        // const [ dataToUse, setDataToUse ] = useState( FetchedNodesData )
-
-        // const t = useRef([makeNodeData('0', "folder", "all", true, "lol", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "mike", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "lal", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, -1)])
-        // const f = useRef([makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "delta", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 3), makeNodeData('1', "folder", "all", true, "code", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 3), makeNodeData('5', "folder", "all", true, "fifa", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 5) ])
-
-        // useEffect(
-        //   () =>
-        //   {
-        //     console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
-        //     if(isEditorMode) setDataToUse(JSON.parse(JSON.stringify(editor.data)))
-        //     else setDataToUse(JSON.parse(JSON.stringify(FetchedNodesData)))
-        //   }, [isEditorMode, FetchedNodesData, editor.data]
-        // )
-
 
         var structuredData = useMemo(function () {
                 var map = new Map();
@@ -2145,12 +1987,13 @@ export default function useGetData(TheDatas) {
 
                 return map;
         }, [dataToUse]);
-        console.log('structuredData', structuredData);
+        // console.log('structuredData',structuredData)
 
-        var _useState7 = useState(Data_Base.data.sections.length === 0 ? 0 : Data_Base.data.sections[0].id),
-            _useState8 = _slicedToArray(_useState7, 2),
-            selectedSectionId = _useState8[0],
-            setSectionId = _useState8[1];
+
+        var _useState13 = useState(Data_Base.data.sections.length === 0 ? 0 : Data_Base.data.sections[0].id),
+            _useState14 = _slicedToArray(_useState13, 2),
+            selectedSectionId = _useState14[0],
+            setSectionId = _useState14[1];
 
         // console.log('selectedSectionId',selectedSectionId)
 
@@ -2165,10 +2008,10 @@ export default function useGetData(TheDatas) {
         // console.log(displayingSection)
 
 
-        var _useState9 = useState(false),
-            _useState10 = _slicedToArray(_useState9, 2),
-            toggleCleared = _useState10[0],
-            setToggleCleared = _useState10[1];
+        var _useState15 = useState(false),
+            _useState16 = _slicedToArray(_useState15, 2),
+            toggleCleared = _useState16[0],
+            setToggleCleared = _useState16[1];
 
         var clearSelected = function clearSelected(setSelectedRows) {
                 setToggleCleared(!toggleCleared);EventsManager.emit('clearSelected');
@@ -2344,15 +2187,15 @@ export default function useGetData(TheDatas) {
         };
 
         function useModalManager() {
-                var _useState11 = useState(React.createElement("div", null)),
-                    _useState12 = _slicedToArray(_useState11, 2),
-                    content = _useState12[0],
-                    setContent = _useState12[1];
+                var _useState17 = useState(React.createElement("div", null)),
+                    _useState18 = _slicedToArray(_useState17, 2),
+                    content = _useState18[0],
+                    setContent = _useState18[1];
 
-                var _useState13 = useState(false),
-                    _useState14 = _slicedToArray(_useState13, 2),
-                    show = _useState14[0],
-                    setShow = _useState14[1];
+                var _useState19 = useState(false),
+                    _useState20 = _slicedToArray(_useState19, 2),
+                    show = _useState20[0],
+                    setShow = _useState20[1];
 
                 var modal_title = useRef("");
                 var can_close = useRef(true);
@@ -2387,10 +2230,10 @@ export default function useGetData(TheDatas) {
                         )
                 );
 
-                var _useState15 = useState(React.createElement("div", null)),
-                    _useState16 = _slicedToArray(_useState15, 2),
-                    container = _useState16[0],
-                    setModalOpening = _useState16[1];
+                var _useState21 = useState(React.createElement("div", null)),
+                    _useState22 = _slicedToArray(_useState21, 2),
+                    container = _useState22[0],
+                    setModalOpening = _useState22[1];
 
                 return {
                         modal: modal,
@@ -2408,10 +2251,10 @@ export default function useGetData(TheDatas) {
         var modalManager = useModalManager();
 
         function useShowSpinner() {
-                var _useState17 = useState(false),
-                    _useState18 = _slicedToArray(_useState17, 2),
-                    show = _useState18[0],
-                    setShow = _useState18[1];
+                var _useState23 = useState(false),
+                    _useState24 = _slicedToArray(_useState23, 2),
+                    show = _useState24[0],
+                    setShow = _useState24[1];
 
                 var spinner = React.createElement(
                         "div",
@@ -2441,64 +2284,6 @@ export default function useGetData(TheDatas) {
 
         var spinnerManager = useShowSpinner();
 
-        // const [show, setShow] = useState(false);
-        // const dropdown = useRef();
-        //
-        //
-        // EventsManager.once(id, () => { console.log(id); setShow(true) })
-        //
-        // useEffect(() => {
-        //         /**
-        //          * Alert if clicked on outside of element
-        //          */
-        //         function handleClickOutside(event) {
-        //                 if (dropdown.current && !dropdown.current.contains(event.target)) {
-        //                         // console.log('outside')
-        //                         setShow(false);
-        //                 }
-        //         }
-        //         // Bind the event listener
-        //         document.addEventListener("click", handleClickOutside);
-        //         return () => {
-        //                 // Unbind the event listener on clean up
-        //                 document.removeEventListener("click", handleClickOutside);
-        //                 EventsManager.off(id);
-        //
-        //         };
-        //
-        // }, []);
-        //
-        // // const ref = useRef()
-        //
-        // return (
-        // <div className = {useMemo(() => (`dropdown ${show ? 'show' : ''}`), [show])} ref = {dropdown}
-        //      style={{
-        //              height: "fit-content",
-        //              width: "fit-content"
-        //      }}
-        // >
-        //
-        //         <div id={id} style={{ width: "fit-content", height: "fit-content" }} data-toggle="dropdown" aria-haspopup="true" aria-expanded = {show} onMouseEnter = {() => { setShow(true) }} >
-        //                 {icon}
-        //         </div>
-        //
-        //         <div className = {useMemo(() => (`dropdown-menu ${show ? 'show' : ''}`), [show])} aria-labelledby="userPanel" onMouseLeave = {() => { setShow(false) }}
-        //              style={{
-        //                      position: "absolute",
-        //                      willChange: 'transform',
-        //                      top: 0,
-        //                      left: 0,
-        //                      transform: 'translate3d(-160px, 5px, 0px)',
-        //                      maxHeight: ( (window.innerHeight/100)*80 ),
-        //                      overflow: 'auto' ,
-        //                      paddingTop: 0,
-        //              }} >
-        //                 <div className="p-1" style={{ backgroundColor: 'white', zIndex: 999, position: 'sticky', top: 0 }} ></div>
-        //                 {content}
-        //         </div>
-        // </div>
-        // )
-
         var CustomDropDown = useCallback(function CustomDropDown(_ref5) {
                 var id = _ref5.id,
                     icon = _ref5.icon,
@@ -2506,10 +2291,10 @@ export default function useGetData(TheDatas) {
                     _ref5$f = _ref5.f,
                     f = _ref5$f === undefined ? undefined : _ref5$f;
 
-                var _useState19 = useState(null),
-                    _useState20 = _slicedToArray(_useState19, 2),
-                    anchorEl = _useState20[0],
-                    setAnchorEl = _useState20[1];
+                var _useState25 = useState(null),
+                    _useState26 = _slicedToArray(_useState25, 2),
+                    anchorEl = _useState26[0],
+                    setAnchorEl = _useState26[1];
 
                 var handleEnter = function handleEnter(event) {
                         setAnchorEl(event.currentTarget);
@@ -2528,29 +2313,31 @@ export default function useGetData(TheDatas) {
                         }
                 }, [anchorEl]);
 
-                useEffect(function () {
-                        /**
-                         * Alert if clicked on outside of element
-                         */
-                        function handleClickOutside(event) {
-                                // console.log('outside')
-                                var dropdown = document.getElementById(id);
-                                if (dropdown && !dropdown.contains(event.target)) {
-                                        // console.log('outside')
-                                        handleLeave();
-                                }
-                        }
-                        // Bind the event listener
-                        document.addEventListener("click", handleClickOutside);
-                        return function () {
-                                // Unbind the event listener on clean up
-                                console.log('byeeeeeeeeeeeeeeeeeeeee');
-                                document.removeEventListener("click", handleClickOutside);
-                        };
-                }, []);
+                // useEffect(() => {
+                //         /**
+                //          * Alert if clicked on outside of element
+                //          */
+                //         function handleClickOutside(event) {
+                //                 // console.log('outside')
+                //                 const dropdown = document.getElementById(id)
+                //                 if (dropdown && !dropdown.contains(event.target)) {
+                //                         // console.log('outside')
+                //                         handleLeave()
+                //                 }
+                //         }
+                //         // Bind the event listener
+                //         document.addEventListener("click", handleClickOutside);
+                //         return () => {
+                //                 // Unbind the event listener on clean up
+                //                 console.log('byeeeeeeeeeeeeeeeeeeeee')
+                //                 document.removeEventListener("click", handleClickOutside);
+                //
+                //         };
+                //
+                // }, [])
 
                 useEffect(function () {
-                        console.log('byeeeeeeeeeeeeeeeeeeeee', open);
+                        // console.log('byeeeeeeeeeeeeeeeeeeeee', open)
                 });
 
                 // const popperAnimation = useSpring({
@@ -2566,43 +2353,45 @@ export default function useGetData(TheDatas) {
                         "div",
                         { id: id, tabIndex: 0, onClick: function onClick(e) {
                                         e.preventDefault();e.stopPropagation();
-                                }, onMouseEnter: handleEnter, onMouseLeave: handleLeave, onFocus: handleEnter },
+                                } },
                         React.createElement(
                                 "div",
-                                null,
+                                { onClick: handleEnter },
                                 icon
                         ),
                         React.createElement(
-                                Collapse,
-                                {
-                                        "in": open
-                                },
-                                React.createElement(
-                                        Popper,
-                                        { id: drop_id + "_pop",
+                                Popover,
+                                { id: drop_id + "_pop",
+                                        PaperProps: {
+                                                className: "d-flex",
                                                 style: {
-                                                        zIndex: 1900,
                                                         borderRadius: '0.25rem',
                                                         fontSize: '14px',
                                                         border: 'none',
-                                                        boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
                                                         overflow: 'hidden',
                                                         padding: '0.5rem',
                                                         maxHeight: "80%",
                                                         maxWidth: "95%",
                                                         backgroundColor: "white"
                                                 },
-                                                onClick: function onClick(e) {
-                                                        e.preventDefault();e.stopPropagation();
-                                                },
-                                                open: open,
-                                                anchorEl: anchorEl
+                                                onMouseLeave: handleLeave
                                         },
-                                        React.createElement(
-                                                Box,
-                                                null,
-                                                content
-                                        )
+                                        anchorOrigin: {
+                                                vertical: 'bottom',
+                                                horizontal: 'center'
+                                        },
+                                        transformOrigin: {
+                                                vertical: 'top',
+                                                horizontal: 'center'
+                                        },
+                                        onClose: handleLeave,
+                                        open: open,
+                                        anchorEl: anchorEl
+                                },
+                                React.createElement(
+                                        Box,
+                                        { className: "d-flex" },
+                                        content
                                 )
                         )
                 );
@@ -2717,26 +2506,7 @@ export default function useGetData(TheDatas) {
                 }
         };
 
-        // function useOutsideAlerter(ref) {
-        //   useEffect(() => {
-        //     /**
-        //      * Alert if clicked on outside of element
-        //      */
-        //     function handleClickOutside(event) {
-        //       if (ref.current && !ref.current.contains(event.target)) {
-        //         alert("You clicked outside of me!");
-        //       }
-        //     }
-        //     // Bind the event listener
-        //     document.addEventListener("mousedown", handleClickOutside);
-        //     return () => {
-        //       // Unbind the event listener on clean up
-        //       document.removeEventListener("mousedown", handleClickOutside);
-        //     };
-        //   }, [ref]);
-        // }
-
-        var _useState21 = useState({
+        var _useState27 = useState({
                 style: {
                         display: 'none',
                         position: 'fixed',
@@ -2744,13 +2514,14 @@ export default function useGetData(TheDatas) {
                         width: '100%',
                         height: '100%',
                         overflow: 'auto',
+                        animation: "fadeMe 0.5s",
                         backgroundColor: '#00000000'
                         // pointerEvents: 'none',
                         // opacity: 0.5,
                 } }),
-            _useState22 = _slicedToArray(_useState21, 2),
-            Overlay_props = _useState22[0],
-            setOverlay_props = _useState22[1];
+            _useState28 = _slicedToArray(_useState27, 2),
+            Overlay_props = _useState28[0],
+            setOverlay_props = _useState28[1];
 
         var Overlay_component = React.createElement("div", Object.assign({}, Overlay_props, { onClick: function onClick(e) {
                         e.stopPropagation();
@@ -2763,11 +2534,13 @@ export default function useGetData(TheDatas) {
                         });
                 } }));
 
+        var absolutePopover = useAbsolutePopover();
+
         return Object.assign({}, window.Global_State, {
                 // EventsManager,
                 // isEditorMode,
                 authUser: Data_Base.authUser, updateAuthUserInfo: function updateAuthUserInfo(value) {
-                        console.log("updateAuthUser", value);updateAuthUser(value);
+                        /*console.log("updateAuthUser", value);*/updateAuthUser(value);
                 },
                 // dataBaseData: FetchedNodesData,
                 dataToUse: dataToUse,
@@ -2806,6 +2579,7 @@ export default function useGetData(TheDatas) {
                 CustomDropDown: CustomDropDown,
                 Overlay_component: Overlay_component,
                 setOverlay_props: setOverlay_props,
+                absolutePopover: absolutePopover,
                 expanded: expanded
         });
 }

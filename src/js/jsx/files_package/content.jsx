@@ -16,9 +16,9 @@ import makeAnimated from 'react-select/animated';
 import {FaInfoCircle, FaPaste, FaSort} from "react-icons/fa";
 import {FcFolder, FcVideoFile} from "react-icons/fc";
 import {BsFillFileEarmarkPdfFill, BsPatchCheckFill} from "react-icons/bs";
-import {RiFileWord2Fill, RiDeleteBin2Fill} from "react-icons/ri";
+import {RiFileWord2Fill, RiDeleteBin2Fill, RiUploadCloud2Fill} from "react-icons/ri";
 import {SiMicrosoftexcel, SiMicrosoftpowerpoint} from "react-icons/si";
-import {AiFillFileUnknown} from "react-icons/ai";
+import {AiFillFileUnknown, AiFillCloseCircle} from "react-icons/ai";
 import {IoArrowUpCircleOutline, IoArrowUpCircleSharp, IoAdd} from "react-icons/io5";
 import {IoIosCut} from "react-icons/io"
 import {HiSaveAs} from 'react-icons/hi'
@@ -26,6 +26,7 @@ import {BiRename} from "react-icons/bi";
 import {VscLiveShare, VscCircleLargeOutline} from "react-icons/vsc";
 import {ImDownload2} from "react-icons/im";
 import {MdUndo, MdRedo} from "react-icons/md";
+import {TbListDetails} from "react-icons/tb";
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -41,6 +42,11 @@ import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import {Box, FormControl, IconButton, InputLabel, MenuItem, Tooltip} from "@mui/material";
 import MuiSelect  from '@mui/material/Select';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
 import CopyAllTwoToneIcon from '@mui/icons-material/CopyAllTwoTone';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
@@ -50,6 +56,7 @@ import { useSpring, animated } from 'react-spring';
 import {Dropdown, FormCheck} from "react-bootstrap";
 import useCustomCheckBox, {CheckBox1} from "../custom_checkBox/custom_check";
 import {LoadingButton} from "@mui/lab";
+import {createPortal} from "react-dom";
 
 
 function Files_Dropzone(props) {
@@ -186,8 +193,7 @@ function FilterComponent({set, filter, node})
                 {
                         const [startDate, endDate] = filter.element;
                         compenent = (
-                        <div className="full_size_element" /*style={{ maxWidth: 300 }}*/ >
-                                {/*<label>Chercher selon {filter.tag} :</label>*/}
+                        <div className="full_size_element filter_by_date_component" >
                                 <DatePicker
                                         selectsRange={true}
                                         startDate={startDate}
@@ -221,7 +227,7 @@ function FilterComponent({set, filter, node})
                 {
                         const [startDate, endDate] = filter.element;
                         compenent = (
-                        <div className="full_size_element" /*style={{ maxWidth: 243 }}*/ >
+                        <div className="full_size_element filter_by_date_component" >
                                 {/*<label>Chercher selon {filter.tag} :</label>*/}
                                 <DatePicker
                                         selectsRange={true}
@@ -296,14 +302,14 @@ function FilterComponent({set, filter, node})
                                 style={{
                                         // width: filter.element.constructor === Array ? "74%" : "86%"
                                         marginRight: 10,
-                                        width: "100%"
+                                        width: "100%",
+                                        flex: "1 0 60%"
                                 }}
                         >
                                 {compenent}
                         </div>
                         <div
                                 style={{
-                                        // width: "7%"
                                 }}
                         >
                                 <Tooltip title={"TAG RESEARCH"} placement={`top-start`} >
@@ -314,6 +320,7 @@ function FilterComponent({set, filter, node})
                                                         labelId="tag_select_label"
                                                         id="tag_select"
                                                         value={filter.tag}
+                                                        renderValue={ value => window.innerWidth > 576 ? value : '' }
                                                         // label="Tag"
                                                         onChange={update_tag}
                                                         >
@@ -385,7 +392,7 @@ function Prev()
 
         const prev_id = prev.pop()
 
-        console.log('prrrrrrreeeeeeeeeeev', prev_id, prev)
+        // console.log('prrrrrrreeeeeeeeeeev', prev_id, prev)
 
         return (
         <div className={'d-flex flex-row align-items-end'} >
@@ -543,6 +550,26 @@ const AsyncUsersSelectComponent = ({areFixed, updateMethod, filter, placeholder}
         )
 }
 
+const CustomDateInput = ({id, value, onClick, loading, onSubmit, other_params } ) =>
+(
+<Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: '#e9ecef' }}>
+        <input
+               className="form-control form-control-sm"
+               style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0, backgroundColor: "rgba(233,236,239,0)" }}
+               value={`${value}`}
+               onChange={e => {e.preventDefault(); e.stopPropagation()}}
+               onClick={ onClick }
+               readOnly
+        />
+
+        <LoadingButton as={IconButton} loading={loading} title={"EFFACER"} color={"primary"} size={"small"} style={{ minWidth: 30 }} onClick={onSubmit} >
+                {
+                        loading ? null : <RiUploadCloud2Fill size={20} />
+                }
+        </LoadingButton>
+</Stack>
+)
+
 export default function FileTable()
 {
 
@@ -552,7 +579,7 @@ export default function FileTable()
 
         const contain_audit = ( node.type === "root" && /^(Audit|AUDIT)(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name) )
 
-        console.log('contentNooooooooooooode', node, window.Global_State.backend)
+        // console.log('contentNooooooooooooode', node, window.Global_State.backend)
 
         const [filter, setFilter] = useState(
                 {
@@ -587,7 +614,7 @@ export default function FileTable()
         () =>
         {
 
-                window.Global_State.EventsManager.on('clearSelected', () => { console.log('clearSelected'); setSelectedRows([]); setNumber(0) })
+                window.Global_State.EventsManager.on('clearSelected', () => { /*console.log('clearSelected');*/ setSelectedRows([]); setNumber(0) })
                 // window.Global_State.EventsManager.once('show_on_screen',
                 // async (data) =>
                 // {
@@ -612,7 +639,7 @@ export default function FileTable()
                 {
                         const row = datas.find( row => row.id ===  id)
 
-                        console.log("roooooooooooooooooow", row, datas, id)
+                        // console.log("roooooooooooooooooow", row, datas, id)
 
                         handleChange(1, [row])
                 }
@@ -639,7 +666,7 @@ export default function FileTable()
                                 window.Global_State.EventsManager.on("shortcut",
                                         (value) =>
                                         {
-                                                console.log("Paste");
+                                                // console.log("Paste");
                                                 if (value === "ctrl_v")
                                                 {
 
@@ -679,7 +706,7 @@ export default function FileTable()
                                                        onChange={
                                                                e => {
                                                                        // e.preventDefault()
-                                                                       console.log('e.target',e.target)
+                                                                       // console.log('e.target',e.target)
                                                                        action.current = { saved: e.target.checked }
                                                                }
                                                        }
@@ -764,7 +791,7 @@ export default function FileTable()
                                                                                                 <Button className={`mr-1`} variant={`outline-light`} onClick={ e => { e.stopPropagation(); resolve(1) } } >
                                                                                                         IGNORER
                                                                                                 </Button>
-                                                                                                <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); console.log('RENOMEEEEEEEEEEER'); resolve(2) } } >
+                                                                                                <Button className={`mr-1`} variant={`outline-primary`} onClick={ e => { e.stopPropagation(); {/*console.log('RENOMEEEEEEEEEEER');*/} resolve(2) } } >
                                                                                                         RENOMER
                                                                                                 </Button>
                                                                                                 {
@@ -789,7 +816,7 @@ export default function FileTable()
                                                                 ).then(
                                                                         res =>
                                                                         {
-                                                                                console.log(res, action.current)
+                                                                                // console.log(res, action.current)
                                                                                 node_to_copy['on_exist'] = res
                                                                                 if (action.current.saved) action.current = {...action.current, value: res}
                                                                         }
@@ -842,7 +869,7 @@ export default function FileTable()
                                                 queryData.append('id', node_to_move.id)
                                                 queryData.append('on_exist', node_to_move.on_exist ?  node_to_move.on_exist : '-1')
 
-                                                console.log('arriiiiiiiiiiiiiveeee', node_to_move)
+                                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
                                                 if (node_to_move.type === 'ds')
                                                 {
 
@@ -858,7 +885,7 @@ export default function FileTable()
                                                                 .then(
                                                                         res =>
                                                                         {
-                                                                                console.log(res)
+                                                                                // console.log(res)
                                                                                 switch (res.data.statue)
                                                                                 {
                                                                                         case 'success':
@@ -889,7 +916,7 @@ export default function FileTable()
                                                                 .then(
                                                                         res =>
                                                                         {
-                                                                                console.log(res)
+                                                                                // console.log(res)
                                                                                 switch (res.data.statue)
                                                                                 {
                                                                                         case 'success':
@@ -912,7 +939,7 @@ export default function FileTable()
                                 else
                                 {
 
-                                        console.log( 'to_move_or_copy.current', concern_nodes )
+                                        // console.log( 'to_move_or_copy.current', concern_nodes )
 
                                         for (const node_to_copy of concern_nodes)
                                         {
@@ -972,7 +999,7 @@ export default function FileTable()
                                                                 .then(
                                                                         res =>
                                                                         {
-                                                                                console.log(res)
+                                                                                // console.log(res)
                                                                                 switch (res.data.statue)
                                                                                 {
                                                                                         case 'success':
@@ -1003,7 +1030,7 @@ export default function FileTable()
                                                                 .then(
                                                                         res =>
                                                                         {
-                                                                                console.log(res)
+                                                                                // console.log(res)
                                                                                 switch (res.data.statue)
                                                                                 {
                                                                                         case 'success':
@@ -1035,7 +1062,7 @@ export default function FileTable()
                                         onClick={
                                                 e =>
                                                 {
-                                                        console.log(to_move_or_copy.current, node.id)
+                                                        // console.log(to_move_or_copy.current, node.id)
 
                                                         if (window.Global_State.isEditorMode) paste_here(node)
                                                         else
@@ -1108,7 +1135,7 @@ export default function FileTable()
                                         const service =  submittedInfo.services[0].label
 
                                         queryBody.append("name",
-                                        submittedInfo.type_audit + "-" + service + "-" + submittedInfo.annee + "-" + submittedInfo.num_chrono
+                                        submittedInfo.type_audit + "-" + submittedInfo.annee + "-" + service + "-" + submittedInfo.num_chrono
                                         )
                                         queryBody.append("services", JSON.stringify(submittedInfo.services))
                                         queryBody.append("inspectors", JSON.stringify(inspector_ids))
@@ -1131,7 +1158,7 @@ export default function FileTable()
                                                 // Handle the response from backend here
                                                 .then((res) =>
                                                 {
-                                                        console.log(res)
+                                                        // console.log(res)
 
                                                         if (res.data.statue === 'success')
                                                         {
@@ -1173,7 +1200,7 @@ export default function FileTable()
 
                                                 // Catch errors if any
                                                 .catch((err) => {
-                                                        console.log(err)
+                                                        // console.log(err)
                                                         let msg
                                                         if(err.response.status === 500) msg = "erreur interne au serveur"
                                                         else if(err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page"
@@ -1187,7 +1214,7 @@ export default function FileTable()
                                         }
                                         else
                                         {
-                                                console.log('editorHandle audit')
+                                                // console.log('editorHandle audit')
 
                                                 window.Global_State.editor.audit.add(queryBody)
 
@@ -1283,7 +1310,7 @@ export default function FileTable()
                                                         {
                                                                 (r) =>
                                                                 {
-                                                                        console.log('new_val', r)
+                                                                        // console.log('new_val', r)
                                                                         // const e = window.Global_State.copyObject(r)
                                                                         // if (!r.length) r.unshift( { value: parseInt(window.Global_State.authUser.id), label: `${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}` } );
                                                                         formik.setFieldValue("inspectors", r)
@@ -1354,10 +1381,10 @@ export default function FileTable()
                                         queryBody.append("section_id", window.Global_State.selectedSectionId)
 
 
-                                        console.log("services", queryBody.get("services"))
-                                        console.log("name", queryBody.get("name"))
-                                        console.log("parent_id", parent_id)
-                                        console.log("parent_type", parent_type)
+                                        // console.log("services", queryBody.get("services"))
+                                        // console.log("name", queryBody.get("name"))
+                                        // console.log("parent_id", parent_id)
+                                        // console.log("parent_type", parent_type)
 
 
                                         if(!window.Global_State.isEditorMode)
@@ -1370,7 +1397,7 @@ export default function FileTable()
                                                 // Handle the response from backend here
                                                 .then((res) =>
                                                 {
-                                                        console.log('res', res)
+                                                        // console.log('res', res)
                                                         if (res.data.statue === 'success')
                                                         {
                                                                 swal({
@@ -1416,7 +1443,7 @@ export default function FileTable()
                                         }
                                         else
                                         {
-                                                console.log('editorHandle folder')
+                                                // console.log('editorHandle folder')
                                                 queryBody.set('front_parent_type', node.type)
                                                 window.Global_State.editor.folder.add(queryBody)
 
@@ -1506,7 +1533,7 @@ export default function FileTable()
 
 
                                 const handleSubmit = (submittedInfo) => {
-                                        console.log(submittedInfo)
+                                        // console.log(submittedInfo)
 
                                         const check_feasibility = (debut, fin, nonC_id) =>
                                         {
@@ -1553,7 +1580,7 @@ export default function FileTable()
                                                         // Handle the response from backend here
                                                         .then((res) =>
                                                         {
-                                                                console.log(res)
+                                                                // console.log(res)
 
                                                                 if (res.data.statue === 'success')
                                                                 {
@@ -1622,7 +1649,7 @@ export default function FileTable()
                                                 }
                                                 else
                                                 {
-                                                        console.log('editorHandle fnc')
+                                                        // console.log('editorHandle fnc')
 
                                                         queryBody.set('front_parent_type', node.type)
                                                         window.Global_State.editor.fnc.add(queryBody)
@@ -1634,7 +1661,7 @@ export default function FileTable()
                                         }
                                         else
                                         {
-                                                console.log('not feasible')
+                                                // console.log('not feasible')
 
                                                 swal({
                                                         title: "ERROR!",
@@ -1776,7 +1803,7 @@ export default function FileTable()
 
 
                                 const handleSubmit = (submittedInfo) => {
-                                        console.log(submittedInfo)
+                                        // console.log(submittedInfo)
 
                                         window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner)
 
@@ -1796,7 +1823,7 @@ export default function FileTable()
                                         // console.log("services", queryBody.get("services"))
                                         // console.log("nc_id", queryBody.get("nonC_id"))
                                         // console.log("debut", queryBody.get("debut"))
-                                        console.log("fin", queryBody.get("fichiers[]"))
+                                        // console.log("fin", queryBody.get("fichiers[]"))
 
                                         if(!window.Global_State.isEditorMode)
                                         {
@@ -1813,7 +1840,7 @@ export default function FileTable()
                                                 // Handle the response from backend here
                                                 .then((res) =>
                                                 {
-                                                        console.log(res)
+                                                        // console.log(res)
 
                                                         if (res.data.statue === 'success')
                                                         {
@@ -1869,7 +1896,7 @@ export default function FileTable()
                                         }
                                         else
                                         {
-                                                console.log('editorHandle for files')
+                                                // console.log('editorHandle for files')
                                                 // queryBody.forEach((value, key) => console.log(key, value));
                                                 queryBody.set('front_parent_type', node.type)
                                                 window.Global_State.editor.files.add(queryBody)
@@ -1962,7 +1989,7 @@ export default function FileTable()
 
                 function handleCut(e)
                 {
-                        console.log("Couperrrrrrrrrrrrr")
+                        // console.log("Couperrrrrrrrrrrrr")
                         if (selectedRow.length > 0)
                         {
                                 e.preventDefault()
@@ -1993,7 +2020,7 @@ export default function FileTable()
                 }
                 function handleCopy(e)
                 {
-                        console.log("Copieeeeeeeeeeeeeee")
+                        // console.log("Copieeeeeeeeeeeeeee")
                         if (selectedRow.length > 0)
                         {
                                 e.preventDefault()
@@ -2021,10 +2048,6 @@ export default function FileTable()
 
                                 setMc_state('copy')
                         }
-                }
-                function handlePaste()
-                {
-
                 }
                 function handleRename(e)
                 {
@@ -2085,7 +2108,7 @@ export default function FileTable()
                                                         http.post(`${route}`, query)
                                                         .then(
                                                         res => {
-                                                                console.log(res)
+                                                                // console.log(res)
                                                                 if(res.data.statue === 'success') window.show_response(`${node.value} renommé avec succès !`, "success")
                                                                 else window.show_response(res.data.data.msg, res.data.statue)
                                                                 setLoading( { ...loading_buttons, rename: false } )
@@ -2102,6 +2125,14 @@ export default function FileTable()
                                 }
                                 else toast.error("Can't do that 😒")
                         }
+                }
+
+                function handleDetails(e)
+                {
+                        e.preventDefault()
+                        e.stopPropagation()
+
+                        window.Global_State.showDetails(selectedRow[0].id)
                 }
                 function handleShare(e)
                 {
@@ -2122,7 +2153,7 @@ export default function FileTable()
                         }
                         )
 
-                        console.log("Shaaaaaaaaaaaaaaaaaaaaaring")
+                        // console.log("Shaaaaaaaaaaaaaaaaaaaaaring")
 
                         const Share_to_users_form = () =>
                         {
@@ -2142,7 +2173,7 @@ export default function FileTable()
 
                                         queryBody.append("inspectors", JSON.stringify(inspector_ids))
 
-                                        console.log("nodes_infoooooooooooooooo", nodes_info)
+                                        // console.log("nodes_infoooooooooooooooo", nodes_info)
                                         // return
                                         queryBody.append("nodes_info", JSON.stringify(nodes_info))
 
@@ -2154,7 +2185,7 @@ export default function FileTable()
                                         window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner)
                                         http.post('share', queryBody)
                                         .then((res) => {
-                                                console.log(res)
+                                                // console.log(res)
 
                                                 if(res.data.statue === 'success') window.show_response(`Fichier(s) partagé(s) avec success"`, "success")
                                                 else window.show_response(res.data.data.msg, res.data.statue)
@@ -2212,7 +2243,7 @@ export default function FileTable()
                                                          {
                                                                  (r) =>
                                                                  {
-                                                                         console.log('new_val', r)
+                                                                         // console.log('new_val', r)
                                                                          // const e = window.Global_State.copyObject(r)
                                                                          // if (!r.length) r.unshift( { value: parseInt(window.Global_State.authUser.id), label: `${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}` } );
                                                                          formik.setFieldValue("inspectors", r)
@@ -2247,32 +2278,37 @@ export default function FileTable()
                                 )
                         }
 
-                        window.Global_State.setOverlay_props( t => (
-                        {
-                                ...t,
-                                style:
-                                {
-                                        ...t.style,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                },
-                                children: (
-                                        <div className="full_size_element d-flex justify-content-center"
-                                             style={{
-                                                     backgroundColor: "rgba(0,0,0,0.22)"
-                                             }}
-                                        >
-                                                <Share_to_users_form />
-                                        </div>
-                                ),
+                        const component =
+                        <div className="custom_overlay d-flex justify-content-center"
+                        >
+                                <Share_to_users_form />
+                        </div>
 
-                        }
-                        ) )
+                        // window.Global_State.setOverlay_props( t => (
+                        // {
+                        //         ...t,
+                        //         style:
+                        //         {
+                        //                 ...t.style,
+                        //                 display: 'flex',
+                        //                 alignItems: 'center',
+                        //                 justifyContent: 'center'
+                        //         },
+                        //         children: (
+                        //                 <div className="full_size_element d-flex justify-content-center"
+                        //                      style={{
+                        //                              backgroundColor: "rgba(0,0,0,0.22)"
+                        //                      }}
+                        //                 >
+                        //                         <Share_to_users_form />
+                        //                 </div>
+                        //         ),
+                        //
+                        // }
+                        // ) )
 
-                        // window.Global_State.modalManager.setContent(<Share_to_users_form/>)
-                        // window.Global_State.modalManager.open_modal("Partager á")
-
+                        window.Global_State.absolutePopover.open(component)
+                        
                 }
                 function handleDownload(e)
                 {
@@ -2297,12 +2333,12 @@ export default function FileTable()
 
                         if ( (nodes_info.length === 1) && (nodes_info[0].model === "App\\Models\\Fichier") )
                         {
-                                console.log(nodes_info)
+                                // console.log(nodes_info)
                                 // return
 
                                 http.get(`download_file?id=${nodes_info[0].id}`, { responseType: 'blob' })
                                 .then( res => {
-                                        console.log(res)
+                                        // console.log(res)
                                         const blob = new Blob([res.data])
                                         // console.log(blob)
                                         const url = window.URL.createObjectURL(blob);
@@ -2323,7 +2359,7 @@ export default function FileTable()
                         }
                         else
                         {
-                                console.log(nodes_info)
+                                // console.log(nodes_info)
                                 // return
                                 const to_compress = new FormData()
                                 to_compress.append("nodes_info", JSON.stringify(nodes_info))
@@ -2332,11 +2368,11 @@ export default function FileTable()
                                 .then(
                                         res =>
                                         {
-                                                console.log(res)
+                                                // console.log(res)
 
                                                 http.get(`download_by_path?path=${res.data}`, { responseType: 'blob' })
                                                 .then( res => {
-                                                        console.log(res)
+                                                        // console.log(res)
                                                         const blob = new Blob([res.data])
                                                         // console.log(blob)
                                                         const url = window.URL.createObjectURL(blob);
@@ -2385,7 +2421,7 @@ export default function FileTable()
                                         const nodeIdentity = window.Global_State.identifyNode(row)
                                         // const [ id, type ] = window.Global_State.identifyNode(row)
 
-                                        console.log(selectedRow)
+                                        // console.log(selectedRow)
                                         let route = ''
                                         switch (row.type) {
                                                 case 'audit':
@@ -2414,7 +2450,7 @@ export default function FileTable()
                                         await http.delete(`${route}?id=` + nodeIdentity[0])
                                         .then(
                                                 res => {
-                                                        console.log(res);
+                                                        // console.log(res);
                                                         if(res.data.statue === 'success') window.show_response(`${row.value} supprimé avec succès !`, "success")
                                                         else window.show_response(res.data.data.msg, res.data.statue)
                                                         setLoading( { ...loading_buttons, delete: false } )
@@ -2448,11 +2484,11 @@ export default function FileTable()
                                         const nodeIdentity = window.Global_State.identifyNode(row)
                                         // const [ id, type ] = window.Global_State.identifyNode(row)
 
-                                        console.log(selectedRow)
+                                        // console.log(selectedRow)
                                         switch (row.type) {
                                                 case 'audit':
 
-                                                        console.log('audit dispatch del')
+                                                        // console.log('audit dispatch del')
                                                         window.Global_State.editor.audit.delete(nodeIdentity[0])
 
                                                         break;
@@ -2464,19 +2500,19 @@ export default function FileTable()
                                                         break;
                                                 case 'fnc':
 
-                                                        console.log('fnc dispatch del')
+                                                        // console.log('fnc dispatch del')
                                                         window.Global_State.editor.fnc.delete(nodeIdentity[0])
 
                                                         break;
                                                 case 'ds':
 
-                                                        console.log('folder del')
+                                                        // console.log('folder del')
                                                         window.Global_State.editor.folder.delete(nodeIdentity[0])
 
                                                         break;
                                                 case 'f':
 
-                                                        console.log('file dispatch del')
+                                                        // console.log('file dispatch del')
                                                         window.Global_State.editor.files.delete(nodeIdentity[0])
 
                                                         break;
@@ -2547,7 +2583,7 @@ export default function FileTable()
                                 window.Global_State.EventsManager.on("shortcut",
                                 (value) =>
                                 {
-                                        console.log(refs[value]);
+                                        // console.log(refs[value]);
                                         if (refs[value])
                                         {
                                                 const action_button = refs[value].current
@@ -2567,6 +2603,24 @@ export default function FileTable()
                         }, []
                 )
 
+                const disable_feature = (editing = false, renaming = false) =>
+                {
+                        if (editing)
+                        {
+                                if (selectedRowNumber === 0) return true
+                                
+                                for (const row of selectedRow) 
+                                {
+                                        if ( (row.type !== "ds") && (row.type !== "f") ) return true
+                                }
+
+                                if (renaming) return selectedRowNumber !== 1
+
+                                return false
+                        }
+                        else return selectedRowNumber === 0
+                }
+                
                 return(
                 <div className="file_table_container_actions">
                         <div className="full_size_element d-flex justify-content-between" >
@@ -2589,16 +2643,16 @@ export default function FileTable()
 
                                                 <Tooltip title={"COUPER"} placement={`top-end`} >
                                                         <div className="action_button" >
-                                                                <IconButton id={`ctrl_x`} ref={refs.ctrl_x} color={"error"} disabled={selectedRowNumber === 0} onClick={handleCut}>
-                                                                        <IoIosCut color={ selectedRowNumber === 0 ? '' : "#cc7613"} size={24} />
+                                                                <IconButton id={`ctrl_x`} ref={refs.ctrl_x} color={"error"} disabled={disable_feature(true)} onClick={handleCut}>
+                                                                        <IoIosCut color={ disable_feature(true) ? '' : "#cc7613"} size={24} />
                                                                 </IconButton>
                                                         </div>
                                                 </Tooltip>
 
                                                 <Tooltip title={"COPIER"} placement={`top-end`} >
                                                         <div className="action_button" >
-                                                                <IconButton id={`ctrl_c`} ref={refs.ctrl_c} color={"success"} disabled={selectedRowNumber === 0} onClick={handleCopy}>
-                                                                        <CopyAllTwoToneIcon color={ selectedRowNumber === 0 ? '' : "success"} fontSize={"medium"} />
+                                                                <IconButton id={`ctrl_c`} ref={refs.ctrl_c} color={"success"} disabled={disable_feature(true)} onClick={handleCopy}>
+                                                                        <CopyAllTwoToneIcon color={ disable_feature(true) ? '' : "success"} fontSize={"medium"} />
                                                                 </IconButton>
                                                         </div>
                                                 </Tooltip>
@@ -2611,21 +2665,31 @@ export default function FileTable()
 
                                                 <Tooltip title={"RENOMMER"} placement={`top-end`} >
                                                         <div className="action_button" >
-                                                                <LoadingButton as={IconButton} loading={loading_buttons.rename} ref={refs.ctrl_r} color={"primary"} disabled={selectedRowNumber !== 1} onClick={handleRename} >
+                                                                <LoadingButton as={IconButton} loading={loading_buttons.rename} ref={refs.ctrl_r} color={"primary"} disabled={disable_feature(true, true)} onClick={handleRename} >
                                                                         {
                                                                                 loading_buttons.rename ? null :
-                                                                                <BiRename color={ selectedRowNumber !== 1 ? '' : "blue"} size={24} />
+                                                                                <BiRename color={ disable_feature(true, true) ? '' : "blue"} size={24} />
                                                                         }
                                                                 </LoadingButton>
                                                         </div>
                                                 </Tooltip>
 
+                                                <Tooltip title={"DÉTAILS"} placement={`top-end`} >
+                                                        <div className="action_button" >
+                                                                <IconButton color={"info"} disabled={selectedRowNumber !== 1} onClick={handleDetails} >
+                                                                        {
+                                                                                <TbListDetails size={24} />
+                                                                        }
+                                                                </IconButton>
+                                                        </div>
+                                                </Tooltip>
+
                                                 <Tooltip title={"PARTAGER"} placement={`top-end`} >
                                                         <div className="action_button" >
-                                                                <LoadingButton as={IconButton} loading={loading_buttons.share} color={"secondary"} disabled={selectedRowNumber === 0} onClick={handleShare}>
+                                                                <LoadingButton as={IconButton} loading={loading_buttons.share} color={"secondary"} disabled={disable_feature()} onClick={handleShare}>
                                                                         {
                                                                                 loading_buttons.share ? null :
-                                                                                <VscLiveShare color={ selectedRowNumber === 0 ? '' : "purple"} size={24} />
+                                                                                <VscLiveShare color={ disable_feature() ? '' : "purple"} size={24} />
                                                                         }
                                                                 </LoadingButton>
                                                         </div>
@@ -2633,10 +2697,10 @@ export default function FileTable()
 
                                                 <Tooltip title={"ACQUERIR"} placement={`top-end`} >
                                                         <div className="action_button" >
-                                                                <LoadingButton as={IconButton} loading={loading_buttons.download} color={"primary"} disabled={selectedRowNumber === 0} onClick={handleDownload}>
+                                                                <LoadingButton as={IconButton} loading={loading_buttons.download} color={"primary"} disabled={disable_feature()} onClick={handleDownload}>
                                                                         {
                                                                                 loading_buttons.download ? null :
-                                                                                <ImDownload2 color={ selectedRowNumber === 0 ? '' : "#1565c0"} size={24} />
+                                                                                <ImDownload2 color={ disable_feature() ? '' : "#1565c0"} size={24} />
                                                                         }
                                                                 </LoadingButton>
                                                         </div>
@@ -2644,11 +2708,11 @@ export default function FileTable()
 
                                                 <Tooltip title={"SUPPRIMER"} placement={`top-end`} >
                                                         <div className="action_button" >
-                                                                <LoadingButton as={IconButton} loading={loading_buttons.delete} id={'ctrl_d'} ref={refs.ctrl_d} color={"error"} disabled={selectedRowNumber === 0} onClick={handleDelete}>
+                                                                <LoadingButton as={IconButton} loading={loading_buttons.delete} id={'ctrl_d'} ref={refs.ctrl_d} color={"error"} disabled={disable_feature()} onClick={handleDelete}>
                                                                         {
                                                                                 loading_buttons.delete ? null :
                                                                                 <RiDeleteBin2Fill
-                                                                                color={selectedRowNumber === 0 ? '' : "red"}
+                                                                                color={disable_feature() ? '' : "red"}
                                                                                 size={24}/>
                                                                         }
                                                                 </LoadingButton>
@@ -2787,7 +2851,7 @@ export default function FileTable()
                                                                  }
                                                                  onClick = { e =>
                                                                         {
-                                                                                console.log(data)
+                                                                                // console.log(data)
                                                                                 window.Global_State.modalManager.setContent(
                                                                                 <div style= {
                                                                                         {
@@ -2918,7 +2982,7 @@ export default function FileTable()
 
                         function handleClick(e)
                         {
-                                console.log(level)
+                                // console.log(level)
                                 const node_data = window.Global_State.getNodeDataById(data.id)
                                 const [id, lol] = window.Global_State.identifyNode(node_data)
                                 // window.Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
@@ -2933,24 +2997,36 @@ export default function FileTable()
                                 {
                                         const update = async () =>
                                         {
+                                                const onFulfilled = (res) =>
+                                                {
+                                                        // console.log('update_leveeeeeeeeeeeeeeeeeeeeeel', res)
+                                                        toast.dismiss(`update_lvl_${data.id}`)
+                                                        if (res.data.statue === "success")
+                                                        {
+                                                                window.show_response("Le niveau a été mis à jour", "success")
+                                                        }
+                                                        else window.show_response(res.data.data.msg, res.data.statue)
+                                                }
+                                                const onRejected = (err) =>
+                                                {
+                                                        console.log(err)
+                                                        toast.dismiss(`update_lvl_${data.id}`)
+                                                        window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                }
 
                                                 await http.post('update_fnc', query)
-                                                .then( res => {
-                                                        console.log(res)
-                                                } )
-                                                .catch(err => { console.log(err); throw err })
+                                                .then( onFulfilled, onRejected )
                                         }
 
-                                        // console.log(selectedRow[0].id.substring(2))
-                                        toast.promise(
-                                        update(),
+                                        toast("Loading...",
                                         {
-                                                loading: 'Loading...',
-                                                success: 'Processus achevé',
-                                                error: 'err'
+                                                id: `update_lvl_${data.id}`,
+                                                type: 'loading',
+                                                duration: Infinity
                                         }
-
                                         )
+
+                                        update()
                                 }
                                 else
                                 {
@@ -2963,6 +3039,174 @@ export default function FileTable()
                         return( <div className={class_name} onClick = {handleClick} >{level}</div> )
                 }
 
+                const OpeningDateComponent = ({data}) =>
+                {
+                        const value = data.opening_date ? data.opening_date : '____/__/__'
+
+                        const handleClick = e =>
+                        {
+                                e.stopPropagation()
+                                // console.log("opening date handle click")
+
+                                const Date_input = ({data }) =>
+                                {
+                                        const [open, setOpen] = useState(false)
+                                        const [anchorEl, setAnchorEl] = useState(null)
+                                        const [loading, setLoading] = useState(false)
+
+                                        const [openingDate, setOpeningDate] = useState(data.opening_date !== null ? new Date(data.opening_date) : new Date());
+
+                                        // `${openingDate.getFullYear()}/${openingDate.getMonth()+1}/${openingDate.getDate()}`
+                                        const new_opening_date = `${openingDate.getFullYear()}/${(openingDate.getMonth()+1).toString().padStart(2, '0')}/${openingDate.getDate().toString().padStart(2, '0')}`
+                                        // console.log('new_opening_date', new_opening_date, e)
+
+                                        // let today = new Date()
+                                        // today.setHours(0, 0, 0, 0)
+
+                                        // console.log('millesec dif', new Date(new_opening_date).valueOf() - new Date().valueOf())
+
+                                        const handleSubmit = e =>
+                                        {
+                                                e.stopPropagation()
+                                                setLoading(true)
+
+                                                // window.Global_State.setOverlay_props(t => (
+                                                //                 {
+                                                //                         ...t,
+                                                //                         style:
+                                                //                         {
+                                                //                                 ...t.style,
+                                                //                                 display: 'none',
+                                                //                         },
+                                                //                 }
+                                                //         )
+                                                // )
+
+                                                // console.log(new_opening_date)
+                                                const [id, model_type] = window.Global_State.identifyNode(data)
+
+                                                const query = new FormData;
+                                                query.append('id', id)
+                                                query.append('update_object', 'opening_date')
+                                                query.append('new_value', new_opening_date)
+
+                                                if(!window.Global_State.isEditorMode)
+                                                {
+                                                        const onFulfilled = (res) =>
+                                                        {
+                                                                // console.log('update_open_daaaaaaaaate', res)
+                                                                setLoading(false)
+                                                                if (res.data.statue === "success")
+                                                                {
+                                                                        window.show_response("La date d'ouverture a été mis à jour", "success")
+                                                                        window.Global_State.absolutePopover.close()
+                                                                }
+                                                                else window.show_response(res.data.data.msg, res.data.statue)
+                                                        }
+                                                        const onRejected = (err) =>
+                                                        {
+                                                                console.log(err)
+                                                                setLoading(false)
+                                                                window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                        }
+
+                                                        http.post('update_fnc', query)
+                                                        .then(onFulfilled, onRejected)
+                                                }
+                                                else
+                                                {
+                                                }
+                                        }
+
+                                        const handleChange = (newValue) => {
+                                                const date = new Date(newValue)
+                                                // console.log( "open_daaaaaaaate newValue", newValue, date.getDate())
+                                                setOpeningDate(date)
+                                        };
+
+                                        const ResponsiveDatePicker = window.innerWidth > 576 ? DesktopDatePicker : MobileDatePicker
+
+                                        return (
+                                        <div className={`d-flex justify-content-center align-items-center m-2`}
+                                             onClick={e => { e.preventDefault(); e.stopPropagation() }}
+                                             style={{
+                                                     backgroundColor: 'rgba(255,255,255,0)',
+                                                     borderRadius: 10,
+                                                     border: '1px solid blue',
+                                                     overflow: "hidden",
+                                                     height: "fit-content",
+                                                     width: "fit-content",
+                                             }}
+                                        >
+                                                <div className={`d-flex`} style={{ width: "fit-content" }} >
+                                                        <LocalizationProvider dateAdapter={AdapterDayjs} >
+                                                                <ResponsiveDatePicker
+                                                                open={open}
+                                                                PopperProps={{
+                                                                        anchorEl,
+                                                                }}
+                                                                onClose={ () => { setOpen(false); setAnchorEl(null) } }
+                                                                inputFormat="YYYY/MM/DD"
+                                                                value={openingDate}
+                                                                onChange={handleChange}
+                                                                maxDate={data.created_at.substring(0, 10)}
+                                                                renderInput={(params) =>
+                                                                <CustomDateInput id={"lol78"}
+                                                                             value={openingDate.toDateString()}
+                                                                             loading={loading}
+                                                                             onSubmit={handleSubmit}
+                                                                             onClick={ e => { setAnchorEl(e.target); setOpen(true) } }
+                                                                />
+                                                                }
+                                                                // disablePast
+                                                                />
+                                                        </LocalizationProvider>
+                                                </div>
+                                        </div>
+                                        )
+                                }
+
+                                // window.Global_State.setOverlay_props( t => (
+                                // {
+                                //         ...t,
+                                //         style:
+                                //         {
+                                //                 ...t.style,
+                                //                 display: 'flex',
+                                //                 alignItems: 'center',
+                                //                 justifyContent: 'center'
+                                //         },
+                                //         children: (
+                                //         <div
+                                //                 style=
+                                //                 {{
+                                //                         width: "max-content",
+                                //                         marginTop: 15,
+                                //                         backgroundColor: 'rgba(255,255,255,0)' ,
+                                //                         position: "absolute",
+                                //                         top: e.clientY - 37,
+                                //                         left: e.clientX - 185/2
+                                //                         // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+                                //                 }}
+                                //                 onClick={ e => { e.stopPropagation() } }
+                                //         >
+                                //                 <Date_input data={data} />
+                                //         </div>
+                                //         ),
+                                //
+                                // }
+                                // ) )
+
+                                window.Global_State.absolutePopover.open(<Date_input data={data} />, e.target)
+                        }
+
+                        return(
+                                <span className={`${data.opening_date ? 'text-primary' : ''}`} onClick={handleClick} >
+                                        {value}
+                                </span>
+                        )
+                }
+
                 const ReviewDateComponent = ({data}) =>
                 {
                         const value = data.review_date ? data.review_date : '____/__/__'
@@ -2970,30 +3214,34 @@ export default function FileTable()
                         const handleClick = e =>
                         {
                                 e.stopPropagation()
-                                console.log("review date handle click")
+                                // console.log("OPENING date handle click")
 
                                 const Date_input = ({data }) =>
                                 {
+                                        const [clearLoading, setClearLoading] = useState(false)
+                                        const [open, setOpen] = useState(false)
+                                        const [anchorEl, setAnchorEl] = useState(null)
+                                        const [loading, setLoading] = useState(false)
 
-                                        const CustomInput = forwardRef(
-                                                ({ value, onClick }, ref) =>
-                                                (
-                                                        <Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: 'whitesmoke' }}>
-                                                                <input ref={ref}
-                                                                       className="form-control form-control-sm"
-                                                                       style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0 }}
-                                                                       value={`${value}`}
-                                                                       onChange={e => {e.preventDefault(); e.stopPropagation()}}
-                                                                       onClick={onClick}
-                                                                       readOnly
-                                                                />
-
-                                                                <div  style={{ width: 'fit-content', height: 'fit-content', padding: 5, backgroundColor: '#E9ECEFFF' }} onClick={ handleSubmit } >
-                                                                        <HiSaveAs size={25} color={'blue'} />
-                                                                </div>
-                                                        </Stack>
-                                                )
-                                        );
+                                        // const CustomInput = forwardRef(
+                                        //         ({ value, onClick }, ref) =>
+                                        //         (
+                                        //                 <Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: 'whitesmoke' }}>
+                                        //                         <input ref={ref}
+                                        //                                className="form-control form-control-sm"
+                                        //                                style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0 }}
+                                        //                                value={`${value}`}
+                                        //                                onChange={e => {e.preventDefault(); e.stopPropagation()}}
+                                        //                                onClick={onClick}
+                                        //                                readOnly
+                                        //                         />
+                                        //
+                                        //                         <div  style={{ width: 'fit-content', height: 'fit-content', padding: 5, backgroundColor: '#E9ECEFFF' }} onClick={ handleSubmit } >
+                                        //                                 <HiSaveAs size={25} color={'blue'} />
+                                        //                         </div>
+                                        //                 </Stack>
+                                        //         )
+                                        // );
 
                                         const CustomTimeInput = useCallback(
                                                 function CustomTimeInput({ date, value, onChange })
@@ -3099,33 +3347,35 @@ export default function FileTable()
                                                 }, []
                                         )
 
-                                        const [startDate, setStartDate] = useState(data.review_date !== null ? new Date(data.review_date) : new Date());
+                                        const [reviewDate, setReviewDate] = useState(data.review_date !== null ? new Date(data.review_date) : new Date());
 
-                                        const new_review_date = `${startDate.getFullYear()}/${startDate.getMonth()+1}/${startDate.getDate()} ${startDate.getHours()}:${startDate.getMinutes()}`
-                                        console.log('new_review_date', new_review_date, e)
+                                        const new_review_date = `${reviewDate.getFullYear()}/${reviewDate.getMonth()+1}/${reviewDate.getDate()} ${reviewDate.getHours()}:${reviewDate.getMinutes()}`
+                                        // console.log('new_review_date', new_review_date, e)
 
                                         // let today = new Date()
                                         // today.setHours(0, 0, 0, 0)
 
-                                        console.log('millesec dif', new Date(new_review_date).valueOf() - new Date().valueOf())
+                                        // console.log('millesec dif', new Date(new_review_date).valueOf() - new Date().valueOf())
 
                                         const handleSubmit = e =>
                                         {
                                                 e.stopPropagation()
 
-                                                window.Global_State.setOverlay_props(t => (
-                                                                {
-                                                                        ...t,
-                                                                        style:
-                                                                        {
-                                                                                ...t.style,
-                                                                                display: 'none',
-                                                                        },
-                                                                }
-                                                        )
-                                                )
+                                                // window.Global_State.setOverlay_props(t => (
+                                                //                 {
+                                                //                         ...t,
+                                                //                         style:
+                                                //                         {
+                                                //                                 ...t.style,
+                                                //                                 display: 'none',
+                                                //                         },
+                                                //                 }
+                                                //         )
+                                                // )
 
-                                                console.log(new_review_date)
+                                                setLoading(true)
+
+                                                // console.log(new_review_date)
                                                 const [id, model_type] = window.Global_State.identifyNode(data)
 
                                                 const query = new FormData;
@@ -3140,50 +3390,26 @@ export default function FileTable()
 
                                                 if(!window.Global_State.isEditorMode)
                                                 {
-                                                        // const update = async () =>
-                                                        // {
-                                                        //
-                                                        //         await http.post('update_fnc', query)
-                                                        //         .then( res => {
-                                                        //                 console.log(res)
-                                                        //         } )
-                                                        //         .catch(err => { console.log(err); throw err })
-                                                        // }
-
-                                                        // console.log(selectedRow[0].id.substring(2))
-                                                        toast.promise(
-                                                                http.post('update_fnc', query),
-                                                                {
-                                                                        loading: 'Loading...',
-                                                                        success: 'Processus achevé',
-                                                                        error: 'Erreur'
-                                                                },
-                                                                {
-                                                                        id: `review_date_${data.id}`,
-                                                                        duration: Infinity
-                                                                }
-
-                                                        )
-                                                        .then(
-                                                        res =>
+                                                        const onFulfilled = (res) =>
                                                         {
-                                                                console.log(res)
-                                                                switch (res.data.statue)
+                                                                // console.log('update_review_daaaaaaaaate', res)
+                                                                setLoading(false)
+                                                                if (res.data.statue === "success")
                                                                 {
-                                                                        case 'success':
-                                                                                toast(`La date de révision a été mise á jour !!`, {type: 'success'})
-                                                                                break
-                                                                        case 'error':
-                                                                                toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
-                                                                                break
-                                                                        case 'info':
-                                                                                toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
-                                                                                break
+                                                                        window.show_response("La date de révision a été mis à jour", "success")
+                                                                        window.Global_State.absolutePopover.close()
                                                                 }
-                                                                setTimeout( () => { toast.dismiss(`review_date_${data.id}`) }, 600 )
+                                                                else window.show_response(res.data.data.msg, res.data.statue)
                                                         }
-                                                        )
-                                                        .catch(err => { console.log(err); setTimeout( () => { toast.dismiss(`review_date_${data.id}`) }, 600 ) })
+                                                        const onRejected = (err) =>
+                                                        {
+                                                                console.log(err)
+                                                                setLoading(false)
+                                                                window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                        }
+
+                                                        http.post('update_fnc', query)
+                                                        .then(onFulfilled, onRejected)
                                                 }
                                                 else
                                                 {
@@ -3191,65 +3417,129 @@ export default function FileTable()
                                                 }
                                         }
 
+                                        const handleClear = e =>
+                                        {
+                                                e.stopPropagation()
+
+                                                // console.log("clear_review_date")
+
+                                                const id = window.Global_State.identifyNode(data)[0]
+
+                                                if(!window.Global_State.isEditorMode)
+                                                {
+                                                        setClearLoading(true)
+
+                                                        const onFulfilled = (res) =>
+                                                        {
+                                                                // console.log('clear_review_daaaaaaaaaaaaaate', res)
+                                                                setClearLoading(false)
+                                                                window.Global_State.absolutePopover.close()
+                                                                if (res.data.statue === "success")
+                                                                {
+                                                                        window.show_response("Programation de révision annulée", "success")
+                                                                }
+                                                                else window.show_response(res.data.data.msg, res.data.statue)
+                                                        }
+                                                        const onRejected = (err) =>
+                                                        {
+                                                                console.log(err)
+                                                                setClearLoading(false)
+                                                                window.Global_State.absolutePopover.close()
+                                                                window.show_response(`${err.message} ${err.response.data.message}`, "error")
+                                                        }
+
+                                                        http.post("update_fnc", {id, update_object: "cancel_review", new_value: 'null'})
+                                                        .then(onFulfilled, onRejected)
+                                                }
+                                                else
+                                                {
+
+                                                }
+                                        }
+
+                                        const handleChange = (newValue) => {
+                                                const date = new Date(newValue)
+                                                setReviewDate(date)
+                                        };
+
                                         return (
-                                                <div className={`d-flex justify-content-center align-items-center`}
-                                                     style={{
-                                                             backgroundColor: 'rgba(255,255,255,0)',
-                                                             borderRadius: 10,
-                                                             border: '1px solid blue',
-                                                             overflow: "hidden"
-                                                        }}
-                                                >
-                                                        <div className={`d-flex`} style={{ width: "fit-content" }} >
-                                                                <DatePicker
-                                                                        selected={startDate}
-                                                                        popperClassName = 'reactDatePickerPopper'
-                                                                        dateFormat="yyyy/MM/dd h:mm aa"
-                                                                        onChange={(date) => setStartDate(date)}
-                                                                        showYearDropdown
-                                                                        scrollableYearDropdown
-                                                                        showTimeInput
-                                                                        customTimeInput={<CustomTimeInput />}
-                                                                        yearDropdownItemNumber={20}
-                                                                        minDate={new Date()}
-                                                                        customInput ={ <CustomInput /> }
-                                                                />
+                                                <Stack className="m-2" direction={"row"} spacing={1} alignItems={"center"} onClick={e => { e.preventDefault(); e.stopPropagation() }} >
+                                                        <div className={`d-flex justify-content-center align-items-center`}
+                                                             style={{
+                                                                     backgroundColor: 'rgba(255,255,255,0)',
+                                                                     borderRadius: 10,
+                                                                     border: '1px solid blue',
+                                                                     overflow: "hidden",
+                                                                     height: "fit-content",
+                                                                     width: "fit-content",
+                                                             }}
+                                                        >
+                                                                <div className={`d-flex`} style={{ width: "fit-content" }} >
+                                                                        <LocalizationProvider dateAdapter={AdapterDayjs} >
+                                                                                <DateTimePicker
+                                                                                open={open}
+                                                                                PopperProps={{
+                                                                                        anchorEl,
+                                                                                }}
+                                                                                onClose={ () => { setOpen(false); setAnchorEl(null) } }
+                                                                                inputFormat="YYYY/MM/DD"
+                                                                                value={reviewDate}
+                                                                                onChange={handleChange}
+                                                                                minDate={new Date()}
+                                                                                renderInput={(params) =>
+                                                                                <CustomDateInput id={"lol78"}
+                                                                                                 value={reviewDate.toDateString()}
+                                                                                                 loading={loading}
+                                                                                                 onSubmit={handleSubmit}
+                                                                                                 onClick={ e => { setAnchorEl(e.target); setOpen(true) } }
+                                                                                />
+                                                                                }
+                                                                                disablePast
+                                                                                />
+                                                                        </LocalizationProvider>
+                                                                </div>
                                                         </div>
-                                                </div>
+                                                        <LoadingButton as={IconButton} loading={clearLoading} title={"EFFACER"} color={"error"} disabled={value === '____/__/__'} onClick={handleClear} >
+                                                                {
+                                                                        clearLoading ? null : <AiFillCloseCircle size={25} />
+                                                                }
+                                                        </LoadingButton>
+                                                </Stack>
                                         )
                                 }
 
+                                // window.Global_State.setOverlay_props( t => (
+                                // {
+                                //         ...t,
+                                //         style:
+                                //         {
+                                //                 ...t.style,
+                                //                 display: 'flex',
+                                //                 alignItems: 'center',
+                                //                 justifyContent: 'center'
+                                //         },
+                                //         children: (
+                                //         <div
+                                //                 style=
+                                //                 {{
+                                //                         width: "max-content",
+                                //                         marginTop: 15,
+                                //                         backgroundColor: 'rgba(255,255,255,0)' ,
+                                //                         position: "absolute",
+                                //                         top: e.clientY - 37,
+                                //                         left: e.clientX - 185/2
+                                //                         // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+                                //                 }}
+                                //                 onClick={ e => { e.stopPropagation() } }
+                                //         >
+                                //                 <Date_input data={data} />
+                                //         </div>
+                                //         ),
+                                //
+                                // }
+                                // ) )
 
-                                window.Global_State.setOverlay_props( t => (
-                                {
-                                        ...t,
-                                        style:
-                                        {
-                                                ...t.style,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                        },
-                                        children: (
-                                        <div
-                                                style=
-                                                {{
-                                                        width: "max-content",
-                                                        marginTop: 15,
-                                                        backgroundColor: 'rgba(255,255,255,0)' ,
-                                                        position: "absolute",
-                                                        top: e.clientY - 37,
-                                                        left: e.clientX - 185/2
-                                                        // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
-                                                }}
-                                                onClick={ e => { e.stopPropagation() } }
-                                        >
-                                                <Date_input data={data} />
-                                        </div>
-                                        ),
-
-                                }
-                                ) )
+                                window.Global_State.absolutePopover.open(<Date_input data={data} />, e.target)
                         }
 
                         return(
@@ -3264,7 +3554,7 @@ export default function FileTable()
                         const handleClick = e =>
                         {
                                 e.stopPropagation()
-                                console.log("IsClosedComponent handle click")
+                                // console.log("IsClosedComponent handle click")
 
                                 const [id, model] = window.Global_State.identifyNode(data)
 
@@ -3291,7 +3581,7 @@ export default function FileTable()
                                         .then(
                                         res =>
                                         {
-                                                console.log(res)
+                                                // console.log(res)
                                                 switch (res.data.statue)
                                                 {
                                                         case 'success':
@@ -3329,7 +3619,7 @@ export default function FileTable()
                                 e.preventDefault();
                                 e.stopPropagation();
 
-                                console.log(e)
+                                // console.log(e)
 
                                 const [id, model] = window.Global_State.identifyNode(data)
                                 // window.Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
@@ -3385,7 +3675,7 @@ export default function FileTable()
                                 )
                                 .then(
                                 res => {
-                                        console.log(res)
+                                        // console.log(res)
                                         switch (res.data.statue) {
                                                 case 'success':
                                                         toast(`L'element a été ${res.data.data.is_validated ? "validé" : "dévalidé"}`, {type: 'success'})
@@ -3473,6 +3763,7 @@ export default function FileTable()
                                         global_type: data.global_type,
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
+                                        opening_date: data.type !== "fnc" ? '' : <OpeningDateComponent data={data} />,
                                         review_date: data.review_date === undefined ? '' : <ReviewDateComponent data={data} />,
                                         valid_badge:  validation_component,
 
@@ -3536,6 +3827,24 @@ export default function FileTable()
                 return 0;
         };
 
+        const compareDate = (dateA, dateB) =>
+        {
+                // console.log("daaaaaaaaate", dateA, dateB)
+                if (!dateA && !dateB) return 0;
+                else if (!dateA) return 0;
+                else if (!dateB) return 0;
+                else {
+                        const a = new Date(dateA);
+                        const b = new Date(dateB);
+
+                        if (a.valueOf() > b.valueOf()) return 1;
+
+                        if (b.valueOf() > a.valueOf()) return -1;
+
+                        return 0;
+                }
+        };
+
 
         const columns = useMemo(() =>
         {
@@ -3546,7 +3855,7 @@ export default function FileTable()
                                 button: true,
                                 cell: row => row.valid_badge,
                                 sortable: false,
-                                width: "40px"
+                                width: "20px"
                         },
                         {
                                 name: 'NOM',
@@ -3561,8 +3870,9 @@ export default function FileTable()
                                 ...[
                                         {
                                                 name: 'CREE LE',
-                                                selector: row => row.created_at,
+                                                selector: row => row.created_at.replace("T", " À "),
                                                 sortable: true,
+                                                sortFunction: (rowA, rowB) => compareDate( rowA.created_at, rowB.created_at ),
                                                 width: "30%"
                                         },
                                         {
@@ -3591,6 +3901,13 @@ export default function FileTable()
                         columns_of_the_type.push(
                                 ...[
                                         {
+                                                name: "DATE D'OUVERTURE",
+                                                selector: row => row.opening_date,
+                                                sortable: true,
+                                                sortFunction: (rowA, rowB) => rowA.opening_date ? compareDate( rowA.opening_date.props.data.opening_date, rowB.opening_date.props.data.opening_date ) : 0,
+                                                width: "15%"
+                                        },
+                                        {
                                                 name: 'NIVEAU',
                                                 selector: row => row.level,
                                                 sortable: true,
@@ -3601,7 +3918,8 @@ export default function FileTable()
                                                 name: 'DATE DE REVISION',
                                                 selector: row => row.review_date,
                                                 sortable: true,
-                                                width: "22%"
+                                                sortFunction: (rowA, rowB) => rowA.review_date ? compareDate( rowA.review_date.props.data.review_date, rowB.review_date.props.data.review_date ) : 0,
+                                                width: "15%",
                                         },
                                         {
                                                 name: 'STATUE',
@@ -3616,13 +3934,16 @@ export default function FileTable()
                                 ...[
                                         {
                                                 name: 'CREE LE',
-                                                selector: row => row.created_at,
+                                                selector: row => row.created_at.replace("T", " À "),
                                                 sortable: true,
+                                                sortFunction: (rowA, rowB) => compareDate( rowA.created_at, rowB.created_at ),
+                                                width: "30%",
                                         },
                                         {
                                                 name: 'TAILLE',
                                                 selector: row => row.size,
                                                 sortable: true,
+                                                width: "100px"
                                         },
 
                                 ]
@@ -3632,20 +3953,6 @@ export default function FileTable()
         },
         [node]
         )
-
-        // const recherche = (value) => {
-        //     setFilteringWord(value)
-        //     // let matchingDatas = []
-        //     // if (tag === "le Nom" && value !== "") {
-        //     //     for(let data of datas)
-        //     //     {
-        //     //         if(data.value.indexOf(value) !== -1) matchingDatas.push(data)
-        //     //     }
-        //     // setVisibleData(matchingDatas)
-        //     // }
-        //     // else if(value === "") setVisibleData(datas)
-        // }
-
 
         const formattedDatas = useMemo(() => dataFormater(node), [node])
         // const formattedDatas = useDataFormater(node)
@@ -3688,7 +3995,7 @@ export default function FileTable()
         }, [formattedDatas]
         )
 
-        console.log('contentRender')
+        // console.log('contentRender')
 
         const handleChange = ( selectedCount, selectedRows, update = false ) =>
         {
@@ -3742,17 +4049,17 @@ export default function FileTable()
         const onRowDoubleClicked =
          async (row, event) =>
         {
-                console.log('db_cliked_row', row)
+                // console.log('db_cliked_row', row)
                 let tree_row = document.getElementById(`treeRow-${row.id}`)
 
                 if (!tree_row)
                 {
-                        console.log('checkpoint 1', tree_row)
+                        // console.log('checkpoint 1', tree_row)
                         const full_row_data = window.Global_State.getNodeDataById(row.id)
-                        console.log('checkpoint 1.5', full_row_data)
+                        // console.log('checkpoint 1.5', full_row_data)
                         if (full_row_data.global_type === 'folder')
                         {
-                                console.log('checkpoint 2', full_row_data)
+                                // console.log('checkpoint 2', full_row_data)
 
                                 const parent_node = window.Global_State.getNodeDataById(full_row_data.parentId)
                                 await onRowDoubleClicked(parent_node, '')
@@ -3829,7 +4136,13 @@ export default function FileTable()
                                         switch (filter.tag)
                                         {
                                                 case 'le Nom':
-                                                        return row.value.indexOf(filter.element) !== -1
+                                                        if ( (node.type === 'nonC') && /^\d+$/.test(filter.element) )
+                                                        {
+                                                                const list = row.value.split('-')
+
+                                                                return parseInt( list[ list.length - 1 ] ) === parseInt(filter.element)
+                                                        }
+                                                        else return row.value.indexOf(filter.element) !== -1
                                                 case 'la Date de creation':
                                                 {
                                                         // console.log(new Date(row.created_at.substring(0, 10).split('-').join('/')).valueOf())
@@ -3871,7 +4184,7 @@ export default function FileTable()
                                                         const [debut, fin] = filter.element
 
                                                         if (debut === null && fin === null) return true
-                                                        else if (data.review_date !== undefined )
+                                                        else if (data.review_date && data.review_date.length )
                                                         {
 
                                                                 const revision_string_date = data.review_date.substring(0, 10)
@@ -3879,7 +4192,7 @@ export default function FileTable()
 
                                                                 const revision_date = new Date(formatted_revision_string_date)
 
-                                                                console.log('review_daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaate', revision_date.toString() )
+                                                                // console.log('review_daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaate', revision_date.toString() )
                                                                 if (debut === null)
                                                                 {
                                                                         return ( revision_date.valueOf() <= fin.valueOf() )
@@ -3904,7 +4217,7 @@ export default function FileTable()
                 }, [datas, filter]
         )
 
-        console.log('filtered_datataaaaaaas', filtered_datas)
+        // console.log('filtered_datataaaaaaas', filtered_datas, columns)
 
         return (
         <div className="file_table_container full_size_element" >
@@ -3975,3 +4288,524 @@ export default function FileTable()
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+// const OpeningDateComponent = ({data}) =>
+// {
+//         const value = data.opening_date ? data.opening_date : '____/__/__'
+//
+//         const handleClick = e =>
+//         {
+//                 e.stopPropagation()
+//                 console.log("opening date handle click")
+//
+//                 const Date_input = ({data }) =>
+//                 {
+//                         const [loading, setLoading] = useState(false)
+//
+//                         const CustomInput = forwardRef(
+//                         ({ value, onClick, loading, onSubmit }, ref) =>
+//                         (
+//                         <Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: '#e9ecef' }}>
+//                                 <input ref={ref}
+//                                        className="form-control form-control-sm"
+//                                        style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0, backgroundColor: "rgba(233,236,239,0)" }}
+//                                        value={`${value}`}
+//                                        onChange={e => {e.preventDefault(); e.stopPropagation()}}
+//                                        onClick={onClick}
+//                                        readOnly
+//                                 />
+//
+//                                 <LoadingButton as={IconButton} loading={loading} title={"EFFACER"} color={"primary"} size={"small"} style={{ minWidth: 30 }} onClick={onSubmit} >
+//                                         {
+//                                                 loading ? null : <RiUploadCloud2Fill size={20} />
+//                                         }
+//                                 </LoadingButton>
+//                         </Stack>
+//                         )
+//                         );
+//
+//                         const [openingDate, setOpeningDate] = useState(data.opening_date !== null ? new Date(data.opening_date) : new Date());
+//
+//                         const new_opening_date = `${openingDate.getFullYear()}/${openingDate.getMonth()+1}/${openingDate.getDate()} ${openingDate.getHours()}:${openingDate.getMinutes()}`
+//                         console.log('new_opening_date', new_opening_date, e)
+//
+//                         // let today = new Date()
+//                         // today.setHours(0, 0, 0, 0)
+//
+//                         console.log('millesec dif', new Date(new_opening_date).valueOf() - new Date().valueOf())
+//
+//                         const handleSubmit = e =>
+//                         {
+//                                 e.stopPropagation()
+//                                 setLoading(true)
+//
+//                                 // window.Global_State.setOverlay_props(t => (
+//                                 //                 {
+//                                 //                         ...t,
+//                                 //                         style:
+//                                 //                         {
+//                                 //                                 ...t.style,
+//                                 //                                 display: 'none',
+//                                 //                         },
+//                                 //                 }
+//                                 //         )
+//                                 // )
+//
+//                                 console.log(new_opening_date)
+//                                 const [id, model_type] = window.Global_State.identifyNode(data)
+//
+//                                 const query = new FormData;
+//                                 query.append('id', id)
+//                                 query.append('update_object', 'opening_date')
+//                                 query.append('new_value', new_opening_date)
+//
+//                                 if(!window.Global_State.isEditorMode)
+//                                 {
+//                                         const onFulfilled = (res) =>
+//                                         {
+//                                                 console.log('update_open_daaaaaaaaate', res)
+//                                                 setLoading(false)
+//                                                 if (res.data.statue === "success")
+//                                                 {
+//                                                         window.show_response("Le niveau a été mis à jour", "success")
+//                                                 }
+//                                                 else window.show_response(res.data.data.msg, res.data.statue)
+//                                         }
+//                                         const onRejected = (err) =>
+//                                         {
+//                                                 console.log(err)
+//                                                 setLoading(false)
+//                                                 window.show_response(`${err.message} ${err.response.data.message}`, "error")
+//                                         }
+//
+//                                         http.post('update_fnc', query)
+//                                         .then(onFulfilled, onRejected)
+//                                 }
+//                                 else
+//                                 {
+//                                 }
+//                         }
+//
+//                         return (
+//                         <div className={`d-flex justify-content-center align-items-center m-2`}
+//                              onClick={e => { e.preventDefault(); e.stopPropagation() }}
+//                              style={{
+//                                      backgroundColor: 'rgba(255,255,255,0)',
+//                                      borderRadius: 10,
+//                                      border: '1px solid blue',
+//                                      overflow: "hidden",
+//                                      height: "fit-content",
+//                                      width: "fit-content",
+//                              }}
+//                         >
+//                                 <div className={`d-flex`} style={{ width: "fit-content" }} >
+//                                         <DatePicker
+//                                         selected={openingDate}
+//                                         popperClassName = 'reactDatePickerPopper'
+//                                         dateFormat="yyyy/MM/dd"
+//                                         onChange={(date) => setOpeningDate(date)}
+//                                         showYearDropdown
+//                                         scrollableYearDropdown
+//                                         yearDropdownItemNumber={20}
+//                                         customInput ={ <CustomInput loading={loading} onSubmit={handleSubmit} /> }
+//                                         />
+//                                 </div>
+//                         </div>
+//                         )
+//                 }
+//
+//                 // window.Global_State.setOverlay_props( t => (
+//                 // {
+//                 //         ...t,
+//                 //         style:
+//                 //         {
+//                 //                 ...t.style,
+//                 //                 display: 'flex',
+//                 //                 alignItems: 'center',
+//                 //                 justifyContent: 'center'
+//                 //         },
+//                 //         children: (
+//                 //         <div
+//                 //                 style=
+//                 //                 {{
+//                 //                         width: "max-content",
+//                 //                         marginTop: 15,
+//                 //                         backgroundColor: 'rgba(255,255,255,0)' ,
+//                 //                         position: "absolute",
+//                 //                         top: e.clientY - 37,
+//                 //                         left: e.clientX - 185/2
+//                 //                         // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+//                 //                 }}
+//                 //                 onClick={ e => { e.stopPropagation() } }
+//                 //         >
+//                 //                 <Date_input data={data} />
+//                 //         </div>
+//                 //         ),
+//                 //
+//                 // }
+//                 // ) )
+//
+//                 window.Global_State.absolutePopover.open(<Date_input data={data} />, e.target)
+//         }
+//
+//         return(
+//         <span className={`${data.opening_date ? 'text-primary' : ''}`} onClick={handleClick} >
+//                                         {value}
+//                                 </span>
+//         )
+// }
+//
+// const ReviewDateComponent = ({data}) =>
+// {
+//         const value = data.review_date ? data.review_date : '____/__/__'
+//
+//         const handleClick = e =>
+//         {
+//                 e.stopPropagation()
+//                 console.log("OPENING date handle click")
+//
+//                 const Date_input = ({data }) =>
+//                 {
+//                         const [clearLoading, setClearLoading] = useState(false)
+//                         const [loading, setLoading] = useState(false)
+//
+//                         // const CustomInput = forwardRef(
+//                         //         ({ value, onClick }, ref) =>
+//                         //         (
+//                         //                 <Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: 'whitesmoke' }}>
+//                         //                         <input ref={ref}
+//                         //                                className="form-control form-control-sm"
+//                         //                                style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0 }}
+//                         //                                value={`${value}`}
+//                         //                                onChange={e => {e.preventDefault(); e.stopPropagation()}}
+//                         //                                onClick={onClick}
+//                         //                                readOnly
+//                         //                         />
+//                         //
+//                         //                         <div  style={{ width: 'fit-content', height: 'fit-content', padding: 5, backgroundColor: '#E9ECEFFF' }} onClick={ handleSubmit } >
+//                         //                                 <HiSaveAs size={25} color={'blue'} />
+//                         //                         </div>
+//                         //                 </Stack>
+//                         //         )
+//                         // );
+//
+//                         const CustomTimeInput = useCallback(
+//                         function CustomTimeInput({ date, value, onChange })
+//                         {
+//
+//                                 const validationRules = yup.object().shape({
+//                                         hour: yup.number().integer().positive("L'heure est positive").min(new Date().getHours()).max(24, 'maximum 24h'),
+//                                         minutes: yup.number().integer().positive("L'heure est positive").min(0).max(60, 'maximum 60mins'),
+//
+//                                 });
+//
+//                                 const formik = useFormik(
+//                                 {
+//                                         validationSchema: validationRules,
+//                                         onSubmit: handleSubmit,
+//                                         initialValues:
+//                                         {
+//                                                 hour: new Date().getHours(),
+//                                                 minutes: 0
+//                                         }
+//                                 }
+//                                 )
+//
+//                                 const handleBlur = e =>
+//                                 {
+//                                         e.preventDefault()
+//                                         e.stopPropagation()
+//                                         if (!formik.errors.hour && !formik.errors.minutes)
+//                                         {
+//                                                 onChange(`${formik.values.hour === '' ? 0 : formik.values.hour}:${formik.values.minutes === '' ? 0 : formik.values.minutes}`)
+//                                         }
+//                                 }
+//
+//                                 return(
+//                                 <Form className={`d-flex flex-row`} value = {undefined} onSubmit={formik.handleSubmit} >
+//
+//
+//                                         <Form.Group className="mr-3 d-flex" >
+//                                                 <Form.Label style={{ margin: 0, marginRight: 5 }} >hh</Form.Label>
+//                                                 <Form.Control
+//                                                 style=
+//                                                 {{
+//                                                         maxWidth: '35px',
+//                                                         maxHeight: '20px',
+//                                                         fontSize: '10px',
+//                                                         padding: '2px'
+//                                                 }}
+//                                                 maxLength = '2'
+//                                                 name="hour"
+//                                                 value={formik.values.hour}
+//                                                 onChange={formik.handleChange}
+//                                                 onBlur={ handleBlur }
+//                                                 // type="number"
+//                                                 placeholder="00"
+//                                                 isInvalid={!!formik.errors.hour}
+//                                                 />
+//                                                 {/*<Form.Control.Feedback  type="invalid">*/}
+//                                                 {/*        {formik.errors.hour}*/}
+//                                                 {/*</Form.Control.Feedback>*/}
+//                                         </Form.Group>
+//
+//
+//                                         <Form.Group className="d-flex" >
+//                                                 <Form.Label style={{ margin: 0, marginRight: 5 }} >mm</Form.Label>
+//                                                 <Form.Control
+//                                                 style=
+//                                                 {{
+//                                                         maxWidth: '35px',
+//                                                         maxHeight: '20px',
+//                                                         fontSize: '10px',
+//                                                         padding: '2px'
+//                                                 }}
+//                                                 maxLength = '2'
+//                                                 name="minutes"
+//                                                 value={formik.values.minutes}
+//                                                 onChange={formik.handleChange}
+//                                                 onBlur={ handleBlur }
+//                                                 // type="number"
+//                                                 placeholder="00"
+//                                                 isInvalid={!!formik.errors.minutes}
+//                                                 />
+//                                                 {/*<Form.Control.Feedback type="invalid">*/}
+//                                                 {/*        {formik.errors.minutes}*/}
+//                                                 {/*</Form.Control.Feedback>*/}
+//                                         </Form.Group>
+//
+//                                         {/*<div*/}
+//                                         {/*style = {*/}
+//                                         {/*        {*/}
+//                                         {/*                display: 'flex',*/}
+//                                         {/*                justifyContent: 'center',*/}
+//                                         {/*                position: 'relative',*/}
+//                                         {/*                alignItems: 'center',*/}
+//                                         {/*        }*/}
+//                                         {/*}*/}
+//                                         {/*>*/}
+//                                         {/*        <Button variant="primary" type="submit">*/}
+//                                         {/*                Submit*/}
+//                                         {/*        </Button>*/}
+//                                         {/*</div>*/}
+//                                 </Form>
+//                                 )
+//                         }, []
+//                         )
+//
+//                         const [startDate, setStartDate] = useState(data.review_date !== null ? new Date(data.review_date) : new Date());
+//
+//                         const new_review_date = `${startDate.getFullYear()}/${startDate.getMonth()+1}/${startDate.getDate()} ${startDate.getHours()}:${startDate.getMinutes()}`
+//                         console.log('new_review_date', new_review_date, e)
+//
+//                         // let today = new Date()
+//                         // today.setHours(0, 0, 0, 0)
+//
+//                         console.log('millesec dif', new Date(new_review_date).valueOf() - new Date().valueOf())
+//
+//                         const handleSubmit = e =>
+//                         {
+//                                 e.stopPropagation()
+//
+//                                 window.Global_State.setOverlay_props(t => (
+//                                 {
+//                                         ...t,
+//                                         style:
+//                                         {
+//                                                 ...t.style,
+//                                                 display: 'none',
+//                                         },
+//                                 }
+//                                 )
+//                                 )
+//
+//                                 console.log(new_review_date)
+//                                 const [id, model_type] = window.Global_State.identifyNode(data)
+//
+//                                 const query = new FormData;
+//                                 query.append('id', id)
+//                                 query.append('update_object', 'review_date')
+//                                 query.append('new_value', new_review_date)
+//                                 query.append('additional_info', JSON.stringify(
+//                                 {
+//                                         remain_ms: `${new Date(new_review_date).valueOf() - new Date().valueOf()}`
+//                                 }
+//                                 ))
+//
+//                                 if(!window.Global_State.isEditorMode)
+//                                 {
+//                                         // console.log(selectedRow[0].id.substring(2))
+//                                         toast.promise(
+//                                         http.post('update_fnc', query),
+//                                         {
+//                                                 loading: 'Loading...',
+//                                                 success: 'Processus achevé',
+//                                                 error: 'Erreur'
+//                                         },
+//                                         {
+//                                                 id: `review_date_${data.id}`,
+//                                                 duration: Infinity
+//                                         }
+//
+//                                         )
+//                                         .then(
+//                                         res =>
+//                                         {
+//                                                 console.log(res)
+//                                                 window.Global_State.absolutePopover.close()
+//                                                 switch (res.data.statue)
+//                                                 {
+//                                                         case 'success':
+//                                                                 toast(`La date de révision a été mise á jour !!`, {type: 'success'})
+//                                                                 break
+//                                                         case 'error':
+//                                                                 toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+//                                                                 break
+//                                                         case 'info':
+//                                                                 toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+//                                                                 break
+//                                                 }
+//                                                 setTimeout( () => { toast.dismiss(`review_date_${data.id}`) }, 600 )
+//                                         }
+//                                         )
+//                                         .catch(
+//                                         err =>
+//                                         {
+//                                                 console.log(err);
+//                                                 window.Global_State.absolutePopover.close()
+//                                                 setTimeout( () => { toast.dismiss(`review_date_${data.id}`) }, 600 )
+//                                         })
+//                                 }
+//                                 else
+//                                 {
+//                                         window.Global_State.editor.fnc.update(query)
+//                                 }
+//                         }
+//
+//                         const handleClear = e =>
+//                         {
+//                                 e.stopPropagation()
+//
+//                                 console.log("clear_review_date")
+//
+//                                 const id = window.Global_State.identifyNode(data)[0]
+//
+//                                 if(!window.Global_State.isEditorMode)
+//                                 {
+//                                         setClearLoading(true)
+//
+//                                         const onFulfilled = (res) =>
+//                                         {
+//                                                 console.log('clear_review_daaaaaaaaaaaaaate', res)
+//                                                 setClearLoading(false)
+//                                                 window.Global_State.absolutePopover.close()
+//                                                 if (res.data.statue === "success")
+//                                                 {
+//                                                         window.show_response("Programation de révision annulée", "success")
+//                                                 }
+//                                                 else window.show_response(res.data.data.msg, res.data.statue)
+//                                         }
+//                                         const onRejected = (err) =>
+//                                         {
+//                                                 console.log(err)
+//                                                 setClearLoading(false)
+//                                                 window.Global_State.absolutePopover.close()
+//                                                 window.show_response(`${err.message} ${err.response.data.message}`, "error")
+//                                         }
+//
+//                                         http.post("update_fnc", {id, update_object: "cancel_review", new_value: 'null'})
+//                                         .then(onFulfilled, onRejected)
+//                                 }
+//                                 else
+//                                 {
+//
+//                                 }
+//                         }
+//
+//                         return (
+//                         <Stack className="m-2" direction={"row"} spacing={1} alignItems={"center"} onClick={e => { e.preventDefault(); e.stopPropagation() }} >
+//                                 <div className={`d-flex justify-content-center align-items-center`}
+//                                      style={{
+//                                              backgroundColor: 'rgba(255,255,255,0)',
+//                                              borderRadius: 10,
+//                                              border: '1px solid blue',
+//                                              overflow: "hidden",
+//                                              height: "fit-content",
+//                                              width: "fit-content",
+//                                      }}
+//                                 >
+//                                         <div className={`d-flex`} style={{ width: "fit-content" }} >
+//                                                 <DatePicker
+//                                                 selected={startDate}
+//                                                 popperClassName = 'reactDatePickerPopper'
+//                                                 dateFormat="yyyy/MM/dd h:mm aa"
+//                                                 onChange={(date) => setStartDate(date)}
+//                                                 showYearDropdown
+//                                                 scrollableYearDropdown
+//                                                 showTimeInput
+//                                                 customTimeInput={<CustomTimeInput />}
+//                                                 yearDropdownItemNumber={20}
+//                                                 minDate={new Date()}
+//                                                 customInput ={ <CustomDateInput loading={loading} onSubmit={handleSubmit} /> }
+//                                                 />
+//                                         </div>
+//                                 </div>
+//                                 <LoadingButton as={IconButton} loading={clearLoading} title={"EFFACER"} color={"error"} disabled={value === '____/__/__'} onClick={handleClear} >
+//                                         {
+//                                                 clearLoading ? null : <AiFillCloseCircle size={25} />
+//                                         }
+//                                 </LoadingButton>
+//                         </Stack>
+//                         )
+//                 }
+//
+//                 // window.Global_State.setOverlay_props( t => (
+//                 // {
+//                 //         ...t,
+//                 //         style:
+//                 //         {
+//                 //                 ...t.style,
+//                 //                 display: 'flex',
+//                 //                 alignItems: 'center',
+//                 //                 justifyContent: 'center'
+//                 //         },
+//                 //         children: (
+//                 //         <div
+//                 //                 style=
+//                 //                 {{
+//                 //                         width: "max-content",
+//                 //                         marginTop: 15,
+//                 //                         backgroundColor: 'rgba(255,255,255,0)' ,
+//                 //                         position: "absolute",
+//                 //                         top: e.clientY - 37,
+//                 //                         left: e.clientX - 185/2
+//                 //                         // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+//                 //                 }}
+//                 //                 onClick={ e => { e.stopPropagation() } }
+//                 //         >
+//                 //                 <Date_input data={data} />
+//                 //         </div>
+//                 //         ),
+//                 //
+//                 // }
+//                 // ) )
+//
+//                 window.Global_State.absolutePopover.open(<Date_input data={data} />, e.target)
+//         }
+//
+//         return(
+//         <span className={`${data.review_date ? 'text-primary' : ''}`} onClick={handleClick} >
+//                                         {value}
+//                                 </span>
+//         )
+// }

@@ -24,9 +24,9 @@ import { FaUserTie, FaUserSecret } from "react-icons/fa";
 import { Link } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 
-// https://api.anac-togo-file-manager.com
+// https://api.anac-togo-file-manager.com 'http://localhost:80'
 export var http = axios.create({
-        baseURL: 'http://localhost:80',
+        baseURL: "https://api.anac-togo-file-manager.com",
         headers: {},
         withCredentials: true
 });
@@ -39,7 +39,7 @@ export default function Login() {
 
         useEffect(function () {
                 http.get('/sanctum/csrf-cookie').then(function (response) {
-                        console.log(response);
+                        // console.log(response)
                 }).catch(function (err) {
                         console.log(err);
                 });
@@ -60,7 +60,7 @@ export default function Login() {
         };
 
         var handleSubmit = function handleSubmit(submittedInfo) {
-                console.log(submittedInfo);
+                // console.log(submittedInfo)
                 setLoading(true);
 
                 var queryBody = new FormData();
@@ -71,19 +71,36 @@ export default function Login() {
                 // console.log(queryBody)
 
                 http.post('/login', queryBody).then(function (res) {
-                        console.log(res);
+                        // console.log(res)
                         setLoading(false);
 
                         if (!parseInt(res.data.user.id)) navigate("/administrator");else navigate("/files_browser");
                 }).catch(function (err) {
                         console.log(err);
-                        setLoading(true);
+                        setLoading(false);
 
-                        swal({
-                                title: "Error",
-                                text: err.response.data.message,
-                                icon: "error"
-                        });
+                        switch (err.response.status) {
+                                case 419:
+                                        swal({
+                                                title: "Error",
+                                                text: err.response.data.message + ' \n\nVeuillez recharger la page \uD83D\uDE0E!',
+                                                icon: "error"
+                                        });
+                                        break;
+                                case 422:
+                                        swal({
+                                                title: "Error",
+                                                text: "Numéro inspecteur ou mot de passe incorect 💔",
+                                                icon: "error"
+                                        });
+                                        break;
+                                default:
+                                        swal({
+                                                title: "Error",
+                                                text: err.response.data.message,
+                                                icon: "error"
+                                        });
+                        }
                 });
         };
 
@@ -252,7 +269,7 @@ export default function Login() {
                 React.createElement(
                         Link,
                         { href: "/forgot_password" },
-                        'Mot de passe oubli\xE9'
+                        'Mot de passe oubli\xE9\uD83D\uDE22'
                 )
         );
 }

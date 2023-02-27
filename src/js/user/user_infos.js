@@ -134,34 +134,6 @@ export default function User_infos() {
                                                                 )
                                                         )
                                                 )
-                                        ),
-                                        React.createElement(
-                                                Grid,
-                                                { item: true, xs: 8 },
-                                                React.createElement(
-                                                        Box,
-                                                        { className: "full_size_element", style: {
-                                                                        border: 'thin solid red',
-                                                                        borderRadius: 10,
-                                                                        padding: 20
-                                                                } },
-                                                        React.createElement(
-                                                                Stack,
-                                                                { className: "full_size_element", direction: "column", spacing: 3 },
-                                                                React.createElement(
-                                                                        Divider,
-                                                                        { sx: {
-                                                                                        // marginBottom: 10,
-                                                                                } },
-                                                                        React.createElement(
-                                                                                "span",
-                                                                                { style: { fontWeight: "bold", fontSize: 15, color: "red" } },
-                                                                                "DANGER ZONE"
-                                                                        )
-                                                                ),
-                                                                React.createElement(Info_field, { label: "MOT DE PASSE", type: "password", default_value: '' })
-                                                        )
-                                                )
                                         )
                                 )
                         )

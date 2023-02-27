@@ -38,10 +38,10 @@ export default function Warning_component(_ref) {
                                 React.createElement(
                                         "div",
                                         null,
-                                        warning_infos.map(function (info) {
+                                        warning_infos.map(function (info, idx) {
                                                 return React.createElement(
                                                         "span",
-                                                        { className: "danger_list_item" },
+                                                        { key: idx, className: "danger_list_item" },
                                                         React.createElement(CgAirplane, { size: 20 }),
                                                         "  ",
                                                         info

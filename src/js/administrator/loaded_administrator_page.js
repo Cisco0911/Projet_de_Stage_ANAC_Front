@@ -69,7 +69,7 @@ export default function Loaded_administrator_page(_ref) {
                 1: React.createElement(User_admin_section, { users: datas.users, new_users: datas.new_users }),
                 2: React.createElement(Service_admin_section, { services: datas.services }),
                 3: React.createElement(Section_admin_section, { sections: datas.sections }),
-                4: React.createElement(History_admin_section, { histories: datas.history || [] })
+                4: React.createElement(History_admin_section, { history: datas.history || [] })
         };
 
         var selectedSection = adimin_options.find(function (option) {
@@ -125,7 +125,7 @@ export default function Loaded_administrator_page(_ref) {
                                 "div",
                                 { id: "section_display", className: "full_size_element",
                                         style: {
-                                                backgroundColor: "white",
+                                                backgroundColor: "#ffffff00",
                                                 borderRadius: 10
                                         }
                                 },

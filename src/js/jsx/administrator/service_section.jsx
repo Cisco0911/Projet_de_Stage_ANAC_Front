@@ -383,7 +383,9 @@ export default function Service_admin_section({services})
         return(
         <div className="full_size_element"
              style={{
-                     position: "relative"
+                     position: "relative",
+                     backgroundColor: "white",
+                     borderRadius: 10,
              }}
         >
                 <div className="full_size_element p-3" >

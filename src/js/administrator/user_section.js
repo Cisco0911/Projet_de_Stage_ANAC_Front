@@ -682,7 +682,9 @@ export default function User_admin_section(_ref6) {
                 "div",
                 { className: "full_size_element",
                         style: {
-                                position: "relative"
+                                position: "relative",
+                                backgroundColor: "white",
+                                borderRadius: 10
                         }
                 },
                 React.createElement(

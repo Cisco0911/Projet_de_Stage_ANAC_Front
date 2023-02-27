@@ -172,7 +172,7 @@ var Save_component = function Save_component(_ref) {
 
 
                                                                 var onFulfilled = function onFulfilled(res) {
-                                                                        console.log('editor handling ressssssssssssssssssssssssssssssssssss', res);
+                                                                        // console.log('editor handling ressssssssssssssssssssssssssssssssssss', res)
                                                                         setLoading(false);
                                                                         window.Global_State.changeMode();
                                                                         window.show_response("Enregistrement terminé.", "success");
@@ -465,7 +465,7 @@ export default function useEditor(data) {
                 switch (action.type) {
                         case 'reset':
                                 {
-                                        console.log('initData.current', initData.current);
+                                        // console.log('initData.current', initData.current)
 
                                         id.current = -2;
                                         job_id.current = 1;
@@ -556,11 +556,11 @@ export default function useEditor(data) {
                         case 'add_folder':
                                 {
 
-                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder');
+                                        // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
 
                                         var _data = action.job.data;
 
-                                        var new_folder = window.Global_State.createNodeData("ds" + action.job.node_id, "folder", getService(_data.services), false, _data.name, "ds", false, _data.front_parent_type === 'root' ? '0' : _data.front_parent_type + _data.parent_id, "", true, undefined, undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data.section_id), undefined, undefined);
+                                        var new_folder = window.Global_State.createNodeData("ds" + action.job.node_id, "folder", getService(_data.services), false, _data.name, "ds", false, _data.front_parent_type === 'root' ? '0' : _data.front_parent_type + _data.parent_id, "", true, undefined, undefined, undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data.section_id), undefined, undefined);
                                         new_folder.path = window.Global_State.getNewPath(Object.assign({}, new_folder), [].concat(_toConsumableArray(state)), true);
                                         new_folder['onEdit'] = true;
 
@@ -614,7 +614,7 @@ export default function useEditor(data) {
                                                                 new_node.name = new_node.ori_name || new_node.name;
 
                                                                 if (isExistingIn([].concat(_toConsumableArray(now_state)), new_node.name, destination.id)) {
-                                                                        console.log('on_________exist', data);
+                                                                        // console.log('on_________exist', data)
                                                                         new_node.ori_name = new_node.name;
 
                                                                         switch (parseInt(data.on_exist)) {
@@ -772,12 +772,12 @@ export default function useEditor(data) {
                         case 'add_files':
                                 {
 
-                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_files');
+                                        // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_files')
 
                                         var _data2 = action.job.data;
                                         var files = action.job.data.files;
 
-                                        console.log('dataaaaaaaaaaaaaaaaaaas', files, action.job);
+                                        // console.log('dataaaaaaaaaaaaaaaaaaas', files, action.job)
 
                                         var _iteratorNormalCompletion11 = true;
                                         var _didIteratorError11 = false;
@@ -792,8 +792,8 @@ export default function useEditor(data) {
 
                                                         var ext = part_name[part_name.length - 1];
 
-                                                        console.log("idxxxxxxxxxxxxxxxxx_file", files.indexOf(file));
-                                                        var new_file = window.Global_State.createNodeData("f" + id.current, "file", getService(_data2.services), false, file.name, "f", false, _data2.front_parent_type === 'root' ? '0' : _data2.front_parent_type + _data2.parent_id, "", false, ext, undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data2.section_id), file.size, undefined);
+                                                        // console.log("idxxxxxxxxxxxxxxxxx_file", files.indexOf(file))
+                                                        var new_file = window.Global_State.createNodeData("f" + id.current, "file", getService(_data2.services), false, file.name, "f", false, _data2.front_parent_type === 'root' ? '0' : _data2.front_parent_type + _data2.parent_id, "", false, ext, undefined, undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data2.section_id), file.size, undefined);
                                                         new_file.path = window.Global_State.getNewPath(Object.assign({}, new_file), [].concat(_toConsumableArray(state)), true);
                                                         new_file['onEdit'] = true;
                                                         new_file['access_key'] = { job_id: action.job.id, num: files.indexOf(file) };
@@ -861,7 +861,7 @@ export default function useEditor(data) {
                                                         new_node.name = new_node.ori_name || new_node.name;
 
                                                         if (isExistingIn([].concat(_toConsumableArray(now_state)), node.name, destination.id)) {
-                                                                console.log('on_________exist', _data3);
+                                                                // console.log('on_________exist', data)
                                                                 new_node.ori_name = new_node.name;
 
                                                                 switch (parseInt(_data3.on_exist)) {
@@ -929,7 +929,7 @@ export default function useEditor(data) {
                         case 'add_audit':
                                 {
 
-                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_audit');
+                                        // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_audit')
 
                                         var _iteratorNormalCompletion13 = true;
                                         var _didIteratorError13 = false;
@@ -943,7 +943,7 @@ export default function useEditor(data) {
 
                                                         var type = _data4.sub_type !== undefined ? _data4.sub_type : 'audit';
 
-                                                        var new_node = window.Global_State.createNodeData("" + type + job.node_id, "folder", getService(_data4.services), false, _data4.name, type, false, type === 'audit' ? '0' : "audit" + job.data.audit_id, "", true, undefined, type === 'audit' ? window.Global_State.authUser : undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data4.section_id), undefined, undefined);
+                                                        var new_node = window.Global_State.createNodeData("" + type + job.node_id, "folder", getService(_data4.services), false, _data4.name, type, false, type === 'audit' ? '0' : "audit" + job.data.audit_id, "", true, undefined, type === 'audit' ? window.Global_State.authUser : undefined, undefined, undefined, undefined, 'pas encore créé', undefined, parseInt(_data4.section_id), undefined, undefined);
                                                         new_node.path = window.Global_State.getNewPath(Object.assign({}, new_node), [].concat(_toConsumableArray(state)), true);
                                                         new_node['onEdit'] = true;
 
@@ -978,7 +978,7 @@ export default function useEditor(data) {
                         case 'add_fncs':
                                 {
 
-                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder');
+                                        // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
 
                                         var _data5 = action.job.data;
 
@@ -993,8 +993,11 @@ export default function useEditor(data) {
                                                 }).parentId;
                                         });
 
+                                        var opening_date = new Date();
+                                        var formattedDate = opening_date.getFullYear() + "/" + (opening_date.getMonth() + 1).toString().padStart(2, '0') + "/" + opening_date.getDate().toString().padStart(2, '0');
+
                                         for (var i = debut; i < fin + 1; i++) {
-                                                var new_fnc = window.Global_State.createNodeData("fnc" + id.current, "folder", getService(_data5.services), false, "FNC-" + audit.name + "-" + i, "fnc", false, "nonC" + _data5.nonC_id, "", true, undefined, undefined, false, null, 'pas encore créé', _data5.level, parseInt(audit.section_id), undefined, undefined);
+                                                var new_fnc = window.Global_State.createNodeData("fnc" + id.current, "folder", getService(_data5.services), false, "FNC-" + audit.name + "-" + i, "fnc", false, "nonC" + _data5.nonC_id, "", true, undefined, undefined, formattedDate, false, null, 'pas encore créé', _data5.level, parseInt(audit.section_id), undefined, undefined);
                                                 new_fnc.path = window.Global_State.getNewPath(Object.assign({}, new_fnc), [].concat(_toConsumableArray(state)), true);
                                                 new_fnc['onEdit'] = true;
                                                 new_fnc['access_key'] = { job_id: action.job.id, num: i };
@@ -1018,7 +1021,7 @@ export default function useEditor(data) {
                         case 'update_fnc':
                                 {
 
-                                        console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder');
+                                        // console.log('ediiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit_add_folder')
 
                                         var _data6 = action.job.data;
 
@@ -1061,7 +1064,7 @@ export default function useEditor(data) {
             setDatasState = _useReducer2[1]; //.map( node => ({...node, name: 'lol'}) )
 
         function jobs_reducer(state, action) {
-                console.log("executinnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnng", undo.current, redo.current);
+                // console.log("executinnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnng", undo.current, redo.current)
                 if (action.type === "undo") {
                         // setCan_redo(true)
                         // if (undo.current.length === 1) setCan_undo(false)
@@ -1098,7 +1101,7 @@ export default function useEditor(data) {
                                         for (var _iterator14 = state[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
                                                 var job = _step14.value;
 
-                                                console.log('searching joooooooooob key.job_id', job.id, key.job_id);
+                                                // console.log('searching joooooooooob key.job_id', job.id, key.job_id)
                                                 if (job.id === key.job_id) return job;
                                         }
                                 } catch (err) {
@@ -1126,7 +1129,7 @@ export default function useEditor(data) {
                                         for (var _iterator15 = state[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
                                                 var _job = _step15.value;
 
-                                                console.log('searching joooooooooob key', _job.id, key);
+                                                // console.log('searching joooooooooob key', job.id, key)
                                                 if (_job.id === key) return _job;
                                         }
                                 } catch (err) {
@@ -1289,7 +1292,7 @@ export default function useEditor(data) {
                 var custom_filter = function custom_filter(job_list, id) {
                         if (!Number.isInteger(id)) return job_list;
 
-                        console.log("jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist11111", job_list, id);
+                        // console.log("jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist11111", job_list, id)
                         var new_job_list = window.Global_State.copyObject(job_list);
 
                         new_job_list = [].concat(_toConsumableArray(new_job_list)).filter(function (job) {
@@ -1332,6 +1335,8 @@ export default function useEditor(data) {
                                         if (!Number.isInteger(job.copy_job_id)) continue;
                                         if (job.copy_job_id === id) new_job_list = custom_filter(new_job_list, job.id);
                                 }
+
+                                // console.log("neeeeeeeeeeeew_jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist", new_job_list, id)
                         } catch (err) {
                                 _didIteratorError19 = true;
                                 _iteratorError19 = err;
@@ -1347,7 +1352,6 @@ export default function useEditor(data) {
                                 }
                         }
 
-                        console.log("neeeeeeeeeeeew_jooooooooooooooooooooooooob_liiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiist", new_job_list, id);
                         return new_job_list;
                 };
 
@@ -1357,7 +1361,7 @@ export default function useEditor(data) {
                         var new_job_list = [].concat(_toConsumableArray(job_list));
 
                         var jobs_to_del = getJobsByNodeId(id, model);
-                        console.log('jobs_to_del', jobs_to_del);
+                        // console.log('jobs_to_del', jobs_to_del)
                         if (jobs_to_del.size) {
 
                                 jobs_to_del.forEach(function (job_to_del, key) {
@@ -1384,7 +1388,7 @@ export default function useEditor(data) {
                                 });
                         }
 
-                        console.log('children' + id, children);
+                        // console.log('children'+id, children)
                         var _iteratorNormalCompletion20 = true;
                         var _didIteratorError20 = false;
                         var _iteratorError20 = undefined;
@@ -1434,7 +1438,7 @@ export default function useEditor(data) {
                         var root_node = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
                         var root_node_id = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : undefined;
 
-                        console.log('from_id, to_id, all_nodes, on_exist', from_id, to_id, on_exist);
+                        // console.log('from_id, to_id, all_nodes, on_exist', from_id, to_id, on_exist)
 
                         // let root_children = false
 
@@ -1455,7 +1459,7 @@ export default function useEditor(data) {
                                 destination.section_id = current_section.id;
                                 destination.name = current_section.name;
                         }
-                        console.log('destination.section_id111', destination.section_id);
+                        // console.log('destination.section_id111', destination.section_id)
 
                         var new_node = destination ? isExistingIn([].concat(_toConsumableArray(new_all_nodes)).filter(function (node) {
                                 return node.section_id === destination.section_id;
@@ -1570,7 +1574,7 @@ export default function useEditor(data) {
                         } else {
                                 //create add in copy job
 
-                                console.log('destination', destination);
+                                // console.log('destination', destination)
 
                                 var _parent_id = window.Global_State.identifyNode(destination)[0];
 
@@ -1599,7 +1603,7 @@ export default function useEditor(data) {
                                 id.current = id.current - 1;
 
                                 new_node.parentId = destination.id;
-                                console.log('destination.section_id', destination.section_id);
+                                // console.log('destination.section_id', destination.section_id)
                                 new_node.section_id = destination.section_id;
                                 new_node.services = destination.services;
 
@@ -1766,7 +1770,7 @@ export default function useEditor(data) {
                                                 return node.id === "ds" + json_request.id;
                                         });
 
-                                        console.log('mooooooove', json_request);
+                                        // console.log('mooooooove', json_request)
 
                                         if (parseInt(json_request.id) > 0 || to_move.onCopy) {
                                                 var existant_job = getJobsByNodeId(json_request.id, 'App\\Models\\DossierSimple').get('move');
@@ -1812,7 +1816,7 @@ export default function useEditor(data) {
                                                 _new_state2 = _new_state2.map(function (job) {
                                                         if (job.operation === 'add') {
                                                                 if (job.node_model === 'App\\Models\\DossierSimple' && job.node_id === parseInt(json_request.id)) {
-                                                                        console.log('destination', destination);
+                                                                        // console.log('destination', destination)
 
                                                                         var parent_services = destination.type === 'root' ? window.Global_State.getCurrentSection().services : destination.services;
                                                                         var parent_section_id = destination.type === 'root' ? window.Global_State.getCurrentSection().id : destination.section_id;
@@ -1851,20 +1855,20 @@ export default function useEditor(data) {
 
                                         var _json_request = form_to_json(_request2);
 
-                                        console.log('new_state_copy', _new_state3, state);
+                                        // console.log('new_state_copy', new_state, state)
 
                                         var destination_var = localDataState.find(function (node) {
                                                 return node.id === "" + (window.Global_State.parseModelToFrontType(_json_request.destination_type) === 'root' ? '0' : "" + window.Global_State.parseModelToFrontType(_json_request.destination_type) + _json_request.destination_id);
                                         });
                                         var _destination = JSON.parse(JSON.stringify(destination_var));
                                         if (_destination.type === 'root') _destination.section_id = window.Global_State.getCurrentSection().id;
-                                        console.log('destination', _destination, window.Global_State.parseModelToFrontType(_json_request.destination_type));
+                                        // console.log('destination', destination, window.Global_State.parseModelToFrontType(json_request.destination_type))
 
                                         var old_folder = localDataState.find(function (node) {
                                                 return node.id === "ds" + _json_request.id;
                                         });
 
-                                        console.log('cooooooopy', _json_request);
+                                        // console.log('cooooooopy', json_request)
 
                                         // id.current = id.current - 1
                                         var _job5 = void 0;
@@ -1930,11 +1934,9 @@ export default function useEditor(data) {
                                                 etat: 'waiting',
                                                 dependencies: getDependencies(_node3.parent_id, _node3.parent_type)
 
-                                        };
+                                                // console.log('nooooooooooooooooooooooooooooode file', {node})
 
-                                        console.log('nooooooooooooooooooooooooooooode file', { node: _node3 });
-
-                                        _new_state4.push(_job6);
+                                        };_new_state4.push(_job6);
 
                                         job_id.current = job_id.current + 1;
 
@@ -1991,7 +1993,7 @@ export default function useEditor(data) {
                                                 return node.id === "f" + _json_request2.id;
                                         });
 
-                                        console.log('mooooooove', _json_request2);
+                                        // console.log('mooooooove', json_request)
 
                                         if (true) // (parseInt(json_request.id) > 0)  || file_to_move.onCopy
                                                 {
@@ -2032,7 +2034,7 @@ export default function useEditor(data) {
                                                 _new_state6 = _new_state6.map(function (job) {
                                                         if (job.operation === 'add') {
                                                                 if (job.node_model === 'App\\Models\\Fichier' && job.node_id === parseInt(_json_request2.id)) {
-                                                                        console.log('destination', _destination2);
+                                                                        // console.log('destination', destination)
 
                                                                         var parent_services = _destination2.type === 'root' ? window.Global_State.getCurrentSection().services : _destination2.services;
                                                                         var parent_section_id = _destination2.type === 'root' ? window.Global_State.getCurrentSection().id : _destination2.section_id;
@@ -2075,13 +2077,13 @@ export default function useEditor(data) {
                                                 return node.id === "" + (window.Global_State.parseModelToFrontType(_json_request3.destination_type) === 'root' ? '0' : "" + window.Global_State.parseModelToFrontType(_json_request3.destination_type) + _json_request3.destination_id);
                                         });
                                         if (_destination3.type === 'root') _destination3.section_id = window.Global_State.getCurrentSection().id;
-                                        console.log('destination', _destination3, window.Global_State.parseModelToFrontType(_json_request3.destination_type));
+                                        // console.log('destination', destination, window.Global_State.parseModelToFrontType(json_request.destination_type))
 
                                         var old_file = localDataState.find(function (node) {
                                                 return node.id === "f" + _json_request3.id;
                                         });
 
-                                        console.log('cooooooopy', _json_request3);
+                                        // console.log('cooooooopy', json_request)
 
                                         // id.current = id.current - 1
                                         var _job9 = void 0;
@@ -2394,7 +2396,7 @@ export default function useEditor(data) {
                 window.Global_State.EventsManager.on("undo", handleUndo);
                 window.Global_State.EventsManager.on("redo", handleRedo);
 
-                console.log("undooooooooooooooooooooooo", undo.current);
+                // console.log("undooooooooooooooooooooooo", undo.current)
 
                 if (undo.current.length > 0) setCan_undo(true);else setCan_undo(false);
                 if (redo.current.length > 0) setCan_redo(true);else setCan_redo(false);
@@ -2406,13 +2408,13 @@ export default function useEditor(data) {
         });
 
         var update_initData = function update_initData(new_data) {
-                console.log('update_initData');
+                // console.log('update_initData')
 
                 setDatasState({ type: 'update_initData', new_data: new_data });
         };
 
         useEffect(function () {
-                console.log("ooooooooooooooooooooooopeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeen", active, jobs);
+                // console.log("ooooooooooooooooooooooopeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeen", active, jobs)
                 setActive(Boolean(jobs.length));
                 // if (jobs.length > 0 )
                 // {
@@ -2544,7 +2546,7 @@ export default function useEditor(data) {
                 dispatch_job({ type: 'reset' });
         };
 
-        console.log('localDataState', localDataState, initData.current, jobs);
+        // console.log('localDataState', localDataState, initData.current, jobs)
 
         return {
                 save_component: React.createElement(Save_component, { open: active, jobs: jobs, localDataState: localDataState }),

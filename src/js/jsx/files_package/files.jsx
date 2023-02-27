@@ -4,7 +4,7 @@ import React, {useRef, useState, useCallback, useEffect, useMemo} from 'react';
 import { Tree } from "react-arborist";
 import useBack from "./nodeBackend";
 import FileTable from "./content";
-import FileDetails from "./files_details";
+import useFileDetails from "./files_details";
 import "./file_style.css";
 
 import { useSpring, animated } from 'react-spring';
@@ -32,25 +32,27 @@ export default function useGetFiles(Global_research) {
                         {
                                 if(e.ctrlKey && e.key === 'f')
                                 {
-                                        console.log('find node')
-                                        window.Global_State.setOverlay_props( t => (
-                                                {
-                                                        ...t,
-                                                        style:
-                                                        {
-                                                                ...t.style,
-                                                                display: 'flex',
-                                                                alignItems: 'start',
-                                                                justifyContent: 'center'
-                                                        },
-                                                        children: (
-                                                        <div style={{ width: "max-content", marginTop: 15 }} onClick={ e => { e.stopPropagation() } } >
-                                                                {Global_research}
-                                                        </div>
-                                                        ),
+                                        // console.log('find node')
+                                        // window.Global_State.setOverlay_props( t => (
+                                        //         {
+                                        //                 ...t,
+                                        //                 style:
+                                        //                 {
+                                        //                         ...t.style,
+                                        //                         display: 'flex',
+                                        //                         alignItems: 'start',
+                                        //                         justifyContent: 'center'
+                                        //                 },
+                                        //                 children: (
+                                        //                 <div style={{ width: "max-content", marginTop: 15 }} onClick={ e => { e.stopPropagation() } } >
+                                        //                         {Global_research}
+                                        //                 </div>
+                                        //                 ),
+                                        //
+                                        //         }
+                                        // ) )
 
-                                                }
-                                        ) )
+                                        window.Global_State.absolutePopover.open(Global_research)
 
 
                                         setImmediate(
@@ -64,7 +66,7 @@ export default function useGetFiles(Global_research) {
                                 }
                                 else if (e.ctrlKey && e.key.length === 1)
                                 {
-                                        console.log(e)
+                                        // console.log(e)
 
                                         window.Global_State.EventsManager.emit("shortcut", `ctrl_${e.key}`)
 
@@ -83,7 +85,7 @@ export default function useGetFiles(Global_research) {
                         window.Global_State.EventsManager.on('show_on_screen',
                         async (data) =>
                         {
-                                console.log(data);
+                                // console.log(data);
                                 await window.Global_State.setSectionId(data.section_id);
                                 const parent_id = window.Global_State.getNodeDataById(data.id).parentId
                                 await window.Global_State.backend.setCurrentSelectedFolder(parent_id)
@@ -91,7 +93,7 @@ export default function useGetFiles(Global_research) {
                                 setTimeout(
                                 () =>
                                 {
-                                        console.log("scroooooooooooooooooooooooooooool")
+                                        // console.log("scroooooooooooooooooooooooooooool")
                                         // const row = document.getElementById(`row-${data.id}`)
                                         // row.click()
                                         // const parent = document.querySelector(".content_xl_size_content")
@@ -139,11 +141,14 @@ export default function useGetFiles(Global_research) {
 
         const dataTable = useMemo(() => (<FileTable  />), [window.Global_State.backend.selectedNode.model])
 
+        const dataDetail = useFileDetails()
+        window.Global_State.showDetails = dataDetail.showDetails
+
         return (
         {
                 fileTree: window.Global_State.hasSection ? <FileTree data = {window.Global_State.backend.data} /> : <div/>,
                 fileTable: window.Global_State.hasSection ? dataTable : <div/> ,
-                fileDetails: window.Global_State.hasSection ? <FileDetails/> : <div/>,
+                fileDetails: window.Global_State.hasSection ? dataDetail.detailsComponent : <div/>,
         }
         )
 
@@ -230,7 +235,7 @@ function FileTree({data}) {
 
 
 
-                        console.log(expanded);
+                        // console.log(expanded);
 
                         window.Global_State.EventsManager.emit("setExpanded", expanded)
                 }
@@ -245,7 +250,7 @@ function FileTree({data}) {
                 useEffect(
                 () =>
                 {
-                        window.Global_State.EventsManager.on(`toggle${node.id}`, e => { console.log(`toggle${node.id}`); handleDbClick(e) })
+                        window.Global_State.EventsManager.on(`toggle${node.id}`, e => { /*console.log(`toggle${node.id}`);*/ handleDbClick(e) })
                         return () =>
                         {
                                 window.Global_State.EventsManager.off(`toggle${node.id}`);
@@ -296,12 +301,12 @@ function FileTree({data}) {
         //         // setExpanded( [nodeId] )
         // }
 
-        console.log('data22222', data)
+        // console.log('data22222', data)
 
         useEffect(
         () =>
         {
-                console.log('expand_change', expanded)
+                // console.log('expand_change', expanded)
         }, [expanded]
         )
 

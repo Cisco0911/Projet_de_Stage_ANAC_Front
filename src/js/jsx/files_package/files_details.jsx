@@ -1,6 +1,13 @@
 /* eslint-disable import/first */
 
 import React, {useEffect, useState} from 'react';
+import {AppBar, Chip, Dialog, DialogContent, DialogContentText, DialogTitle, Slide, Toolbar} from "@mui/material";
+import Stack from "@mui/material/Stack";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+
+import {AiFillCloseSquare} from "react-icons/ai";
 
 //     node: 
 // {
@@ -20,143 +27,283 @@ import React, {useEffect, useState} from 'react';
 // }
 
 
-export default function FileDetails() {
+const Transition = React.forwardRef(function Transition(props, ref) {
+        return <Slide direction="up" ref={ref} {...props} />;
+});
 
-
-    const [selectedRow, setSelectedRow] = useState(null)
-
-    window.Global_State.EventsManager.on('viewDetailEnabled', (data) => { console.log('viewDetailEnabled'); setSelectedRow(data) })
-
-    useEffect(
-        () =>
+function FileDetail({node, open, handleClose})
+{
+        const jsonDetails =
         {
-            return () =>
-            {
-                window.Global_State.EventsManager.off('viewDetailEnabled');
-            }
-        },
-        []
-    )
-
-    const data = selectedRow !== null ? window.Global_State.getNodeDataById(selectedRow.id) : null
-
-    let Type
-
-    if (selectedRow !== null && data !== null) {
-
-        console.log(selectedRow)
-        console.log(data)
-
-        switch (data.type) {
-            case "audit":
-                Type = "Audit"
-                break;
-            case "fnc":
-                Type = "Non-Conformite"
-                break;
-            case "ds":
-                Type = "Dossier"
-                break;
-            case "checkList":
-                Type = "CheckList"
-                break;
-            case "dp":
-                Type = "Dossier Preuve d'Audit"
-                break;
-            case "nonC":
-                Type = "Dossier des Non-Conformités"
-                break;
-
-            default:
-                Type = "Unknown"
-                break;
+                general:
+                {
+                        NOM: node.name,
+                        CHEMIN: node.path,
+                        "CREE LE": node.created_at.replace("T", " À "),
+                        VALIDE: node.is_validated ? `OUI par ${ node.validator ? `${node.validator.name} ${node.validator.second_name}` : 'inconnu' }` : "NON",
+                        SERVICES: node.services.reduce((acc, service) => acc ? `${acc}, ${service.name}` : service.name, "")
+                }
         }
 
-    }
+        switch (node.type)
+        {
+                case 'audit':
+                        jsonDetails.specific =
+                        {
+                                TYPE: "AUDIT",
+                                "RESPONSABLE AUDIT":
+                                <b style={{ color: "blue" }} >
+                                        {`${node.ra.name} ${node.ra.second_name}`}
+                                </b>,
+                        }
 
-    return (
-    <React.Fragment>
-            {
-                    selectedRow !== null && data !== null ?
-                    <div className="sidebar" id="view-detail">
-                            <div className="sidebar-header">
-                                    <h4>View Detail</h4>
-                                    <a href="#" className="btn btn-light btn-floating sidebar-close-btn">
-                                            <i className="ti-angle-right"></i>
-                                    </a>
-                            </div>
-                            <div className="sidebar-content">
-                                    <figure className="avatar mb-4">
-                            <span className="avatar-title bg-info-bright text-info rounded-pill">
-                                <i className="ti-file"></i>
-                            </span>
-                                    </figure>
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Nom:</div>
-                                            <div className="col-8">{data.name}</div>
-                                    </div>
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Type:</div>
-                                            <div className="col-8">{data.type === "f" ? window.Global_State.getType(data.ext) : Type}</div>
-                                    </div>
-                                    {data.type === "checkList" || data.type === "dp" || data.type === "nonC" ?
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Audit:</div>
-                                            <div className="col-8">{window.Global_State.getNodeDataById(data.parentId).name}</div>
-                                    </div> : null}
-                                    {data.type === "f" ?
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Taille:</div>
-                                            <div className="col-8">{window.Global_State.sizeFormater(data.taille, false)}</div>
-                                    </div> : null}
-                                    {data.type === "audit" ?
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >RA:</div>
-                                            <div className="col-8">{data.ra.name + " " + data.ra.second_name}</div>
-                                    </div> : null}
-                                    {data.type === "fnc" ?
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Level:</div>
-                                            <div className="col-8 text-danger">{"Level " + data.level}</div>
-                                    </div> : null}
-                                    {data.type === "fnc" ?
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Revision:</div>
-                                            <div className={`col-8 ${data.review_date !== null ? 'text-success' : 'text-warning'}`}>{`${data.review_date !== null ? data.review_date : '____/__/__'}`}</div>
-                                    </div> : null}
-                                    {data.type === "fnc" ?
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Clôturé:</div>
-                                            <div className="col-8">
-                                                    {
-                                                            data.isClosed ? <div className="badge bg-success-bright text-success">true</div> : <div className="badge bg-danger-bright text-danger">false</div>
-                                                    }
-                                            </div>
-                                    </div> : null}
-                                    {data.isClosed === 1 ?
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Date de cloture:</div>
-                                            <div className="col-8">
-                                                    2022-11-05
-                                            </div>
-                                    </div> : null}
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Créé le:</div>
-                                            <div className="col-8 text-primary">{data.created_at}</div>
-                                    </div>
-                                    <div className="row mb-3">
-                                            <div className="col-4" style = {{fontWeight: 'bold'}} >Modifié le:</div>
-                                            <div className="col-8 text-success">{data.created_at}</div>
-                                    </div>
-                            </div>
-                            <div className="sidebar-footer">
-                                    <button className="btn btn-lg btn-block btn-primary">
-                                            <i className="ti-share mr-3"></i> Share
-                                    </button>
-                            </div>
-                    </div> : null
-            }
-    </React.Fragment>
+                        break
+                case 'checkList':
+                        jsonDetails.specific =
+                        {
+                                TYPE: "CHECKLIST",
+                        }
+
+                        break
+                case 'dp':
+                        jsonDetails.specific =
+                        {
+                                TYPE: "DOSSIER PREUVE",
+                        }
+
+                        break
+                case 'nonC':
+                        jsonDetails.specific =
+                        {
+                                TYPE: "DOSSIER NC",
+                        }
+
+                        break
+                case 'fnc':
+                        let levelComponent
+                        switch ( parseInt(node.level) )
+                        {
+                                case 1:
+                                        levelComponent = <Chip label={node.level} variant={"filled"} color={"error"} />
+                                        break
+                                case 2:
+                                        levelComponent = <Chip label={node.level} variant={"filled"} color={"warning"} />
+                                        break
+                                case 3:
+                                        levelComponent = <Chip label={node.level} variant={"filled"} color={"default"} />
+                                        break
+
+                        }
+
+
+                        jsonDetails.specific =
+                        {
+                                TYPE: "NON-CONFORMITÉ",
+                                NIVEAU: levelComponent,
+                                "DATE DE REVISION": node.review_date || "____/__/__",
+                                STATUT: node.isClosed ?
+                                <div className="badge bg-success-bright text-success" >Clôturé</div> :
+                                <div className="badge bg-danger-bright text-danger" >Non-Clôturé</div>,
+                        }
+
+                        break
+                case 'ds':
+                        jsonDetails.specific =
+                        {
+                                TYPE: "DOSSIER SIMPLE",
+                        }
+
+                        break
+                case 'f':
+                        jsonDetails.specific =
+                        {
+                                TYPE: "FICHIER",
+                        }
+
+                        break
+                default:
+                        break;
+        }
+
+        const generalDetails = []
+
+        for (const key in jsonDetails.general)
+        {
+                const value = jsonDetails.general[key]
+
+                generalDetails.push(
+                <Stack direction={"row"} spacing={1} key={key}
+                       style={{
+                               whiteSpace: "nowrap",
+                               overflow: "hidden",
+                               textOverflow: "ellipsis",
+                               display: "block"
+                       }}
+                >
+                        <b style={{
+                                height: "fit-content"
+                        }} > {key}: </b>
+                        {
+                                typeof value === "string" ?
+                                <b title={value} > {value} </b> : value
+                        }
+                </Stack>
+                )
+        }
+        const specificDetails = []
+
+        for (const key in jsonDetails.specific)
+        {
+                const value = jsonDetails.specific[key]
+
+                specificDetails.push(
+                <Stack direction={"row"} spacing={1} key={key} alignItems={"end"}
+                       style={{
+                               whiteSpace: "nowrap",
+                               overflow: "hidden",
+                               textOverflow: "ellipsis",
+                               display: "block"
+                       }}
+                >
+                        <b style={{
+                                height: "fit-content"
+                        }} > {key}: </b>
+                        {
+                                typeof value === "string" ?
+                                <b title={value} > {value} </b> : value
+                        }
+                </Stack>
+                )
+        }
+
+        return (
+                <Dialog
+                fullScreen={ window.innerWidth < 576 }
+                open={open}
+                TransitionComponent={Transition}
+                onClose={handleClose}
+                aria-labelledby="FileDetail-dialog-title"
+                aria-describedby="FileDetail-dialog-description"
+                >
+                        {
+                                window.innerWidth > 576 ?
+                                <React.Fragment>
+                                        <DialogTitle id="FileDetail-dialog-title">
+                                                {node.name}
+                                        </DialogTitle>
+                                        <DialogContent>
+                                                <Stack direction={"column"} spacing={5} >
+                                                        <Divider textAlign={"center"} > GENERAL </Divider>
+                                                        <Stack direction={"column"} spacing={3} >
+                                                                { generalDetails }
+                                                        </Stack>
+                                                        <Divider textAlign={"center"} > SPECIFIQUE </Divider>
+                                                        <Stack direction={"column"} spacing={3} >
+                                                                { specificDetails }
+                                                        </Stack>
+                                                </Stack>
+                                        </DialogContent>
+                                </React.Fragment>
+                                :
+                                <React.Fragment>
+                                        <AppBar sx={{ position: 'relative' }}>
+                                                <Toolbar>
+                                                        <IconButton
+                                                        edge="start"
+                                                        color="inherit"
+                                                        onClick={handleClose}
+                                                        aria-label="close"
+                                                        >
+                                                                <AiFillCloseSquare size={24} />
+                                                        </IconButton>
+                                                        <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                                                                {node.name}
+                                                        </Typography>
+                                                </Toolbar>
+                                        </AppBar>
+                                        <Stack direction={"column"} spacing={5} margin={3} >
+                                                <Divider textAlign={"center"} > GENERAL </Divider>
+                                                <Stack direction={"column"} spacing={3} >
+                                                        { generalDetails }
+                                                </Stack>
+                                                <Divider textAlign={"center"} > SPECIFIQUE </Divider>
+                                                <Stack direction={"column"} spacing={3} >
+                                                        { specificDetails }
+                                                </Stack>
+                                        </Stack>
+                                </React.Fragment>
+                        }
+                </Dialog>
         )
+}
+
+export default function useFileDetails()
+{
+        const [open, setOpen] = useState(false)
+        const [nodeId, setNodeId] = useState(null)
+
+        const showDetails = (id) =>
+        {
+                setNodeId(id)
+                setOpen(true)
+        }
+
+        const handleClose = () =>
+        {
+                setOpen(false)
+                setNodeId(null)
+        }
+
+        let detailsComponent = null
+
+        if (nodeId)
+        {
+                const node = window.Global_State.getNodeDataById(nodeId)
+
+                if (node)
+                {
+                        detailsComponent = <FileDetail node={node} open={open} handleClose={handleClose} />
+                }
+                else
+                {
+                        detailsComponent =
+                        <Dialog
+                        open={open}
+                        onClose={handleClose}
+                        aria-labelledby="not_found-dialog-title"
+                        aria-describedby="not_found-dialog-description"
+                        >
+                                <DialogTitle id="not_found-dialog-title">
+                                        {"Fichier introuvable"}
+                                </DialogTitle>
+                                <DialogContent>
+                                        <DialogContentText id="not_found-dialog-description">
+                                                Aucun détail
+                                        </DialogContentText>
+                                </DialogContent>
+                        </Dialog>
+                }
+        }
+        else
+        {
+                detailsComponent =
+                <Dialog
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="invalid_id-dialog-title"
+                aria-describedby="invalid_id-dialog-description"
+                >
+                        <DialogTitle id="invalid_id-dialog-title">
+                                {"Id invalide"}
+                        </DialogTitle>
+                        <DialogContent>
+                                <DialogContentText id="invalid_id-dialog-description">
+                                        Aucun détail
+                                </DialogContentText>
+                        </DialogContent>
+                </Dialog>
+        }
+
+        return { showDetails, detailsComponent }
 }
 

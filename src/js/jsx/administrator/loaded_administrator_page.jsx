@@ -79,7 +79,7 @@ export default function Loaded_administrator_page({datas})
                 1: <User_admin_section users={datas.users} new_users={datas.new_users} />,
                 2: <Service_admin_section services={datas.services} />,
                 3: <Section_admin_section sections={datas.sections} />,
-                4: <History_admin_section histories={datas.history || []} />,
+                4: <History_admin_section history={datas.history || []} />,
         }
 
         const selectedSection = adimin_options.find( option => option.isSelected === true ).id
@@ -123,7 +123,7 @@ export default function Loaded_administrator_page({datas})
                                 </div>
                                 <div id="section_display" className="full_size_element"
                                      style={{
-                                             backgroundColor: "white",
+                                             backgroundColor: "#ffffff00",
                                              borderRadius: 10,
                                      }}
                                 >

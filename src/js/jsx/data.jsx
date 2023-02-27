@@ -16,7 +16,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import Button from 'react-bootstrap/Button';
 
 import toast from "react-hot-toast";
-import {Box, Grow, Popper} from "@mui/material";
+import {Box, Fade, Grow, Popover, Popper} from "@mui/material";
 import {Queue} from "@mui/icons-material";
 import {useSpring, animated} from "react-spring";
 import {Collapse} from "react-bootstrap";
@@ -47,46 +47,6 @@ const options = {
                 };
         },
 };
-
-// const echo = new Echo(options);
-
-// let echosHandler
-
-// echo.channel(`nodeUpdate`).listen( 'NodeUpdateEvent', (data) => {
-//   if (data.operation === 'add')
-//   {
-//     console.log('emitting echo')
-//     console.log(data)
-//     const ids = new FormData
-//     data.node.forEach(element => {
-//       console.log(element)
-//       ids.append('ids[]', element)
-//     });
-//     console.log(ids.get('ids[]'))
-
-//     http.post('getDatasByIds', ids)
-//     .then( res =>
-//       {
-//         console.log(res)
-
-//         echosHandler('NodeUpdateEvent', {...data, 'node': res.data})
-//       }
-//     )
-//     .catch( err =>
-//       {
-//         console.log(err)
-//       }
-//     )
-//   }
-//   else if(data.operation === 'delete')
-//   {
-//     console.log('emitting echo')
-//     echosHandler('NodeUpdateEvent', data)
-//   }
-// });
-
-
-let isLogged = false
 
 
 export const getFromDataBase = async () =>
@@ -133,100 +93,138 @@ export const getFromDataBase = async () =>
                 }
 
 
-        await http
-                .get("user")
-                .then(response => {Datas.authUser = response.data})
+        // await http
+        //         .get("user")
+        //         .then(response => {Datas.authUser = response.data})
+        //
+        // await http
+        //         .get("get_ss")
+        //         .then(response => { Datas.status.sections = response.status; Datas.data.sections = response.data; })
+        //         .catch(error => Datas.errors.sections = error);
+        //
+        // await http
+        //         .get("get_audits")
+        //         .then(response => { Datas.status.audits = response.status; Datas.data.audits = response.data; })
+        //         .catch(error => Datas.errors.audits = error);
+        //
+        // await http
+        //         .get("get_checkLists")
+        //         .then(response => { Datas.status.checkLists = response.status; Datas.data.checkLists = response.data; })
+        //         .catch(error => Datas.errors.checkLists = error);
+        //
+        // await http
+        //         .get("get_Dps")
+        //         .then(response => { Datas.status.dps = response.status; Datas.data.dps = response.data; })
+        //         .catch(error => Datas.errors.dps = error);
+        //
+        // await http
+        //         .get("get_NonCs")
+        //         .then(response => { Datas.status.nonCs = response.status; Datas.data.nonCs = response.data; })
+        //         .catch(error => Datas.errors.nonCs = error);
+        //
+        // await http
+        //         .get("get_fncs")
+        //         .then(response => { Datas.status.fncs = response.status; Datas.data.fncs = response.data; })
+        //         .catch(error => Datas.errors.fncs = error);
+        //
+        // await http
+        //         .get("get_ds")
+        //         .then(response => { Datas.status.ds = response.status; Datas.data.ds = response.data; })
+        //         .catch(error => Datas.errors.ds = error);
+        //
+        // await http
+        //         .get("get_fs")
+        //         .then(response => { Datas.status.fs = response.status; Datas.data.fs = response.data; })
+        //         .catch(error => Datas.errors.fs = error);
+        //
+        // await http
+        //         .get("get_services")
+        //         .then(response => { Datas.status.services = response.status; Datas.data.services = response.data; })
+        //         .catch(error => Datas.errors.services = error);
 
-        await http
-                .get("get_ss")
-                .then(response => { Datas.status.sections = response.status; Datas.data.sections = response.data; })
-                .catch(error => Datas.errors.sections = error);
 
-        await http
-                .get("get_audits")
-                .then(response => { Datas.status.audits = response.status; Datas.data.audits = response.data; })
-                .catch(error => Datas.errors.audits = error);
+        let data
 
-        await http
-                .get("get_checkLists")
-                .then(response => { Datas.status.checkLists = response.status; Datas.data.checkLists = response.data; })
-                .catch(error => Datas.errors.checkLists = error);
+        await http.post("get_data", {})
+        .then( res => data = res.data )
+        .catch(error => console.log(error));
 
-        await http
-                .get("get_Dps")
-                .then(response => { Datas.status.dps = response.status; Datas.data.dps = response.data; })
-                .catch(error => Datas.errors.dps = error);
+        // console.log("Dataaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaas", data)
 
-        await http
-                .get("get_NonCs")
-                .then(response => { Datas.status.nonCs = response.status; Datas.data.nonCs = response.data; })
-                .catch(error => Datas.errors.nonCs = error);
-
-        await http
-                .get("get_fncs")
-                .then(response => { Datas.status.fncs = response.status; Datas.data.fncs = response.data; })
-                .catch(error => Datas.errors.fncs = error);
-
-        await http
-                .get("get_ds")
-                .then(response => { Datas.status.ds = response.status; Datas.data.ds = response.data; })
-                .catch(error => Datas.errors.ds = error);
-
-        await http
-                .get("get_fs")
-                .then(response => { Datas.status.fs = response.status; Datas.data.fs = response.data; })
-                .catch(error => Datas.errors.fs = error);
-
-        await http
-                .get("get_services")
-                .then(response => { Datas.status.services = response.status; Datas.data.services = response.data; })
-                .catch(error => Datas.errors.services = error);
-
-        console.log(Datas)
-
-        // echo.private(`validating.${Datas.authUser.id}`).listen('RemovalEvent', (data) => {
-        //   toast((t) => (
-        //     <div>
-        //       <div  >
-        //         Confirmer la suppression de  : {data.node_type} <b>{data.node.name}</b>
-        //       </div>
-        //       <div
-        //           style = {
-        //               {
-        //                 display: 'flex',
-        //                 justifyContent: 'center',
-        //                 position: 'relative',
-        //                 alignItems: 'center',
-        //               }
-        //           }
-        //           >
-        //           <Button style={{ width: 85, height: 35, alignItems: 'center', justifyContent: 'center', }}  variant="primary" onClick={() => toast.dismiss(t.id)}>
-        //               Dismiss
-        //           </Button>
-        //       </div>
-        //     </div>
-        //   ),
-        //   {
-        //     position: "top-right",
-        //     style: {
-        //       border: '1px solid #713200',
-        //       padding: '16px',
-        //       color: '#713200',
-        //     },
-        //     duration: 9999999999999999,
-        //   }
-        //   );
-        // });
-
-        return Datas
+        return data
 
 }
 
+function useAbsolutePopover()
+{
+        const [isOpen, setIsOpen] = useState(false)
+        const [anchorEl, setAnchorEl] = useState(null);
+        const [content, setContent] = useState(null);
+
+        function open(child, origin = null)
+        {
+                // console.log("origiiiiiiiiiiiinnnnnnnnn", origin)
+                if (origin) setAnchorEl(origin)
+                setContent(child)
+                setIsOpen(true)
+        }
+
+        function close()
+        {
+                setIsOpen(false)
+                setTimeout( () => setAnchorEl(null), 500 )
+        }
+
+        const paperStyle = anchorEl ?
+        {
+                backgroundColor: '#ffffff00',
+                boxShadow: 'none',
+                overflow: 'visible',
+        }
+        :
+        {
+                display: "contents"
+        }
+
+        const popover =
+        <Popover
+                open={isOpen}
+                anchorReference={ anchorEl ? "anchorEl" : "none" }
+                anchorEl={anchorEl}
+                onClose={close}
+                PaperProps={{
+                        style: paperStyle
+                }}
+                anchorOrigin={{
+                        vertical: anchorEl ? 'bottom' : 'top',
+                        horizontal: 'center',
+                }}
+                transformOrigin={{
+                        vertical: anchorEl ? "top" : 'center',
+                        horizontal: 'center',
+                }}
+                // TransitionComponent={Fade}
+        >
+                <div className={`${ anchorEl ? '' : "d-flex justify-content-center align-items-start" }`}
+                     style={{
+                             marginTop: !anchorEl ? 15 : 0,
+                             width: anchorEl ? "fit-content" : "100%",
+                             height: anchorEl ? "fit-content" : "100%",
+                             animation: "fadeMe 0.5s"
+                        }}
+                     onClick={close}
+                >
+                        {content}
+                </div>
+        </Popover>
+
+        return {open, close, popover}
+}
 
 export default function useGetData(TheDatas)
 {
 
-        console.log('checking', TheDatas)
+        // console.log('checking', TheDatas)
 
 
         const [authUser, updateAuthUser] = useState(TheDatas.authUser)
@@ -242,11 +240,11 @@ export default function useGetData(TheDatas)
                         switch (tag) {
                                 case 'updateAuthUserInfo':
                                 {
-                                        console.log('updateAuthUserInfo')
+                                        // console.log('updateAuthUserInfo')
                                         await http.get('user')
                                         .then(res =>
                                                 {
-                                                        console.log(res)
+                                                        // console.log(res)
                                                         updateAuthUser(res.data)
                                                 }
                                         )
@@ -259,24 +257,24 @@ export default function useGetData(TheDatas)
 
                                         do {
                                                 const data = node_events_queue.current.shift()
-                                                console.log('start', data, node_events_queue.current)
+                                                // console.log('start', data, node_events_queue.current)
                                                 // return
 
                                                 if (data.operation === 'add')
                                                 {
-                                                        console.log('emitting echo')
-                                                        console.log(data)
+                                                        // console.log('emitting echo')
+                                                        // console.log(data)
                                                         const ids = new FormData
                                                         data.node.map(element => {
-                                                                console.log(element)
+                                                                // console.log(element)
                                                                 ids.append('ids[]', element)
                                                         });
-                                                        console.log(ids.get('ids[]'))
+                                                        // console.log(ids.get('ids[]'))
 
                                                         await http.post('getDatasByIds', ids)
                                                         .then( res =>
                                                         {
-                                                                console.log('getDatasByIds_add', res)
+                                                                // console.log('getDatasByIds_add', res)
 
                                                                 setImmediate( () => { dispatch({type: 'add', data: {...data, 'node': res.data}}) } )
                                                         }
@@ -289,23 +287,23 @@ export default function useGetData(TheDatas)
                                                 }
                                                 else if(data.operation === 'delete')
                                                 {
-                                                        console.log('emitting echo')
+                                                        // console.log('emitting echo')
                                                         setImmediate( () => { dispatch({type: 'delete', data}) } )
                                                 }
                                                 else if(data.operation === 'update')
                                                 {
-                                                        console.log('echo update ')
+                                                        // console.log('echo update ')
 
                                                         const ids = new FormData
-                                                        console.log('data.node', data.node)
+                                                        // console.log('data.node', data.node)
                                                         data.node.map(element => {
-                                                                console.log(element)
+                                                                // console.log(element)
                                                                 ids.append('ids[]', element)
                                                         });
                                                         await http.post('getDatasByIds', ids)
                                                         .then( res =>
                                                         {
-                                                                console.log('getDatasByIds_update', res)
+                                                                // console.log('getDatasByIds_update', res)
 
                                                                 setImmediate( () => { dispatch({type: 'update', data: {...data, 'node': res.data}}) } )
                                                         }
@@ -356,108 +354,6 @@ export default function useGetData(TheDatas)
 
                 }
 
-
-        // const handle_node_events = () =>
-        // {
-        //         handling_node_events.current = true
-        //
-        //         for (const event_data of node_events_queue.current)
-        //         {
-        //                 const data = event_data
-        //
-        //                 if (data.operation === 'add')
-        //                 {
-        //                         console.log('emitting echo')
-        //                         console.log(data)
-        //                         const ids = new FormData
-        //                         data.node.map(element => {
-        //                                 console.log(element)
-        //                                 ids.append('ids[]', element)
-        //                         });
-        //                         console.log(ids.get('ids[]'))
-        //
-        //                         http.post('getDatasByIds', ids)
-        //                         .then( res =>
-        //                         {
-        //                                 console.log('getDatasByIds', res)
-        //
-        //                                 dispatch({type: 'add', data: {...data, 'node': res.data}})
-        //                         }
-        //                         )
-        //                         .catch( err =>
-        //                         {
-        //                                 console.log(err)
-        //                         }
-        //                         )
-        //                 }
-        //                 else if(data.operation === 'delete')
-        //                 {
-        //                         console.log('emitting echo')
-        //                         // while (true) {
-        //                         //         if (!wait_for_update.current) {
-        //                         //                 console.log('deleteeeee')
-        //                         //                 dispatch({type: 'delete', data})
-        //                         //                 break
-        //                         //         }
-        //                         // }
-        //
-        //                 }
-        //                 else if(data.operation === 'update')
-        //                 {
-        //                         console.log('echo update ')
-        //
-        //                         const ids = new FormData
-        //                         console.log('data.node', data.node)
-        //                         data.node.map(element => {
-        //                                 console.log(element)
-        //                                 ids.append('ids[]', element)
-        //                         });
-        //                         wait_for_update.current = true
-        //                         http.post('getDatasByIds', ids)
-        //                         .then( res =>
-        //                         {
-        //                                 console.log(res)
-        //
-        //                                 dispatch({type: 'update', data: {...data, 'node': res.data}})
-        //                                 wait_for_update.current = false
-        //                         }
-        //                         )
-        //                         .catch( err =>
-        //                         {
-        //                                 console.log(err)
-        //                                 wait_for_update.current = false
-        //                         }
-        //                         )
-        //                 }
-        //                 else if (data.operation === 'move')
-        //                 {
-        //                         console.log('emitting move echo', data)
-        //                         const ids = new FormData
-        //                         data.node.map(element => {
-        //                                 console.log(element)
-        //                                 ids.append('ids[]', element)
-        //                         });
-        //                         console.log(ids.get('ids[]'))
-        //
-        //                         http.post('getDatasByIds', ids)
-        //                         .then( res =>
-        //                         {
-        //                                 console.log(res)
-        //
-        //                                 dispatch({type: 'move', data: {...data, 'node': res.data}})
-        //                         }
-        //                         )
-        //                         .catch( err =>
-        //                         {
-        //                                 console.log(err)
-        //                         }
-        //                         )
-        //                 }
-        //         }
-        //
-        //         handling_node_events.current = false
-        // }
-
         const [expanded, setExpanded] = useState(["0"])
 
         useEffect(
@@ -470,7 +366,7 @@ export default function useGetData(TheDatas)
                                 echo.private(`nodeUpdate.${service.id}`).listen( 'NodeUpdateEvent', (data) =>
                                 {
                                         node_events_queue.current.push(data)
-                                        console.log('NodeUpdateEvent', node_events_queue.current, data)
+                                        // console.log('NodeUpdateEvent', node_events_queue.current, data)
                                         if (!handling_node_events.current) echosHandler('handle_node_events')
                                 }
                                 );
@@ -487,7 +383,7 @@ export default function useGetData(TheDatas)
                         echo.private(`user.${authUser.id}`).listen('AuthUserUpdate',
                                 () =>
                                 {
-                                        console.log('AuthUserUpdate')
+                                        // console.log('AuthUserUpdate')
                                         echosHandler('updateAuthUserInfo')
                                 }
                         )
@@ -495,7 +391,7 @@ export default function useGetData(TheDatas)
                         echo.private(`user.${authUser.id}`).notification((data) => {
                                 if(data.type === 'AskPermission')
                                 {
-                                        console.log(data)
+                                        // console.log(data)
 
                                         echosHandler('updateAuthUserInfo')
 
@@ -511,7 +407,7 @@ export default function useGetData(TheDatas)
                                 }
                                 else if (data.type === "Information")
                                 {
-                                        console.log('Informationnnnnnnnnnnnnn!!!!!', data)
+                                        // console.log('Informationnnnnnnnnnnnnn!!!!!', data)
 
                                         const attachment = JSON.parse(data.attachment)
                                         const attachment_items = []
@@ -571,7 +467,7 @@ export default function useGetData(TheDatas)
                                 }
                                 else if (data.type === 'FncReviewNotification')
                                 {
-                                        console.log(data)
+                                        // console.log(data)
 
                                         // const ids = new FormData
                                         //
@@ -632,19 +528,6 @@ export default function useGetData(TheDatas)
         )
 
 
-
-
-        // sections: [],
-        //           audits: [],
-        //           checkLists: [],
-        //           dps: [],
-        //           nonCs: [],
-        //           fncs: [],
-        //           fs: [],
-        //           ds: [],
-
-        // console.log(TheDatas)
-
         const haveRightToSee = (elementServices, authServices) =>
         {
                 for(let authService of authServices)
@@ -665,7 +548,7 @@ export default function useGetData(TheDatas)
         Data_Base.data.ds = Data_Base.data.ds.filter((element) => { return haveRightToSee(element.services, Data_Base.authUser.services) }).map((visibleElement) => {return visibleElement})
         Data_Base.data.fs = Data_Base.data.fs.filter((element) => { return haveRightToSee(element.services, Data_Base.authUser.services) }).map((visibleElement) => {return visibleElement})
 
-        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, isClosed, review_date, created_at, level, section_id, taille, url, is_validated, validator_id)
+        function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, opening_date, isClosed, review_date, created_at, level, section_id, taille, url, is_validated, validator_id, validator = null)
         {
 
 
@@ -681,16 +564,18 @@ export default function useGetData(TheDatas)
                         validator_id,
                         taille,
                         level,
-                        created_at,
+                        created_at: created_at && created_at.substring(0, 19),
                         ra,
                         hasChildren,
                         isRoot,
                         parentId,
                         path,
                         isClosed,
+                        opening_date,
                         review_date,
                         ext,
                         url,
+                        validator,
                 }
 
         }
@@ -809,7 +694,7 @@ export default function useGetData(TheDatas)
 
                 if (new_node.type === 'root')
                 {
-                        console.log('sectionnnnnnnnnnnnnnnnnnnnnnnnnn', sections.get(1), new_node)
+                        // console.log('sectionnnnnnnnnnnnnnnnnnnnnnnnnn', sections.get(1), new_node)
                         return `${sections.get(new_node.section_id).name}:`
                 }
 
@@ -929,7 +814,7 @@ export default function useGetData(TheDatas)
 
                 up_to_date_node.path = getNewPath(up_to_date_node, current_state, true)
 
-                console.log('current_state', current_state)
+                // console.log('current_state', current_state)
 
                 let new_state = JSON.parse( JSON.stringify( current_state ) ).map(
                 current_node =>
@@ -939,7 +824,7 @@ export default function useGetData(TheDatas)
                 }
                 )
 
-                console.log('new_state', new_state)
+                // console.log('new_state', new_state)
 
                 let final_state = JSON.parse( JSON.stringify( new_state ) )
 
@@ -964,7 +849,7 @@ export default function useGetData(TheDatas)
 
                 // makeNodeData(0, "Racine", "root", true, -1, "", true)
 
-                let allDataAsNodeData = [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, undefined, -1)]
+                let allDataAsNodeData = [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, undefined, undefined, -1)]
 
                 const audits = Data_Base.data.audits.map((audit) => { return(
                         {
@@ -1125,13 +1010,15 @@ export default function useGetData(TheDatas)
                                         audit.user,
                                         undefined,
                                         undefined,
-                                        audit.created_at.substring(0, 10) + " A " + audit.created_at.substring(11, 19),
+                                        undefined,
+                                        audit.created_at,
                                         undefined,
                                         audit.section_id,
                                         undefined,
                                         undefined,
                                         audit.is_validated,
-                                        audit.validator_id
+                                        audit.validator_id,
+                                        audit.validator,
                                 )
                         )
                 }
@@ -1154,13 +1041,15 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         undefined,
                                         undefined,
-                                        checkList.created_at.substring(0, 10) + " A " + checkList.created_at.substring(11, 19),
+                                        undefined,
+                                        checkList.created_at,
                                         undefined,
                                         checkList.section_id,
                                         undefined,
                                         undefined,
                                         checkList.is_validated,
-                                        checkList.validator_id
+                                        checkList.validator_id,
+                                        checkList.validator,
                                 )
                         )
                 }
@@ -1183,13 +1072,15 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         undefined,
                                         undefined,
-                                        dp.created_at.substring(0, 10) + " A " + dp.created_at.substring(11, 19),
+                                        undefined,
+                                        dp.created_at,
                                         undefined,
                                         dp.section_id,
                                         undefined,
                                         undefined,
                                         dp.is_validated,
-                                        dp.validator_id
+                                        dp.validator_id,
+                                        dp.validator,
                                 )
                         )
                 }
@@ -1212,13 +1103,15 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         undefined,
                                         undefined,
-                                        nonC.created_at.substring(0, 10) + " A " + nonC.created_at.substring(11, 19),
+                                        undefined,
+                                        nonC.created_at,
                                         undefined,
                                         nonC.section_id,
                                         undefined,
                                         undefined,
                                         nonC.is_validated,
-                                        nonC.validator_id
+                                        nonC.validator_id,
+                                        nonC.validator,
                                 )
                         )
                 }
@@ -1239,15 +1132,17 @@ export default function useGetData(TheDatas)
                                         true,
                                         undefined,
                                         undefined,
+                                        fnc.opening_date,
                                         fnc.isClosed,
                                         fnc.review_date,
-                                        fnc.created_at.substring(0, 10) + " A " + fnc.created_at.substring(11, 19),
+                                        fnc.created_at,
                                         fnc.level,
                                         fnc.section_id,
                                         undefined,
                                         undefined,
                                         fnc.is_validated,
-                                        fnc.validator_id
+                                        fnc.validator_id,
+                                        fnc.validator,
                                 )
                         )
                 }
@@ -1270,13 +1165,15 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         undefined,
                                         undefined,
-                                        f.created_at.substring(0, 10) + " A " + f.created_at.substring(11, 19),
+                                        undefined,
+                                        f.created_at,
                                         undefined,
                                         f.section_id,
                                         f.size,
                                         f.url,
                                         f.is_validated,
-                                        f.validator_id
+                                        f.validator_id,
+                                        f.validator,
                                 )
                         )
                 }
@@ -1299,27 +1196,20 @@ export default function useGetData(TheDatas)
                                         undefined,
                                         undefined,
                                         undefined,
-                                        d.created_at.substring(0, 10) + " A " + d.created_at.substring(11, 19),
+                                        undefined,
+                                        d.created_at,
                                         undefined,
                                         d.section_id,
                                         undefined,
                                         undefined,
                                         d.is_validated,
-                                        d.validator_id
+                                        d.validator_id,
+                                        d.validator,
                                 )
                         )
                 }
 
                 // console.log("DataFormater", allDataAsNodeData)
-
-                // const structuredData = new Map()
-
-                // for(let section of Data_Base.data.sections)
-                // {
-                //         structuredData.set(section.id, allDataAsNodeData.filter((nodeData) => { /*console.log(nodeData.section_id, section.id)*/; return nodeData.section_id === section.id || nodeData.section_id === -1 }).map((nodeData) => { return nodeData } ) )
-                // }
-
-                // console.log(structuredData.get(1))
 
 
                 return allDataAsNodeData
@@ -1375,16 +1265,18 @@ export default function useGetData(TheDatas)
                                 undefined,
                                 type !== 'f',
                                 type === 'f' ? node.extension : undefined,
-                                node.user,
+                                type === 'audit' ? node.user : undefined,
+                                type === 'fnc' ? node.opening_date : undefined,
                                 type === 'fnc' ? node.isClosed : undefined,
                                 type === 'fnc' ? node.review_date : undefined,
-                                node.created_at.substring(0, 10) + " A " + node.created_at.substring(11, 19),//
+                                node.created_at,//
                                 type === 'fnc' ? node.level : undefined,
                                 parseInt(node.section_id),
                                 type === 'f' ? node.size : undefined,
                                 type === 'f' ? node.url : undefined,
                                 node.is_validated,
-                                node.validator_id
+                                node.validator_id,
+                                node.validator
                         )
                 }
 
@@ -1408,7 +1300,7 @@ export default function useGetData(TheDatas)
                                 to_refresh.current = true
 
                                 const data = action.data
-                                console.log( 'broadcast.........', data);
+                                // console.log( 'broadcast.........', data);
 
                                 // const section_id = data.node.constructor === Array ? parseInt(data.node[0].section_id) : parseInt(data.node.section_id)
 
@@ -1434,16 +1326,16 @@ export default function useGetData(TheDatas)
                                 to_refresh.current = true
 
                                 const data = action.data
-                                console.log( 'broadcast.........', data);
+                                // console.log( 'broadcast.........', data);
 
-                                console.log('enter notif update')
+                                // console.log('enter notif update')
 
                                 authUser.asking_permission_notifications.forEach(notif =>
                                         {
-                                                console.log(notif.operable_id, data.node.id, notif.operable_id === data.node.id)
+                                                // console.log(notif.operable_id, data.node.id, notif.operable_id === data.node.id)
                                                 if (notif.operable_id === data.node.id)
                                                 {
-                                                        console.log('notif update')
+                                                        // console.log('notif update')
                                                         echosHandler('updateAuthUserInfo')
                                                         EventsManager.emit('updateNotif', notif.id)
                                                 }
@@ -1454,7 +1346,7 @@ export default function useGetData(TheDatas)
 
                                 // EventsManager.emit('updateData')
 
-                                console.log('newState', newState)
+                                // console.log('newState', newState)
 
                                 return JSON.parse(JSON.stringify(newState))
                         }
@@ -1463,7 +1355,7 @@ export default function useGetData(TheDatas)
                                 to_refresh.current = true
 
                                 const data = action.data
-                                console.log( 'broadcast.........', data);
+                                // console.log( 'broadcast.........', data);
 
                                 let newState = JSON.parse( JSON.stringify(state) )
 
@@ -1471,7 +1363,7 @@ export default function useGetData(TheDatas)
                                 {
                                         const updatedNode = create_new_node(node)
 
-                                        console.log('updatedNode', updatedNode)
+                                        // console.log('updatedNode', updatedNode)
 
                                         const current_state = JSON.parse( JSON.stringify(newState) )
                                         newState = current_state.map(
@@ -1498,7 +1390,7 @@ export default function useGetData(TheDatas)
 
                                 // EventsManager.emit('updateData')
 
-                                console.log('finalState', newState)
+                                // console.log('finalState', newState)
 
                                 return JSON.parse(JSON.stringify(newState))
                         }
@@ -1522,13 +1414,6 @@ export default function useGetData(TheDatas)
 
         const [FetchedNodesData, dispatch] = useReducer(reducer, dataFormater())
 
-        // useEffect(
-        //   () =>
-        //   {
-        //     console.log('emiiiiiiiiiiiiiiiiiiiiiiiiit' false
-        //     EventsManager.emit('updateData')
-        //   }, [FetchedNodesData]
-        // )
 
         window.Global_State['isEditorMode'] = isEditorMode
         window.Global_State['dataBaseData'] = FetchedNodesData
@@ -1558,20 +1443,6 @@ export default function useGetData(TheDatas)
                 [FetchedNodesData, isEditorMode, editor.data]
         )
 
-        // const [ dataToUse, setDataToUse ] = useState( FetchedNodesData )
-
-        // const t = useRef([makeNodeData('0', "folder", "all", true, "lol", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "mike", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "lal", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, -1)])
-        // const f = useRef([makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1), makeNodeData('1', "folder", "all", true, "delta", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 3), makeNodeData('1', "folder", "all", true, "code", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 3), makeNodeData('5', "folder", "all", true, "fifa", "ds", false, '0', "", true, undefined, undefined, undefined, undefined, undefined, 5) ])
-
-        // useEffect(
-        //   () =>
-        //   {
-        //     console.log('kkkkkkkkkkkkkkkkkkkkkkkkk')
-        //     if(isEditorMode) setDataToUse(JSON.parse(JSON.stringify(editor.data)))
-        //     else setDataToUse(JSON.parse(JSON.stringify(FetchedNodesData)))
-        //   }, [isEditorMode, FetchedNodesData, editor.data]
-        // )
-
 
         const structuredData = useMemo(
                 () =>
@@ -1585,7 +1456,7 @@ export default function useGetData(TheDatas)
                         return map
                 }, [dataToUse]
         )
-        console.log('structuredData',structuredData)
+        // console.log('structuredData',structuredData)
 
 
         const [selectedSectionId, setSectionId] = useState(Data_Base.data.sections.length === 0 ? 0 : Data_Base.data.sections[0].id)
@@ -1772,64 +1643,6 @@ export default function useGetData(TheDatas)
 
         const spinnerManager = useShowSpinner()
 
-        // const [show, setShow] = useState(false);
-        // const dropdown = useRef();
-        //
-        //
-        // EventsManager.once(id, () => { console.log(id); setShow(true) })
-        //
-        // useEffect(() => {
-        //         /**
-        //          * Alert if clicked on outside of element
-        //          */
-        //         function handleClickOutside(event) {
-        //                 if (dropdown.current && !dropdown.current.contains(event.target)) {
-        //                         // console.log('outside')
-        //                         setShow(false);
-        //                 }
-        //         }
-        //         // Bind the event listener
-        //         document.addEventListener("click", handleClickOutside);
-        //         return () => {
-        //                 // Unbind the event listener on clean up
-        //                 document.removeEventListener("click", handleClickOutside);
-        //                 EventsManager.off(id);
-        //
-        //         };
-        //
-        // }, []);
-        //
-        // // const ref = useRef()
-        //
-        // return (
-        // <div className = {useMemo(() => (`dropdown ${show ? 'show' : ''}`), [show])} ref = {dropdown}
-        //      style={{
-        //              height: "fit-content",
-        //              width: "fit-content"
-        //      }}
-        // >
-        //
-        //         <div id={id} style={{ width: "fit-content", height: "fit-content" }} data-toggle="dropdown" aria-haspopup="true" aria-expanded = {show} onMouseEnter = {() => { setShow(true) }} >
-        //                 {icon}
-        //         </div>
-        //
-        //         <div className = {useMemo(() => (`dropdown-menu ${show ? 'show' : ''}`), [show])} aria-labelledby="userPanel" onMouseLeave = {() => { setShow(false) }}
-        //              style={{
-        //                      position: "absolute",
-        //                      willChange: 'transform',
-        //                      top: 0,
-        //                      left: 0,
-        //                      transform: 'translate3d(-160px, 5px, 0px)',
-        //                      maxHeight: ( (window.innerHeight/100)*80 ),
-        //                      overflow: 'auto' ,
-        //                      paddingTop: 0,
-        //              }} >
-        //                 <div className="p-1" style={{ backgroundColor: 'white', zIndex: 999, position: 'sticky', top: 0 }} ></div>
-        //                 {content}
-        //         </div>
-        // </div>
-        // )
-
         const CustomDropDown = useCallback(
                 function CustomDropDown({id, icon, content, f = undefined})
                 {
@@ -1857,33 +1670,33 @@ export default function useGetData(TheDatas)
                         }, [anchorEl]
                         )
 
-                        useEffect(() => {
-                                /**
-                                 * Alert if clicked on outside of element
-                                 */
-                                function handleClickOutside(event) {
-                                        // console.log('outside')
-                                        const dropdown = document.getElementById(id)
-                                        if (dropdown && !dropdown.contains(event.target)) {
-                                                // console.log('outside')
-                                                handleLeave()
-                                        }
-                                }
-                                // Bind the event listener
-                                document.addEventListener("click", handleClickOutside);
-                                return () => {
-                                        // Unbind the event listener on clean up
-                                        console.log('byeeeeeeeeeeeeeeeeeeeee')
-                                        document.removeEventListener("click", handleClickOutside);
-
-                                };
-
-                        }, [])
+                        // useEffect(() => {
+                        //         /**
+                        //          * Alert if clicked on outside of element
+                        //          */
+                        //         function handleClickOutside(event) {
+                        //                 // console.log('outside')
+                        //                 const dropdown = document.getElementById(id)
+                        //                 if (dropdown && !dropdown.contains(event.target)) {
+                        //                         // console.log('outside')
+                        //                         handleLeave()
+                        //                 }
+                        //         }
+                        //         // Bind the event listener
+                        //         document.addEventListener("click", handleClickOutside);
+                        //         return () => {
+                        //                 // Unbind the event listener on clean up
+                        //                 console.log('byeeeeeeeeeeeeeeeeeeeee')
+                        //                 document.removeEventListener("click", handleClickOutside);
+                        //
+                        //         };
+                        //
+                        // }, [])
 
                         useEffect(
                                 () =>
                                 {
-                                        console.log('byeeeeeeeeeeeeeeeeeeeee', open)
+                                        // console.log('byeeeeeeeeeeeeeeeeeeeee', open)
                                 }
                         )
 
@@ -1897,33 +1710,39 @@ export default function useGetData(TheDatas)
                         // });
 
                         return (
-                                <div id={id} tabIndex={0} onClick={e => { e.preventDefault(); e.stopPropagation() }} onMouseEnter={handleEnter} onMouseLeave={handleLeave} onFocus={handleEnter} >
-                                        <div>{icon}</div>
-                                        <Collapse
-                                                in={open}
+                                <div id={id} tabIndex={0} onClick={e => { e.preventDefault(); e.stopPropagation() }} >
+                                        <div onClick={handleEnter} >{icon}</div>
+                                        <Popover id={`${drop_id}_pop`}
+                                                 PaperProps={{
+                                                         className: "d-flex",
+                                                         style: {
+                                                         borderRadius: '0.25rem',
+                                                         fontSize: '14px',
+                                                         border: 'none',
+                                                         overflow: 'hidden',
+                                                         padding: '0.5rem',
+                                                         maxHeight: "80%",
+                                                         maxWidth: "95%",
+                                                         backgroundColor: "white",
+                                                        },
+                                                         onMouseLeave: handleLeave
+                                                 }}
+                                                 anchorOrigin={{
+                                                         vertical: 'bottom',
+                                                         horizontal: 'center',
+                                                 }}
+                                                 transformOrigin={{
+                                                         vertical: 'top',
+                                                         horizontal: 'center',
+                                                 }}
+                                                 onClose={handleLeave}
+                                                 open={open}
+                                                 anchorEl={anchorEl}
                                         >
-                                                <Popper id={`${drop_id}_pop`}
-                                                        style={{
-                                                                zIndex: 1900,
-                                                                borderRadius: '0.25rem',
-                                                                fontSize: '14px',
-                                                                border: 'none',
-                                                                boxShadow: '0px 5px 10px -1px rgba(0, 0, 0, 0.15)',
-                                                                overflow: 'hidden',
-                                                                padding: '0.5rem',
-                                                                maxHeight: "80%",
-                                                                maxWidth: "95%",
-                                                                backgroundColor: "white",
-                                                        }}
-                                                        onClick={  e => { e.preventDefault(); e.stopPropagation() }}
-                                                        open={open}
-                                                        anchorEl={anchorEl}
-                                                >
-                                                        <Box>
-                                                                {content}
-                                                        </Box>
-                                                </Popper>
-                                        </Collapse>
+                                                <Box className="d-flex" >
+                                                        {content}
+                                                </Box>
+                                        </Popover>
                                 </div>
                         );
 
@@ -2045,25 +1864,6 @@ export default function useGetData(TheDatas)
         }
 
 
-        // function useOutsideAlerter(ref) {
-        //   useEffect(() => {
-        //     /**
-        //      * Alert if clicked on outside of element
-        //      */
-        //     function handleClickOutside(event) {
-        //       if (ref.current && !ref.current.contains(event.target)) {
-        //         alert("You clicked outside of me!");
-        //       }
-        //     }
-        //     // Bind the event listener
-        //     document.addEventListener("mousedown", handleClickOutside);
-        //     return () => {
-        //       // Unbind the event listener on clean up
-        //       document.removeEventListener("mousedown", handleClickOutside);
-        //     };
-        //   }, [ref]);
-        // }
-
         const [Overlay_props, setOverlay_props] = useState({
                 style: {
                         display: 'none',
@@ -2072,6 +1872,7 @@ export default function useGetData(TheDatas)
                         width: '100%',
                         height: '100%',
                         overflow: 'auto',
+                        animation: "fadeMe 0.5s",
                         backgroundColor: '#00000000',
                         // pointerEvents: 'none',
                         // opacity: 0.5,
@@ -2094,12 +1895,14 @@ export default function useGetData(TheDatas)
                 }
         }  />
 
+        const absolutePopover = useAbsolutePopover()
+
         return (
                 {
                         ...window.Global_State,
                         // EventsManager,
                         // isEditorMode,
-                        authUser: Data_Base.authUser, updateAuthUserInfo: value => { console.log("updateAuthUser", value); updateAuthUser(value) },
+                        authUser: Data_Base.authUser, updateAuthUserInfo: value => { /*console.log("updateAuthUser", value);*/ updateAuthUser(value) },
                         // dataBaseData: FetchedNodesData,
                         dataToUse,
                         hasSection: Data_Base.data.sections.length !== 0,
@@ -2133,6 +1936,7 @@ export default function useGetData(TheDatas)
                         CustomDropDown,
                         Overlay_component,
                         setOverlay_props,
+                        absolutePopover,
                         expanded
                 }
         )

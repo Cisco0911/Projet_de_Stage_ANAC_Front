@@ -1,10 +1,12 @@
 import _regeneratorRuntime from 'babel-runtime/regenerator';
 
-var _this2 = this;
+var _this = this;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 /* eslint-disable import/first */
 
@@ -44,12 +46,13 @@ import toast, { Toaster } from "react-hot-toast";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useRouteError, redirect, useNavigate } from "react-router-dom";
-import { Box, Button, Popper, Snackbar, SwipeableDrawer, Tooltip } from "@mui/material";
+import { Box, Button, Chip, Popover, Popper, Snackbar, SwipeableDrawer, Tooltip } from "@mui/material";
 import { Collapse, Fade, Offcanvas } from "react-bootstrap";
 import Administrator_home from "./administrator/administrator_home";
 import swal from "sweetalert";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import { createPortal } from "react-dom";
 
 export default function ErrorPage() {
         var error = useRouteError();
@@ -112,7 +115,7 @@ function Lol(_ref) {
                 ico = iconNO;
         }
 
-        console.log("Lolllllll rerender");
+        // console.log("Lolllllll rerender")
 
         return React.createElement(
                 'div',
@@ -168,7 +171,7 @@ function Header() {
         var navigate = useNavigate();
 
         var dropMenuItemsUser = React.createElement(
-                React.Fragment,
+                Box,
                 null,
                 React.createElement(
                         'div',
@@ -177,7 +180,7 @@ function Header() {
                                         navigate("/user_information");
                                 }
                         },
-                        React.createElement(Avatar, { alt: window.Global_State.authUser.name + ' ' + window.Global_State.authUser.second_name, src: './style/assets/media/image/user/man_avatar3.jpg' }),
+                        React.createElement(Avatar, { alt: window.Global_State.authUser.name + ' ' + window.Global_State.authUser.second_name, src: '' }),
                         React.createElement(
                                 'h5',
                                 { className: 'mb-0' },
@@ -197,7 +200,7 @@ function Header() {
                                                 success: "Vous etes déconnecté !!",
                                                 error: "Erreur de déconnexion"
                                         }).then(function (res) {
-                                                console.log(res);
+                                                // console.log(res)
                                                 setTimeout(function () {
                                                         navigate("/login");
                                                 }, 1000);
@@ -227,7 +230,7 @@ function Header() {
                                 React.createElement(
                                         Avatar,
                                         { sx: { bgcolor: 'green' } },
-                                        'N'
+                                        window.Global_State.authUser.name[0]
                                 ),
                                 React.createElement(MdOutlineArrowDropDownCircle, null)
                         )
@@ -259,15 +262,221 @@ function Header() {
                 )
         );
 }
+function Responsive_header(_ref2) {
+        var component = _ref2.component;
 
+        var _useState3 = useState(false),
+            _useState4 = _slicedToArray(_useState3, 2),
+            open = _useState4[0],
+            setOpen = _useState4[1];
+
+        var ref = useRef();
+
+        var handleOpen = function handleOpen(e) {
+                // console.log("Open header")
+
+                ref.current.style.position = "absolute";
+                ref.current.style.top = 0;
+                ref.current.style.right = 0;
+                ref.current.style.zIndex = 1000;
+                // ref.current.style.width = "80%"
+                ref.current.style.height = "fit-content";
+
+                setOpen(true);
+        };
+
+        var handleClose = function handleClose() {
+                // console.log("Close header")
+
+                ref.current.style.position = "unset";
+                ref.current.style.top = "unset";
+                ref.current.style.left = "unset";
+                ref.current.style.zIndex = "unset";
+                ref.current.style.width = "100%";
+                ref.current.style.height = "100%";
+
+                setOpen(false);
+        };
+
+        return React.createElement(
+                'div',
+                { ref: ref, className: "full_size_element wrapper_xs_size_header" },
+                !open ? React.createElement(
+                        'div',
+                        { className: 'full_size_element d-flex justify-content-start align-items-center', onClick: handleOpen },
+                        React.createElement(
+                                Tooltip,
+                                { title: window.current_location },
+                                React.createElement(
+                                        'b',
+                                        {
+                                                style: {
+                                                        fontSize: 16,
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        whiteSpace: 'nowrap'
+                                                }
+                                        },
+                                        window.current_location
+                                )
+                        )
+                ) : React.createElement(
+                        'div',
+                        { className: 'content_header_xs_size',
+                                style: { animation: "fadeMe 0.3s", position: "relative" }
+                        },
+                        createPortal(React.createElement(
+                                'div',
+                                { className: 'custom_overlay', onClick: handleClose },
+                                ' '
+                        ), document.getElementById("file_loaded")),
+                        component
+                )
+        );
+}
+
+function GroupByServiceComponent(_ref3) {
+        var service = _ref3.service,
+            sections = _ref3.sections;
+
+        var _useState5 = useState(null),
+            _useState6 = _slicedToArray(_useState5, 2),
+            anchorEl = _useState6[0],
+            setAnchorEl = _useState6[1];
+
+        var handlePopoverOpen = function handlePopoverOpen(event) {
+                // console.log("enterrrrrrrrrr", service.name, open)
+                setAnchorEl(event.currentTarget);
+        };
+
+        var handlePopoverClose = function handlePopoverClose() {
+                // console.log("closinnnnnnnnnnnnnnnnnnnnnnnnng", service.name, open)
+                setAnchorEl(null);
+        };
+
+        var open = Boolean(anchorEl);
+
+        var selectedSection = window.Global_State.sections.get(window.Global_State.selectedSectionId);
+
+        var is_active = Boolean(selectedSection.services.find(function (sectionService) {
+                return sectionService.id === service.id;
+        }));
+
+        return React.createElement(
+                'div',
+                null,
+                React.createElement(
+                        Typography,
+                        {
+                                variant: 'div',
+                                'aria-owns': open ? 'mouse-over-popover' : undefined,
+                                'aria-haspopup': 'true'
+                        },
+                        React.createElement(Chip, { className: 'd-flex p-2 full_size_element', tabIndex: -1, variant: '' + (is_active ? "outlined" : "filled"),
+                                style: {
+                                        borderColor: "blue"
+                                }
+                                // disabled={is_active}
+                                , onClick: handlePopoverOpen,
+                                color: "primary",
+                                label: React.createElement(
+                                        'b',
+                                        {
+                                                style: {
+                                                        maxWidth: "100%",
+                                                        overflow: "hidden",
+                                                        textOverflow: 'ellipsis',
+                                                        color: '' + (is_active ? "blue" : "white")
+                                                }
+                                        },
+                                        service.name
+                                )
+                        })
+                ),
+                React.createElement(
+                        Popover,
+                        {
+                                id: service.name + '-over-popover',
+                                PaperProps: {
+                                        className: 'd-flex',
+                                        style: {
+                                                marginLeft: 20,
+                                                border: "thin solid blue",
+                                                boxShadow: "none"
+                                        }
+                                },
+                                open: open,
+                                anchorEl: anchorEl,
+                                anchorOrigin: {
+                                        vertical: 'center',
+                                        horizontal: 'right'
+                                },
+                                transformOrigin: {
+                                        vertical: 'center',
+                                        horizontal: 'left'
+                                },
+                                onClose: handlePopoverClose,
+                                disableRestoreFocus: true
+                        },
+                        React.createElement(
+                                Typography,
+                                { variant: 'div', sx: { p: 1 } },
+                                React.createElement(
+                                        Stack,
+                                        { direction: 'column', spacing: 2, className: 'full_size_element d-flex justify-content-center align-items-center' },
+                                        sections.map(function (section, idx) {
+                                                // console.log(sections)
+                                                return React.createElement(
+                                                        Tooltip,
+                                                        { key: idx, title: section.name, placement: 'right-start' },
+                                                        React.createElement(
+                                                                'span',
+                                                                { className: 'full_size_element', style: {
+                                                                                height: "fit-content"
+                                                                        } },
+                                                                React.createElement(
+                                                                        Button,
+                                                                        { className: 'd-flex p-2 full_size_element', tabIndex: -1, variant: 'text',
+                                                                                style: {
+                                                                                        borderColor: "blue"
+                                                                                },
+                                                                                disabled: window.Global_State.selectedSectionId === section.id,
+                                                                                onClick: function onClick() {
+                                                                                        var overlay = document.getElementById("section_side_bar_responsive_overlay");
+                                                                                        if (overlay) overlay.click();
+                                                                                        window.Global_State.setSectionId(section.id);
+                                                                                        // window.Global_State.backend.setCurrentSelectedFolder(window.Global_State.selectedNodeIdsInSections.current.get(section.id) )
+                                                                                }
+                                                                        },
+                                                                        React.createElement(
+                                                                                'b',
+                                                                                {
+                                                                                        style: {
+                                                                                                maxWidth: "100%",
+                                                                                                overflow: "hidden",
+                                                                                                textOverflow: 'ellipsis',
+                                                                                                color: '' + (window.Global_State.selectedSectionId === section.id ? '' : 'blue')
+                                                                                        }
+                                                                                },
+                                                                                section.name
+                                                                        )
+                                                                )
+                                                        )
+                                                );
+                                        })
+                                )
+                        )
+                )
+        );
+}
 function Sections_side_bar() {
-        var _this = this;
-
         var sections = [];
         // console.log(window.Global_State.sections)
         window.Global_State.sections.forEach(function (section) {
                 sections.push(section);
         });
+
+        var services = [].concat(_toConsumableArray(window.Global_State.authUser.services));
 
         return React.createElement(
                 'div',
@@ -284,7 +493,21 @@ function Sections_side_bar() {
                 React.createElement(
                         'div',
                         { className: 'sections_div' },
-                        React.createElement(
+                        services.length > 1 ? React.createElement(
+                                Stack,
+                                { direction: 'column', spacing: 2, className: 'full_size_element d-flex justify-content-center align-items-center' },
+                                services.map(function (service, idx) {
+                                        // console.log(sections)
+
+                                        var service_sections = sections.filter(function (section) {
+                                                return Boolean(section.services.find(function (section_service) {
+                                                        return section_service.id === service.id;
+                                                }));
+                                        });
+
+                                        return React.createElement(GroupByServiceComponent, { key: idx, service: service, sections: service_sections });
+                                })
+                        ) : React.createElement(
                                 Stack,
                                 { direction: 'column', spacing: 2, className: 'full_size_element d-flex justify-content-center align-items-center' },
                                 sections.map(function (section, idx) {
@@ -304,21 +527,12 @@ function Sections_side_bar() {
                                                                                 borderColor: "blue"
                                                                         },
                                                                         disabled: window.Global_State.selectedSectionId === section.id,
-                                                                        onClick: _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee() {
-                                                                                return _regeneratorRuntime.wrap(function _callee$(_context) {
-                                                                                        while (1) {
-                                                                                                switch (_context.prev = _context.next) {
-                                                                                                        case 0:
-                                                                                                                _context.next = 2;
-                                                                                                                return window.Global_State.setSectionId(section.id);
-
-                                                                                                        case 2:
-                                                                                                        case 'end':
-                                                                                                                return _context.stop();
-                                                                                                }
-                                                                                        }
-                                                                                }, _callee, _this);
-                                                                        }))
+                                                                        onClick: function onClick() {
+                                                                                var overlay = document.getElementById("section_side_bar_responsive_overlay");
+                                                                                if (overlay) overlay.click();
+                                                                                window.Global_State.setSectionId(section.id);
+                                                                                // window.Global_State.backend.setCurrentSelectedFolder(window.Global_State.selectedNodeIdsInSections.current.get(section.id) )
+                                                                        }
                                                                 },
                                                                 React.createElement(
                                                                         'b',
@@ -340,21 +554,21 @@ function Sections_side_bar() {
                 )
         );
 }
-function Responsive_sections_side_bar(_ref3) {
-        var component = _ref3.component,
-            icon = _ref3.icon;
+function Responsive_sections_side_bar(_ref4) {
+        var component = _ref4.component,
+            icon = _ref4.icon;
 
-        var _useState3 = useState(false),
-            _useState4 = _slicedToArray(_useState3, 2),
-            show = _useState4[0],
-            setShow = _useState4[1];
+        var _useState7 = useState(false),
+            _useState8 = _slicedToArray(_useState7, 2),
+            show = _useState8[0],
+            setShow = _useState8[1];
 
         var ref = useRef();
 
         var open = function open(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log("opppppeeeeeeeeeeen");
+                // console.log("opppppeeeeeeeeeeen", e.target)
                 // const element = document.getElementById("section_side_bar_responsive")
                 ref.current.style.height = "95vh";
 
@@ -365,36 +579,12 @@ function Responsive_sections_side_bar(_ref3) {
             close = function close(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log("clossssssssssssssse");
+                // console.log("clossssssssssssssse")
                 // const element = document.getElementById("section_side_bar_responsive")
                 ref.current.style.height = "100%";
 
                 setShow(false);
         };
-
-        // useEffect(
-        // () => {
-        //         /**
-        //          * Alert if clicked on outside of element
-        //          */
-        //         function handleClickOutside(event) {
-        //                 // console.log('outside')
-        //                 const dropdown = document.getElementById("section_side_bar_responsive")
-        //                 if (dropdown && !dropdown.contains(event.target)) {
-        //                         console.log('outside')
-        //                         close()
-        //                 }
-        //         }
-        //         // Bind the event listener
-        //         document.addEventListener("click", handleClickOutside);
-        //         return () => {
-        //                 // Unbind the event listener on clean up
-        //                 console.log('byeeeeeeeeeeeeeeeeeeeee')
-        //                 document.removeEventListener("click", handleClickOutside);
-        //
-        //         };
-        //
-        // }, [])
 
         return React.createElement(
                 'div',
@@ -402,17 +592,13 @@ function Responsive_sections_side_bar(_ref3) {
                 show ? React.createElement(
                         'div',
                         { className: 'full_size_element', tabIndex: -1, style: { animation: "fadeMe 0.3s", position: "relative" }, onClick: function onClick(e) {
-                                        console.log(e);
+                                        /*console.log(e);*/e.preventDefault();e.stopPropagation();
                                 } },
-                        React.createElement(
+                        createPortal(React.createElement(
                                 'div',
-                                { className: 'custom_close_button', onClick: close },
-                                React.createElement(
-                                        IconButton,
-                                        { color: "error" },
-                                        React.createElement(AiOutlineCloseSquare, { size: 20, color: "red" })
-                                )
-                        ),
+                                { id: "section_side_bar_responsive_overlay", className: 'custom_overlay', onClick: close },
+                                ' '
+                        ), document.getElementById("file_loaded")),
                         component
                 ) : icon
         );
@@ -446,8 +632,8 @@ function Responsive_file_tree() {
                 offsetX.current = e.clientX - X;
                 offsetY.current = e.clientY - Y;
 
-                console.log("Drag startttttttttttt", offsetX, offsetY);
-                console.log("element.offsetLeft", element.offsetLeft);
+                // console.log("Drag startttttttttttt", offsetX, offsetY )
+                // console.log("element.offsetLeft", element.offsetLeft)
         };
 
         function arrange(distance, max, component_size) {
@@ -478,7 +664,7 @@ function Responsive_file_tree() {
                 var newX = arrange(xOpposite, window.innerWidth, 48, true);
                 var newY = arrange(Y, window.innerHeight, 48);
 
-                console.log("New plaaaaaaaaace", xOpposite, newY);
+                // console.log("New plaaaaaaaaace", xOpposite, newY)
 
                 on_left.current = Boolean(newX);
 
@@ -488,13 +674,13 @@ function Responsive_file_tree() {
                 element.style.right = newX + 'px';
         };
 
-        var _useState5 = useState(false),
-            _useState6 = _slicedToArray(_useState5, 2),
-            open = _useState6[0],
-            setOpen = _useState6[1];
+        var _useState9 = useState(false),
+            _useState10 = _slicedToArray(_useState9, 2),
+            open = _useState10[0],
+            setOpen = _useState10[1];
 
         var handleClick = function handleClick(e) {
-                console.log("Toggle file treeeeeeeeeeeeeeeeee", on_left);
+                // console.log("Toggle file treeeeeeeeeeeeeeeeee", on_left)
                 setOpen(!open);
         };
         var handleClose = function handleClose() {
@@ -530,104 +716,6 @@ function Responsive_file_tree() {
         );
 }
 
-function Responsive_header(_ref4) {
-        var component = _ref4.component;
-
-        var _useState7 = useState(false),
-            _useState8 = _slicedToArray(_useState7, 2),
-            open = _useState8[0],
-            setOpen = _useState8[1];
-
-        var ref = useRef();
-
-        var handleOpen = function handleOpen(e) {
-                console.log("Open header");
-
-                ref.current.style.position = "absolute";
-                ref.current.style.top = 0;
-                ref.current.style.right = 0;
-                ref.current.style.zIndex = 1000;
-                // ref.current.style.width = "80%"
-                ref.current.style.height = "fit-content";
-
-                setOpen(true);
-        };
-
-        var handleClose = function handleClose() {
-                console.log("Close header");
-
-                ref.current.style.position = "unset";
-                ref.current.style.top = "unset";
-                ref.current.style.left = "unset";
-                ref.current.style.width = "100%";
-                ref.current.style.height = "100%";
-
-                setOpen(false);
-        };
-
-        return React.createElement(
-                'div',
-                { ref: ref, className: "full_size_element wrapper_xs_size_header" },
-                !open ? React.createElement(
-                        'div',
-                        { className: 'full_size_element d-flex justify-content-start align-items-center', onClick: handleOpen },
-                        React.createElement(
-                                Tooltip,
-                                { title: window.current_location },
-                                React.createElement(
-                                        'b',
-                                        {
-                                                style: {
-                                                        fontSize: 16,
-                                                        overflow: "hidden",
-                                                        textOverflow: "ellipsis",
-                                                        whiteSpace: 'nowrap'
-                                                }
-                                        },
-                                        window.current_location
-                                )
-                        )
-                ) : React.createElement(
-                        'div',
-                        { className: 'content_header_xs_size',
-                                style: { animation: "fadeMe 0.3s", position: "relative" }
-                        },
-                        React.createElement(
-                                'div',
-                                { className: 'custom_close_button', onClick: handleClose },
-                                React.createElement(
-                                        IconButton,
-                                        { color: "error" },
-                                        React.createElement(AiOutlineCloseSquare, { size: 20, color: "red" })
-                                )
-                        ),
-                        component
-                )
-        );
-
-        // return(
-        //         <div className={"full_size_element wrapper_xs_size_header"} onClick={handleOpen} >
-        //                 <Tooltip title={window.current_location}>
-        //                         <b
-        //                         style={{
-        //                                 fontSize: 16,
-        //                                 overflow: "hidden",
-        //                                 textOverflow: "ellipsis",
-        //                                 whiteSpace: 'nowrap'
-        //                         }}
-        //                         >
-        //                                 {window.current_location}
-        //                         </b>
-        //                 </Tooltip>
-        //
-        //                 <Offcanvas className="content_header_xs_size" show={open} onHide={handleClose} placement="top" >
-        //                         <Offcanvas.Body as={Header_offcanvas_body} >
-        //                         </Offcanvas.Body>
-        //                 </Offcanvas>
-        //         </div>
-        // )
-}
-
 function Load(_ref5) {
         var datas = _ref5.datas;
 
@@ -635,7 +723,7 @@ function Load(_ref5) {
         // const [le, setLe] = useState(initData)
         // console.log("Leeeee", le);
         window.Global_State = useGetData(JSON.parse(JSON.stringify(datas)));
-        console.log(window.Global_State);
+        // console.log(window.Global_State)
 
         window.files_family = useGetFiles(React.createElement(Global_research, { display: 'd-none d-sm-flex' }));
 
@@ -646,7 +734,7 @@ function Load(_ref5) {
 
         return React.createElement(
                 'div',
-                { className: 'full_size_element' },
+                { id: "file_loaded", className: 'full_size_element' },
                 React.createElement(
                         'div',
                         null,
@@ -673,8 +761,10 @@ function Load(_ref5) {
                         })
                 ),
                 window.Global_State.Overlay_component,
+                window.Global_State.absolutePopover.popover,
                 window.Global_State.modalManager.modal,
                 window.Global_State.editor.save_component,
+                window.files_family.fileDetails,
                 React.createElement(
                         'div',
                         { className: 'full_size_element layout-wrapper d-none d-xl-block' },
@@ -840,6 +930,8 @@ function Load(_ref5) {
 
 function File_home() {
         window.show_response = function (msg, type) {
+                var msg_part = [].concat(_toConsumableArray(msg.split("L@O%L&")));
+
                 toast(function (t) {
                         return (
                                 // t.visible ?
@@ -857,7 +949,13 @@ function File_home() {
                                                 }),
                                                 ' '
                                         ),
-                                        msg
+                                        msg_part.map(function (value, idx) {
+                                                return React.createElement(
+                                                        'div',
+                                                        { key: idx },
+                                                        value
+                                                );
+                                        })
                                 )
                         );
                 }, {
@@ -882,10 +980,10 @@ function File_home() {
                 if (e.ctrlKey && e.key === 'r') return false;
         };
 
-        var _useState9 = useState(null),
-            _useState10 = _slicedToArray(_useState9, 2),
-            Data_Base = _useState10[0],
-            setData_base = _useState10[1];
+        var _useState11 = useState(null),
+            _useState12 = _slicedToArray(_useState11, 2),
+            Data_Base = _useState12[0],
+            setData_base = _useState12[1];
 
         // useEffect(()=>(
         //     console.log("Daaa a change !!!", Data_Base)
@@ -903,26 +1001,26 @@ function File_home() {
 
         useEffect(function () {
                 var FetchData = function () {
-                        var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
+                        var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee() {
                                 var Datas;
-                                return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                                return _regeneratorRuntime.wrap(function _callee$(_context) {
                                         while (1) {
-                                                switch (_context2.prev = _context2.next) {
+                                                switch (_context.prev = _context.next) {
                                                         case 0:
-                                                                _context2.next = 2;
+                                                                _context.next = 2;
                                                                 return getFromDataBase();
 
                                                         case 2:
-                                                                Datas = _context2.sent;
+                                                                Datas = _context.sent;
 
                                                                 setData_base(Datas);
 
                                                         case 4:
                                                         case 'end':
-                                                                return _context2.stop();
+                                                                return _context.stop();
                                                 }
                                         }
-                                }, _callee2, this);
+                                }, _callee, this);
                         }));
 
                         return function FetchData() {
@@ -933,7 +1031,7 @@ function File_home() {
                 FetchData();
         }, []);
 
-        console.log("render");
+        // console.log("render")
 
         var theme = createTheme({
                 typography: {
@@ -967,13 +1065,65 @@ function Page() {
                 }, 3000);
         }, []);
 
-        console.log("render");
+        // console.log("render")
 
         return container;
 }
 
+var auth_loader = function () {
+        var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee2() {
+                var user;
+                return _regeneratorRuntime.wrap(function _callee2$(_context2) {
+                        while (1) {
+                                switch (_context2.prev = _context2.next) {
+                                        case 0:
+                                                user = void 0;
+                                                _context2.next = 3;
+                                                return http.get('user').then(function (res) {
+                                                        // console.log(res)
+                                                        user = res.data;
+                                                }).catch(function (err) {
+                                                        console.log(err);
+                                                });
+
+                                        case 3:
+                                                if (!(user instanceof Object)) {
+                                                        _context2.next = 11;
+                                                        break;
+                                                }
+
+                                                if (user.id) {
+                                                        _context2.next = 8;
+                                                        break;
+                                                }
+
+                                                return _context2.abrupt('return', redirect("/administrator"));
+
+                                        case 8:
+                                                return _context2.abrupt('return', redirect("/files_browser"));
+
+                                        case 9:
+                                                _context2.next = 12;
+                                                break;
+
+                                        case 11:
+                                                return _context2.abrupt('return', "ok");
+
+                                        case 12:
+                                        case 'end':
+                                                return _context2.stop();
+                                }
+                        }
+                }, _callee2, _this);
+        }));
+
+        return function auth_loader() {
+                return _ref7.apply(this, arguments);
+        };
+}();
+
 var files_loader = function () {
-        var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
+        var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3() {
                 var user;
                 return _regeneratorRuntime.wrap(function _callee3$(_context3) {
                         while (1) {
@@ -982,49 +1132,46 @@ var files_loader = function () {
                                                 user = void 0;
                                                 _context3.next = 3;
                                                 return http.get('user').then(function (res) {
-                                                        console.log(res);
+                                                        // console.log(res)
                                                         user = res.data;
                                                 }).catch(function (err) {
                                                         console.log(err);
                                                 });
 
                                         case 3:
-
-                                                console.log(user);
-
                                                 if (!(user === '')) {
-                                                        _context3.next = 8;
+                                                        _context3.next = 7;
                                                         break;
                                                 }
 
                                                 return _context3.abrupt('return', redirect("/login"));
 
-                                        case 8:
+                                        case 7:
                                                 if (user.id) {
-                                                        _context3.next = 12;
+                                                        _context3.next = 11;
                                                         break;
                                                 }
 
                                                 return _context3.abrupt('return', redirect("/administrator"));
 
-                                        case 12:
+                                        case 11:
                                                 return _context3.abrupt('return', "ok");
 
-                                        case 13:
+                                        case 12:
                                         case 'end':
                                                 return _context3.stop();
                                 }
                         }
-                }, _callee3, _this2);
+                }, _callee3, _this);
         }));
 
         return function files_loader() {
-                return _ref7.apply(this, arguments);
+                return _ref8.apply(this, arguments);
         };
 }();
 
 var user_info_loader = function () {
-        var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4() {
+        var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4() {
                 var user;
                 return _regeneratorRuntime.wrap(function _callee4$(_context4) {
                         while (1) {
@@ -1033,57 +1180,54 @@ var user_info_loader = function () {
                                                 user = void 0;
                                                 _context4.next = 3;
                                                 return http.get('user').then(function (res) {
-                                                        console.log(res);
+                                                        // console.log(res)
                                                         user = res.data;
                                                 }).catch(function (err) {
                                                         console.log(err);
                                                 });
 
                                         case 3:
-
-                                                console.log(user);
-
                                                 if (!(user === '')) {
-                                                        _context4.next = 8;
+                                                        _context4.next = 7;
                                                         break;
                                                 }
 
                                                 return _context4.abrupt('return', redirect("/login"));
 
-                                        case 8:
+                                        case 7:
                                                 if (!(!window.Global_State || !window.Global_State.authUser)) {
-                                                        _context4.next = 12;
+                                                        _context4.next = 11;
                                                         break;
                                                 }
 
                                                 return _context4.abrupt('return', redirect("/files_browser"));
 
-                                        case 12:
+                                        case 11:
                                                 if (user.id) {
-                                                        _context4.next = 16;
+                                                        _context4.next = 15;
                                                         break;
                                                 }
 
                                                 return _context4.abrupt('return', redirect("/administrator"));
 
-                                        case 16:
+                                        case 15:
                                                 return _context4.abrupt('return', "ok");
 
-                                        case 17:
+                                        case 16:
                                         case 'end':
                                                 return _context4.stop();
                                 }
                         }
-                }, _callee4, _this2);
+                }, _callee4, _this);
         }));
 
         return function user_info_loader() {
-                return _ref8.apply(this, arguments);
+                return _ref9.apply(this, arguments);
         };
 }();
 
 var admin_loader = function () {
-        var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
+        var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
                 var user;
                 return _regeneratorRuntime.wrap(function _callee5$(_context5) {
                         while (1) {
@@ -1092,44 +1236,41 @@ var admin_loader = function () {
                                                 user = void 0;
                                                 _context5.next = 3;
                                                 return http.get('user').then(function (res) {
-                                                        console.log(res);
+                                                        // console.log(res)
                                                         user = res.data;
                                                 }).catch(function (err) {
                                                         console.log(err);
                                                 });
 
                                         case 3:
-
-                                                console.log(user);
-
                                                 if (!(user === '')) {
-                                                        _context5.next = 8;
+                                                        _context5.next = 7;
                                                         break;
                                                 }
 
                                                 return _context5.abrupt('return', redirect("/login"));
 
-                                        case 8:
+                                        case 7:
                                                 if (!user.id) {
-                                                        _context5.next = 12;
+                                                        _context5.next = 11;
                                                         break;
                                                 }
 
                                                 return _context5.abrupt('return', redirect("/files_browser"));
 
-                                        case 12:
+                                        case 11:
                                                 return _context5.abrupt('return', "ok");
 
-                                        case 13:
+                                        case 12:
                                         case 'end':
                                                 return _context5.stop();
                                 }
                         }
-                }, _callee5, _this2);
+                }, _callee5, _this);
         }));
 
         return function admin_loader() {
-                return _ref9.apply(this, arguments);
+                return _ref10.apply(this, arguments);
         };
 }();
 
@@ -1139,16 +1280,20 @@ var router = createBrowserRouter([{
         errorElement: React.createElement(ErrorPage, null)
 }, {
         path: "/login",
-        element: React.createElement(Login, null)
+        element: React.createElement(Login, null),
+        loader: auth_loader
 }, {
         path: "/sign_in",
-        element: React.createElement(Create_account, null)
+        element: React.createElement(Create_account, null),
+        loader: auth_loader
 }, {
         path: "/forgot_password",
-        element: React.createElement(Forgot_password, null)
+        element: React.createElement(Forgot_password, null),
+        loader: auth_loader
 }, {
         path: "/reset_password",
-        element: React.createElement(Reset_password, null)
+        element: React.createElement(Reset_password, null),
+        loader: auth_loader
 }, {
         path: "/files_browser",
         element: React.createElement(File_home, null),

@@ -31,9 +31,9 @@ export default function Warning_component({open, onConfirm, onCancel, warning_in
                                 <div>
                                         {
                                                 warning_infos.map(
-                                                        info =>
+                                                        (info, idx) =>
                                                         (
-                                                                <span className="danger_list_item" >
+                                                                <span key={idx} className="danger_list_item" >
                                                                       <CgAirplane size={20} />  {info}
                                                                 </span>
                                                         )

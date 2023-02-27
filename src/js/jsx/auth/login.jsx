@@ -24,9 +24,9 @@ import {LoadingButton} from "@mui/lab";
 
 
 
-// https://api.anac-togo-file-manager.com
+// https://api.anac-togo-file-manager.com 'http://localhost:80'
 export const http = axios.create({
-        baseURL: 'http://localhost:80',
+        baseURL: "http://localhost:80",
         headers: {
 
         },
@@ -45,7 +45,7 @@ export default function Login()
                 {
                         http.get('/sanctum/csrf-cookie')
                         .then(response => {
-                                console.log(response)
+                                // console.log(response)
                         })
                         .catch(err => {console.log(err)})
                 }, []
@@ -61,7 +61,7 @@ export default function Login()
 
         const handleSubmit = (submittedInfo) =>
         {
-                console.log(submittedInfo)
+                // console.log(submittedInfo)
                 setLoading(true)
 
                 let queryBody = new FormData()
@@ -75,7 +75,7 @@ export default function Login()
                 .then(
                 res =>
                 {
-                        console.log(res)
+                        // console.log(res)
                         setLoading(false)
 
                         if ( !parseInt(res.data.user.id) ) navigate("/administrator")
@@ -86,13 +86,31 @@ export default function Login()
                 err =>
                 {
                         console.log(err)
-                        setLoading(true)
+                        setLoading(false)
 
-                        swal({
-                                title: "Error",
-                                text: err.response.data.message,
-                                icon: "error"
-                        })
+                        switch (err.response.status)
+                        {
+                                case 419:
+                                        swal({
+                                                title: "Error",
+                                                text: `${err.response.data.message} \n\nVeuillez recharger la page 😎!`,
+                                                icon: "error"
+                                        })
+                                        break
+                                case 422:
+                                        swal({
+                                                title: "Error",
+                                                text: "Numéro inspecteur ou mot de passe incorect 💔",
+                                                icon: "error"
+                                        })
+                                        break
+                                default:
+                                        swal({
+                                                title: "Error",
+                                                text: err.response.data.message,
+                                                icon: "error"
+                                        })
+                        }
                 })
 
         };
@@ -230,7 +248,7 @@ export default function Login()
                         don't have account ? <Link href={"/sign_in"} >Sign in</Link>
                 </span>
                 <Link href={"/forgot_password"} >
-                        Mot de passe oublié
+                        Mot de passe oublié😢
                 </Link>
         </div>
 

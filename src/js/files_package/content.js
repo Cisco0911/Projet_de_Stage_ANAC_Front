@@ -26,9 +26,9 @@ import makeAnimated from 'react-select/animated';
 import { FaInfoCircle, FaPaste, FaSort } from "react-icons/fa";
 import { FcFolder, FcVideoFile } from "react-icons/fc";
 import { BsFillFileEarmarkPdfFill, BsPatchCheckFill } from "react-icons/bs";
-import { RiFileWord2Fill, RiDeleteBin2Fill } from "react-icons/ri";
+import { RiFileWord2Fill, RiDeleteBin2Fill, RiUploadCloud2Fill } from "react-icons/ri";
 import { SiMicrosoftexcel, SiMicrosoftpowerpoint } from "react-icons/si";
-import { AiFillFileUnknown } from "react-icons/ai";
+import { AiFillFileUnknown, AiFillCloseCircle } from "react-icons/ai";
 import { IoArrowUpCircleOutline, IoArrowUpCircleSharp, IoAdd } from "react-icons/io5";
 import { IoIosCut } from "react-icons/io";
 import { HiSaveAs } from 'react-icons/hi';
@@ -36,6 +36,7 @@ import { BiRename } from "react-icons/bi";
 import { VscLiveShare, VscCircleLargeOutline } from "react-icons/vsc";
 import { ImDownload2 } from "react-icons/im";
 import { MdUndo, MdRedo } from "react-icons/md";
+import { TbListDetails } from "react-icons/tb";
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -51,6 +52,11 @@ import Stack from "@mui/material/Stack";
 import Divider from "@mui/material/Divider";
 import { Box, FormControl, IconButton, InputLabel, MenuItem, Tooltip } from "@mui/material";
 import MuiSelect from '@mui/material/Select';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import AddCircleTwoToneIcon from '@mui/icons-material/AddCircleTwoTone';
 import CopyAllTwoToneIcon from '@mui/icons-material/CopyAllTwoTone';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
@@ -60,6 +66,7 @@ import { useSpring, animated } from 'react-spring';
 import { Dropdown, FormCheck } from "react-bootstrap";
 import useCustomCheckBox, { CheckBox1 } from "../custom_checkBox/custom_check";
 import { LoadingButton } from "@mui/lab";
+import { createPortal } from "react-dom";
 
 function Files_Dropzone(props) {
 
@@ -223,7 +230,7 @@ function FilterComponent(_ref) {
 
                                 compenent = React.createElement(
                                         'div',
-                                        { className: 'full_size_element' /*style={{ maxWidth: 300 }}*/ },
+                                        { className: 'full_size_element filter_by_date_component' },
                                         React.createElement(DatePicker, {
                                                 selectsRange: true,
                                                 startDate: startDate,
@@ -258,7 +265,7 @@ function FilterComponent(_ref) {
 
                                 compenent = React.createElement(
                                         'div',
-                                        { className: 'full_size_element' /*style={{ maxWidth: 243 }}*/ },
+                                        { className: 'full_size_element filter_by_date_component' },
                                         React.createElement(DatePicker, {
                                                 selectsRange: true,
                                                 startDate: _startDate,
@@ -331,7 +338,8 @@ function FilterComponent(_ref) {
                                 style: {
                                         // width: filter.element.constructor === Array ? "74%" : "86%"
                                         marginRight: 10,
-                                        width: "100%"
+                                        width: "100%",
+                                        flex: "1 0 60%"
                                 }
                         },
                         compenent
@@ -339,9 +347,7 @@ function FilterComponent(_ref) {
                 React.createElement(
                         'div',
                         {
-                                style: {
-                                        // width: "7%"
-                                }
+                                style: {}
                         },
                         React.createElement(
                                 Tooltip,
@@ -357,7 +363,10 @@ function FilterComponent(_ref) {
                                                         {
                                                                 labelId: 'tag_select_label',
                                                                 id: 'tag_select',
-                                                                value: filter.tag
+                                                                value: filter.tag,
+                                                                renderValue: function renderValue(value) {
+                                                                        return window.innerWidth > 576 ? value : '';
+                                                                }
                                                                 // label="Tag"
                                                                 , onChange: update_tag
                                                         },
@@ -441,7 +450,7 @@ function Prev() {
 
         var prev_id = prev.pop();
 
-        console.log('prrrrrrreeeeeeeeeeev', prev_id, prev);
+        // console.log('prrrrrrreeeeeeeeeeev', prev_id, prev)
 
         return React.createElement(
                 'div',
@@ -617,6 +626,34 @@ var AsyncUsersSelectComponent = function AsyncUsersSelectComponent(_ref5) {
         });
 };
 
+var CustomDateInput = function CustomDateInput(_ref6) {
+        var id = _ref6.id,
+            value = _ref6.value,
+            onClick = _ref6.onClick,
+            loading = _ref6.loading,
+            onSubmit = _ref6.onSubmit,
+            other_params = _ref6.other_params;
+        return React.createElement(
+                Stack,
+                { direction: 'row', sx: { width: 'fit-content', backgroundColor: '#e9ecef' } },
+                React.createElement('input', {
+                        className: 'form-control form-control-sm',
+                        style: { height: 35, textAlign: 'center', border: 'none', borderRadius: 0, backgroundColor: "rgba(233,236,239,0)" },
+                        value: '' + value,
+                        onChange: function onChange(e) {
+                                e.preventDefault();e.stopPropagation();
+                        },
+                        onClick: onClick,
+                        readOnly: true
+                }),
+                React.createElement(
+                        LoadingButton,
+                        { as: IconButton, loading: loading, title: "EFFACER", color: "primary", size: "small", style: { minWidth: 30 }, onClick: onSubmit },
+                        loading ? null : React.createElement(RiUploadCloud2Fill, { size: 20 })
+                )
+        );
+};
+
 export default function FileTable() {
         var _this4 = this;
 
@@ -628,7 +665,7 @@ export default function FileTable() {
 
         var contain_audit = node.type === "root" && /^(Audit|AUDIT)(( \b\w*\b)|)$/.test(window.Global_State.getCurrentSection().name);
 
-        console.log('contentNooooooooooooode', node, window.Global_State.backend);
+        // console.log('contentNooooooooooooode', node, window.Global_State.backend)
 
         var _useState5 = useState({
                 tag: "le Nom",
@@ -657,10 +694,10 @@ export default function FileTable() {
             mc_state = _useState12[0],
             setMc_state = _useState12[1];
 
-        var _ref6 = [useRef([]), useRef(undefined), useRef(undefined)],
-            to_move_or_copy = _ref6[0],
-            from_id = _ref6[1],
-            clear_clipboard_id = _ref6[2];
+        var _ref7 = [useRef([]), useRef(undefined), useRef(undefined)],
+            to_move_or_copy = _ref7[0],
+            from_id = _ref7[1],
+            clear_clipboard_id = _ref7[2];
 
 
         useEffect(function () {
@@ -675,7 +712,7 @@ export default function FileTable() {
         useEffect(function () {
 
                 window.Global_State.EventsManager.on('clearSelected', function () {
-                        console.log('clearSelected');setSelectedRows([]);setNumber(0);
+                        /*console.log('clearSelected');*/setSelectedRows([]);setNumber(0);
                 });
                 // window.Global_State.EventsManager.once('show_on_screen',
                 // async (data) =>
@@ -701,7 +738,7 @@ export default function FileTable() {
                                 return row.id === id;
                         });
 
-                        console.log("roooooooooooooooooow", row, datas, id);
+                        // console.log("roooooooooooooooooow", row, datas, id)
 
                         handleChange(1, [row]);
                 });
@@ -714,7 +751,7 @@ export default function FileTable() {
 
         var Paste_component = useCallback(function Paste_component() {
                 var paste_here = function () {
-                        var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3(node) {
+                        var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee3(node) {
                                 var _this = this;
 
                                 var concern_nodes, destination_node, destination_info, destination_id, destination_type, operation_type, Save_for_rest, _loop, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, node_to_copy, to_move, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, node_to_move, queryData, _iteratorNormalCompletion4, _didIteratorError4, _iteratorError4, _iterator4, _step4, _queryData, services, section;
@@ -741,7 +778,7 @@ export default function FileTable() {
                                                                                 React.createElement('input', { id: 'save_checkbox', type: 'checkbox',
                                                                                         onChange: function onChange(e) {
                                                                                                 // e.preventDefault()
-                                                                                                console.log('e.target', e.target);
+                                                                                                // console.log('e.target',e.target)
                                                                                                 action.current = { saved: e.target.checked };
                                                                                         }
                                                                                 }),
@@ -879,7 +916,7 @@ export default function FileTable() {
                                                                                                                                                                         React.createElement(
                                                                                                                                                                                 Button,
                                                                                                                                                                                 { className: 'mr-1', variant: 'outline-primary', onClick: function onClick(e) {
-                                                                                                                                                                                                e.stopPropagation();console.log('RENOMEEEEEEEEEEER');resolve(2);
+                                                                                                                                                                                                e.stopPropagation();{/*console.log('RENOMEEEEEEEEEEER');*/}resolve(2);
                                                                                                                                                                                         } },
                                                                                                                                                                                 'RENOMER'
                                                                                                                                                                         ),
@@ -906,7 +943,7 @@ export default function FileTable() {
                                                                                                                                                         window.Global_State.modalManager.setContent(content);
                                                                                                                                                         window.Global_State.modalManager.open_modal('Conflit de ' + (child_node.type === 'f' ? 'fichiers' : 'dossiers'), false);
                                                                                                                                                 }).then(function (res) {
-                                                                                                                                                        console.log(res, action.current);
+                                                                                                                                                        // console.log(res, action.current)
                                                                                                                                                         node_to_copy['on_exist'] = res;
                                                                                                                                                         if (action.current.saved) action.current = Object.assign({}, action.current, { value: res });
                                                                                                                                                 });
@@ -1058,7 +1095,7 @@ export default function FileTable() {
                                                                 // console.log( 'to_move_or_copy.current1', to_move_or_copy.current )
 
                                                                 if (!(operation_type === 'move')) {
-                                                                        _context3.next = 96;
+                                                                        _context3.next = 95;
                                                                         break;
                                                                 }
 
@@ -1076,7 +1113,7 @@ export default function FileTable() {
 
                                                         case 50:
                                                                 if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
-                                                                        _context3.next = 80;
+                                                                        _context3.next = 79;
                                                                         break;
                                                                 }
 
@@ -1107,7 +1144,7 @@ export default function FileTable() {
                                                                                 node.path
                                                                         )
                                                                 ), { type: "error" });
-                                                                return _context3.abrupt('continue', 77);
+                                                                return _context3.abrupt('continue', 76);
 
                                                         case 55:
                                                                 queryData = new FormData();
@@ -1118,26 +1155,26 @@ export default function FileTable() {
                                                                 queryData.append('id', node_to_move.id);
                                                                 queryData.append('on_exist', node_to_move.on_exist ? node_to_move.on_exist : '-1');
 
-                                                                console.log('arriiiiiiiiiiiiiveeee', node_to_move);
+                                                                // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
 
                                                                 if (!(node_to_move.type === 'ds')) {
-                                                                        _context3.next = 70;
+                                                                        _context3.next = 69;
                                                                         break;
                                                                 }
 
                                                                 if (!window.Global_State.isEditorMode) {
-                                                                        _context3.next = 66;
+                                                                        _context3.next = 65;
                                                                         break;
                                                                 }
 
                                                                 window.Global_State.editor.folder.move(queryData);
-                                                                _context3.next = 68;
+                                                                _context3.next = 67;
                                                                 break;
 
-                                                        case 66:
-                                                                _context3.next = 68;
+                                                        case 65:
+                                                                _context3.next = 67;
                                                                 return http.post('move_folder', queryData).then(function (res) {
-                                                                        console.log(res);
+                                                                        // console.log(res)
                                                                         switch (res.data.statue) {
                                                                                 case 'success':
                                                                                         toast('Dossier deplac\xE9 avec succ\xE8s', { type: 'success' });
@@ -1153,29 +1190,29 @@ export default function FileTable() {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 68:
-                                                                _context3.next = 77;
+                                                        case 67:
+                                                                _context3.next = 76;
                                                                 break;
 
-                                                        case 70:
+                                                        case 69:
                                                                 if (!(node_to_move.type === 'f')) {
-                                                                        _context3.next = 77;
+                                                                        _context3.next = 76;
                                                                         break;
                                                                 }
 
                                                                 if (!window.Global_State.isEditorMode) {
-                                                                        _context3.next = 75;
+                                                                        _context3.next = 74;
                                                                         break;
                                                                 }
 
                                                                 window.Global_State.editor.files.move(queryData);
-                                                                _context3.next = 77;
+                                                                _context3.next = 76;
                                                                 break;
 
-                                                        case 75:
-                                                                _context3.next = 77;
+                                                        case 74:
+                                                                _context3.next = 76;
                                                                 return http.post('move_file', queryData).then(function (res) {
-                                                                        console.log(res);
+                                                                        // console.log(res)
                                                                         switch (res.data.statue) {
                                                                                 case 'success':
                                                                                         toast('Fichier deplac\xE9 avec succ\xE8s', { type: 'success' });
@@ -1191,69 +1228,69 @@ export default function FileTable() {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 77:
+                                                        case 76:
                                                                 _iteratorNormalCompletion3 = true;
                                                                 _context3.next = 50;
                                                                 break;
 
-                                                        case 80:
-                                                                _context3.next = 86;
+                                                        case 79:
+                                                                _context3.next = 85;
                                                                 break;
 
-                                                        case 82:
-                                                                _context3.prev = 82;
+                                                        case 81:
+                                                                _context3.prev = 81;
                                                                 _context3.t2 = _context3['catch'](48);
                                                                 _didIteratorError3 = true;
                                                                 _iteratorError3 = _context3.t2;
 
-                                                        case 86:
+                                                        case 85:
+                                                                _context3.prev = 85;
                                                                 _context3.prev = 86;
-                                                                _context3.prev = 87;
 
                                                                 if (!_iteratorNormalCompletion3 && _iterator3.return) {
                                                                         _iterator3.return();
                                                                 }
 
-                                                        case 89:
-                                                                _context3.prev = 89;
+                                                        case 88:
+                                                                _context3.prev = 88;
 
                                                                 if (!_didIteratorError3) {
-                                                                        _context3.next = 92;
+                                                                        _context3.next = 91;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError3;
 
+                                                        case 91:
+                                                                return _context3.finish(88);
+
                                                         case 92:
-                                                                return _context3.finish(89);
+                                                                return _context3.finish(85);
 
                                                         case 93:
-                                                                return _context3.finish(86);
-
-                                                        case 94:
-                                                                _context3.next = 149;
+                                                                _context3.next = 147;
                                                                 break;
 
-                                                        case 96:
+                                                        case 95:
 
-                                                                console.log('to_move_or_copy.current', concern_nodes);
+                                                                // console.log( 'to_move_or_copy.current', concern_nodes )
 
                                                                 _iteratorNormalCompletion4 = true;
                                                                 _didIteratorError4 = false;
                                                                 _iteratorError4 = undefined;
-                                                                _context3.prev = 100;
+                                                                _context3.prev = 98;
                                                                 _iterator4 = concern_nodes[Symbol.iterator]();
 
-                                                        case 102:
+                                                        case 100:
                                                                 if (_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done) {
-                                                                        _context3.next = 135;
+                                                                        _context3.next = 133;
                                                                         break;
                                                                 }
 
                                                                 node_to_copy = _step4.value;
 
                                                                 if (!(node.path.indexOf(node_to_copy.path) !== -1)) {
-                                                                        _context3.next = 107;
+                                                                        _context3.next = 105;
                                                                         break;
                                                                 }
 
@@ -1277,9 +1314,9 @@ export default function FileTable() {
                                                                                 node.path
                                                                         )
                                                                 ), { type: "error" });
-                                                                return _context3.abrupt('continue', 132);
+                                                                return _context3.abrupt('continue', 130);
 
-                                                        case 107:
+                                                        case 105:
                                                                 _queryData = new FormData();
 
 
@@ -1307,23 +1344,23 @@ export default function FileTable() {
                                                                 // console.log('arriiiiiiiiiiiiiveeee', node_to_move)
 
                                                                 if (!(node_to_copy.type === 'ds')) {
-                                                                        _context3.next = 125;
+                                                                        _context3.next = 123;
                                                                         break;
                                                                 }
 
                                                                 if (!window.Global_State.isEditorMode) {
-                                                                        _context3.next = 121;
+                                                                        _context3.next = 119;
                                                                         break;
                                                                 }
 
                                                                 window.Global_State.editor.folder.copy(_queryData);
-                                                                _context3.next = 123;
+                                                                _context3.next = 121;
                                                                 break;
 
-                                                        case 121:
-                                                                _context3.next = 123;
+                                                        case 119:
+                                                                _context3.next = 121;
                                                                 return http.post('copy_folder', _queryData).then(function (res) {
-                                                                        console.log(res);
+                                                                        // console.log(res)
                                                                         switch (res.data.statue) {
                                                                                 case 'success':
                                                                                         toast('Dossier copi\xE9 avec succ\xE8s', { type: 'success' });
@@ -1339,29 +1376,29 @@ export default function FileTable() {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 123:
-                                                                _context3.next = 132;
+                                                        case 121:
+                                                                _context3.next = 130;
                                                                 break;
 
-                                                        case 125:
+                                                        case 123:
                                                                 if (!(node_to_copy.type === 'f')) {
-                                                                        _context3.next = 132;
-                                                                        break;
-                                                                }
-
-                                                                if (!window.Global_State.isEditorMode) {
                                                                         _context3.next = 130;
                                                                         break;
                                                                 }
 
+                                                                if (!window.Global_State.isEditorMode) {
+                                                                        _context3.next = 128;
+                                                                        break;
+                                                                }
+
                                                                 window.Global_State.editor.files.copy(_queryData);
-                                                                _context3.next = 132;
+                                                                _context3.next = 130;
                                                                 break;
 
-                                                        case 130:
-                                                                _context3.next = 132;
+                                                        case 128:
+                                                                _context3.next = 130;
                                                                 return http.post('copy_file', _queryData).then(function (res) {
-                                                                        console.log(res);
+                                                                        // console.log(res)
                                                                         switch (res.data.statue) {
                                                                                 case 'success':
                                                                                         toast('Fichier copi\xE9 avec succ\xE8s', { type: 'success' });
@@ -1377,55 +1414,55 @@ export default function FileTable() {
                                                                         console.log(err);throw err;
                                                                 });
 
-                                                        case 132:
+                                                        case 130:
                                                                 _iteratorNormalCompletion4 = true;
-                                                                _context3.next = 102;
+                                                                _context3.next = 100;
+                                                                break;
+
+                                                        case 133:
+                                                                _context3.next = 139;
                                                                 break;
 
                                                         case 135:
-                                                                _context3.next = 141;
-                                                                break;
-
-                                                        case 137:
-                                                                _context3.prev = 137;
-                                                                _context3.t3 = _context3['catch'](100);
+                                                                _context3.prev = 135;
+                                                                _context3.t3 = _context3['catch'](98);
                                                                 _didIteratorError4 = true;
                                                                 _iteratorError4 = _context3.t3;
 
-                                                        case 141:
-                                                                _context3.prev = 141;
-                                                                _context3.prev = 142;
+                                                        case 139:
+                                                                _context3.prev = 139;
+                                                                _context3.prev = 140;
 
                                                                 if (!_iteratorNormalCompletion4 && _iterator4.return) {
                                                                         _iterator4.return();
                                                                 }
 
-                                                        case 144:
-                                                                _context3.prev = 144;
+                                                        case 142:
+                                                                _context3.prev = 142;
 
                                                                 if (!_didIteratorError4) {
-                                                                        _context3.next = 147;
+                                                                        _context3.next = 145;
                                                                         break;
                                                                 }
 
                                                                 throw _iteratorError4;
 
+                                                        case 145:
+                                                                return _context3.finish(142);
+
+                                                        case 146:
+                                                                return _context3.finish(139);
+
                                                         case 147:
-                                                                return _context3.finish(144);
-
-                                                        case 148:
-                                                                return _context3.finish(141);
-
-                                                        case 149:
                                                         case 'end':
                                                                 return _context3.stop();
                                                 }
                                         }
-                                }, _callee3, this, [[19, 29, 33, 41], [34,, 36, 40], [48, 82, 86, 94], [87,, 89, 93], [100, 137, 141, 149], [142,, 144, 148]]);
+                                }, _callee3, this, [[19, 29, 33, 41], [34,, 36, 40], [48, 81, 85, 93], [86,, 88, 92], [98, 135, 139, 147], [140,, 142, 146]]);
                         }));
 
                         return function paste_here(_x) {
-                                return _ref7.apply(this, arguments);
+                                return _ref8.apply(this, arguments);
                         };
                 }();
 
@@ -1434,7 +1471,7 @@ export default function FileTable() {
 
                 useEffect(function () {
                         window.Global_State.EventsManager.on("shortcut", function (value) {
-                                console.log("Paste");
+                                // console.log("Paste");
                                 if (value === "ctrl_v") {
 
                                         if (ref.current) ref.current.click();
@@ -1452,7 +1489,7 @@ export default function FileTable() {
                                 disabled: mc_state === 'none'
                                 // style = {{ marginRight: 20, }}
                                 , onClick: function onClick(e) {
-                                        console.log(to_move_or_copy.current, node.id);
+                                        // console.log(to_move_or_copy.current, node.id)
 
                                         if (window.Global_State.isEditorMode) paste_here(node);else {
                                                 toast.promise(paste_here(node), {
@@ -1545,7 +1582,7 @@ export default function FileTable() {
 
                                         var service = submittedInfo.services[0].label;
 
-                                        queryBody.append("name", submittedInfo.type_audit + "-" + service + "-" + submittedInfo.annee + "-" + submittedInfo.num_chrono);
+                                        queryBody.append("name", submittedInfo.type_audit + "-" + submittedInfo.annee + "-" + service + "-" + submittedInfo.num_chrono);
                                         queryBody.append("services", JSON.stringify(submittedInfo.services));
                                         queryBody.append("inspectors", JSON.stringify(inspector_ids));
                                         queryBody.append("ra_id", window.Global_State.authUser.id);
@@ -1563,7 +1600,7 @@ export default function FileTable() {
 
                                                 // Handle the response from backend here
                                                 .then(function (res) {
-                                                        console.log(res);
+                                                        // console.log(res)
 
                                                         if (res.data.statue === 'success') {
                                                                 swal({
@@ -1601,7 +1638,7 @@ export default function FileTable() {
 
                                                 // Catch errors if any
                                                 .catch(function (err) {
-                                                        console.log(err);
+                                                        // console.log(err)
                                                         var msg = void 0;
                                                         if (err.response.status === 500) msg = "erreur interne au serveur";else if (err.response.status === 401) msg = "erreur du a une session expirée, veuillez vous reconnecter en rechargeant la page";
                                                         swal({
@@ -1612,7 +1649,7 @@ export default function FileTable() {
                                                         window.Global_State.modalManager.setContent(React.createElement(Audit_form, null));
                                                 });
                                         } else {
-                                                console.log('editorHandle audit');
+                                                // console.log('editorHandle audit')
 
                                                 window.Global_State.editor.audit.add(queryBody);
 
@@ -1745,7 +1782,7 @@ export default function FileTable() {
                                                 ),
                                                 React.createElement(AsyncUsersSelectComponent, {
                                                         updateMethod: function updateMethod(r) {
-                                                                console.log('new_val', r);
+                                                                // console.log('new_val', r)
                                                                 // const e = window.Global_State.copyObject(r)
                                                                 // if (!r.length) r.unshift( { value: parseInt(window.Global_State.authUser.id), label: `${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}` } );
                                                                 formik.setFieldValue("inspectors", r);
@@ -1826,10 +1863,11 @@ export default function FileTable() {
                                         queryBody.append("parent_type", parent_type);
                                         queryBody.append("section_id", window.Global_State.selectedSectionId);
 
-                                        console.log("services", queryBody.get("services"));
-                                        console.log("name", queryBody.get("name"));
-                                        console.log("parent_id", parent_id);
-                                        console.log("parent_type", parent_type);
+                                        // console.log("services", queryBody.get("services"))
+                                        // console.log("name", queryBody.get("name"))
+                                        // console.log("parent_id", parent_id)
+                                        // console.log("parent_type", parent_type)
+
 
                                         if (!window.Global_State.isEditorMode) {
 
@@ -1839,7 +1877,7 @@ export default function FileTable() {
 
                                                 // Handle the response from backend here
                                                 .then(function (res) {
-                                                        console.log('res', res);
+                                                        // console.log('res', res)
                                                         if (res.data.statue === 'success') {
                                                                 swal({
                                                                         title: "FIN!",
@@ -1877,7 +1915,7 @@ export default function FileTable() {
                                                         window.Global_State.modalManager.setContent(React.createElement(Folder_form, null));
                                                 });
                                         } else {
-                                                console.log('editorHandle folder');
+                                                // console.log('editorHandle folder')
                                                 queryBody.set('front_parent_type', node.type);
                                                 window.Global_State.editor.folder.add(queryBody);
 
@@ -1985,7 +2023,7 @@ export default function FileTable() {
                                 var msg_err = "Valeur de champ invalide";
 
                                 var handleSubmit = function handleSubmit(submittedInfo) {
-                                        console.log(submittedInfo);
+                                        // console.log(submittedInfo)
 
                                         var check_feasibility = function check_feasibility(debut, fin, nonC_id) {
                                                 var nonC = window.Global_State.getNodeDataById(nonC_id);
@@ -2034,7 +2072,7 @@ export default function FileTable() {
 
                                                         // Handle the response from backend here
                                                         .then(function (res) {
-                                                                console.log(res);
+                                                                // console.log(res)
 
                                                                 if (res.data.statue === 'success') {
                                                                         if (res.data.data.existing_fnc) {
@@ -2091,7 +2129,7 @@ export default function FileTable() {
                                                                 window.Global_State.modalManager.setContent(React.createElement(FNCs_form, null));
                                                         });
                                                 } else {
-                                                        console.log('editorHandle fnc');
+                                                        // console.log('editorHandle fnc')
 
                                                         queryBody.set('front_parent_type', node.type);
                                                         window.Global_State.editor.fnc.add(queryBody);
@@ -2101,7 +2139,7 @@ export default function FileTable() {
 
                                                 // console.log(queryBody.get("name"))
                                         } else {
-                                                console.log('not feasible');
+                                                // console.log('not feasible')
 
                                                 swal({
                                                         title: "ERROR!",
@@ -2290,7 +2328,7 @@ export default function FileTable() {
                                 var msg_err = "Valeur de champ invalide";
 
                                 var handleSubmit = function handleSubmit(submittedInfo) {
-                                        console.log(submittedInfo);
+                                        // console.log(submittedInfo)
 
                                         window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner);
 
@@ -2312,7 +2350,7 @@ export default function FileTable() {
                                         // console.log("services", queryBody.get("services"))
                                         // console.log("nc_id", queryBody.get("nonC_id"))
                                         // console.log("debut", queryBody.get("debut"))
-                                        console.log("fin", queryBody.get("fichiers[]"));
+                                        // console.log("fin", queryBody.get("fichiers[]"))
 
                                         if (!window.Global_State.isEditorMode) {
 
@@ -2326,7 +2364,7 @@ export default function FileTable() {
 
                                                 // Handle the response from backend here
                                                 .then(function (res) {
-                                                        console.log(res);
+                                                        // console.log(res)
 
                                                         if (res.data.statue === 'success') {
                                                                 swal({
@@ -2376,7 +2414,7 @@ export default function FileTable() {
                                                         window.Global_State.modalManager.setContent(React.createElement(Fs_form, null));
                                                 });
                                         } else {
-                                                console.log('editorHandle for files');
+                                                // console.log('editorHandle for files')
                                                 // queryBody.forEach((value, key) => console.log(key, value));
                                                 queryBody.set('front_parent_type', node.type);
                                                 window.Global_State.editor.files.add(queryBody);
@@ -2509,7 +2547,7 @@ export default function FileTable() {
                 ));
 
                 function handleCut(e) {
-                        console.log("Couperrrrrrrrrrrrr");
+                        // console.log("Couperrrrrrrrrrrrr")
                         if (selectedRow.length > 0) {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -2532,7 +2570,7 @@ export default function FileTable() {
                         }
                 }
                 function handleCopy(e) {
-                        console.log("Copieeeeeeeeeeeeeee");
+                        // console.log("Copieeeeeeeeeeeeeee")
                         if (selectedRow.length > 0) {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -2554,7 +2592,6 @@ export default function FileTable() {
                                 setMc_state('copy');
                         }
                 }
-                function handlePaste() {}
                 function handleRename(e) {
                         e.preventDefault();
                         e.stopPropagation();
@@ -2602,7 +2639,7 @@ export default function FileTable() {
 
                                                         // console.log(selectedRow[0].id.substring(2))
                                                         http.post('' + route, query).then(function (res) {
-                                                                console.log(res);
+                                                                // console.log(res)
                                                                 if (res.data.statue === 'success') window.show_response(node.value + ' renomm\xE9 avec succ\xE8s !', "success");else window.show_response(res.data.data.msg, res.data.statue);
                                                                 setLoading(Object.assign({}, loading_buttons, { rename: false }));
                                                         }).catch(function (err) {
@@ -2614,6 +2651,13 @@ export default function FileTable() {
                                         });
                                 } else toast.error("Can't do that 😒");
                         }
+                }
+
+                function handleDetails(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        window.Global_State.showDetails(selectedRow[0].id);
                 }
                 function handleShare(e) {
                         e.preventDefault();
@@ -2628,7 +2672,7 @@ export default function FileTable() {
                                 };
                         });
 
-                        console.log("Shaaaaaaaaaaaaaaaaaaaaaring");
+                        // console.log("Shaaaaaaaaaaaaaaaaaaaaaring")
 
                         var Share_to_users_form = function Share_to_users_form() {
                                 // const [selectedService, setSelectedServices] = useState(null);
@@ -2649,7 +2693,7 @@ export default function FileTable() {
 
                                         queryBody.append("inspectors", JSON.stringify(inspector_ids));
 
-                                        console.log("nodes_infoooooooooooooooo", nodes_info);
+                                        // console.log("nodes_infoooooooooooooooo", nodes_info)
                                         // return
                                         queryBody.append("nodes_info", JSON.stringify(nodes_info));
 
@@ -2659,7 +2703,7 @@ export default function FileTable() {
 
                                         window.Global_State.modalManager.setContent(window.Global_State.spinnerManager.spinner);
                                         http.post('share', queryBody).then(function (res) {
-                                                console.log(res);
+                                                // console.log(res)
 
                                                 if (res.data.statue === 'success') window.show_response('Fichier(s) partag\xE9(s) avec success"', "success");else window.show_response(res.data.data.msg, res.data.statue);
                                                 setLoading(Object.assign({}, loading_buttons, { share: false }));
@@ -2718,7 +2762,7 @@ export default function FileTable() {
                                                         React.createElement(AsyncUsersSelectComponent, {
                                                                 areFixed: [],
                                                                 updateMethod: function updateMethod(r) {
-                                                                        console.log('new_val', r);
+                                                                        // console.log('new_val', r)
                                                                         // const e = window.Global_State.copyObject(r)
                                                                         // if (!r.length) r.unshift( { value: parseInt(window.Global_State.authUser.id), label: `${window.Global_State.authUser.name} ${window.Global_State.authUser.second_name}` } );
                                                                         formik.setFieldValue("inspectors", r);
@@ -2756,28 +2800,37 @@ export default function FileTable() {
                                 );
                         };
 
-                        window.Global_State.setOverlay_props(function (t) {
-                                return Object.assign({}, t, {
-                                        style: Object.assign({}, t.style, {
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                        }),
-                                        children: React.createElement(
-                                                'div',
-                                                { className: 'full_size_element d-flex justify-content-center',
-                                                        style: {
-                                                                backgroundColor: "rgba(0,0,0,0.22)"
-                                                        }
-                                                },
-                                                React.createElement(Share_to_users_form, null)
-                                        )
+                        var component = React.createElement(
+                                'div',
+                                { className: 'custom_overlay d-flex justify-content-center'
+                                },
+                                React.createElement(Share_to_users_form, null)
+                        );
 
-                                });
-                        });
+                        // window.Global_State.setOverlay_props( t => (
+                        // {
+                        //         ...t,
+                        //         style:
+                        //         {
+                        //                 ...t.style,
+                        //                 display: 'flex',
+                        //                 alignItems: 'center',
+                        //                 justifyContent: 'center'
+                        //         },
+                        //         children: (
+                        //                 <div className="full_size_element d-flex justify-content-center"
+                        //                      style={{
+                        //                              backgroundColor: "rgba(0,0,0,0.22)"
+                        //                      }}
+                        //                 >
+                        //                         <Share_to_users_form />
+                        //                 </div>
+                        //         ),
+                        //
+                        // }
+                        // ) )
 
-                        // window.Global_State.modalManager.setContent(<Share_to_users_form/>)
-                        // window.Global_State.modalManager.open_modal("Partager á")
+                        window.Global_State.absolutePopover.open(component);
                 }
                 function handleDownload(e) {
                         e.preventDefault();
@@ -2795,11 +2848,11 @@ export default function FileTable() {
                         setLoading(Object.assign({}, loading_buttons, { download: true }));
 
                         if (nodes_info.length === 1 && nodes_info[0].model === "App\\Models\\Fichier") {
-                                console.log(nodes_info);
+                                // console.log(nodes_info)
                                 // return
 
                                 http.get('download_file?id=' + nodes_info[0].id, { responseType: 'blob' }).then(function (res) {
-                                        console.log(res);
+                                        // console.log(res)
                                         var blob = new Blob([res.data]);
                                         // console.log(blob)
                                         var url = window.URL.createObjectURL(blob);
@@ -2816,16 +2869,16 @@ export default function FileTable() {
                                         window.show_response(err.message + ' ' + err.response.data.message, "error");
                                 });
                         } else {
-                                console.log(nodes_info);
+                                // console.log(nodes_info)
                                 // return
                                 var to_compress = new FormData();
                                 to_compress.append("nodes_info", JSON.stringify(nodes_info));
 
                                 http.post("compress", to_compress).then(function (res) {
-                                        console.log(res);
+                                        // console.log(res)
 
                                         http.get('download_by_path?path=' + res.data, { responseType: 'blob' }).then(function (res) {
-                                                console.log(res);
+                                                // console.log(res)
                                                 var blob = new Blob([res.data]);
                                                 // console.log(blob)
                                                 var url = window.URL.createObjectURL(blob);
@@ -2855,7 +2908,7 @@ export default function FileTable() {
                         e.stopPropagation();
 
                         var remove = function () {
-                                var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
+                                var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee5() {
                                         return _regeneratorRuntime.wrap(function _callee5$(_context5) {
                                                 while (1) {
                                                         switch (_context5.prev = _context5.next) {
@@ -2863,7 +2916,7 @@ export default function FileTable() {
                                                                         setLoading(Object.assign({}, loading_buttons, { delete: true }));
 
                                                                         return _context5.abrupt('return', Promise.all(selectedRow.map(function () {
-                                                                                var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(row) {
+                                                                                var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(row) {
                                                                                         var nodeIdentity, route;
                                                                                         return _regeneratorRuntime.wrap(function _callee4$(_context4) {
                                                                                                 while (1) {
@@ -2873,44 +2926,45 @@ export default function FileTable() {
                                                                                                                         nodeIdentity = window.Global_State.identifyNode(row);
                                                                                                                         // const [ id, type ] = window.Global_State.identifyNode(row)
 
-                                                                                                                        console.log(selectedRow);
+                                                                                                                        // console.log(selectedRow)
+
                                                                                                                         route = '';
                                                                                                                         _context4.t0 = row.type;
-                                                                                                                        _context4.next = _context4.t0 === 'audit' ? 6 : _context4.t0 === 'checkList' ? 8 : _context4.t0 === 'dp' ? 9 : _context4.t0 === 'nonC' ? 10 : _context4.t0 === 'fnc' ? 11 : _context4.t0 === 'ds' ? 13 : _context4.t0 === 'f' ? 15 : 17;
+                                                                                                                        _context4.next = _context4.t0 === 'audit' ? 5 : _context4.t0 === 'checkList' ? 7 : _context4.t0 === 'dp' ? 8 : _context4.t0 === 'nonC' ? 9 : _context4.t0 === 'fnc' ? 10 : _context4.t0 === 'ds' ? 12 : _context4.t0 === 'f' ? 14 : 16;
                                                                                                                         break;
 
-                                                                                                                case 6:
+                                                                                                                case 5:
                                                                                                                         route = 'del_audit';
-                                                                                                                        return _context4.abrupt('break', 18);
+                                                                                                                        return _context4.abrupt('break', 17);
+
+                                                                                                                case 7:
+                                                                                                                        return _context4.abrupt('break', 17);
 
                                                                                                                 case 8:
-                                                                                                                        return _context4.abrupt('break', 18);
+                                                                                                                        return _context4.abrupt('break', 17);
 
                                                                                                                 case 9:
-                                                                                                                        return _context4.abrupt('break', 18);
+                                                                                                                        return _context4.abrupt('break', 17);
 
                                                                                                                 case 10:
-                                                                                                                        return _context4.abrupt('break', 18);
-
-                                                                                                                case 11:
                                                                                                                         route = 'del_fnc';
-                                                                                                                        return _context4.abrupt('break', 18);
+                                                                                                                        return _context4.abrupt('break', 17);
 
-                                                                                                                case 13:
+                                                                                                                case 12:
                                                                                                                         route = 'del_folder';
-                                                                                                                        return _context4.abrupt('break', 18);
+                                                                                                                        return _context4.abrupt('break', 17);
 
-                                                                                                                case 15:
+                                                                                                                case 14:
                                                                                                                         route = 'del_file';
-                                                                                                                        return _context4.abrupt('break', 18);
+                                                                                                                        return _context4.abrupt('break', 17);
+
+                                                                                                                case 16:
+                                                                                                                        return _context4.abrupt('break', 17);
 
                                                                                                                 case 17:
-                                                                                                                        return _context4.abrupt('break', 18);
-
-                                                                                                                case 18:
-                                                                                                                        _context4.next = 20;
+                                                                                                                        _context4.next = 19;
                                                                                                                         return http.delete(route + '?id=' + nodeIdentity[0]).then(function (res) {
-                                                                                                                                console.log(res);
+                                                                                                                                // console.log(res);
                                                                                                                                 if (res.data.statue === 'success') window.show_response(row.value + ' supprim\xE9 avec succ\xE8s !', "success");else window.show_response(res.data.data.msg, res.data.statue);
                                                                                                                                 setLoading(Object.assign({}, loading_buttons, { delete: false }));
                                                                                                                         }).catch(function (err) {
@@ -2924,7 +2978,7 @@ export default function FileTable() {
                                                                                                                                 // })
                                                                                                                         });
 
-                                                                                                                case 20:
+                                                                                                                case 19:
                                                                                                                 case 'end':
                                                                                                                         return _context4.stop();
                                                                                                         }
@@ -2933,7 +2987,7 @@ export default function FileTable() {
                                                                                 }));
 
                                                                                 return function (_x2) {
-                                                                                        return _ref9.apply(this, arguments);
+                                                                                        return _ref10.apply(this, arguments);
                                                                                 };
                                                                         }()
 
@@ -2950,7 +3004,7 @@ export default function FileTable() {
                                 }));
 
                                 return function remove() {
-                                        return _ref8.apply(this, arguments);
+                                        return _ref9.apply(this, arguments);
                                 };
                         }();
 
@@ -2960,11 +3014,11 @@ export default function FileTable() {
                                         var nodeIdentity = window.Global_State.identifyNode(row);
                                         // const [ id, type ] = window.Global_State.identifyNode(row)
 
-                                        console.log(selectedRow);
+                                        // console.log(selectedRow)
                                         switch (row.type) {
                                                 case 'audit':
 
-                                                        console.log('audit dispatch del');
+                                                        // console.log('audit dispatch del')
                                                         window.Global_State.editor.audit.delete(nodeIdentity[0]);
 
                                                         break;
@@ -2976,19 +3030,19 @@ export default function FileTable() {
                                                         break;
                                                 case 'fnc':
 
-                                                        console.log('fnc dispatch del');
+                                                        // console.log('fnc dispatch del')
                                                         window.Global_State.editor.fnc.delete(nodeIdentity[0]);
 
                                                         break;
                                                 case 'ds':
 
-                                                        console.log('folder del');
+                                                        // console.log('folder del')
                                                         window.Global_State.editor.folder.delete(nodeIdentity[0]);
 
                                                         break;
                                                 case 'f':
 
-                                                        console.log('file dispatch del');
+                                                        // console.log('file dispatch del')
                                                         window.Global_State.editor.files.delete(nodeIdentity[0]);
 
                                                         break;
@@ -3042,7 +3096,7 @@ export default function FileTable() {
 
                 useEffect(function () {
                         window.Global_State.EventsManager.on("shortcut", function (value) {
-                                console.log(refs[value]);
+                                // console.log(refs[value]);
                                 if (refs[value]) {
                                         var action_button = refs[value].current;
 
@@ -3054,6 +3108,44 @@ export default function FileTable() {
                                 window.Global_State.EventsManager.off("shortcut");
                         };
                 }, []);
+
+                var disable_feature = function disable_feature() {
+                        var editing = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+                        var renaming = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+                        if (editing) {
+                                if (selectedRowNumber === 0) return true;
+
+                                var _iteratorNormalCompletion7 = true;
+                                var _didIteratorError7 = false;
+                                var _iteratorError7 = undefined;
+
+                                try {
+                                        for (var _iterator7 = selectedRow[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                                                var row = _step7.value;
+
+                                                if (row.type !== "ds" && row.type !== "f") return true;
+                                        }
+                                } catch (err) {
+                                        _didIteratorError7 = true;
+                                        _iteratorError7 = err;
+                                } finally {
+                                        try {
+                                                if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                                                        _iterator7.return();
+                                                }
+                                        } finally {
+                                                if (_didIteratorError7) {
+                                                        throw _iteratorError7;
+                                                }
+                                        }
+                                }
+
+                                if (renaming) return selectedRowNumber !== 1;
+
+                                return false;
+                        } else return selectedRowNumber === 0;
+                };
 
                 return React.createElement(
                         'div',
@@ -3093,8 +3185,8 @@ export default function FileTable() {
                                                                 { className: 'action_button' },
                                                                 React.createElement(
                                                                         IconButton,
-                                                                        { id: 'ctrl_x', ref: refs.ctrl_x, color: "error", disabled: selectedRowNumber === 0, onClick: handleCut },
-                                                                        React.createElement(IoIosCut, { color: selectedRowNumber === 0 ? '' : "#cc7613", size: 24 })
+                                                                        { id: 'ctrl_x', ref: refs.ctrl_x, color: "error", disabled: disable_feature(true), onClick: handleCut },
+                                                                        React.createElement(IoIosCut, { color: disable_feature(true) ? '' : "#cc7613", size: 24 })
                                                                 )
                                                         )
                                                 ),
@@ -3106,8 +3198,8 @@ export default function FileTable() {
                                                                 { className: 'action_button' },
                                                                 React.createElement(
                                                                         IconButton,
-                                                                        { id: 'ctrl_c', ref: refs.ctrl_c, color: "success", disabled: selectedRowNumber === 0, onClick: handleCopy },
-                                                                        React.createElement(CopyAllTwoToneIcon, { color: selectedRowNumber === 0 ? '' : "success", fontSize: "medium" })
+                                                                        { id: 'ctrl_c', ref: refs.ctrl_c, color: "success", disabled: disable_feature(true), onClick: handleCopy },
+                                                                        React.createElement(CopyAllTwoToneIcon, { color: disable_feature(true) ? '' : "success", fontSize: "medium" })
                                                                 )
                                                         )
                                                 ),
@@ -3128,8 +3220,21 @@ export default function FileTable() {
                                                                 { className: 'action_button' },
                                                                 React.createElement(
                                                                         LoadingButton,
-                                                                        { as: IconButton, loading: loading_buttons.rename, ref: refs.ctrl_r, color: "primary", disabled: selectedRowNumber !== 1, onClick: handleRename },
-                                                                        loading_buttons.rename ? null : React.createElement(BiRename, { color: selectedRowNumber !== 1 ? '' : "blue", size: 24 })
+                                                                        { as: IconButton, loading: loading_buttons.rename, ref: refs.ctrl_r, color: "primary", disabled: disable_feature(true, true), onClick: handleRename },
+                                                                        loading_buttons.rename ? null : React.createElement(BiRename, { color: disable_feature(true, true) ? '' : "blue", size: 24 })
+                                                                )
+                                                        )
+                                                ),
+                                                React.createElement(
+                                                        Tooltip,
+                                                        { title: "DÉTAILS", placement: 'top-end' },
+                                                        React.createElement(
+                                                                'div',
+                                                                { className: 'action_button' },
+                                                                React.createElement(
+                                                                        IconButton,
+                                                                        { color: "info", disabled: selectedRowNumber !== 1, onClick: handleDetails },
+                                                                        React.createElement(TbListDetails, { size: 24 })
                                                                 )
                                                         )
                                                 ),
@@ -3141,8 +3246,8 @@ export default function FileTable() {
                                                                 { className: 'action_button' },
                                                                 React.createElement(
                                                                         LoadingButton,
-                                                                        { as: IconButton, loading: loading_buttons.share, color: "secondary", disabled: selectedRowNumber === 0, onClick: handleShare },
-                                                                        loading_buttons.share ? null : React.createElement(VscLiveShare, { color: selectedRowNumber === 0 ? '' : "purple", size: 24 })
+                                                                        { as: IconButton, loading: loading_buttons.share, color: "secondary", disabled: disable_feature(), onClick: handleShare },
+                                                                        loading_buttons.share ? null : React.createElement(VscLiveShare, { color: disable_feature() ? '' : "purple", size: 24 })
                                                                 )
                                                         )
                                                 ),
@@ -3154,8 +3259,8 @@ export default function FileTable() {
                                                                 { className: 'action_button' },
                                                                 React.createElement(
                                                                         LoadingButton,
-                                                                        { as: IconButton, loading: loading_buttons.download, color: "primary", disabled: selectedRowNumber === 0, onClick: handleDownload },
-                                                                        loading_buttons.download ? null : React.createElement(ImDownload2, { color: selectedRowNumber === 0 ? '' : "#1565c0", size: 24 })
+                                                                        { as: IconButton, loading: loading_buttons.download, color: "primary", disabled: disable_feature(), onClick: handleDownload },
+                                                                        loading_buttons.download ? null : React.createElement(ImDownload2, { color: disable_feature() ? '' : "#1565c0", size: 24 })
                                                                 )
                                                         )
                                                 ),
@@ -3167,9 +3272,9 @@ export default function FileTable() {
                                                                 { className: 'action_button' },
                                                                 React.createElement(
                                                                         LoadingButton,
-                                                                        { as: IconButton, loading: loading_buttons.delete, id: 'ctrl_d', ref: refs.ctrl_d, color: "error", disabled: selectedRowNumber === 0, onClick: handleDelete },
+                                                                        { as: IconButton, loading: loading_buttons.delete, id: 'ctrl_d', ref: refs.ctrl_d, color: "error", disabled: disable_feature(), onClick: handleDelete },
                                                                         loading_buttons.delete ? null : React.createElement(RiDeleteBin2Fill, {
-                                                                                color: selectedRowNumber === 0 ? '' : "red",
+                                                                                color: disable_feature() ? '' : "red",
                                                                                 size: 24 })
                                                                 )
                                                         )
@@ -3219,40 +3324,15 @@ export default function FileTable() {
                         var img = ["jpeg", "jpg", "png", "gif"];
                         var vid = ["mp4", "avi", "MOV", "mpeg"];
 
-                        var _iteratorNormalCompletion7 = true;
-                        var _didIteratorError7 = false;
-                        var _iteratorError7 = undefined;
-
-                        try {
-                                for (var _iterator7 = img[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-                                        var imgExt = _step7.value;
-
-                                        if (imgExt === ext) return "img";
-                                }
-                        } catch (err) {
-                                _didIteratorError7 = true;
-                                _iteratorError7 = err;
-                        } finally {
-                                try {
-                                        if (!_iteratorNormalCompletion7 && _iterator7.return) {
-                                                _iterator7.return();
-                                        }
-                                } finally {
-                                        if (_didIteratorError7) {
-                                                throw _iteratorError7;
-                                        }
-                                }
-                        }
-
                         var _iteratorNormalCompletion8 = true;
                         var _didIteratorError8 = false;
                         var _iteratorError8 = undefined;
 
                         try {
-                                for (var _iterator8 = vid[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                                        var vidExt = _step8.value;
+                                for (var _iterator8 = img[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                                        var imgExt = _step8.value;
 
-                                        if (vidExt === ext) return "vid";
+                                        if (imgExt === ext) return "img";
                                 }
                         } catch (err) {
                                 _didIteratorError8 = true;
@@ -3269,13 +3349,38 @@ export default function FileTable() {
                                 }
                         }
 
+                        var _iteratorNormalCompletion9 = true;
+                        var _didIteratorError9 = false;
+                        var _iteratorError9 = undefined;
+
+                        try {
+                                for (var _iterator9 = vid[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                                        var vidExt = _step9.value;
+
+                                        if (vidExt === ext) return "vid";
+                                }
+                        } catch (err) {
+                                _didIteratorError9 = true;
+                                _iteratorError9 = err;
+                        } finally {
+                                try {
+                                        if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                                                _iterator9.return();
+                                        }
+                                } finally {
+                                        if (_didIteratorError9) {
+                                                throw _iteratorError9;
+                                        }
+                                }
+                        }
+
                         return ext;
                 }
 
                 function TypeIcon(props) {
-                        var _ref10 = [props.data, props.iconSize],
-                            data = _ref10[0],
-                            iconSize = _ref10[1];
+                        var _ref11 = [props.data, props.iconSize],
+                            data = _ref11[0],
+                            iconSize = _ref11[1];
 
                         if (data.global_type === "folder") {
 
@@ -3336,7 +3441,7 @@ export default function FileTable() {
                                                                 pointerEvents: 'all'
                                                         },
                                                         onClick: function onClick(e) {
-                                                                console.log(data);
+                                                                // console.log(data)
                                                                 window.Global_State.modalManager.setContent(React.createElement(
                                                                         'div',
                                                                         { style: {
@@ -3416,8 +3521,8 @@ export default function FileTable() {
                         );
                 };
 
-                var LevelComponent = function LevelComponent(_ref11) {
-                        var data = _ref11.data;
+                var LevelComponent = function LevelComponent(_ref12) {
+                        var data = _ref12.data;
 
                         // const [niv, setNiv] = useState(level)
 
@@ -3456,7 +3561,7 @@ export default function FileTable() {
                         function handleClick(e) {
                                 var _this3 = this;
 
-                                console.log(level);
+                                // console.log(level)
                                 var node_data = window.Global_State.getNodeDataById(data.id);
 
                                 var _window$Global_State$9 = window.Global_State.identifyNode(node_data),
@@ -3473,19 +3578,30 @@ export default function FileTable() {
 
                                 if (!window.Global_State.isEditorMode) {
                                         var update = function () {
-                                                var _ref12 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee6() {
+                                                var _ref13 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee6() {
+                                                        var onFulfilled, onRejected;
                                                         return _regeneratorRuntime.wrap(function _callee6$(_context6) {
                                                                 while (1) {
                                                                         switch (_context6.prev = _context6.next) {
                                                                                 case 0:
-                                                                                        _context6.next = 2;
-                                                                                        return http.post('update_fnc', query).then(function (res) {
-                                                                                                console.log(res);
-                                                                                        }).catch(function (err) {
-                                                                                                console.log(err);throw err;
-                                                                                        });
+                                                                                        onFulfilled = function onFulfilled(res) {
+                                                                                                // console.log('update_leveeeeeeeeeeeeeeeeeeeeeel', res)
+                                                                                                toast.dismiss('update_lvl_' + data.id);
+                                                                                                if (res.data.statue === "success") {
+                                                                                                        window.show_response("Le niveau a été mis à jour", "success");
+                                                                                                } else window.show_response(res.data.data.msg, res.data.statue);
+                                                                                        };
 
-                                                                                case 2:
+                                                                                        onRejected = function onRejected(err) {
+                                                                                                console.log(err);
+                                                                                                toast.dismiss('update_lvl_' + data.id);
+                                                                                                window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                                                                        };
+
+                                                                                        _context6.next = 4;
+                                                                                        return http.post('update_fnc', query).then(onFulfilled, onRejected);
+
+                                                                                case 4:
                                                                                 case 'end':
                                                                                         return _context6.stop();
                                                                         }
@@ -3494,16 +3610,17 @@ export default function FileTable() {
                                                 }));
 
                                                 return function update() {
-                                                        return _ref12.apply(this, arguments);
+                                                        return _ref13.apply(this, arguments);
                                                 };
                                         }();
 
-                                        // console.log(selectedRow[0].id.substring(2))
-                                        toast.promise(update(), {
-                                                loading: 'Loading...',
-                                                success: 'Processus achevé',
-                                                error: 'err'
+                                        toast("Loading...", {
+                                                id: 'update_lvl_' + data.id,
+                                                type: 'loading',
+                                                duration: Infinity
                                         });
+
+                                        update();
                                 } else {
                                         window.Global_State.editor.fnc.update(query);
                                 }
@@ -3516,47 +3633,251 @@ export default function FileTable() {
                         );
                 };
 
-                var ReviewDateComponent = function ReviewDateComponent(_ref13) {
-                        var data = _ref13.data;
+                var OpeningDateComponent = function OpeningDateComponent(_ref14) {
+                        var data = _ref14.data;
+
+                        var value = data.opening_date ? data.opening_date : '____/__/__';
+
+                        var handleClick = function handleClick(e) {
+                                e.stopPropagation();
+                                // console.log("opening date handle click")
+
+                                var Date_input = function Date_input(_ref15) {
+                                        var data = _ref15.data;
+
+                                        var _useState19 = useState(false),
+                                            _useState20 = _slicedToArray(_useState19, 2),
+                                            open = _useState20[0],
+                                            setOpen = _useState20[1];
+
+                                        var _useState21 = useState(null),
+                                            _useState22 = _slicedToArray(_useState21, 2),
+                                            anchorEl = _useState22[0],
+                                            setAnchorEl = _useState22[1];
+
+                                        var _useState23 = useState(false),
+                                            _useState24 = _slicedToArray(_useState23, 2),
+                                            loading = _useState24[0],
+                                            setLoading = _useState24[1];
+
+                                        var _useState25 = useState(data.opening_date !== null ? new Date(data.opening_date) : new Date()),
+                                            _useState26 = _slicedToArray(_useState25, 2),
+                                            openingDate = _useState26[0],
+                                            setOpeningDate = _useState26[1];
+
+                                        // `${openingDate.getFullYear()}/${openingDate.getMonth()+1}/${openingDate.getDate()}`
+
+
+                                        var new_opening_date = openingDate.getFullYear() + '/' + (openingDate.getMonth() + 1).toString().padStart(2, '0') + '/' + openingDate.getDate().toString().padStart(2, '0');
+                                        // console.log('new_opening_date', new_opening_date, e)
+
+                                        // let today = new Date()
+                                        // today.setHours(0, 0, 0, 0)
+
+                                        // console.log('millesec dif', new Date(new_opening_date).valueOf() - new Date().valueOf())
+
+                                        var handleSubmit = function handleSubmit(e) {
+                                                e.stopPropagation();
+                                                setLoading(true);
+
+                                                // window.Global_State.setOverlay_props(t => (
+                                                //                 {
+                                                //                         ...t,
+                                                //                         style:
+                                                //                         {
+                                                //                                 ...t.style,
+                                                //                                 display: 'none',
+                                                //                         },
+                                                //                 }
+                                                //         )
+                                                // )
+
+                                                // console.log(new_opening_date)
+
+                                                var _window$Global_State$11 = window.Global_State.identifyNode(data),
+                                                    _window$Global_State$12 = _slicedToArray(_window$Global_State$11, 2),
+                                                    id = _window$Global_State$12[0],
+                                                    model_type = _window$Global_State$12[1];
+
+                                                var query = new FormData();
+                                                query.append('id', id);
+                                                query.append('update_object', 'opening_date');
+                                                query.append('new_value', new_opening_date);
+
+                                                if (!window.Global_State.isEditorMode) {
+                                                        var onFulfilled = function onFulfilled(res) {
+                                                                // console.log('update_open_daaaaaaaaate', res)
+                                                                setLoading(false);
+                                                                if (res.data.statue === "success") {
+                                                                        window.show_response("La date d'ouverture a été mis à jour", "success");
+                                                                        window.Global_State.absolutePopover.close();
+                                                                } else window.show_response(res.data.data.msg, res.data.statue);
+                                                        };
+                                                        var onRejected = function onRejected(err) {
+                                                                console.log(err);
+                                                                setLoading(false);
+                                                                window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                                        };
+
+                                                        http.post('update_fnc', query).then(onFulfilled, onRejected);
+                                                } else {}
+                                        };
+
+                                        var handleChange = function handleChange(newValue) {
+                                                var date = new Date(newValue);
+                                                // console.log( "open_daaaaaaaate newValue", newValue, date.getDate())
+                                                setOpeningDate(date);
+                                        };
+
+                                        var ResponsiveDatePicker = window.innerWidth > 576 ? DesktopDatePicker : MobileDatePicker;
+
+                                        return React.createElement(
+                                                'div',
+                                                { className: 'd-flex justify-content-center align-items-center m-2',
+                                                        onClick: function onClick(e) {
+                                                                e.preventDefault();e.stopPropagation();
+                                                        },
+                                                        style: {
+                                                                backgroundColor: 'rgba(255,255,255,0)',
+                                                                borderRadius: 10,
+                                                                border: '1px solid blue',
+                                                                overflow: "hidden",
+                                                                height: "fit-content",
+                                                                width: "fit-content"
+                                                        }
+                                                },
+                                                React.createElement(
+                                                        'div',
+                                                        { className: 'd-flex', style: { width: "fit-content" } },
+                                                        React.createElement(
+                                                                LocalizationProvider,
+                                                                { dateAdapter: AdapterDayjs },
+                                                                React.createElement(ResponsiveDatePicker, {
+                                                                        open: open,
+                                                                        PopperProps: {
+                                                                                anchorEl: anchorEl
+                                                                        },
+                                                                        onClose: function onClose() {
+                                                                                setOpen(false);setAnchorEl(null);
+                                                                        },
+                                                                        inputFormat: 'YYYY/MM/DD',
+                                                                        value: openingDate,
+                                                                        onChange: handleChange,
+                                                                        maxDate: data.created_at.substring(0, 10),
+                                                                        renderInput: function renderInput(params) {
+                                                                                return React.createElement(CustomDateInput, { id: "lol78",
+                                                                                        value: openingDate.toDateString(),
+                                                                                        loading: loading,
+                                                                                        onSubmit: handleSubmit,
+                                                                                        onClick: function onClick(e) {
+                                                                                                setAnchorEl(e.target);setOpen(true);
+                                                                                        }
+                                                                                });
+                                                                        }
+                                                                        // disablePast
+                                                                })
+                                                        )
+                                                )
+                                        );
+                                };
+
+                                // window.Global_State.setOverlay_props( t => (
+                                // {
+                                //         ...t,
+                                //         style:
+                                //         {
+                                //                 ...t.style,
+                                //                 display: 'flex',
+                                //                 alignItems: 'center',
+                                //                 justifyContent: 'center'
+                                //         },
+                                //         children: (
+                                //         <div
+                                //                 style=
+                                //                 {{
+                                //                         width: "max-content",
+                                //                         marginTop: 15,
+                                //                         backgroundColor: 'rgba(255,255,255,0)' ,
+                                //                         position: "absolute",
+                                //                         top: e.clientY - 37,
+                                //                         left: e.clientX - 185/2
+                                //                         // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+                                //                 }}
+                                //                 onClick={ e => { e.stopPropagation() } }
+                                //         >
+                                //                 <Date_input data={data} />
+                                //         </div>
+                                //         ),
+                                //
+                                // }
+                                // ) )
+
+                                window.Global_State.absolutePopover.open(React.createElement(Date_input, { data: data }), e.target);
+                        };
+
+                        return React.createElement(
+                                'span',
+                                { className: '' + (data.opening_date ? 'text-primary' : ''), onClick: handleClick },
+                                value
+                        );
+                };
+
+                var ReviewDateComponent = function ReviewDateComponent(_ref16) {
+                        var data = _ref16.data;
 
                         var value = data.review_date ? data.review_date : '____/__/__';
 
                         var handleClick = function handleClick(e) {
                                 e.stopPropagation();
-                                console.log("review date handle click");
+                                // console.log("OPENING date handle click")
 
-                                var Date_input = function Date_input(_ref14) {
-                                        var data = _ref14.data;
+                                var Date_input = function Date_input(_ref17) {
+                                        var data = _ref17.data;
 
+                                        var _useState27 = useState(false),
+                                            _useState28 = _slicedToArray(_useState27, 2),
+                                            clearLoading = _useState28[0],
+                                            setClearLoading = _useState28[1];
 
-                                        var CustomInput = forwardRef(function (_ref15, ref) {
-                                                var value = _ref15.value,
-                                                    onClick = _ref15.onClick;
-                                                return React.createElement(
-                                                        Stack,
-                                                        { direction: 'row', sx: { width: 'fit-content', backgroundColor: 'whitesmoke' } },
-                                                        React.createElement('input', { ref: ref,
-                                                                className: 'form-control form-control-sm',
-                                                                style: { height: 35, textAlign: 'center', border: 'none', borderRadius: 0 },
-                                                                value: '' + value,
-                                                                onChange: function onChange(e) {
-                                                                        e.preventDefault();e.stopPropagation();
-                                                                },
-                                                                onClick: onClick,
-                                                                readOnly: true
-                                                        }),
-                                                        React.createElement(
-                                                                'div',
-                                                                { style: { width: 'fit-content', height: 'fit-content', padding: 5, backgroundColor: '#E9ECEFFF' }, onClick: handleSubmit },
-                                                                React.createElement(HiSaveAs, { size: 25, color: 'blue' })
-                                                        )
-                                                );
-                                        });
+                                        var _useState29 = useState(false),
+                                            _useState30 = _slicedToArray(_useState29, 2),
+                                            open = _useState30[0],
+                                            setOpen = _useState30[1];
 
-                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref16) {
-                                                var date = _ref16.date,
-                                                    value = _ref16.value,
-                                                    onChange = _ref16.onChange;
+                                        var _useState31 = useState(null),
+                                            _useState32 = _slicedToArray(_useState31, 2),
+                                            anchorEl = _useState32[0],
+                                            setAnchorEl = _useState32[1];
+
+                                        var _useState33 = useState(false),
+                                            _useState34 = _slicedToArray(_useState33, 2),
+                                            loading = _useState34[0],
+                                            setLoading = _useState34[1];
+
+                                        // const CustomInput = forwardRef(
+                                        //         ({ value, onClick }, ref) =>
+                                        //         (
+                                        //                 <Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: 'whitesmoke' }}>
+                                        //                         <input ref={ref}
+                                        //                                className="form-control form-control-sm"
+                                        //                                style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0 }}
+                                        //                                value={`${value}`}
+                                        //                                onChange={e => {e.preventDefault(); e.stopPropagation()}}
+                                        //                                onClick={onClick}
+                                        //                                readOnly
+                                        //                         />
+                                        //
+                                        //                         <div  style={{ width: 'fit-content', height: 'fit-content', padding: 5, backgroundColor: '#E9ECEFFF' }} onClick={ handleSubmit } >
+                                        //                                 <HiSaveAs size={25} color={'blue'} />
+                                        //                         </div>
+                                        //                 </Stack>
+                                        //         )
+                                        // );
+
+                                        var CustomTimeInput = useCallback(function CustomTimeInput(_ref18) {
+                                                var date = _ref18.date,
+                                                    value = _ref18.value,
+                                                    onChange = _ref18.onChange;
 
 
                                                 var validationRules = yup.object().shape({
@@ -3638,36 +3959,42 @@ export default function FileTable() {
                                                 );
                                         }, []);
 
-                                        var _useState19 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
-                                            _useState20 = _slicedToArray(_useState19, 2),
-                                            startDate = _useState20[0],
-                                            setStartDate = _useState20[1];
+                                        var _useState35 = useState(data.review_date !== null ? new Date(data.review_date) : new Date()),
+                                            _useState36 = _slicedToArray(_useState35, 2),
+                                            reviewDate = _useState36[0],
+                                            setReviewDate = _useState36[1];
 
-                                        var new_review_date = startDate.getFullYear() + '/' + (startDate.getMonth() + 1) + '/' + startDate.getDate() + ' ' + startDate.getHours() + ':' + startDate.getMinutes();
-                                        console.log('new_review_date', new_review_date, e);
+                                        var new_review_date = reviewDate.getFullYear() + '/' + (reviewDate.getMonth() + 1) + '/' + reviewDate.getDate() + ' ' + reviewDate.getHours() + ':' + reviewDate.getMinutes();
+                                        // console.log('new_review_date', new_review_date, e)
 
                                         // let today = new Date()
                                         // today.setHours(0, 0, 0, 0)
 
-                                        console.log('millesec dif', new Date(new_review_date).valueOf() - new Date().valueOf());
+                                        // console.log('millesec dif', new Date(new_review_date).valueOf() - new Date().valueOf())
 
                                         var handleSubmit = function handleSubmit(e) {
                                                 e.stopPropagation();
 
-                                                window.Global_State.setOverlay_props(function (t) {
-                                                        return Object.assign({}, t, {
-                                                                style: Object.assign({}, t.style, {
-                                                                        display: 'none'
-                                                                })
-                                                        });
-                                                });
+                                                // window.Global_State.setOverlay_props(t => (
+                                                //                 {
+                                                //                         ...t,
+                                                //                         style:
+                                                //                         {
+                                                //                                 ...t.style,
+                                                //                                 display: 'none',
+                                                //                         },
+                                                //                 }
+                                                //         )
+                                                // )
 
-                                                console.log(new_review_date);
+                                                setLoading(true);
 
-                                                var _window$Global_State$11 = window.Global_State.identifyNode(data),
-                                                    _window$Global_State$12 = _slicedToArray(_window$Global_State$11, 2),
-                                                    id = _window$Global_State$12[0],
-                                                    model_type = _window$Global_State$12[1];
+                                                // console.log(new_review_date)
+
+                                                var _window$Global_State$13 = window.Global_State.identifyNode(data),
+                                                    _window$Global_State$14 = _slicedToArray(_window$Global_State$13, 2),
+                                                    id = _window$Global_State$14[0],
+                                                    model_type = _window$Global_State$14[1];
 
                                                 var query = new FormData();
                                                 query.append('id', id);
@@ -3678,110 +4005,150 @@ export default function FileTable() {
                                                 }));
 
                                                 if (!window.Global_State.isEditorMode) {
-                                                        // const update = async () =>
-                                                        // {
-                                                        //
-                                                        //         await http.post('update_fnc', query)
-                                                        //         .then( res => {
-                                                        //                 console.log(res)
-                                                        //         } )
-                                                        //         .catch(err => { console.log(err); throw err })
-                                                        // }
+                                                        var onFulfilled = function onFulfilled(res) {
+                                                                // console.log('update_review_daaaaaaaaate', res)
+                                                                setLoading(false);
+                                                                if (res.data.statue === "success") {
+                                                                        window.show_response("La date de révision a été mis à jour", "success");
+                                                                        window.Global_State.absolutePopover.close();
+                                                                } else window.show_response(res.data.data.msg, res.data.statue);
+                                                        };
+                                                        var onRejected = function onRejected(err) {
+                                                                console.log(err);
+                                                                setLoading(false);
+                                                                window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                                        };
 
-                                                        // console.log(selectedRow[0].id.substring(2))
-                                                        toast.promise(http.post('update_fnc', query), {
-                                                                loading: 'Loading...',
-                                                                success: 'Processus achevé',
-                                                                error: 'Erreur'
-                                                        }, {
-                                                                id: 'review_date_' + data.id,
-                                                                duration: Infinity
-                                                        }).then(function (res) {
-                                                                console.log(res);
-                                                                switch (res.data.statue) {
-                                                                        case 'success':
-                                                                                toast('La date de r\xE9vision a \xE9t\xE9 mise \xE1 jour !!', { type: 'success' });
-                                                                                break;
-                                                                        case 'error':
-                                                                                toast('Erreur survenue: ' + res.data.data.msg, { type: 'error' });
-                                                                                break;
-                                                                        case 'info':
-                                                                                toast('Info: ' + res.data.data.msg, { icon: "📢", style: { fontWeight: 'bold' } });
-                                                                                break;
-                                                                }
-                                                                setTimeout(function () {
-                                                                        toast.dismiss('review_date_' + data.id);
-                                                                }, 600);
-                                                        }).catch(function (err) {
-                                                                console.log(err);setTimeout(function () {
-                                                                        toast.dismiss('review_date_' + data.id);
-                                                                }, 600);
-                                                        });
+                                                        http.post('update_fnc', query).then(onFulfilled, onRejected);
                                                 } else {
                                                         window.Global_State.editor.fnc.update(query);
                                                 }
                                         };
 
+                                        var handleClear = function handleClear(e) {
+                                                e.stopPropagation();
+
+                                                // console.log("clear_review_date")
+
+                                                var id = window.Global_State.identifyNode(data)[0];
+
+                                                if (!window.Global_State.isEditorMode) {
+                                                        setClearLoading(true);
+
+                                                        var onFulfilled = function onFulfilled(res) {
+                                                                // console.log('clear_review_daaaaaaaaaaaaaate', res)
+                                                                setClearLoading(false);
+                                                                window.Global_State.absolutePopover.close();
+                                                                if (res.data.statue === "success") {
+                                                                        window.show_response("Programation de révision annulée", "success");
+                                                                } else window.show_response(res.data.data.msg, res.data.statue);
+                                                        };
+                                                        var onRejected = function onRejected(err) {
+                                                                console.log(err);
+                                                                setClearLoading(false);
+                                                                window.Global_State.absolutePopover.close();
+                                                                window.show_response(err.message + ' ' + err.response.data.message, "error");
+                                                        };
+
+                                                        http.post("update_fnc", { id: id, update_object: "cancel_review", new_value: 'null' }).then(onFulfilled, onRejected);
+                                                } else {}
+                                        };
+
+                                        var handleChange = function handleChange(newValue) {
+                                                var date = new Date(newValue);
+                                                setReviewDate(date);
+                                        };
+
                                         return React.createElement(
-                                                'div',
-                                                { className: 'd-flex justify-content-center align-items-center',
-                                                        style: {
-                                                                backgroundColor: 'rgba(255,255,255,0)',
-                                                                borderRadius: 10,
-                                                                border: '1px solid blue',
-                                                                overflow: "hidden"
-                                                        }
-                                                },
+                                                Stack,
+                                                { className: 'm-2', direction: "row", spacing: 1, alignItems: "center", onClick: function onClick(e) {
+                                                                e.preventDefault();e.stopPropagation();
+                                                        } },
                                                 React.createElement(
                                                         'div',
-                                                        { className: 'd-flex', style: { width: "fit-content" } },
-                                                        React.createElement(DatePicker, {
-                                                                selected: startDate,
-                                                                popperClassName: 'reactDatePickerPopper',
-                                                                dateFormat: 'yyyy/MM/dd h:mm aa',
-                                                                onChange: function onChange(date) {
-                                                                        return setStartDate(date);
-                                                                },
-                                                                showYearDropdown: true,
-                                                                scrollableYearDropdown: true,
-                                                                showTimeInput: true,
-                                                                customTimeInput: React.createElement(CustomTimeInput, null),
-                                                                yearDropdownItemNumber: 20,
-                                                                minDate: new Date(),
-                                                                customInput: React.createElement(CustomInput, null)
-                                                        })
+                                                        { className: 'd-flex justify-content-center align-items-center',
+                                                                style: {
+                                                                        backgroundColor: 'rgba(255,255,255,0)',
+                                                                        borderRadius: 10,
+                                                                        border: '1px solid blue',
+                                                                        overflow: "hidden",
+                                                                        height: "fit-content",
+                                                                        width: "fit-content"
+                                                                }
+                                                        },
+                                                        React.createElement(
+                                                                'div',
+                                                                { className: 'd-flex', style: { width: "fit-content" } },
+                                                                React.createElement(
+                                                                        LocalizationProvider,
+                                                                        { dateAdapter: AdapterDayjs },
+                                                                        React.createElement(DateTimePicker, {
+                                                                                open: open,
+                                                                                PopperProps: {
+                                                                                        anchorEl: anchorEl
+                                                                                },
+                                                                                onClose: function onClose() {
+                                                                                        setOpen(false);setAnchorEl(null);
+                                                                                },
+                                                                                inputFormat: 'YYYY/MM/DD',
+                                                                                value: reviewDate,
+                                                                                onChange: handleChange,
+                                                                                minDate: new Date(),
+                                                                                renderInput: function renderInput(params) {
+                                                                                        return React.createElement(CustomDateInput, { id: "lol78",
+                                                                                                value: reviewDate.toDateString(),
+                                                                                                loading: loading,
+                                                                                                onSubmit: handleSubmit,
+                                                                                                onClick: function onClick(e) {
+                                                                                                        setAnchorEl(e.target);setOpen(true);
+                                                                                                }
+                                                                                        });
+                                                                                },
+                                                                                disablePast: true
+                                                                        })
+                                                                )
+                                                        )
+                                                ),
+                                                React.createElement(
+                                                        LoadingButton,
+                                                        { as: IconButton, loading: clearLoading, title: "EFFACER", color: "error", disabled: value === '____/__/__', onClick: handleClear },
+                                                        clearLoading ? null : React.createElement(AiFillCloseCircle, { size: 25 })
                                                 )
                                         );
                                 };
 
-                                window.Global_State.setOverlay_props(function (t) {
-                                        return Object.assign({}, t, {
-                                                style: Object.assign({}, t.style, {
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center'
-                                                }),
-                                                children: React.createElement(
-                                                        'div',
-                                                        {
-                                                                style: {
-                                                                        width: "max-content",
-                                                                        marginTop: 15,
-                                                                        backgroundColor: 'rgba(255,255,255,0)',
-                                                                        position: "absolute",
-                                                                        top: e.clientY - 37,
-                                                                        left: e.clientX - 185 / 2
-                                                                        // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
-                                                                },
-                                                                onClick: function onClick(e) {
-                                                                        e.stopPropagation();
-                                                                }
-                                                        },
-                                                        React.createElement(Date_input, { data: data })
-                                                )
+                                // window.Global_State.setOverlay_props( t => (
+                                // {
+                                //         ...t,
+                                //         style:
+                                //         {
+                                //                 ...t.style,
+                                //                 display: 'flex',
+                                //                 alignItems: 'center',
+                                //                 justifyContent: 'center'
+                                //         },
+                                //         children: (
+                                //         <div
+                                //                 style=
+                                //                 {{
+                                //                         width: "max-content",
+                                //                         marginTop: 15,
+                                //                         backgroundColor: 'rgba(255,255,255,0)' ,
+                                //                         position: "absolute",
+                                //                         top: e.clientY - 37,
+                                //                         left: e.clientX - 185/2
+                                //                         // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+                                //                 }}
+                                //                 onClick={ e => { e.stopPropagation() } }
+                                //         >
+                                //                 <Date_input data={data} />
+                                //         </div>
+                                //         ),
+                                //
+                                // }
+                                // ) )
 
-                                        });
-                                });
+                                window.Global_State.absolutePopover.open(React.createElement(Date_input, { data: data }), e.target);
                         };
 
                         return React.createElement(
@@ -3791,17 +4158,17 @@ export default function FileTable() {
                         );
                 };
 
-                var IsClosedComponent = function IsClosedComponent(_ref17) {
-                        var data = _ref17.data;
+                var IsClosedComponent = function IsClosedComponent(_ref19) {
+                        var data = _ref19.data;
 
                         var handleClick = function handleClick(e) {
                                 e.stopPropagation();
-                                console.log("IsClosedComponent handle click");
+                                // console.log("IsClosedComponent handle click")
 
-                                var _window$Global_State$13 = window.Global_State.identifyNode(data),
-                                    _window$Global_State$14 = _slicedToArray(_window$Global_State$13, 2),
-                                    id = _window$Global_State$14[0],
-                                    model = _window$Global_State$14[1];
+                                var _window$Global_State$15 = window.Global_State.identifyNode(data),
+                                    _window$Global_State$16 = _slicedToArray(_window$Global_State$15, 2),
+                                    id = _window$Global_State$16[0],
+                                    model = _window$Global_State$16[1];
 
                                 var query = new FormData();
                                 query.append('id', id);
@@ -3817,7 +4184,7 @@ export default function FileTable() {
                                                 id: 'is_closed_' + data.id,
                                                 duration: Infinity
                                         }).then(function (res) {
-                                                console.log(res);
+                                                // console.log(res)
                                                 switch (res.data.statue) {
                                                         case 'success':
                                                                 toast('Le statue a \xE9t\xE9 mise \xE1 jour !!', { type: 'success' });
@@ -3853,24 +4220,24 @@ export default function FileTable() {
                         );
                 };
 
-                var ValidBadge = function ValidBadge(_ref18) {
-                        var data = _ref18.data;
+                var ValidBadge = function ValidBadge(_ref20) {
+                        var data = _ref20.data;
 
-                        var _useState21 = useState(false),
-                            _useState22 = _slicedToArray(_useState21, 2),
-                            checked = _useState22[0],
-                            check = _useState22[1];
+                        var _useState37 = useState(false),
+                            _useState38 = _slicedToArray(_useState37, 2),
+                            checked = _useState38[0],
+                            check = _useState38[1];
 
                         function handleClick(e) {
                                 e.preventDefault();
                                 e.stopPropagation();
 
-                                console.log(e);
+                                // console.log(e)
 
-                                var _window$Global_State$15 = window.Global_State.identifyNode(data),
-                                    _window$Global_State$16 = _slicedToArray(_window$Global_State$15, 2),
-                                    id = _window$Global_State$16[0],
-                                    model = _window$Global_State$16[1];
+                                var _window$Global_State$17 = window.Global_State.identifyNode(data),
+                                    _window$Global_State$18 = _slicedToArray(_window$Global_State$17, 2),
+                                    id = _window$Global_State$18[0],
+                                    model = _window$Global_State$18[1];
                                 // window.Global_State.EventsManager.emit('nodeUpdate', {node_type: node.type, node: {...node, id, level: nextNiv(node.level)}})
 
                                 var query = new FormData();
@@ -3917,7 +4284,7 @@ export default function FileTable() {
                                         id: '' + route + data.id,
                                         duration: Infinity
                                 }).then(function (res) {
-                                        console.log(res);
+                                        // console.log(res)
                                         switch (res.data.statue) {
                                                 case 'success':
                                                         toast('L\'element a \xE9t\xE9 ' + (res.data.data.is_validated ? "validé" : "dévalidé"), { type: 'success' });
@@ -3960,13 +4327,13 @@ export default function FileTable() {
                         }
                 }
 
-                var _iteratorNormalCompletion9 = true;
-                var _didIteratorError9 = false;
-                var _iteratorError9 = undefined;
+                var _iteratorNormalCompletion10 = true;
+                var _didIteratorError10 = false;
+                var _iteratorError10 = undefined;
 
                 try {
-                        for (var _iterator9 = node.children[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                                var child_node = _step9.value;
+                        for (var _iterator10 = node.children[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                                var child_node = _step10.value;
 
                                 // console.log('child_node.id', child_node)
                                 var data = child_node; // window.Global_State.getNodeDataById(child_node.id)
@@ -3993,22 +4360,23 @@ export default function FileTable() {
                                         global_type: data.global_type,
                                         section_id: data.section_id,
                                         isBeingEdited: data.onEdit,
+                                        opening_date: data.type !== "fnc" ? '' : React.createElement(OpeningDateComponent, { data: data }),
                                         review_date: data.review_date === undefined ? '' : React.createElement(ReviewDateComponent, { data: data }),
                                         valid_badge: validation_component
 
                                 });
                         }
                 } catch (err) {
-                        _didIteratorError9 = true;
-                        _iteratorError9 = err;
+                        _didIteratorError10 = true;
+                        _iteratorError10 = err;
                 } finally {
                         try {
-                                if (!_iteratorNormalCompletion9 && _iterator9.return) {
-                                        _iterator9.return();
+                                if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                                        _iterator10.return();
                                 }
                         } finally {
-                                if (_didIteratorError9) {
-                                        throw _iteratorError9;
+                                if (_didIteratorError10) {
+                                        throw _iteratorError10;
                                 }
                         }
                 }
@@ -4020,12 +4388,12 @@ export default function FileTable() {
         var sortByName = function sortByName(rowA, rowB) {
                 // console.log('tyyyyyyyyyyyyyyyyyyype', node.type)
                 if (node.type === 'nonC') {
-                        var _ref19 = [rowA.value.split('-'), rowB.value.split('-')],
-                            listA = _ref19[0],
-                            listB = _ref19[1];
-                        var _ref20 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
-                            a = _ref20[0],
-                            b = _ref20[1];
+                        var _ref21 = [rowA.value.split('-'), rowB.value.split('-')],
+                            listA = _ref21[0],
+                            listB = _ref21[1];
+                        var _ref22 = [parseInt(listA[listA.length - 1]), parseInt(listB[listB.length - 1])],
+                            a = _ref22[0],
+                            b = _ref22[1];
 
 
                         if (a > b) {
@@ -4071,6 +4439,20 @@ export default function FileTable() {
                 return 0;
         };
 
+        var compareDate = function compareDate(dateA, dateB) {
+                // console.log("daaaaaaaaate", dateA, dateB)
+                if (!dateA && !dateB) return 0;else if (!dateA) return 0;else if (!dateB) return 0;else {
+                        var a = new Date(dateA);
+                        var b = new Date(dateB);
+
+                        if (a.valueOf() > b.valueOf()) return 1;
+
+                        if (b.valueOf() > a.valueOf()) return -1;
+
+                        return 0;
+                }
+        };
+
         var columns = useMemo(function () {
                 var columns_of_the_type = [{
                         name: '',
@@ -4079,7 +4461,7 @@ export default function FileTable() {
                                 return row.valid_badge;
                         },
                         sortable: false,
-                        width: "40px"
+                        width: "20px"
                 }, {
                         name: 'NOM',
                         selector: function selector(row) {
@@ -4093,9 +4475,12 @@ export default function FileTable() {
                         columns_of_the_type.push.apply(columns_of_the_type, [{
                                 name: 'CREE LE',
                                 selector: function selector(row) {
-                                        return row.created_at;
+                                        return row.created_at.replace("T", " À ");
                                 },
                                 sortable: true,
+                                sortFunction: function sortFunction(rowA, rowB) {
+                                        return compareDate(rowA.created_at, rowB.created_at);
+                                },
                                 width: "30%"
                         }, {
                                 name: 'RA',
@@ -4115,6 +4500,16 @@ export default function FileTable() {
                         }]);
                 } else if (node.type === "nonC") {
                         columns_of_the_type.push.apply(columns_of_the_type, [{
+                                name: "DATE D'OUVERTURE",
+                                selector: function selector(row) {
+                                        return row.opening_date;
+                                },
+                                sortable: true,
+                                sortFunction: function sortFunction(rowA, rowB) {
+                                        return rowA.opening_date ? compareDate(rowA.opening_date.props.data.opening_date, rowB.opening_date.props.data.opening_date) : 0;
+                                },
+                                width: "15%"
+                        }, {
                                 name: 'NIVEAU',
                                 selector: function selector(row) {
                                         return row.level;
@@ -4128,7 +4523,10 @@ export default function FileTable() {
                                         return row.review_date;
                                 },
                                 sortable: true,
-                                width: "22%"
+                                sortFunction: function sortFunction(rowA, rowB) {
+                                        return rowA.review_date ? compareDate(rowA.review_date.props.data.review_date, rowB.review_date.props.data.review_date) : 0;
+                                },
+                                width: "15%"
                         }, {
                                 name: 'STATUE',
                                 selector: function selector(row) {
@@ -4139,33 +4537,24 @@ export default function FileTable() {
                 } else columns_of_the_type.push.apply(columns_of_the_type, [{
                         name: 'CREE LE',
                         selector: function selector(row) {
-                                return row.created_at;
+                                return row.created_at.replace("T", " À ");
                         },
-                        sortable: true
+                        sortable: true,
+                        sortFunction: function sortFunction(rowA, rowB) {
+                                return compareDate(rowA.created_at, rowB.created_at);
+                        },
+                        width: "30%"
                 }, {
                         name: 'TAILLE',
                         selector: function selector(row) {
                                 return row.size;
                         },
-                        sortable: true
+                        sortable: true,
+                        width: "100px"
                 }]);
 
                 return columns_of_the_type;
         }, [node]);
-
-        // const recherche = (value) => {
-        //     setFilteringWord(value)
-        //     // let matchingDatas = []
-        //     // if (tag === "le Nom" && value !== "") {
-        //     //     for(let data of datas)
-        //     //     {
-        //     //         if(data.value.indexOf(value) !== -1) matchingDatas.push(data)
-        //     //     }
-        //     // setVisibleData(matchingDatas)
-        //     // }
-        //     // else if(value === "") setVisibleData(datas)
-        // }
-
 
         var formattedDatas = useMemo(function () {
                 return dataFormater(node);
@@ -4207,7 +4596,7 @@ export default function FileTable() {
                 dispatch({ type: 'nodeUpdate', newDatas: initDatas });
         }, [formattedDatas]);
 
-        console.log('contentRender');
+        // console.log('contentRender')
 
         var handleChange = function handleChange(selectedCount, selectedRows) {
                 var update = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
@@ -4251,45 +4640,44 @@ export default function FileTable() {
         }, [selectedRow]);
 
         var onRowDoubleClicked = function () {
-                var _ref21 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee7(row, event) {
+                var _ref23 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee7(row, event) {
                         var tree_row, full_row_data, parent_node, doubleClickEvent;
                         return _regeneratorRuntime.wrap(function _callee7$(_context7) {
                                 while (1) {
                                         switch (_context7.prev = _context7.next) {
                                                 case 0:
-                                                        console.log('db_cliked_row', row);
+                                                        // console.log('db_cliked_row', row)
                                                         tree_row = document.getElementById('treeRow-' + row.id);
 
                                                         if (tree_row) {
-                                                                _context7.next = 15;
+                                                                _context7.next = 11;
                                                                 break;
                                                         }
 
-                                                        console.log('checkpoint 1', tree_row);
+                                                        // console.log('checkpoint 1', tree_row)
                                                         full_row_data = window.Global_State.getNodeDataById(row.id);
-
-                                                        console.log('checkpoint 1.5', full_row_data);
+                                                        // console.log('checkpoint 1.5', full_row_data)
 
                                                         if (!(full_row_data.global_type === 'folder')) {
-                                                                _context7.next = 14;
+                                                                _context7.next = 10;
                                                                 break;
                                                         }
 
-                                                        console.log('checkpoint 2', full_row_data);
+                                                        // console.log('checkpoint 2', full_row_data)
 
                                                         parent_node = window.Global_State.getNodeDataById(full_row_data.parentId);
-                                                        _context7.next = 11;
+                                                        _context7.next = 7;
                                                         return onRowDoubleClicked(parent_node, '');
 
-                                                case 11:
+                                                case 7:
                                                         tree_row = document.getElementById('treeRow-' + row.id);
-                                                        _context7.next = 15;
+                                                        _context7.next = 11;
                                                         break;
 
-                                                case 14:
+                                                case 10:
                                                         return _context7.abrupt('return');
 
-                                                case 15:
+                                                case 11:
 
                                                         tree_row.click();
 
@@ -4308,7 +4696,7 @@ export default function FileTable() {
                                                         // window.Global_State.backend.setCurrentSelectedFolder(row.id)
                                                         // console.log('dbclick',row)
 
-                                                case 19:
+                                                case 15:
                                                 case 'end':
                                                         return _context7.stop();
                                         }
@@ -4316,8 +4704,8 @@ export default function FileTable() {
                         }, _callee7, _this4);
                 }));
 
-                return function onRowDoubleClicked(_x4, _x5) {
-                        return _ref21.apply(this, arguments);
+                return function onRowDoubleClicked(_x6, _x7) {
+                        return _ref23.apply(this, arguments);
                 };
         }();
 
@@ -4363,7 +4751,11 @@ export default function FileTable() {
                 return datas.filter(function (row) {
                         switch (filter.tag) {
                                 case 'le Nom':
-                                        return row.value.indexOf(filter.element) !== -1;
+                                        if (node.type === 'nonC' && /^\d+$/.test(filter.element)) {
+                                                var list = row.value.split('-');
+
+                                                return parseInt(list[list.length - 1]) === parseInt(filter.element);
+                                        } else return row.value.indexOf(filter.element) !== -1;
                                 case 'la Date de creation':
                                         {
                                                 // console.log(new Date(row.created_at.substring(0, 10).split('-').join('/')).valueOf())
@@ -4400,14 +4792,14 @@ export default function FileTable() {
                                                     _debut = _filter$element4[0],
                                                     _fin = _filter$element4[1];
 
-                                                if (_debut === null && _fin === null) return true;else if (data.review_date !== undefined) {
+                                                if (_debut === null && _fin === null) return true;else if (data.review_date && data.review_date.length) {
 
                                                         var revision_string_date = data.review_date.substring(0, 10);
                                                         var formatted_revision_string_date = revision_string_date.split('-').join('/');
 
                                                         var revision_date = new Date(formatted_revision_string_date);
 
-                                                        console.log('review_daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaate', revision_date.toString());
+                                                        // console.log('review_daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaate', revision_date.toString() )
                                                         if (_debut === null) {
                                                                 return revision_date.valueOf() <= _fin.valueOf();
                                                         } else if (_fin === null) {
@@ -4423,7 +4815,7 @@ export default function FileTable() {
                 });
         }, [datas, filter]);
 
-        console.log('filtered_datataaaaaaas', filtered_datas);
+        // console.log('filtered_datataaaaaaas', filtered_datas, columns)
 
         return React.createElement(
                 'div',
@@ -4468,9 +4860,9 @@ export default function FileTable() {
                                 , selectableRowSelected: function selectableRowSelected(row) {
                                         justChecking.current = true; /* console.log('selectableRowSelected'); */return row.isSelected;
                                 },
-                                onSelectedRowsChange: function onSelectedRowsChange(_ref22) {
-                                        var selectedCount = _ref22.selectedCount,
-                                            selectedRows = _ref22.selectedRows;
+                                onSelectedRowsChange: function onSelectedRowsChange(_ref24) {
+                                        var selectedCount = _ref24.selectedCount,
+                                            selectedRows = _ref24.selectedRows;
                                         if (filtered_datas.length > 0) handleChange(selectedCount, selectedRows);
                                 },
                                 clearSelectedRows: window.Global_State.toggleCleared,
@@ -4509,3 +4901,514 @@ export default function FileTable() {
                 )
         );
 }
+
+// const OpeningDateComponent = ({data}) =>
+// {
+//         const value = data.opening_date ? data.opening_date : '____/__/__'
+//
+//         const handleClick = e =>
+//         {
+//                 e.stopPropagation()
+//                 console.log("opening date handle click")
+//
+//                 const Date_input = ({data }) =>
+//                 {
+//                         const [loading, setLoading] = useState(false)
+//
+//                         const CustomInput = forwardRef(
+//                         ({ value, onClick, loading, onSubmit }, ref) =>
+//                         (
+//                         <Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: '#e9ecef' }}>
+//                                 <input ref={ref}
+//                                        className="form-control form-control-sm"
+//                                        style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0, backgroundColor: "rgba(233,236,239,0)" }}
+//                                        value={`${value}`}
+//                                        onChange={e => {e.preventDefault(); e.stopPropagation()}}
+//                                        onClick={onClick}
+//                                        readOnly
+//                                 />
+//
+//                                 <LoadingButton as={IconButton} loading={loading} title={"EFFACER"} color={"primary"} size={"small"} style={{ minWidth: 30 }} onClick={onSubmit} >
+//                                         {
+//                                                 loading ? null : <RiUploadCloud2Fill size={20} />
+//                                         }
+//                                 </LoadingButton>
+//                         </Stack>
+//                         )
+//                         );
+//
+//                         const [openingDate, setOpeningDate] = useState(data.opening_date !== null ? new Date(data.opening_date) : new Date());
+//
+//                         const new_opening_date = `${openingDate.getFullYear()}/${openingDate.getMonth()+1}/${openingDate.getDate()} ${openingDate.getHours()}:${openingDate.getMinutes()}`
+//                         console.log('new_opening_date', new_opening_date, e)
+//
+//                         // let today = new Date()
+//                         // today.setHours(0, 0, 0, 0)
+//
+//                         console.log('millesec dif', new Date(new_opening_date).valueOf() - new Date().valueOf())
+//
+//                         const handleSubmit = e =>
+//                         {
+//                                 e.stopPropagation()
+//                                 setLoading(true)
+//
+//                                 // window.Global_State.setOverlay_props(t => (
+//                                 //                 {
+//                                 //                         ...t,
+//                                 //                         style:
+//                                 //                         {
+//                                 //                                 ...t.style,
+//                                 //                                 display: 'none',
+//                                 //                         },
+//                                 //                 }
+//                                 //         )
+//                                 // )
+//
+//                                 console.log(new_opening_date)
+//                                 const [id, model_type] = window.Global_State.identifyNode(data)
+//
+//                                 const query = new FormData;
+//                                 query.append('id', id)
+//                                 query.append('update_object', 'opening_date')
+//                                 query.append('new_value', new_opening_date)
+//
+//                                 if(!window.Global_State.isEditorMode)
+//                                 {
+//                                         const onFulfilled = (res) =>
+//                                         {
+//                                                 console.log('update_open_daaaaaaaaate', res)
+//                                                 setLoading(false)
+//                                                 if (res.data.statue === "success")
+//                                                 {
+//                                                         window.show_response("Le niveau a été mis à jour", "success")
+//                                                 }
+//                                                 else window.show_response(res.data.data.msg, res.data.statue)
+//                                         }
+//                                         const onRejected = (err) =>
+//                                         {
+//                                                 console.log(err)
+//                                                 setLoading(false)
+//                                                 window.show_response(`${err.message} ${err.response.data.message}`, "error")
+//                                         }
+//
+//                                         http.post('update_fnc', query)
+//                                         .then(onFulfilled, onRejected)
+//                                 }
+//                                 else
+//                                 {
+//                                 }
+//                         }
+//
+//                         return (
+//                         <div className={`d-flex justify-content-center align-items-center m-2`}
+//                              onClick={e => { e.preventDefault(); e.stopPropagation() }}
+//                              style={{
+//                                      backgroundColor: 'rgba(255,255,255,0)',
+//                                      borderRadius: 10,
+//                                      border: '1px solid blue',
+//                                      overflow: "hidden",
+//                                      height: "fit-content",
+//                                      width: "fit-content",
+//                              }}
+//                         >
+//                                 <div className={`d-flex`} style={{ width: "fit-content" }} >
+//                                         <DatePicker
+//                                         selected={openingDate}
+//                                         popperClassName = 'reactDatePickerPopper'
+//                                         dateFormat="yyyy/MM/dd"
+//                                         onChange={(date) => setOpeningDate(date)}
+//                                         showYearDropdown
+//                                         scrollableYearDropdown
+//                                         yearDropdownItemNumber={20}
+//                                         customInput ={ <CustomInput loading={loading} onSubmit={handleSubmit} /> }
+//                                         />
+//                                 </div>
+//                         </div>
+//                         )
+//                 }
+//
+//                 // window.Global_State.setOverlay_props( t => (
+//                 // {
+//                 //         ...t,
+//                 //         style:
+//                 //         {
+//                 //                 ...t.style,
+//                 //                 display: 'flex',
+//                 //                 alignItems: 'center',
+//                 //                 justifyContent: 'center'
+//                 //         },
+//                 //         children: (
+//                 //         <div
+//                 //                 style=
+//                 //                 {{
+//                 //                         width: "max-content",
+//                 //                         marginTop: 15,
+//                 //                         backgroundColor: 'rgba(255,255,255,0)' ,
+//                 //                         position: "absolute",
+//                 //                         top: e.clientY - 37,
+//                 //                         left: e.clientX - 185/2
+//                 //                         // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+//                 //                 }}
+//                 //                 onClick={ e => { e.stopPropagation() } }
+//                 //         >
+//                 //                 <Date_input data={data} />
+//                 //         </div>
+//                 //         ),
+//                 //
+//                 // }
+//                 // ) )
+//
+//                 window.Global_State.absolutePopover.open(<Date_input data={data} />, e.target)
+//         }
+//
+//         return(
+//         <span className={`${data.opening_date ? 'text-primary' : ''}`} onClick={handleClick} >
+//                                         {value}
+//                                 </span>
+//         )
+// }
+//
+// const ReviewDateComponent = ({data}) =>
+// {
+//         const value = data.review_date ? data.review_date : '____/__/__'
+//
+//         const handleClick = e =>
+//         {
+//                 e.stopPropagation()
+//                 console.log("OPENING date handle click")
+//
+//                 const Date_input = ({data }) =>
+//                 {
+//                         const [clearLoading, setClearLoading] = useState(false)
+//                         const [loading, setLoading] = useState(false)
+//
+//                         // const CustomInput = forwardRef(
+//                         //         ({ value, onClick }, ref) =>
+//                         //         (
+//                         //                 <Stack direction={'row'} sx={{ width: 'fit-content', backgroundColor: 'whitesmoke' }}>
+//                         //                         <input ref={ref}
+//                         //                                className="form-control form-control-sm"
+//                         //                                style={{ height: 35, textAlign: 'center', border: 'none', borderRadius: 0 }}
+//                         //                                value={`${value}`}
+//                         //                                onChange={e => {e.preventDefault(); e.stopPropagation()}}
+//                         //                                onClick={onClick}
+//                         //                                readOnly
+//                         //                         />
+//                         //
+//                         //                         <div  style={{ width: 'fit-content', height: 'fit-content', padding: 5, backgroundColor: '#E9ECEFFF' }} onClick={ handleSubmit } >
+//                         //                                 <HiSaveAs size={25} color={'blue'} />
+//                         //                         </div>
+//                         //                 </Stack>
+//                         //         )
+//                         // );
+//
+//                         const CustomTimeInput = useCallback(
+//                         function CustomTimeInput({ date, value, onChange })
+//                         {
+//
+//                                 const validationRules = yup.object().shape({
+//                                         hour: yup.number().integer().positive("L'heure est positive").min(new Date().getHours()).max(24, 'maximum 24h'),
+//                                         minutes: yup.number().integer().positive("L'heure est positive").min(0).max(60, 'maximum 60mins'),
+//
+//                                 });
+//
+//                                 const formik = useFormik(
+//                                 {
+//                                         validationSchema: validationRules,
+//                                         onSubmit: handleSubmit,
+//                                         initialValues:
+//                                         {
+//                                                 hour: new Date().getHours(),
+//                                                 minutes: 0
+//                                         }
+//                                 }
+//                                 )
+//
+//                                 const handleBlur = e =>
+//                                 {
+//                                         e.preventDefault()
+//                                         e.stopPropagation()
+//                                         if (!formik.errors.hour && !formik.errors.minutes)
+//                                         {
+//                                                 onChange(`${formik.values.hour === '' ? 0 : formik.values.hour}:${formik.values.minutes === '' ? 0 : formik.values.minutes}`)
+//                                         }
+//                                 }
+//
+//                                 return(
+//                                 <Form className={`d-flex flex-row`} value = {undefined} onSubmit={formik.handleSubmit} >
+//
+//
+//                                         <Form.Group className="mr-3 d-flex" >
+//                                                 <Form.Label style={{ margin: 0, marginRight: 5 }} >hh</Form.Label>
+//                                                 <Form.Control
+//                                                 style=
+//                                                 {{
+//                                                         maxWidth: '35px',
+//                                                         maxHeight: '20px',
+//                                                         fontSize: '10px',
+//                                                         padding: '2px'
+//                                                 }}
+//                                                 maxLength = '2'
+//                                                 name="hour"
+//                                                 value={formik.values.hour}
+//                                                 onChange={formik.handleChange}
+//                                                 onBlur={ handleBlur }
+//                                                 // type="number"
+//                                                 placeholder="00"
+//                                                 isInvalid={!!formik.errors.hour}
+//                                                 />
+//                                                 {/*<Form.Control.Feedback  type="invalid">*/}
+//                                                 {/*        {formik.errors.hour}*/}
+//                                                 {/*</Form.Control.Feedback>*/}
+//                                         </Form.Group>
+//
+//
+//                                         <Form.Group className="d-flex" >
+//                                                 <Form.Label style={{ margin: 0, marginRight: 5 }} >mm</Form.Label>
+//                                                 <Form.Control
+//                                                 style=
+//                                                 {{
+//                                                         maxWidth: '35px',
+//                                                         maxHeight: '20px',
+//                                                         fontSize: '10px',
+//                                                         padding: '2px'
+//                                                 }}
+//                                                 maxLength = '2'
+//                                                 name="minutes"
+//                                                 value={formik.values.minutes}
+//                                                 onChange={formik.handleChange}
+//                                                 onBlur={ handleBlur }
+//                                                 // type="number"
+//                                                 placeholder="00"
+//                                                 isInvalid={!!formik.errors.minutes}
+//                                                 />
+//                                                 {/*<Form.Control.Feedback type="invalid">*/}
+//                                                 {/*        {formik.errors.minutes}*/}
+//                                                 {/*</Form.Control.Feedback>*/}
+//                                         </Form.Group>
+//
+//                                         {/*<div*/}
+//                                         {/*style = {*/}
+//                                         {/*        {*/}
+//                                         {/*                display: 'flex',*/}
+//                                         {/*                justifyContent: 'center',*/}
+//                                         {/*                position: 'relative',*/}
+//                                         {/*                alignItems: 'center',*/}
+//                                         {/*        }*/}
+//                                         {/*}*/}
+//                                         {/*>*/}
+//                                         {/*        <Button variant="primary" type="submit">*/}
+//                                         {/*                Submit*/}
+//                                         {/*        </Button>*/}
+//                                         {/*</div>*/}
+//                                 </Form>
+//                                 )
+//                         }, []
+//                         )
+//
+//                         const [startDate, setStartDate] = useState(data.review_date !== null ? new Date(data.review_date) : new Date());
+//
+//                         const new_review_date = `${startDate.getFullYear()}/${startDate.getMonth()+1}/${startDate.getDate()} ${startDate.getHours()}:${startDate.getMinutes()}`
+//                         console.log('new_review_date', new_review_date, e)
+//
+//                         // let today = new Date()
+//                         // today.setHours(0, 0, 0, 0)
+//
+//                         console.log('millesec dif', new Date(new_review_date).valueOf() - new Date().valueOf())
+//
+//                         const handleSubmit = e =>
+//                         {
+//                                 e.stopPropagation()
+//
+//                                 window.Global_State.setOverlay_props(t => (
+//                                 {
+//                                         ...t,
+//                                         style:
+//                                         {
+//                                                 ...t.style,
+//                                                 display: 'none',
+//                                         },
+//                                 }
+//                                 )
+//                                 )
+//
+//                                 console.log(new_review_date)
+//                                 const [id, model_type] = window.Global_State.identifyNode(data)
+//
+//                                 const query = new FormData;
+//                                 query.append('id', id)
+//                                 query.append('update_object', 'review_date')
+//                                 query.append('new_value', new_review_date)
+//                                 query.append('additional_info', JSON.stringify(
+//                                 {
+//                                         remain_ms: `${new Date(new_review_date).valueOf() - new Date().valueOf()}`
+//                                 }
+//                                 ))
+//
+//                                 if(!window.Global_State.isEditorMode)
+//                                 {
+//                                         // console.log(selectedRow[0].id.substring(2))
+//                                         toast.promise(
+//                                         http.post('update_fnc', query),
+//                                         {
+//                                                 loading: 'Loading...',
+//                                                 success: 'Processus achevé',
+//                                                 error: 'Erreur'
+//                                         },
+//                                         {
+//                                                 id: `review_date_${data.id}`,
+//                                                 duration: Infinity
+//                                         }
+//
+//                                         )
+//                                         .then(
+//                                         res =>
+//                                         {
+//                                                 console.log(res)
+//                                                 window.Global_State.absolutePopover.close()
+//                                                 switch (res.data.statue)
+//                                                 {
+//                                                         case 'success':
+//                                                                 toast(`La date de révision a été mise á jour !!`, {type: 'success'})
+//                                                                 break
+//                                                         case 'error':
+//                                                                 toast(`Erreur survenue: ${res.data.data.msg}`, {type: 'error'})
+//                                                                 break
+//                                                         case 'info':
+//                                                                 toast(`Info: ${res.data.data.msg}`, {icon: "📢", style: { fontWeight: 'bold' } })
+//                                                                 break
+//                                                 }
+//                                                 setTimeout( () => { toast.dismiss(`review_date_${data.id}`) }, 600 )
+//                                         }
+//                                         )
+//                                         .catch(
+//                                         err =>
+//                                         {
+//                                                 console.log(err);
+//                                                 window.Global_State.absolutePopover.close()
+//                                                 setTimeout( () => { toast.dismiss(`review_date_${data.id}`) }, 600 )
+//                                         })
+//                                 }
+//                                 else
+//                                 {
+//                                         window.Global_State.editor.fnc.update(query)
+//                                 }
+//                         }
+//
+//                         const handleClear = e =>
+//                         {
+//                                 e.stopPropagation()
+//
+//                                 console.log("clear_review_date")
+//
+//                                 const id = window.Global_State.identifyNode(data)[0]
+//
+//                                 if(!window.Global_State.isEditorMode)
+//                                 {
+//                                         setClearLoading(true)
+//
+//                                         const onFulfilled = (res) =>
+//                                         {
+//                                                 console.log('clear_review_daaaaaaaaaaaaaate', res)
+//                                                 setClearLoading(false)
+//                                                 window.Global_State.absolutePopover.close()
+//                                                 if (res.data.statue === "success")
+//                                                 {
+//                                                         window.show_response("Programation de révision annulée", "success")
+//                                                 }
+//                                                 else window.show_response(res.data.data.msg, res.data.statue)
+//                                         }
+//                                         const onRejected = (err) =>
+//                                         {
+//                                                 console.log(err)
+//                                                 setClearLoading(false)
+//                                                 window.Global_State.absolutePopover.close()
+//                                                 window.show_response(`${err.message} ${err.response.data.message}`, "error")
+//                                         }
+//
+//                                         http.post("update_fnc", {id, update_object: "cancel_review", new_value: 'null'})
+//                                         .then(onFulfilled, onRejected)
+//                                 }
+//                                 else
+//                                 {
+//
+//                                 }
+//                         }
+//
+//                         return (
+//                         <Stack className="m-2" direction={"row"} spacing={1} alignItems={"center"} onClick={e => { e.preventDefault(); e.stopPropagation() }} >
+//                                 <div className={`d-flex justify-content-center align-items-center`}
+//                                      style={{
+//                                              backgroundColor: 'rgba(255,255,255,0)',
+//                                              borderRadius: 10,
+//                                              border: '1px solid blue',
+//                                              overflow: "hidden",
+//                                              height: "fit-content",
+//                                              width: "fit-content",
+//                                      }}
+//                                 >
+//                                         <div className={`d-flex`} style={{ width: "fit-content" }} >
+//                                                 <DatePicker
+//                                                 selected={startDate}
+//                                                 popperClassName = 'reactDatePickerPopper'
+//                                                 dateFormat="yyyy/MM/dd h:mm aa"
+//                                                 onChange={(date) => setStartDate(date)}
+//                                                 showYearDropdown
+//                                                 scrollableYearDropdown
+//                                                 showTimeInput
+//                                                 customTimeInput={<CustomTimeInput />}
+//                                                 yearDropdownItemNumber={20}
+//                                                 minDate={new Date()}
+//                                                 customInput ={ <CustomDateInput loading={loading} onSubmit={handleSubmit} /> }
+//                                                 />
+//                                         </div>
+//                                 </div>
+//                                 <LoadingButton as={IconButton} loading={clearLoading} title={"EFFACER"} color={"error"} disabled={value === '____/__/__'} onClick={handleClear} >
+//                                         {
+//                                                 clearLoading ? null : <AiFillCloseCircle size={25} />
+//                                         }
+//                                 </LoadingButton>
+//                         </Stack>
+//                         )
+//                 }
+//
+//                 // window.Global_State.setOverlay_props( t => (
+//                 // {
+//                 //         ...t,
+//                 //         style:
+//                 //         {
+//                 //                 ...t.style,
+//                 //                 display: 'flex',
+//                 //                 alignItems: 'center',
+//                 //                 justifyContent: 'center'
+//                 //         },
+//                 //         children: (
+//                 //         <div
+//                 //                 style=
+//                 //                 {{
+//                 //                         width: "max-content",
+//                 //                         marginTop: 15,
+//                 //                         backgroundColor: 'rgba(255,255,255,0)' ,
+//                 //                         position: "absolute",
+//                 //                         top: e.clientY - 37,
+//                 //                         left: e.clientX - 185/2
+//                 //                         // translate: `${Math.abs( e.clientX - window.innerWidth/2 )}px ${Math.abs( e.clientY - window.innerHeight/2 )}px`
+//                 //                 }}
+//                 //                 onClick={ e => { e.stopPropagation() } }
+//                 //         >
+//                 //                 <Date_input data={data} />
+//                 //         </div>
+//                 //         ),
+//                 //
+//                 // }
+//                 // ) )
+//
+//                 window.Global_State.absolutePopover.open(<Date_input data={data} />, e.target)
+//         }
+//
+//         return(
+//         <span className={`${data.review_date ? 'text-primary' : ''}`} onClick={handleClick} >
+//                                         {value}
+//                                 </span>
+//         )
+// }
