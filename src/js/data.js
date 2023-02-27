@@ -742,6 +742,7 @@ export default function useGetData(TheDatas) {
         function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, opening_date, isClosed, review_date, created_at, level, section_id, taille, url, is_validated, validator_id) {
                 var validator = arguments.length > 22 && arguments[22] !== undefined ? arguments[22] : null;
 
+                // console.log(created_at, name, parentId)
 
                 return {
                         id: id,
@@ -1922,6 +1923,8 @@ export default function useGetData(TheDatas) {
                 }
         }
 
+        // console.log('Render useGetData')
+
         var _useReducer = useReducer(reducer, dataFormater()),
             _useReducer2 = _slicedToArray(_useReducer, 2),
             FetchedNodesData = _useReducer2[0],
@@ -1998,7 +2001,7 @@ export default function useGetData(TheDatas) {
         // console.log('selectedSectionId',selectedSectionId)
 
         var displayingSection = useMemo(function () {
-                return Data_Base.data.sections.length === 0 ? [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)] : structuredData.get(selectedSectionId);
+                return Data_Base.data.sections.length === 0 ? [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, undefined, undefined, -1)] : structuredData.get(selectedSectionId);
         }, [selectedSectionId, structuredData]);
 
         var dataParsedToJson = useMemo(function () {

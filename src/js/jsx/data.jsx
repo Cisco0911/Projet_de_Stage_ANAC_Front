@@ -550,7 +550,7 @@ export default function useGetData(TheDatas)
 
         function makeNodeData(id, global_type, services, isOpen, name, type, isRoot, parentId, path, hasChildren, ext, ra, opening_date, isClosed, review_date, created_at, level, section_id, taille, url, is_validated, validator_id, validator = null)
         {
-
+                // console.log(created_at, name, parentId)
 
                 return {
                         id,
@@ -1412,6 +1412,7 @@ export default function useGetData(TheDatas)
                 }
         }
 
+        // console.log('Render useGetData')
         const [FetchedNodesData, dispatch] = useReducer(reducer, dataFormater())
 
 
@@ -1466,7 +1467,7 @@ export default function useGetData(TheDatas)
         const displayingSection = useMemo( () =>
                 {
                         return Data_Base.data.sections.length === 0 ?
-                                [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, -1)] :
+                                [makeNodeData('0', "folder", "all", true, "Racine", "root", true, -1, "", true, undefined, undefined, undefined, undefined, undefined, undefined, undefined, -1)] :
                                 structuredData.get(selectedSectionId)
                 },
                 [selectedSectionId, structuredData]

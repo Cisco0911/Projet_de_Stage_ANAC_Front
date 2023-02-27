@@ -328,7 +328,7 @@ function Right_component({value})
                                 res =>
                                 {
                                         console.log(res)
-
+                                        toast.dismiss(`right_${value.id}`)
                                         if (res.data.statue === "success")
                                         {
                                                 window.reload()
@@ -345,7 +345,7 @@ function Right_component({value})
                                 err =>
                                 {
                                         console.log(err)
-
+                                        toast.dismiss(`right_${value.id}`)
                                         window.show_response(`${err.message} ${err.response.data.message}`, "error")
                                         toast.dismiss(`right_${value.id}`)
                                 }

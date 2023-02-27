@@ -304,7 +304,7 @@ function Right_component(_ref2) {
 
                         http.post("admin_update_user", queryBody).then(function (res) {
                                 console.log(res);
-
+                                toast.dismiss("right_" + value.id);
                                 if (res.data.statue === "success") {
                                         window.reload();
                                         window.show_response("Mise á jour reussie !", "success");
@@ -314,7 +314,7 @@ function Right_component(_ref2) {
                                 }
                         }).catch(function (err) {
                                 console.log(err);
-
+                                toast.dismiss("right_" + value.id);
                                 window.show_response(err.message + " " + err.response.data.message, "error");
                                 toast.dismiss("right_" + value.id);
                         });
